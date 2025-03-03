@@ -1,0 +1,37 @@
+- **bgarden-frontend**
+  - `.env` (40.0 B)
+  - **docs**
+    - `Структура_bgarden-frontend_от_03-03-2025.md` (996.0 B)
+  - `eslint.config.js` (734.0 B)
+  - `index.html` (366.0 B)
+  - `package-lock.json` (155.6 KB)
+  - `package.json` (1011.0 B)
+  - **public**
+    - `vite.svg` (1.5 KB)
+  - `README.md` (1.9 KB)
+  - **src**
+    - `App.css` (606.0 B)
+    - `App.tsx` (953.0 B)
+    - **assets**
+      - `react.svg` (4.0 KB)
+    - **components**
+      - `ProtectedRoute.tsx` (729.0 B)
+    - **contexts**
+      - `AuthContext.tsx` (3.5 KB)
+    - **hooks**
+    - `index.css` (1.1 KB)
+    - `main.tsx` (230.0 B)
+    - **pages**
+      - `HomePage.tsx` (1.3 KB)
+      - `LoginPage.tsx` (3.6 KB)
+      - `RegisterPage.tsx` (5.3 KB)
+    - **services**
+      - `api.ts` (3.8 KB)
+    - **types**
+      - `user.ts` (1.2 KB)
+    - **utils**
+    - `vite-env.d.ts` (38.0 B)
+  - `tsconfig.app.json` (665.0 B)
+  - `tsconfig.json` (119.0 B)
+  - `tsconfig.node.json` (593.0 B)
+  - `vite.config.ts` (308.0 B)
