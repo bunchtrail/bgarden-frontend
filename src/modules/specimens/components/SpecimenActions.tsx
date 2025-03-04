@@ -94,40 +94,88 @@ export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
         >
           <ButtonGroup variant='outlined' size='small' sx={buttonGroupStyles}>
             <Tooltip title='Первая запись'>
-              <Button
-                onClick={onNavigateFirst}
-                disabled={isLoading || currentIndex <= 0}
-                startIcon={<FirstPageIcon />}
-              >
-                Первая
-              </Button>
+              {isLoading || currentIndex <= 0 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    onClick={onNavigateFirst}
+                    disabled={true}
+                    startIcon={<FirstPageIcon />}
+                  >
+                    Первая
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  onClick={onNavigateFirst}
+                  disabled={false}
+                  startIcon={<FirstPageIcon />}
+                >
+                  Первая
+                </Button>
+              )}
             </Tooltip>
             <Tooltip title='Предыдущая запись'>
-              <Button
-                onClick={onNavigatePrev}
-                disabled={isLoading || currentIndex <= 0}
-                startIcon={<NavigateBeforeIcon />}
-              >
-                Пред.
-              </Button>
+              {isLoading || currentIndex <= 0 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    onClick={onNavigatePrev}
+                    disabled={true}
+                    startIcon={<NavigateBeforeIcon />}
+                  >
+                    Пред.
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  onClick={onNavigatePrev}
+                  disabled={false}
+                  startIcon={<NavigateBeforeIcon />}
+                >
+                  Пред.
+                </Button>
+              )}
             </Tooltip>
             <Tooltip title='Следующая запись'>
-              <Button
-                onClick={onNavigateNext}
-                disabled={isLoading || currentIndex >= totalCount - 1}
-                endIcon={<NavigateNextIcon />}
-              >
-                След.
-              </Button>
+              {isLoading || currentIndex >= totalCount - 1 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    onClick={onNavigateNext}
+                    disabled={true}
+                    endIcon={<NavigateNextIcon />}
+                  >
+                    След.
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  onClick={onNavigateNext}
+                  disabled={false}
+                  endIcon={<NavigateNextIcon />}
+                >
+                  След.
+                </Button>
+              )}
             </Tooltip>
             <Tooltip title='Последняя запись'>
-              <Button
-                onClick={onNavigateLast}
-                disabled={isLoading || currentIndex >= totalCount - 1}
-                endIcon={<LastPageIcon />}
-              >
-                Последняя
-              </Button>
+              {isLoading || currentIndex >= totalCount - 1 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    onClick={onNavigateLast}
+                    disabled={true}
+                    endIcon={<LastPageIcon />}
+                  >
+                    Последняя
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  onClick={onNavigateLast}
+                  disabled={false}
+                  endIcon={<LastPageIcon />}
+                >
+                  Последняя
+                </Button>
+              )}
             </Tooltip>
           </ButtonGroup>
 
@@ -171,40 +219,88 @@ export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
           }}
         >
           <Tooltip title='Печать текущей записи'>
-            <Button
-              onClick={onPrintCurrent}
-              disabled={isLoading || totalCount === 0}
-              startIcon={<PrintIcon />}
-            >
-              Печать карточки
-            </Button>
+            {isLoading || totalCount === 0 ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  onClick={onPrintCurrent}
+                  disabled={true}
+                  startIcon={<PrintIcon />}
+                >
+                  Печать карточки
+                </Button>
+              </span>
+            ) : (
+              <Button
+                onClick={onPrintCurrent}
+                disabled={false}
+                startIcon={<PrintIcon />}
+              >
+                Печать карточки
+              </Button>
+            )}
           </Tooltip>
           <Tooltip title='Печать списка'>
-            <Button
-              onClick={onPrintList}
-              disabled={isLoading || totalCount === 0}
-              startIcon={<PrintIcon />}
-            >
-              Печать списка
-            </Button>
+            {isLoading || totalCount === 0 ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  onClick={onPrintList}
+                  disabled={true}
+                  startIcon={<PrintIcon />}
+                >
+                  Печать списка
+                </Button>
+              </span>
+            ) : (
+              <Button
+                onClick={onPrintList}
+                disabled={false}
+                startIcon={<PrintIcon />}
+              >
+                Печать списка
+              </Button>
+            )}
           </Tooltip>
           <Tooltip title='Экспорт в Excel'>
-            <Button
-              onClick={onExportToExcel}
-              disabled={isLoading || totalCount === 0}
-              startIcon={<FileDownloadIcon />}
-            >
-              Excel
-            </Button>
+            {isLoading || totalCount === 0 ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  onClick={onExportToExcel}
+                  disabled={true}
+                  startIcon={<FileDownloadIcon />}
+                >
+                  Excel
+                </Button>
+              </span>
+            ) : (
+              <Button
+                onClick={onExportToExcel}
+                disabled={false}
+                startIcon={<FileDownloadIcon />}
+              >
+                Excel
+              </Button>
+            )}
           </Tooltip>
           <Tooltip title='Экспорт в PDF'>
-            <Button
-              onClick={onExportToPdf}
-              disabled={isLoading || totalCount === 0}
-              startIcon={<FileDownloadIcon />}
-            >
-              PDF
-            </Button>
+            {isLoading || totalCount === 0 ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  onClick={onExportToPdf}
+                  disabled={true}
+                  startIcon={<FileDownloadIcon />}
+                >
+                  PDF
+                </Button>
+              </span>
+            ) : (
+              <Button
+                onClick={onExportToPdf}
+                disabled={false}
+                startIcon={<FileDownloadIcon />}
+              >
+                PDF
+              </Button>
+            )}
           </Tooltip>
         </ButtonGroup>
       </Box>
@@ -219,45 +315,118 @@ export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {onViewPhenology && (
             <Tooltip title='Фенологические наблюдения'>
-              <Button
-                variant='outlined'
-                onClick={onViewPhenology}
-                disabled={isLoading || totalCount === 0}
-                startIcon={<VisibilityIcon />}
-                size='small'
-                sx={actionButtonStyles}
-              >
-                Фенология
-              </Button>
+              {isLoading || totalCount === 0 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    variant='outlined'
+                    onClick={onViewPhenology}
+                    disabled={true}
+                    startIcon={<VisibilityIcon />}
+                    size='small'
+                    sx={actionButtonStyles}
+                  >
+                    Фенология
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  variant='outlined'
+                  onClick={onViewPhenology}
+                  disabled={false}
+                  startIcon={<VisibilityIcon />}
+                  size='small'
+                  sx={actionButtonStyles}
+                >
+                  Фенология
+                </Button>
+              )}
             </Tooltip>
           )}
 
           {onViewBiometry && (
             <Tooltip title='Биометрия'>
-              <Button
-                variant='outlined'
-                onClick={onViewBiometry}
-                disabled={isLoading || totalCount === 0}
-                startIcon={<MonitorHeartIcon />}
-                size='small'
-                sx={actionButtonStyles}
-              >
-                Биометрия
-              </Button>
+              {isLoading || totalCount === 0 ? (
+                <span style={{ display: 'inline-block' }}>
+                  <Button
+                    variant='outlined'
+                    onClick={onViewBiometry}
+                    disabled={true}
+                    startIcon={<MonitorHeartIcon />}
+                    size='small'
+                    sx={actionButtonStyles}
+                  >
+                    Биометрия
+                  </Button>
+                </span>
+              ) : (
+                <Button
+                  variant='outlined'
+                  onClick={onViewBiometry}
+                  disabled={false}
+                  startIcon={<MonitorHeartIcon />}
+                  size='small'
+                  sx={actionButtonStyles}
+                >
+                  Биометрия
+                </Button>
+              )}
             </Tooltip>
           )}
 
           <Tooltip title='Запросы'>
-            <Button
-              variant='outlined'
-              onClick={onViewReports}
-              disabled={isLoading}
-              startIcon={<ListAltIcon />}
-              size='small'
-              sx={actionButtonStyles}
-            >
-              Запросы
-            </Button>
+            {isLoading ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  variant='outlined'
+                  onClick={onViewReports}
+                  disabled={true}
+                  startIcon={<ListAltIcon />}
+                  size='small'
+                  sx={actionButtonStyles}
+                >
+                  Запросы
+                </Button>
+              </span>
+            ) : (
+              <Button
+                variant='outlined'
+                onClick={onViewReports}
+                disabled={false}
+                startIcon={<ListAltIcon />}
+                size='small'
+                sx={actionButtonStyles}
+              >
+                Запросы
+              </Button>
+            )}
+          </Tooltip>
+
+          <Tooltip title='Выход'>
+            {isLoading ? (
+              <span style={{ display: 'inline-block' }}>
+                <Button
+                  variant='outlined'
+                  onClick={onExit}
+                  disabled={true}
+                  startIcon={<ExitToAppIcon />}
+                  size='small'
+                  sx={actionButtonStyles}
+                >
+                  Выход
+                </Button>
+              </span>
+            ) : (
+              <Button
+                variant='outlined'
+                onClick={onExit}
+                disabled={false}
+                startIcon={<ExitToAppIcon />}
+                size='small'
+                sx={actionButtonStyles}
+              >
+                Выход
+              </Button>
+            )}
           </Tooltip>
         </Box>
       </Box>

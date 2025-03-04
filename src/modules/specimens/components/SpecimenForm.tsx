@@ -227,7 +227,11 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
               <InputLabel>Семейство</InputLabel>
               <Select
                 name='familyId'
-                value={formData.familyId.toString()}
+                value={
+                  formData.familyId !== undefined && formData.familyId !== null
+                    ? formData.familyId.toString()
+                    : '0'
+                }
                 onChange={handleSelectChange}
                 error={!!errors.familyId}
                 disabled={isLoading}

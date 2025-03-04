@@ -4,7 +4,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
-  Chip,
   Divider,
   FormControl,
   IconButton,
@@ -28,12 +27,13 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { SectorType, Specimen, SpecimenFilterParams } from '../types';
+import styles from './specimens.module.css';
 import {
-  SPACING,
-  chipStyles,
-  containerStyles,
+  SPECIMEN_SPACING,
   headingStyles,
+  specimenContainerStyles,
   tableCellStyles,
+  tableContainerStyles,
 } from './styles';
 
 interface SpecimensListProps {
@@ -134,23 +134,24 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
   );
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%' }} className={styles.fadeIn}>
       {/* Фильтры */}
-      <Paper sx={containerStyles}>
-        <Toolbar sx={{ pl: { sm: SPACING.SM }, pr: { xs: 1, sm: 1 } }}>
+      <Paper sx={specimenContainerStyles}>
+        <Toolbar sx={{ pl: { sm: SPECIMEN_SPACING.SM }, pr: { xs: 1, sm: 1 } }}>
           <Typography variant='h6' component='div' sx={headingStyles}>
             Образцы растений
           </Typography>
         </Toolbar>
-        <Divider sx={{ mb: SPACING.SM }} />
+        <Divider sx={{ mb: SPECIMEN_SPACING.SM }} />
 
         <Box
           sx={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: SPACING.SM,
-            mb: SPACING.SM,
+            gap: SPECIMEN_SPACING.SM,
+            mb: SPECIMEN_SPACING.SM,
           }}
+          className={styles.specimenFilterContainer}
         >
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Поле поиска</InputLabel>
@@ -197,7 +198,9 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
           />
         </Box>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: SPACING.SM }}>
+        <Box
+          sx={{ display: 'flex', flexWrap: 'wrap', gap: SPECIMEN_SPACING.SM }}
+        >
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Семейство</InputLabel>
             <Select
@@ -236,115 +239,76 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
             sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}
           >
             <Tooltip title='Применить фильтры'>
-              <IconButton onClick={handleSearch} disabled={isLoading}>
-                <FilterListIcon />
-              </IconButton>
+              {isLoading ? (
+                <span>
+                  <IconButton onClick={handleSearch} disabled={true}>
+                    <FilterListIcon />
+                  </IconButton>
+                </span>
+              ) : (
+                <IconButton onClick={handleSearch} disabled={false}>
+                  <FilterListIcon />
+                </IconButton>
+              )}
             </Tooltip>
           </Box>
         </Box>
       </Paper>
 
       {/* Таблица */}
-      <Paper sx={{ width: '100%', overflow: 'hidden', mt: SPACING.MD }}>
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 300px)' }}>
-          <Table stickyHeader aria-label='таблица образцов растений'>
+      <Paper
+        sx={{ width: '100%', overflow: 'hidden', mt: SPECIMEN_SPACING.MD }}
+      >
+        <TableContainer
+          sx={tableContainerStyles}
+          className={styles.specimenTableContainer}
+        >
+          <Table
+            stickyHeader
+            aria-label='таблица образцов растений'
+            size='small'
+            className={styles.specimensTable}
+          >
             <TableHead>
               <TableRow>
                 <TableCell>Инв. номер</TableCell>
-                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                  Семейство
+                <TableCell sx={tableCellStyles('150px')}>Сектор</TableCell>
+                <TableCell sx={tableCellStyles('200px')}>Семейство</TableCell>
+                <TableCell sx={tableCellStyles('200px')}>Род</TableCell>
+                <TableCell sx={tableCellStyles('200px')}>Вид</TableCell>
+                <TableCell sx={tableCellStyles('200px')}>Сорт</TableCell>
+                <TableCell sx={tableCellStyles('150px')}>Экспозиция</TableCell>
+                <TableCell sx={{ width: 100, textAlign: 'center' }}>
+                  Действия
                 </TableCell>
-                <TableCell>Род</TableCell>
-                <TableCell>Вид</TableCell>
-                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                  Сорт
-                </TableCell>
-                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                  Год посадки
-                </TableCell>
-                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                  Местоположение
-                </TableCell>
-                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                  Статус
-                </TableCell>
-                <TableCell align='right'>Действия</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedSpecimens.length > 0 ? (
-                paginatedSpecimens.map((specimen) => (
-                  <TableRow key={specimen.id} hover>
-                    <TableCell
-                      sx={tableCellStyles({ xs: '120px', sm: '150px' })}
-                    >
-                      {specimen.inventoryNumber}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        display: { xs: 'none', sm: 'table-cell' },
-                        ...tableCellStyles('150px'),
-                      }}
-                    >
-                      {specimen.familyName}
-                    </TableCell>
-                    <TableCell
-                      sx={tableCellStyles({ xs: '100px', sm: '150px' })}
-                    >
-                      {specimen.genus}
-                    </TableCell>
-                    <TableCell
-                      sx={tableCellStyles({ xs: '100px', sm: '150px' })}
-                    >
-                      {specimen.species}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        display: { xs: 'none', md: 'table-cell' },
-                        ...tableCellStyles('150px'),
-                      }}
-                    >
-                      {specimen.cultivar}
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                    >
-                      {specimen.plantingYear}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        display: { xs: 'none', lg: 'table-cell' },
-                        ...tableCellStyles('180px'),
-                      }}
-                    >
-                      {specimen.expositionName}
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', lg: 'table-cell' } }}
-                    >
-                      {specimen.conservationStatus ? (
-                        <Chip
-                          label={specimen.conservationStatus}
-                          color='warning'
-                          size='small'
-                          sx={chipStyles}
-                        />
-                      ) : specimen.hasHerbarium ? (
-                        <Chip
-                          label='Гербарий'
-                          color='success'
-                          size='small'
-                          sx={chipStyles}
-                        />
-                      ) : null}
-                    </TableCell>
-                    <TableCell
-                      align='right'
-                      sx={{
-                        whiteSpace: 'nowrap',
-                        width: { xs: '100px', sm: 'auto' },
-                      }}
-                    >
+              {paginatedSpecimens.map((specimen) => (
+                <TableRow hover key={specimen.id}>
+                  <TableCell>{specimen.inventoryNumber}</TableCell>
+                  <TableCell sx={tableCellStyles('150px')}>
+                    {specimen.sectorType === SectorType.Dendrology
+                      ? 'Дендрология'
+                      : 'Цветоводство'}
+                  </TableCell>
+                  <TableCell sx={tableCellStyles('200px')}>
+                    {specimen.familyName}
+                  </TableCell>
+                  <TableCell sx={tableCellStyles('200px')}>
+                    {specimen.genus}
+                  </TableCell>
+                  <TableCell sx={tableCellStyles('200px')}>
+                    {specimen.species}
+                  </TableCell>
+                  <TableCell sx={tableCellStyles('200px')}>
+                    {specimen.cultivar}
+                  </TableCell>
+                  <TableCell sx={tableCellStyles('150px')}>
+                    {specimen.expositionName}
+                  </TableCell>
+                  <TableCell sx={{ width: 100, textAlign: 'center' }}>
+                    <Box className={styles.actionButtonsContainer}>
                       <Tooltip title='Просмотр'>
                         <IconButton
                           size='small'
@@ -353,7 +317,7 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
                           <VisibilityIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title='Редактирование'>
+                      <Tooltip title='Редактировать'>
                         <IconButton
                           size='small'
                           onClick={() => onEditSpecimen(specimen.id)}
@@ -361,21 +325,15 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
                           <EditIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={9} align='center'>
-                    {isLoading ? 'Загрузка...' : 'Нет данных для отображения'}
+                    </Box>
                   </TableCell>
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[10, 25, 50, 100]}
           component='div'
           count={specimens.length}
           rowsPerPage={rowsPerPage}
@@ -384,7 +342,7 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage='Строк на странице:'
           labelDisplayedRows={({ from, to, count }) =>
-            `${from}–${to} из ${count !== -1 ? count : `более чем ${to}`}`
+            `${from}–${to} из ${count}`
           }
         />
       </Paper>

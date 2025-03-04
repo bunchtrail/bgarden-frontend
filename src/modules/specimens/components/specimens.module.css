@@ -1,0 +1,91 @@
+/* 
+ * Специальные CSS стили для модуля Specimens
+ * Изолированы через CSS Modules для предотвращения конфликтов
+ */
+
+.specimenCard {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.specimenCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Исправление стилей таблицы */
+.specimensTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.specimensTable th {
+  font-weight: 600;
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+.specimensTable td {
+  padding: 8px 12px;
+}
+
+.specimenTableContainer {
+  scrollbar-width: thin;
+}
+
+/* Улучшение контейнеров для действий */
+.actionButtonsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.actionButtonsContainer button {
+  padding: 4px;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 600px) {
+  .specimenFilterContainer {
+    flex-direction: column;
+  }
+  
+  .specimenFilterContainer > * {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* Улучшение стилей чипов */
+.specimenChip {
+  border-radius: 16px;
+  padding: 0 2px;
+  height: auto;
+}
+
+.specimenChip span {
+  padding: 4px 8px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* Анимации для плавных переходов */
+.fadeIn {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Фиксы для кнопок в модальных окнах */
+.specimenModalButton {
+  min-width: 100px;
+  margin: 0 4px !important;
+} 

@@ -1,14 +1,15 @@
 - **specimens**
   - **components**
     - `index.ts` (162.0 B)
-    - `SpecimenActions.tsx` (8.7 KB)
-    - `SpecimenCard.tsx` (4.1 KB)
-    - `SpecimenForm.tsx` (16.0 KB)
-    - `SpecimensList.tsx` (13.2 KB)
-    - `styles.ts` (2.7 KB)
+    - `SpecimenActions.tsx` (14.2 KB)
+    - `SpecimenCard.tsx` (4.2 KB)
+    - `SpecimenForm.tsx` (16.1 KB)
+    - `specimens.module.css` (1.8 KB)
+    - `SpecimensList.tsx` (11.7 KB)
+    - `styles.ts` (4.6 KB)
   - **contexts**
   - **docs**
-    - `Структура_specimens_от_04-03-2025.md` (422.0 B)
+    - `Структура_specimens_от_04-03-2025.md` (461.0 B)
   - **hooks**
   - `index.ts` (59.0 B)
   - **services**

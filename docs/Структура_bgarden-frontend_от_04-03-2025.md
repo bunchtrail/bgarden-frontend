@@ -4,7 +4,7 @@
     - `cert.pem` (1.1 KB)
     - `key.pem` (1.7 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.7 KB)
+    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.8 KB)
   - `eslint.config.js` (734.0 B)
   - `index.html` (366.0 B)
   - `package-lock.json` (157.7 KB)
@@ -50,14 +50,15 @@
       - **specimens**
         - **components**
           - `index.ts` (162.0 B)
-          - `SpecimenActions.tsx` (8.7 KB)
-          - `SpecimenCard.tsx` (4.1 KB)
-          - `SpecimenForm.tsx` (16.0 KB)
-          - `SpecimensList.tsx` (13.2 KB)
-          - `styles.ts` (2.7 KB)
+          - `SpecimenActions.tsx` (14.2 KB)
+          - `SpecimenCard.tsx` (4.2 KB)
+          - `SpecimenForm.tsx` (16.1 KB)
+          - `specimens.module.css` (1.8 KB)
+          - `SpecimensList.tsx` (11.7 KB)
+          - `styles.ts` (4.6 KB)
         - **contexts**
         - **docs**
-          - `Структура_specimens_от_04-03-2025.md` (422.0 B)
+          - `Структура_specimens_от_04-03-2025.md` (461.0 B)
         - **hooks**
         - `index.ts` (59.0 B)
         - **services**
@@ -78,7 +79,8 @@
       - `buttonGroupFix.css` (2.1 KB)
       - `components.ts` (4.5 KB)
       - `index.css` (2.3 KB)
-      - `index.ts` (1.2 KB)
+      - `index.ts` (1.4 KB)
+      - `reset.css` (2.5 KB)
       - `variables.css` (1.5 KB)
     - `theme.tsx` (8.5 KB)
     - **types**

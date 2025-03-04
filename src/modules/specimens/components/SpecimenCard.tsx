@@ -1,19 +1,12 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  SxProps,
-  Theme,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Specimen } from '../types';
+import styles from './specimens.module.css';
 import {
-  SPACING,
+  SPECIMEN_SPACING,
   chipStyles,
-  containerStyles,
+  specimenContainerStyles,
+  specimenTextStyles,
   wordBreakStyles,
 } from './styles';
 
@@ -22,16 +15,15 @@ interface SpecimenCardProps {
 }
 
 export const SpecimenCard: React.FC<SpecimenCardProps> = ({ specimen }) => {
-  // Стили для текста в информационных блоках
-  const typographyStyles: SxProps<Theme> = {
-    mb: 1,
-    ...wordBreakStyles,
-  };
-
   return (
-    <Card sx={{ ...containerStyles, mb: SPACING.SM }}>
-      <CardContent sx={{ p: { xs: SPACING.SM, sm: SPACING.MD } }}>
-        <Grid container spacing={SPACING.SM}>
+    <Card
+      sx={{ ...specimenContainerStyles, mb: SPECIMEN_SPACING.SM }}
+      className={styles.specimenCard}
+    >
+      <CardContent
+        sx={{ p: { xs: SPECIMEN_SPACING.SM, sm: SPECIMEN_SPACING.MD } }}
+      >
+        <Grid container spacing={SPECIMEN_SPACING.SM}>
           <Grid item xs={12}>
             <Typography
               variant='h5'
@@ -50,19 +42,19 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({ specimen }) => {
 
           <Grid item xs={12} sm={6}>
             <Box>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Семейство:</strong> {specimen.familyName}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Род:</strong> {specimen.genus}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Вид:</strong> {specimen.species}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Сорт:</strong> {specimen.cultivar}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Форма:</strong> {specimen.form}
               </Typography>
             </Box>
@@ -70,16 +62,16 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({ specimen }) => {
 
           <Grid item xs={12} sm={6}>
             <Box>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Год посадки:</strong> {specimen.plantingYear}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Местоположение:</strong> {specimen.expositionName}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Определил:</strong> {specimen.determinedBy}
               </Typography>
-              <Typography variant='body2' sx={typographyStyles}>
+              <Typography variant='body2' sx={specimenTextStyles}>
                 <strong>Заполнил:</strong> {specimen.filledBy}
               </Typography>
               {specimen.conservationStatus && (
@@ -89,6 +81,7 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({ specimen }) => {
                     color='warning'
                     size='small'
                     sx={chipStyles}
+                    className={styles.specimenChip}
                   />
                 </Box>
               )}
@@ -101,7 +94,8 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({ specimen }) => {
                 label='Имеется гербарий'
                 color='success'
                 size='small'
-                sx={{ mr: 1, mb: 1 }}
+                sx={chipStyles}
+                className={styles.specimenChip}
               />
             </Grid>
           )}
