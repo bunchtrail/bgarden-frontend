@@ -25,28 +25,6 @@ export interface UserDto {
     token?: string;
 }
 
-export interface CreateUserDto {
-    username: string;
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    role?: string;
-}
-
-export interface UpdateUserDto {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    role?: string;
-}
-
-export interface ChangePasswordDto {
-    currentPassword: string;
-    newPassword: string;
-    confirmNewPassword: string;
-}
-
 export interface RegisterDto {
     username: string;
     email: string;
@@ -73,6 +51,7 @@ export interface AuthResponse {
 export interface ErrorResponse {
     message: string;
     statusCode: number;
+    isAuthError?: boolean;
 }
 
 export interface TokenDto {
@@ -86,29 +65,4 @@ export interface TokenDto {
 export interface RefreshTokenDto {
     token: string;
     IpAddress?: string;
-}
-
-export interface VerifyTwoFactorDto {
-    username: string;
-    code: string;
-    rememberMe: boolean;
-}
-
-export interface VerifyTwoFactorCodeDto {
-    code: string;
-}
-
-export interface TwoFactorSetupDto {
-    secretKey: string;
-    qrCodeUrl: string;
-}
-
-export interface AuthLogDto {
-    id: number;
-    username: string;
-    timestamp: string;
-    ipAddress: string;
-    userAgent: string;
-    succeeded: boolean;
-    failureReason?: string;
 } 

@@ -4,7 +4,7 @@
     - `cert.pem` (1.1 KB)
     - `key.pem` (1.7 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_04-03-2025.md` (1.8 KB)
+    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.0 KB)
   - `eslint.config.js` (734.0 B)
   - `index.html` (366.0 B)
   - `package-lock.json` (157.7 KB)
@@ -20,49 +20,54 @@
     - `generate-trusted-certs.mjs` (2.0 KB)
     - `install-cert-windows.bat` (472.0 B)
   - **src**
-    - `App.css` (606.0 B)
-    - `App.tsx` (539.0 B)
+    - `App.css` (2.6 KB)
+    - `App.tsx` (638.0 B)
     - **assets**
       - `react.svg` (4.0 KB)
     - **components**
-      - `index.ts` (46.0 B)
-      - `Layout.tsx` (2.1 KB)
-    - `index.css` (1.1 KB)
-    - `main.tsx` (230.0 B)
+      - `ErrorMessage.tsx` (5.4 KB)
+      - `index.ts` (178.0 B)
+      - `Layout.tsx` (4.2 KB)
+      - `README.md` (4.4 KB)
+    - `index.css` (1.8 KB)
+    - `main.tsx` (277.0 B)
     - **modules**
       - **auth**
         - **components**
-          - `AuthHistory.tsx` (2.1 KB)
-          - `ProtectedRoute.tsx` (724.0 B)
-          - `TwoFactorAuth.tsx` (2.2 KB)
-          - `TwoFactorSetup.tsx` (6.8 KB)
+          - `ProtectedRoute.tsx` (1.5 KB)
         - **contexts**
-          - `AuthContext.tsx` (9.6 KB)
+          - `AuthContext.tsx` (6.8 KB)
         - **hooks**
           - `index.ts` (53.0 B)
-          - `useTokenRefresh.ts` (2.1 KB)
-        - `index.ts` (705.0 B)
+          - `useTokenRefresh.ts` (2.0 KB)
+        - `index.ts` (524.0 B)
         - `README.md` (2.9 KB)
         - **services**
-          - `authService.ts` (10.2 KB)
+          - `authService.ts` (5.8 KB)
         - **types**
-          - `index.ts` (2.1 KB)
+          - `index.ts` (1.3 KB)
     - **pages**
-      - `AuthOverviewPage.tsx` (4.8 KB)
-      - `index.ts` (235.0 B)
-      - `LoginPage.tsx` (5.2 KB)
-      - `ProfilePage.tsx` (3.6 KB)
+      - `AuthOverviewPage.tsx` (4.2 KB)
+      - `HomePage.tsx` (3.1 KB)
+      - `index.ts` (287.0 B)
+      - `LoginPage.tsx` (8.2 KB)
+      - `ProfilePage.tsx` (2.3 KB)
       - `RegisterPage.tsx` (4.7 KB)
-    - `routes.tsx` (976.0 B)
+    - `routes.tsx` (1007.0 B)
     - **services**
       - `api.ts` (270.0 B)
     - **styles**
+      - `index.css` (1.5 KB)
+      - `variables.css` (1.5 KB)
+    - `theme.tsx` (5.7 KB)
     - **types**
       - `user.ts` (183.0 B)
     - **utils**
+      - `errorUtils.ts` (4.2 KB)
+      - `index.ts` (31.0 B)
     - `vite-env.d.ts` (38.0 B)
   - `tsconfig.app.json` (665.0 B)
   - `tsconfig.json` (119.0 B)
   - `tsconfig.node.json` (593.0 B)
-  - `vite.config.ts` (2.0 KB)
-  - `vite.http.config.ts` (526.0 B)
+  - `vite.config.ts` (1.5 KB)
+  - `vite.http.config.ts` (432.0 B)

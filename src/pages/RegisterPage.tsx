@@ -1,6 +1,14 @@
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
-import { Box, Button, Container, TextField, Typography, Paper, Alert } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../modules/auth';
 
 const RegisterPage: React.FC = () => {
@@ -27,21 +35,18 @@ const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
     setRegisterError(null);
-
-    // Валидация
-    if (formData.password !== formData.confirmPassword) {
-      setRegisterError('Пароли не совпадают');
-      return;
-    }
-
+    clearError();
     setLoading(true);
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      await register(registerData);
-      navigate('/profile');
+      const success = await register(registerData);
+
+      // Перенаправляем только при успешной регистрации
+      if (success) {
+        navigate('/profile');
+      }
     } catch (err) {
       if (err instanceof Error) {
         setRegisterError(err.message);
@@ -54,99 +59,97 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box mt={8} display="flex" flexDirection="column" alignItems="center">
+    <Container maxWidth='sm'>
+      <Box mt={8} display='flex' flexDirection='column' alignItems='center'>
         <Paper elevation={3} style={{ padding: 24, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
+          <Typography component='h1' variant='h5' align='center' gutterBottom>
             Регистрация
           </Typography>
 
           {(error || registerError) && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity='error' sx={{ mb: 2 }}>
               {error || registerError}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Box component='form' onSubmit={handleSubmit} noValidate>
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              id="username"
-              label="Имя пользователя"
-              name="username"
-              autoComplete="username"
+              id='username'
+              label='Имя пользователя'
+              name='username'
+              autoComplete='username'
               autoFocus
               value={formData.username}
               onChange={handleChange}
             />
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              autoComplete="email"
+              id='email'
+              label='Email'
+              name='email'
+              autoComplete='email'
               value={formData.email}
               onChange={handleChange}
             />
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              id="firstName"
-              label="Имя"
-              name="firstName"
+              id='firstName'
+              label='Имя'
+              name='firstName'
               value={formData.firstName}
               onChange={handleChange}
             />
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              id="lastName"
-              label="Фамилия"
-              name="lastName"
+              id='lastName'
+              label='Фамилия'
+              name='lastName'
               value={formData.lastName}
               onChange={handleChange}
             />
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              name="password"
-              label="Пароль"
-              type="password"
-              id="password"
+              name='password'
+              label='Пароль'
+              type='password'
+              id='password'
               value={formData.password}
               onChange={handleChange}
             />
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              name="confirmPassword"
-              label="Подтвердите пароль"
-              type="password"
-              id="confirmPassword"
+              name='confirmPassword'
+              label='Подтвердите пароль'
+              type='password'
+              id='confirmPassword'
               value={formData.confirmPassword}
               onChange={handleChange}
             />
             <Button
-              type="submit"
+              type='submit'
               fullWidth
-              variant="contained"
+              variant='contained'
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
               {loading ? 'Регистрация...' : 'Зарегистрироваться'}
             </Button>
-            <Box display="flex" justifyContent="center">
-              <Link to="/login">
-                <Typography variant="body2">
-                  Уже есть аккаунт? Войти
-                </Typography>
+            <Box display='flex' justifyContent='center'>
+              <Link to='/login'>
+                <Typography variant='body2'>Уже есть аккаунт? Войти</Typography>
               </Link>
             </Box>
           </Box>
@@ -156,4 +159,4 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

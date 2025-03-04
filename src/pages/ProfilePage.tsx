@@ -7,41 +7,14 @@ import {
   ListItem,
   ListItemText,
   Paper,
-  Tab,
-  Tabs,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../modules/auth';
-import { AuthHistory } from '../modules/auth/components/AuthHistory';
-import { TwoFactorSetup } from '../modules/auth/components/TwoFactorSetup';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role='tabpanel'
-      hidden={value !== index}
-      id={`profile-tabpanel-${index}`}
-      aria-labelledby={`profile-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, loading, logout } = useAuth();
-  const [tabValue, setTabValue] = useState(0);
 
   if (loading) {
     return <div>Загрузка...</div>;
@@ -51,12 +24,15 @@ const ProfilePage: React.FC = () => {
     return <Navigate to='/login' />;
   }
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   const handleLogout = async () => {
-    await logout();
+    try {
+      setLoading(true);
+      await logout(true);
+    } catch (error) {
+      console.error('Ошибка при выходе из системы:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,25 +79,6 @@ const ProfilePage: React.FC = () => {
                 <ListItemText primary='Роль' secondary={user.role} />
               </ListItem>
             </List>
-          </Box>
-
-          <Box sx={{ width: '100%' }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                aria-label='profile tabs'
-              >
-                <Tab label='Двухфакторная аутентификация' />
-                <Tab label='История входов' />
-              </Tabs>
-            </Box>
-            <TabPanel value={tabValue} index={0}>
-              <TwoFactorSetup />
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-              <AuthHistory />
-            </TabPanel>
           </Box>
         </Paper>
       </Box>

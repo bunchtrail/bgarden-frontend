@@ -5,10 +5,7 @@ export * from './types';
 export { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Экспорт компонентов
-export { AuthHistory } from './components/AuthHistory';
 export { ProtectedRoute } from './components/ProtectedRoute';
-export { TwoFactorAuth } from './components/TwoFactorAuth';
-export { TwoFactorSetup } from './components/TwoFactorSetup';
 
 // Экспорт хуков
 export { useTokenRefresh } from './hooks/useTokenRefresh';

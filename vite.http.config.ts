@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   const config = {
     plugins: [react()],
     server: {
@@ -16,6 +16,5 @@ export default defineConfig(({ command, mode }) => {
     },
   }
 
-  console.log('Запуск сервера по HTTP на порту 3000')
   return config
 }) 

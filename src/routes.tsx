@@ -3,6 +3,7 @@ import { Layout } from './components';
 import { ProtectedRoute } from './modules/auth/components/ProtectedRoute';
 import {
   AuthOverviewPage,
+  HomePage,
   LoginPage,
   ProfilePage,
   RegisterPage,
@@ -45,10 +46,14 @@ export const routes = [
   },
   {
     path: '/',
-    element: <Navigate to='/auth-overview' replace />,
+    element: (
+      <Layout>
+        <HomePage />
+      </Layout>
+    ),
   },
   {
     path: '*',
-    element: <Navigate to='/login' replace />,
+    element: <Navigate to='/' replace />,
   },
 ];

@@ -1,33 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import {
-  AuthLogDto,
-  LoginDto,
-  RegisterDto,
-  TwoFactorSetupDto,
-  UserDto,
-  VerifyTwoFactorDto,
-} from '../types';
+import { authService, clearAuthData } from '../services/authService';
+import { LoginDto, RegisterDto, UserDto } from '../types';
 
 interface AuthContextType {
   user: UserDto | null;
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
-  isTwoFactorRequired: boolean;
-  temporaryUsername: string | null;
-  login: (data: LoginDto) => Promise<void>;
-  register: (data: RegisterDto) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (data: LoginDto) => Promise<boolean>;
+  register: (data: RegisterDto) => Promise<boolean>;
+  logout: (redirect?: boolean) => Promise<void>;
   clearError: () => void;
-  verifyTwoFactor: (code: string, rememberMe: boolean) => Promise<void>;
-  setupTwoFactor: () => Promise<TwoFactorSetupDto>;
-  enableTwoFactor: (code: string) => Promise<boolean>;
-  disableTwoFactor: (code: string) => Promise<boolean>;
-  getAuthHistory: () => Promise<AuthLogDto[]>;
   unlockUser: (username: string) => Promise<boolean>;
-  refreshToken: (token: string) => Promise<void>;
+  refreshToken: () => Promise<void>;
+  handleAuthError: (err: any) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,10 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isTwoFactorRequired, setIsTwoFactorRequired] = useState(false);
-  const [temporaryUsername, setTemporaryUsername] = useState<string | null>(
-    null
-  );
   const navigate = useNavigate();
 
   // Проверка авторизации при загрузке
@@ -58,8 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setIsAuthenticated(false);
         }
       } catch (err) {
-        console.error('Ошибка при проверке авторизации:', err);
         setIsAuthenticated(false);
+        // Не делаем автоматического перенаправления при ошибке авторизации
       } finally {
         setLoading(false);
       }
@@ -70,31 +53,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const clearError = () => setError(null);
 
-  const login = async (data: LoginDto) => {
+  const login = async (data: LoginDto): Promise<boolean> => {
     setLoading(true);
     setError(null);
+    // Сбрасываем состояние аутентификации перед попыткой входа
+    setIsAuthenticated(false);
+    setUser(null);
+
     try {
-      const response = await authService.login(data);
+      await authService.login(data);
 
-      // Проверяем, требуется ли двухфакторная аутентификация
-      if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
-        setIsTwoFactorRequired(true);
-        setTemporaryUsername(response.username);
-        setIsAuthenticated(false);
-        return;
-      }
+      // Делаем небольшую задержку, чтобы токен успел сохраниться в localStorage
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Если успешный вход (получили токен)
-      if ('accessToken' in response) {
-        // Делаем небольшую задержку, чтобы токен успел сохраниться в localStorage
-        await new Promise((resolve) => setTimeout(resolve, 100));
+      // Получаем данные пользователя после успешной авторизации
+      const userData = await authService.checkAuth();
 
-        // Получаем данные пользователя после успешной авторизации
-        const userData = await authService.checkAuth();
+      if (userData) {
         setUser(userData);
         setIsAuthenticated(true);
-        setIsTwoFactorRequired(false);
-        setTemporaryUsername(null);
+        return true; // Авторизация успешна
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        setError('Не удалось получить данные пользователя');
+        return false; // Авторизация не удалась
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -103,22 +86,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setError('Произошла ошибка при входе в систему');
       }
       setIsAuthenticated(false);
+      setUser(null);
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (data: RegisterDto) => {
+  const register = async (data: RegisterDto): Promise<boolean> => {
     try {
       setError(null);
       setLoading(true);
-      const response = await authService.register(data);
+      await authService.register(data);
 
       // Получаем данные пользователя после успешной регистрации
       const userData = await authService.checkAuth();
-      setUser(userData);
-      setIsAuthenticated(true);
+
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+        return true; // Регистрация успешна
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        setError('Не удалось получить данные пользователя после регистрации');
+        return false; // Регистрация не удалась
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -131,127 +124,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = async () => {
+  const logout = async (redirect?: boolean) => {
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Ошибка при выходе из системы:', error);
+      // Обработка ошибки
     } finally {
       setUser(null);
       setIsAuthenticated(false);
       setError(null);
-      navigate('/login');
+      // Выполняем перенаправление только если это явно запрошено
+      if (redirect) {
+        navigate('/login');
+      }
     }
   };
 
-  const verifyTwoFactor = async (code: string, rememberMe: boolean) => {
-    if (!temporaryUsername) {
-      setError('Отсутствует имя пользователя для проверки');
-      return;
+  // Добавляем метод для обработки ошибок авторизации
+  const handleAuthError = (err: any) => {
+    // Проверяем, является ли ошибка ошибкой авторизации
+    if (err && (err.statusCode === 401 || err.isAuthError)) {
+      // Очищаем данные авторизации
+      clearAuthData();
+      setUser(null);
+      setIsAuthenticated(false);
+      setError('Сессия истекла. Пожалуйста, войдите снова.');
+      return true;
     }
-
-    try {
-      setError(null);
-      setLoading(true);
-
-      const verifyData: VerifyTwoFactorDto = {
-        username: temporaryUsername,
-        code,
-        rememberMe,
-      };
-
-      const response = await authService.verifyTwoFactor(verifyData);
-
-      // Получаем данные пользователя после успешной верификации
-      const userData = await authService.checkAuth();
-      setUser(userData);
-      setIsAuthenticated(true);
-      setIsTwoFactorRequired(false);
-      setTemporaryUsername(null);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Произошла ошибка при проверке кода');
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setupTwoFactor = async () => {
-    try {
-      setError(null);
-      setLoading(true);
-      const setupData = await authService.setupTwoFactor();
-      return setupData;
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Произошла ошибка при настройке двухфакторной аутентификации');
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const enableTwoFactor = async (code: string) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const result = await authService.enableTwoFactor(code);
-      return result;
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Произошла ошибка при включении двухфакторной аутентификации');
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const disableTwoFactor = async (code: string) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const result = await authService.disableTwoFactor(code);
-      return result;
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(
-          'Произошла ошибка при отключении двухфакторной аутентификации'
-        );
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getAuthHistory = async () => {
-    try {
-      setError(null);
-      setLoading(true);
-      const history = await authService.getAuthHistory();
-      return history;
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Произошла ошибка при получении истории аутентификации');
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+    return false;
   };
 
   const unlockUser = async (username: string) => {
@@ -272,21 +172,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const refreshToken = async (token: string) => {
+  const refreshToken = async () => {
     try {
       setError(null);
       setLoading(true);
-      await authService.refreshToken(token);
-      const userData = await authService.checkAuth();
-      setUser(userData);
-      setIsAuthenticated(!!userData);
+      await authService.refreshToken();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Произошла ошибка при обновлении токена');
       }
-      setIsAuthenticated(false);
       throw err;
     } finally {
       setLoading(false);
@@ -300,19 +196,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         error,
         isAuthenticated,
-        isTwoFactorRequired,
-        temporaryUsername,
         login,
         register,
         logout,
         clearError,
-        verifyTwoFactor,
-        setupTwoFactor,
-        enableTwoFactor,
-        disableTwoFactor,
-        getAuthHistory,
         unlockUser,
         refreshToken,
+        handleAuthError,
       }}
     >
       {children}

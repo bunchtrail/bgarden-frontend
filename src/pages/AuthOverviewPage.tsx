@@ -1,7 +1,6 @@
 import HistoryIcon from '@mui/icons-material/History';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
-import SecurityIcon from '@mui/icons-material/Security';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import {
   Box,
@@ -40,16 +39,6 @@ const AuthOverviewPage: React.FC = () => {
               <ListItemText
                 primary='Регистрация и вход'
                 secondary='Простая регистрация и вход в систему с проверкой учетных данных и защитой от атак перебором.'
-              />
-            </ListItem>
-
-            <ListItem>
-              <ListItemIcon>
-                <SecurityIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary='Двухфакторная аутентификация'
-                secondary='Дополнительный уровень безопасности с помощью TOTP (временные одноразовые пароли) через приложения Google Authenticator, Microsoft Authenticator и другие.'
               />
             </ListItem>
 

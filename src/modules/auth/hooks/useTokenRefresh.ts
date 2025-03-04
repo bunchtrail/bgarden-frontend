@@ -28,10 +28,9 @@ export const useTokenRefresh = (refreshInterval = 15 * 60 * 1000) => {
 
             if (currentRefreshToken) {
               await refreshToken(currentRefreshToken);
-              console.log('Токен успешно обновлен');
             }
           } catch (error) {
-            console.error('Ошибка при обновлении токена:', error);
+            // Ошибка при обновлении токена
           }
         }, refreshInterval);
       } else if (timerRef.current) {
