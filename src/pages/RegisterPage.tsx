@@ -40,8 +40,37 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
-      const success = await register(registerData);
+      // Проверяем, что пароли совпадают
+      if (formData.password !== formData.confirmPassword) {
+        setRegisterError('Пароли не совпадают');
+        setLoading(false);
+        return;
+      }
+
+      // Проверяем сложность пароля
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
+      const hasDigit = /[0-9]/.test(formData.password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':\\|,.<>\/?]/.test(
+        formData.password
+      );
+
+      if (
+        formData.password.length < 8 ||
+        !hasUpperCase ||
+        !hasLowerCase ||
+        !hasDigit ||
+        !hasSpecialChar
+      ) {
+        setRegisterError(
+          'Пароль должен содержать минимум 8 символов, включая заглавные и строчные буквы, цифры и специальные символы'
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Отправляем все данные, включая confirmPassword
+      const success = await register(formData);
 
       // Перенаправляем только при успешной регистрации
       if (success) {
@@ -50,6 +79,8 @@ const RegisterPage: React.FC = () => {
     } catch (err) {
       if (err instanceof Error) {
         setRegisterError(err.message);
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        setRegisterError(err.message as string);
       } else {
         setRegisterError('Произошла ошибка при регистрации');
       }
@@ -127,6 +158,14 @@ const RegisterPage: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
             />
+            <Typography
+              variant='caption'
+              color='textSecondary'
+              sx={{ display: 'block', mb: 1 }}
+            >
+              Пароль должен содержать минимум 8 символов, включая заглавные и
+              строчные буквы, цифры и специальные символы
+            </Typography>
             <TextField
               margin='normal'
               required

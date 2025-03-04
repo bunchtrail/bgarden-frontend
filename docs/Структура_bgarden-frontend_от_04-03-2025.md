@@ -36,23 +36,23 @@
         - **components**
           - `ProtectedRoute.tsx` (1.5 KB)
         - **contexts**
-          - `AuthContext.tsx` (6.8 KB)
+          - `AuthContext.tsx` (6.9 KB)
         - **hooks**
           - `index.ts` (53.0 B)
           - `useTokenRefresh.ts` (2.0 KB)
         - `index.ts` (524.0 B)
         - `README.md` (2.9 KB)
         - **services**
-          - `authService.ts` (5.8 KB)
+          - `authService.ts` (6.5 KB)
         - **types**
-          - `index.ts` (1.3 KB)
+          - `index.ts` (1.4 KB)
     - **pages**
       - `AuthOverviewPage.tsx` (4.2 KB)
       - `HomePage.tsx` (3.1 KB)
       - `index.ts` (287.0 B)
       - `LoginPage.tsx` (8.2 KB)
       - `ProfilePage.tsx` (2.3 KB)
-      - `RegisterPage.tsx` (4.7 KB)
+      - `RegisterPage.tsx` (6.3 KB)
     - `routes.tsx` (1007.0 B)
     - **services**
       - `api.ts` (270.0 B)

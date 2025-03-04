@@ -115,6 +115,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError(err.message as string);
       } else {
         setError('Произошла ошибка при регистрации');
       }

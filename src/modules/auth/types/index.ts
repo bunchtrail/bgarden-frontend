@@ -18,9 +18,11 @@ export interface UserDto {
     id: number;
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
+    fullName: string;
+    role: number | string;
+    position: string | null;
+    createdAt: string;
+    lastLogin: string;
     isActive: boolean;
     token?: string;
 }
@@ -29,6 +31,7 @@ export interface RegisterDto {
     username: string;
     email: string;
     password: string;
+    confirmPassword: string;
     firstName: string;
     lastName: string;
     IpAddress?: string;

@@ -67,10 +67,7 @@ const ProfilePage: React.FC = () => {
                 />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary='Имя'
-                  secondary={`${user.firstName} ${user.lastName}`}
-                />
+                <ListItemText primary='Имя' secondary={user.fullName} />
               </ListItem>
               <ListItem>
                 <ListItemText primary='Email' secondary={user.email} />

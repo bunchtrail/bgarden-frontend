@@ -65,12 +65,28 @@ export const authService = {
     
     // Регистрация пользователя
     register: async (registerDto: RegisterDto): Promise<TokenDto> => {
-        const response = await api.post<TokenDto>('/Auth/register', registerDto);
-        if (response.data.accessToken) {
-            localStorage.setItem('token', response.data.accessToken);
-            localStorage.setItem('username', response.data.username);
+        try {
+            const response = await api.post<TokenDto>('/Auth/register', registerDto);
+            if (response.data.accessToken) {
+                localStorage.setItem('token', response.data.accessToken);
+                localStorage.setItem('username', response.data.username);
+            }
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 400) {
+                    throw {
+                        message: error.response?.data?.message || 'Ошибка при регистрации. Проверьте правильность введенных данных.',
+                        statusCode: 400
+                    };
+                }
+                throw {
+                    message: error.response?.data?.message || 'Ошибка при регистрации пользователя',
+                    statusCode: error.response?.status || 500
+                };
+            }
+            throw error;
         }
-        return response.data;
     },
 
     // Авторизация пользователя
@@ -140,12 +156,11 @@ export const authService = {
         }
 
         try {
-            // Используем только эндпоинт, связанный с авторизацией
+            // Используем эндпоинт User/me для получения данных пользователя
             const userData = await api.get<UserDto>('/User/me');
             return userData.data;
         } catch (err) {
-            // Не очищаем данные авторизации здесь, это будет делать handleAuthError
-            // при необходимости
+            console.error('Ошибка при проверке авторизации:', err);
             return null;
         }
     }
