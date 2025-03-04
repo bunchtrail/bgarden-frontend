@@ -27,7 +27,8 @@ export const useTokenRefresh = (refreshInterval = 15 * 60 * 1000) => {
               ?.split('=')[1];
 
             if (currentRefreshToken) {
-              await refreshToken(currentRefreshToken);
+              // Вызываем refreshToken без параметров, как определено в AuthContext
+              await refreshToken();
             }
           } catch (error) {
             // Ошибка при обновлении токена

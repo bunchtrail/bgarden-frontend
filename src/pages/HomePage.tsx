@@ -1,6 +1,7 @@
 import { Box, Container, Typography } from '@mui/material';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { SectorType } from '../modules/specimens';
 
 const HomePage: React.FC = () => {
   const categories = [
@@ -11,7 +12,7 @@ const HomePage: React.FC = () => {
         'Изучение древесных растений, их анатомии, физиологии, систематики и экологических характеристик',
       image:
         'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80',
-      link: '/dendrology',
+      sectorType: SectorType.Dendrology,
     },
     {
       id: 'flora',
@@ -20,7 +21,7 @@ const HomePage: React.FC = () => {
         'Исследование видового разнообразия растений, их распространения и взаимодействия с окружающей средой',
       image:
         'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&q=80',
-      link: '/flora',
+      sectorType: SectorType.Dendrology, // пока используем дендрологию, можно будет добавить новый тип
     },
     {
       id: 'floriculture',
@@ -29,7 +30,7 @@ const HomePage: React.FC = () => {
         'Искусство выращивания цветов, создания композиций и ухода за декоративными растениями',
       image:
         'https://images.unsplash.com/photo-1523810192022-5a0fb9aa7ff8?auto=format&fit=crop&q=80',
-      link: '/floriculture',
+      sectorType: SectorType.Floriculture,
     },
   ];
 
@@ -52,7 +53,7 @@ const HomePage: React.FC = () => {
           <div className='category-grid'>
             {categories.map((category) => (
               <Link
-                to={category.link}
+                to={`/specimens?sector=${category.sectorType}`}
                 key={category.id}
                 style={{ textDecoration: 'none' }}
               >

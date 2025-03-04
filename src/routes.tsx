@@ -7,6 +7,7 @@ import {
   LoginPage,
   ProfilePage,
   RegisterPage,
+  SpecimensPage,
 } from './pages';
 
 export const routes = [
@@ -41,6 +42,16 @@ export const routes = [
     element: (
       <Layout>
         <AuthOverviewPage />
+      </Layout>
+    ),
+  },
+  {
+    path: '/specimens',
+    element: (
+      <Layout>
+        <ProtectedRoute>
+          <SpecimensPage />
+        </ProtectedRoute>
       </Layout>
     ),
   },

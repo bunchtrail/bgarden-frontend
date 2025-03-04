@@ -4,7 +4,7 @@
     - `cert.pem` (1.1 KB)
     - `key.pem` (1.7 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.0 KB)
+    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.5 KB)
   - `eslint.config.js` (734.0 B)
   - `index.html` (366.0 B)
   - `package-lock.json` (157.7 KB)
@@ -39,27 +39,42 @@
           - `AuthContext.tsx` (6.9 KB)
         - **hooks**
           - `index.ts` (53.0 B)
-          - `useTokenRefresh.ts` (2.0 KB)
+          - `useTokenRefresh.ts` (2.1 KB)
         - `index.ts` (524.0 B)
         - `README.md` (2.9 KB)
         - **services**
           - `authService.ts` (6.5 KB)
         - **types**
           - `index.ts` (1.4 KB)
+      - **specimens**
+        - **components**
+          - `index.ts` (162.0 B)
+          - `SpecimenActions.tsx` (8.7 KB)
+          - `SpecimenCard.tsx` (4.1 KB)
+          - `SpecimenForm.tsx` (16.0 KB)
+          - `SpecimensList.tsx` (13.2 KB)
+          - `styles.ts` (3.1 KB)
+        - **contexts**
+        - **hooks**
+        - `index.ts` (59.0 B)
+        - **services**
+        - **types**
+          - `index.ts` (1.2 KB)
     - **pages**
       - `AuthOverviewPage.tsx` (4.2 KB)
-      - `HomePage.tsx` (3.1 KB)
-      - `index.ts` (287.0 B)
+      - `HomePage.tsx` (3.3 KB)
+      - `index.ts` (348.0 B)
       - `LoginPage.tsx` (8.2 KB)
-      - `ProfilePage.tsx` (2.3 KB)
+      - `ProfilePage.tsx` (2.2 KB)
       - `RegisterPage.tsx` (6.3 KB)
-    - `routes.tsx` (1007.0 B)
+      - `SpecimensPage.tsx` (19.6 KB)
+    - `routes.tsx` (1.2 KB)
     - **services**
       - `api.ts` (270.0 B)
     - **styles**
       - `index.css` (1.5 KB)
       - `variables.css` (1.5 KB)
-    - `theme.tsx` (5.7 KB)
+    - `theme.tsx` (8.1 KB)
     - **types**
       - `user.ts` (183.0 B)
     - **utils**

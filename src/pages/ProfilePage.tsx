@@ -26,12 +26,9 @@ const ProfilePage: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      setLoading(true);
       await logout(true);
     } catch (error) {
       console.error('Ошибка при выходе из системы:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

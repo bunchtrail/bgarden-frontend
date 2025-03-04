@@ -145,16 +145,44 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
               root: {
                 borderRadius: 980,
                 boxShadow: 'none',
-                padding: '10px 20px',
-                transition: 'background-color 0.2s ease, transform 0.1s ease',
+                padding: '8px 16px',
+                transition: 'all 0.2s ease',
                 '&:active': {
                   transform: 'scale(0.98)',
                 },
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               },
               contained: {
                 '&:hover': {
                   boxShadow: 'none',
+                  backgroundColor: ({
+                    theme,
+                    ownerState,
+                  }: {
+                    theme: any;
+                    ownerState: any;
+                  }) =>
+                    ownerState.color === 'primary'
+                      ? theme.palette.primary.dark
+                      : ownerState.color === 'secondary'
+                      ? theme.palette.secondary.dark
+                      : undefined,
+                  opacity: 0.9,
                 },
+              },
+              outlined: {
+                '&:hover': {
+                  backgroundColor: () =>
+                    mode === 'light'
+                      ? 'rgba(0, 113, 227, 0.08)'
+                      : 'rgba(10, 132, 255, 0.15)',
+                },
+              },
+              sizeSmall: {
+                padding: '4px 12px',
+                fontSize: '0.8125rem',
               },
             },
           },
@@ -165,6 +193,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
               },
               elevation1: {
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.05)',
+              },
+              root: {
+                overflow: 'hidden',
               },
             },
           },
@@ -190,6 +221,55 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
             styleOverrides: {
               root: {
                 boxShadow: 'none',
+              },
+            },
+          },
+          MuiModal: {
+            styleOverrides: {
+              root: {
+                '& .MuiBox-root': {
+                  maxHeight: '90vh',
+                  overflow: 'auto',
+                },
+              },
+            },
+          },
+          MuiTableContainer: {
+            styleOverrides: {
+              root: {
+                overflow: 'auto',
+              },
+            },
+          },
+          MuiTab: {
+            styleOverrides: {
+              root: {
+                minWidth: 'auto',
+                padding: '12px 16px',
+                whiteSpace: 'nowrap',
+                '&.Mui-selected': {
+                  backgroundColor:
+                    mode === 'light'
+                      ? 'rgba(0, 113, 227, 0.08)'
+                      : 'rgba(10, 132, 255, 0.15)',
+                },
+              },
+            },
+          },
+          MuiFormControl: {
+            styleOverrides: {
+              root: {
+                width: '100%',
+              },
+            },
+          },
+          MuiButtonGroup: {
+            styleOverrides: {
+              root: {
+                '& .MuiButton-root': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                },
               },
             },
           },
