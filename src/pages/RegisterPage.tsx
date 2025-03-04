@@ -1,139 +1,159 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { CreateUserDto } from '../types/user';
+import { Box, Button, Container, TextField, Typography, Paper, Alert } from '@mui/material';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../modules/auth';
 
-export const RegisterPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register, error } = useAuth();
-  const [formData, setFormData] = useState<CreateUserDto>({
+  const { register, error, clearError } = useAuth();
+  const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
+    setRegisterError(null);
+
+    // Валидация
+    if (formData.password !== formData.confirmPassword) {
+      setRegisterError('Пароли не совпадают');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await register(formData);
-      navigate('/');
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
+      navigate('/profile');
     } catch (err) {
-      console.error('Ошибка регистрации:', err);
+      if (err instanceof Error) {
+        setRegisterError(err.message);
+      } else {
+        setRegisterError('Произошла ошибка при регистрации');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-md w-full space-y-8'>
-        <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
+    <Container maxWidth="sm">
+      <Box mt={8} display="flex" flexDirection="column" alignItems="center">
+        <Paper elevation={3} style={{ padding: 24, width: '100%' }}>
+          <Typography component="h1" variant="h5" align="center" gutterBottom>
             Регистрация
-          </h2>
-        </div>
-        <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-          <div className='rounded-md shadow-sm -space-y-px'>
-            <div>
-              <label htmlFor='username' className='sr-only'>
-                Имя пользователя
-              </label>
-              <input
-                id='username'
-                name='username'
-                type='text'
-                required
-                className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Имя пользователя'
-                value={formData.username}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor='email' className='sr-only'>
-                Email
-              </label>
-              <input
-                id='email'
-                name='email'
-                type='email'
-                required
-                className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Email'
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor='firstName' className='sr-only'>
-                Имя
-              </label>
-              <input
-                id='firstName'
-                name='firstName'
-                type='text'
-                required
-                className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Имя'
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor='lastName' className='sr-only'>
-                Фамилия
-              </label>
-              <input
-                id='lastName'
-                name='lastName'
-                type='text'
-                required
-                className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Фамилия'
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor='password' className='sr-only'>
-                Пароль
-              </label>
-              <input
-                id='password'
-                name='password'
-                type='password'
-                required
-                className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Пароль'
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
+          </Typography>
 
-          {error && (
-            <div className='text-red-500 text-sm text-center'>{error}</div>
+          {(error || registerError) && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error || registerError}
+            </Alert>
           )}
 
-          <div>
-            <button
-              type='submit'
-              className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="Имя пользователя"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={formData.username}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="firstName"
+              label="Имя"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="lastName"
+              label="Фамилия"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Пароль"
+              type="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Подтвердите пароль"
+              type="password"
+              id="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Зарегистрироваться
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            </Button>
+            <Box display="flex" justifyContent="center">
+              <Link to="/login">
+                <Typography variant="body2">
+                  Уже есть аккаунт? Войти
+                </Typography>
+              </Link>
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+    </Container>
   );
 };
 
-export default RegisterPage;
+export default RegisterPage; 

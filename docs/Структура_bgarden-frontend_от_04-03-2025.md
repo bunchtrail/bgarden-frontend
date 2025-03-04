@@ -1,0 +1,68 @@
+- **bgarden-frontend**
+  - `.env` (39.0 B)
+  - **certificates**
+    - `cert.pem` (1.1 KB)
+    - `key.pem` (1.7 KB)
+  - **docs**
+    - `Структура_bgarden-frontend_от_04-03-2025.md` (1.8 KB)
+  - `eslint.config.js` (734.0 B)
+  - `index.html` (366.0 B)
+  - `package-lock.json` (157.7 KB)
+  - `package.json` (1.6 KB)
+  - **public**
+    - `vite.svg` (1.5 KB)
+  - `README.md` (1.9 KB)
+  - `rootCA-key.pem` (2.4 KB)
+  - `rootCA.pem` (1.8 KB)
+  - **scripts**
+    - `generate-certificates.js` (1.5 KB)
+    - `generate-certs.mjs` (2.1 KB)
+    - `generate-trusted-certs.mjs` (2.0 KB)
+    - `install-cert-windows.bat` (472.0 B)
+  - **src**
+    - `App.css` (606.0 B)
+    - `App.tsx` (539.0 B)
+    - **assets**
+      - `react.svg` (4.0 KB)
+    - **components**
+      - `index.ts` (46.0 B)
+      - `Layout.tsx` (2.1 KB)
+    - `index.css` (1.1 KB)
+    - `main.tsx` (230.0 B)
+    - **modules**
+      - **auth**
+        - **components**
+          - `AuthHistory.tsx` (2.1 KB)
+          - `ProtectedRoute.tsx` (724.0 B)
+          - `TwoFactorAuth.tsx` (2.2 KB)
+          - `TwoFactorSetup.tsx` (6.8 KB)
+        - **contexts**
+          - `AuthContext.tsx` (9.6 KB)
+        - **hooks**
+          - `index.ts` (53.0 B)
+          - `useTokenRefresh.ts` (2.1 KB)
+        - `index.ts` (705.0 B)
+        - `README.md` (2.9 KB)
+        - **services**
+          - `authService.ts` (10.2 KB)
+        - **types**
+          - `index.ts` (2.1 KB)
+    - **pages**
+      - `AuthOverviewPage.tsx` (4.8 KB)
+      - `index.ts` (235.0 B)
+      - `LoginPage.tsx` (5.2 KB)
+      - `ProfilePage.tsx` (3.6 KB)
+      - `RegisterPage.tsx` (4.7 KB)
+    - `routes.tsx` (976.0 B)
+    - **services**
+      - `api.ts` (270.0 B)
+    - **styles**
+    - **types**
+      - `user.ts` (183.0 B)
+    - **utils**
+    - `vite-env.d.ts` (38.0 B)
+  - `tsconfig.app.json` (665.0 B)
+  - `tsconfig.json` (119.0 B)
+  - `tsconfig.node.json` (593.0 B)
+  - `vite.config.ts` (2.0 KB)
+  - `vite.http.config.ts` (526.0 B)

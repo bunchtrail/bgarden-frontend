@@ -1,98 +1,169 @@
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { LoginDto } from '../types/user';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../modules/auth';
 
-export const LoginPage: React.FC = () => {
-  const { login, error, isAuthenticated, user } = useAuth();
-  const [formData, setFormData] = useState<LoginDto>({
-    username: '',
-    password: '',
-  });
+const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { login, error, clearError, isTwoFactorRequired, verifyTwoFactor } =
+    useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
+    setLoginError(null);
+    setLoading(true);
+
     try {
-      await login(formData);
+      await login({ username, password });
+      if (!isTwoFactorRequired) {
+        navigate('/profile');
+      }
     } catch (err) {
-      console.error('Ошибка входа:', err);
+      if (err instanceof Error) {
+        setLoginError(err.message);
+      } else {
+        setLoginError('Произошла ошибка при входе');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const handleTwoFactorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+    setLoginError(null);
+    setLoading(true);
+
+    try {
+      await verifyTwoFactor(twoFactorCode, rememberMe);
+      navigate('/profile');
+    } catch (err) {
+      if (err instanceof Error) {
+        setLoginError(err.message);
+      } else {
+        setLoginError('Произошла ошибка при проверке кода');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-md w-full space-y-8'>
-        <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
-            Вход в систему
-          </h2>
-        </div>
+    <Container maxWidth='sm'>
+      <Box mt={8} display='flex' flexDirection='column' alignItems='center'>
+        <Paper elevation={3} style={{ padding: 24, width: '100%' }}>
+          <Typography component='h1' variant='h5' align='center' gutterBottom>
+            {isTwoFactorRequired
+              ? 'Двухфакторная аутентификация'
+              : 'Вход в систему'}
+          </Typography>
 
-        {isAuthenticated ? (
-          <div className='text-center'>
-            <div className='text-green-600 font-medium text-lg mb-4'>
-              Вы успешно авторизованы!
-            </div>
-            <div className='text-gray-600'>
-              Добро пожаловать, {user?.username}!
-            </div>
-          </div>
-        ) : (
-          <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-            <div className='rounded-md shadow-sm -space-y-px'>
-              <div>
-                <label htmlFor='username' className='sr-only'>
-                  Имя пользователя
-                </label>
-                <input
-                  id='username'
-                  name='username'
-                  type='text'
-                  required
-                  className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                  placeholder='Имя пользователя'
-                  value={formData.username}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <label htmlFor='password' className='sr-only'>
-                  Пароль
-                </label>
-                <input
-                  id='password'
-                  name='password'
-                  type='password'
-                  required
-                  className='appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                  placeholder='Пароль'
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
+          {(error || loginError) && (
+            <Alert severity='error' sx={{ mb: 2 }}>
+              {error || loginError}
+            </Alert>
+          )}
 
-            {error && (
-              <div className='text-red-500 text-sm text-center'>{error}</div>
-            )}
-
-            <div>
-              <button
+          {!isTwoFactorRequired ? (
+            <Box component='form' onSubmit={handleSubmit} noValidate>
+              <TextField
+                margin='normal'
+                required
+                fullWidth
+                id='username'
+                label='Имя пользователя'
+                name='username'
+                autoComplete='username'
+                autoFocus
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <TextField
+                margin='normal'
+                required
+                fullWidth
+                name='password'
+                label='Пароль'
+                type='password'
+                id='password'
+                autoComplete='current-password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
                 type='submit'
-                className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                fullWidth
+                variant='contained'
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
               >
-                Войти
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
+                {loading ? 'Вход...' : 'Войти'}
+              </Button>
+              <Box display='flex' justifyContent='center'>
+                <Link to='/register'>
+                  <Typography variant='body2'>
+                    Нет аккаунта? Зарегистрироваться
+                  </Typography>
+                </Link>
+              </Box>
+            </Box>
+          ) : (
+            <Box component='form' onSubmit={handleTwoFactorSubmit} noValidate>
+              <TextField
+                margin='normal'
+                required
+                fullWidth
+                id='twoFactorCode'
+                label='Код подтверждения'
+                name='twoFactorCode'
+                autoFocus
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value)}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    name='rememberMe'
+                    color='primary'
+                  />
+                }
+                label='Запомнить устройство'
+              />
+              <Button
+                type='submit'
+                fullWidth
+                variant='contained'
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+              >
+                {loading ? 'Проверка...' : 'Подтвердить'}
+              </Button>
+            </Box>
+          )}
+        </Paper>
+      </Box>
+    </Container>
   );
 };
+
+export default LoginPage;
