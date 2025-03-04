@@ -165,11 +165,11 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                     ownerState: any;
                   }) =>
                     ownerState.color === 'primary'
-                      ? theme.palette.primary.dark
+                      ? '#0077ed'
                       : ownerState.color === 'secondary'
                       ? theme.palette.secondary.dark
                       : undefined,
-                  opacity: 0.9,
+                  opacity: 0.95,
                 },
               },
               outlined: {
@@ -178,6 +178,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                     mode === 'light'
                       ? 'rgba(0, 113, 227, 0.08)'
                       : 'rgba(10, 132, 255, 0.15)',
+                  color: 'primary.main',
+                  borderColor: 'primary.main',
                 },
               },
               sizeSmall: {
@@ -269,6 +271,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                 '& .MuiButton-root': {
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
+                  '&:hover': {
+                    backgroundColor: () =>
+                      mode === 'light'
+                        ? 'rgba(0, 113, 227, 0.05)'
+                        : 'rgba(10, 132, 255, 0.1)',
+                    color: 'primary.main',
+                    borderColor: 'primary.main',
+                  },
                 },
               },
             },

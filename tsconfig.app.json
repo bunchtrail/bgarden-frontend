@@ -20,7 +20,16 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Paths */
+    "baseUrl": ".",
+    "paths": {
+      "@/styles/*": ["src/styles/*"],
+      "@/styles": ["src/styles"],
+      "@/components/*": ["src/components/*"],
+      "@/modules/*": ["src/modules/*"]
+    }
   },
   "include": ["src"]
 }

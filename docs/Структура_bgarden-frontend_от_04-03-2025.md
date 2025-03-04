@@ -4,7 +4,7 @@
     - `cert.pem` (1.1 KB)
     - `key.pem` (1.7 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.5 KB)
+    - `Структура_bgarden-frontend_от_04-03-2025.md` (2.7 KB)
   - `eslint.config.js` (734.0 B)
   - `index.html` (366.0 B)
   - `package-lock.json` (157.7 KB)
@@ -25,12 +25,13 @@
     - **assets**
       - `react.svg` (4.0 KB)
     - **components**
+      - `Button.tsx` (1.7 KB)
       - `ErrorMessage.tsx` (5.4 KB)
-      - `index.ts` (178.0 B)
+      - `index.ts` (272.0 B)
       - `Layout.tsx` (4.2 KB)
       - `README.md` (4.4 KB)
     - `index.css` (1.8 KB)
-    - `main.tsx` (277.0 B)
+    - `main.tsx` (314.0 B)
     - **modules**
       - **auth**
         - **components**
@@ -53,8 +54,10 @@
           - `SpecimenCard.tsx` (4.1 KB)
           - `SpecimenForm.tsx` (16.0 KB)
           - `SpecimensList.tsx` (13.2 KB)
-          - `styles.ts` (3.1 KB)
+          - `styles.ts` (2.7 KB)
         - **contexts**
+        - **docs**
+          - `Структура_specimens_от_04-03-2025.md` (422.0 B)
         - **hooks**
         - `index.ts` (59.0 B)
         - **services**
@@ -67,21 +70,24 @@
       - `LoginPage.tsx` (8.2 KB)
       - `ProfilePage.tsx` (2.2 KB)
       - `RegisterPage.tsx` (6.3 KB)
-      - `SpecimensPage.tsx` (19.6 KB)
+      - `SpecimensPage.tsx` (20.2 KB)
     - `routes.tsx` (1.2 KB)
     - **services**
       - `api.ts` (270.0 B)
     - **styles**
-      - `index.css` (1.5 KB)
+      - `buttonGroupFix.css` (2.1 KB)
+      - `components.ts` (4.5 KB)
+      - `index.css` (2.3 KB)
+      - `index.ts` (1.2 KB)
       - `variables.css` (1.5 KB)
-    - `theme.tsx` (8.1 KB)
+    - `theme.tsx` (8.5 KB)
     - **types**
       - `user.ts` (183.0 B)
     - **utils**
       - `errorUtils.ts` (4.2 KB)
       - `index.ts` (31.0 B)
     - `vite-env.d.ts` (38.0 B)
-  - `tsconfig.app.json` (665.0 B)
+  - `tsconfig.app.json` (881.0 B)
   - `tsconfig.json` (119.0 B)
   - `tsconfig.node.json` (593.0 B)
   - `vite.config.ts` (1.5 KB)

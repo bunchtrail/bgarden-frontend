@@ -186,17 +186,19 @@ const SpecimensPage: React.FC = () => {
 
         setSpecimens(mockData);
 
-        // Применяем начальный фильтр по сектору, если он указан
-        applyFilters(mockData, currentFilters);
+        // Применяем текущие фильтры к загруженным данным
+        const filtered = applyFilters(mockData, currentFilters);
+        setFilteredSpecimens(filtered);
+
+        setIsLoading(false);
       } catch (error) {
         console.error('Ошибка загрузки данных:', error);
-      } finally {
         setIsLoading(false);
       }
     };
 
     loadSampleData();
-  }, []);
+  }, [currentFilters]);
 
   // Функция для применения фильтров к списку образцов
   const applyFilters = (data: Specimen[], filters: SpecimenFilterParams) => {
@@ -227,12 +229,12 @@ const SpecimensPage: React.FC = () => {
       });
     }
 
-    setFilteredSpecimens(result);
-
     // Сбрасываем индекс текущего образца при изменении фильтров
     if (result.length > 0) {
       setCurrentIndex(0);
     }
+
+    return result;
   };
 
   // Обработчики навигации
@@ -298,14 +300,18 @@ const SpecimensPage: React.FC = () => {
           s.id === data.id ? ({ ...data, id: data.id } as Specimen) : s
         );
         setSpecimens(updatedSpecimens);
-        applyFilters(updatedSpecimens, currentFilters);
+        // Применяем фильтры и обновляем состояние
+        const filtered = applyFilters(updatedSpecimens, currentFilters);
+        setFilteredSpecimens(filtered);
       } else {
         // Добавление нового образца
         const newId = Math.max(...specimens.map((s) => s.id), 0) + 1;
         const newSpecimen: Specimen = { ...data, id: newId } as Specimen;
         const updatedSpecimens = [...specimens, newSpecimen];
         setSpecimens(updatedSpecimens);
-        applyFilters(updatedSpecimens, currentFilters);
+        // Применяем фильтры и обновляем состояние
+        const filtered = applyFilters(updatedSpecimens, currentFilters);
+        setFilteredSpecimens(filtered);
       }
 
       setShowFormModal(false);
@@ -323,8 +329,10 @@ const SpecimensPage: React.FC = () => {
       const newFilters = { ...currentFilters, ...filterParams };
       setCurrentFilters(newFilters);
 
-      // Применяем фильтры к данным
-      applyFilters(specimens, newFilters);
+      // Применяем фильтры к данным и обновляем состояние
+      // Здесь мы не вызываем applyFilters напрямую, так как это произойдет
+      // автоматически из-за добавления currentFilters в зависимости useEffect
+      // который загружает данные
 
       setIsLoading(false);
     }, 500);

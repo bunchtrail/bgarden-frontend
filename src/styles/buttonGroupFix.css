@@ -1,0 +1,64 @@
+/* 
+ * Исправление стилей для кнопок в ButtonGroup
+ * Решает проблему полного закрашивания кнопок при наведении
+ */
+
+.MuiButtonGroup-grouped.MuiButtonGroup-groupedOutlined.MuiButtonGroup-groupedOutlinedPrimary:hover {
+  background-color: rgba(0, 113, 227, 0.05) !important;
+  color: #0071e3 !important;
+  border-color: #0071e3 !important;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+  .MuiButtonGroup-grouped.MuiButtonGroup-groupedOutlined.MuiButtonGroup-groupedOutlinedPrimary:hover {
+    background-color: rgba(10, 132, 255, 0.1) !important;
+    color: #0a84ff !important;
+    border-color: #0a84ff !important;
+  }
+} 
+
+/* 
+ * Исправление стилей для contained кнопок
+ * Решает проблему потери фона при наведении 
+ */
+.MuiButton-contained.MuiButton-containedPrimary:hover {
+  background-color: #0077ed !important; /* Немного темнее основного #0071e3 */
+  color: white !important;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+  .MuiButton-contained.MuiButton-containedPrimary:hover {
+    background-color: #0091ff !important; /* Немного светлее основного #0084ff */
+    color: white !important;
+  }
+} 
+
+
+.MuiButton-outlinedPrimary:hover {
+  background-color: rgba(0, 113, 227, 0.05) !important;
+  color: #0071e3 !important;
+  border-color: #0071e3 !important;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+  .MuiButton-outlinedPrimary:hover {
+    background-color: rgba(10, 132, 255, 0.1) !important;
+    color: #0a84ff !important;
+    border-color: #0a84ff !important;
+  }
+}
+.MuiButton-textPrimary:hover {
+  background-color: rgba(0, 113, 227, 0.05) !important;
+  color: #0071e3 !important;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+  .MuiButton-textPrimary:hover {
+    background-color: rgba(10, 132, 255, 0.1) !important;
+    color: #0a84ff !important;
+  }
+}
