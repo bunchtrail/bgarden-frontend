@@ -1,4 +1,19 @@
-export type UserRole = 'viewer' | 'editor' | 'admin' | 'user';
+export enum UserRole {
+    /**
+     * Администратор системы (полный доступ)
+     */
+    Administrator = 1,
+    
+    /**
+     * Работник ботанического сада (расширенный доступ)
+     */
+    Employee = 2,
+    
+    /**
+     * Клиент (ограниченный доступ, только для просмотра)
+     */
+    Client = 3
+}
 
 export interface User {
     id: string;
@@ -19,7 +34,7 @@ export interface UserDto {
     username: string;
     email: string;
     fullName: string;
-    role: number | string;
+    role: UserRole;
     position: string | null;
     createdAt: string;
     lastLogin: string;

@@ -1,0 +1,1 @@
+export { expositionService } from './expositionService'; 

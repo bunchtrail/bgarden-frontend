@@ -1,76 +1,74 @@
 /* 
  * Специальные CSS стили для модуля Specimens
- * Изолированы через CSS Modules для предотвращения конфликтов
+ * Интегрированы с Tailwind CSS
  */
 
+/* Общие классы, которые невозможно сделать через встроенные утилиты Tailwind */
 .specimenCard {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
+  @apply transition-all duration-300;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .specimenCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  @apply transform -translate-y-1;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* Исправление стилей таблицы */
+/* Стили таблицы */
 .specimensTable {
-  table-layout: fixed;
-  width: 100%;
+  @apply w-full table-fixed;
 }
 
 .specimensTable th {
-  font-weight: 600;
-  background-color: rgba(25, 118, 210, 0.05);
+  @apply font-semibold bg-blue-50 p-2 border-b border-gray-200;
 }
 
 .specimensTable td {
-  padding: 8px 12px;
+  @apply p-2 border-b border-gray-100;
+}
+
+.specimensTable tr:hover {
+  @apply bg-blue-50;
 }
 
 .specimenTableContainer {
-  scrollbar-width: thin;
+  @apply overflow-auto rounded-lg border border-gray-200;
 }
 
-/* Улучшение контейнеров для действий */
+/* Контейнеры для действий */
 .actionButtonsContainer {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
+  @apply flex justify-center gap-1;
 }
 
 .actionButtonsContainer button {
-  padding: 4px;
+  @apply p-1.5 rounded-full transition-colors duration-200;
 }
 
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 600px) {
-  .specimenFilterContainer {
-    flex-direction: column;
-  }
-  
-  .specimenFilterContainer > * {
-    width: 100%;
-    margin-bottom: 8px;
-  }
+.actionButtonsContainer button:hover {
+  @apply bg-gray-100;
 }
 
-/* Улучшение стилей чипов */
+/* Медиа-запросы обрабатываются через Tailwind по умолчанию */
+.specimenFilterContainer {
+  @apply flex flex-col sm:flex-row rounded-lg bg-white shadow-sm mb-4 p-3;
+}
+
+.specimenFilterContainer > * {
+  @apply w-full sm:w-auto mb-2 sm:mb-0 sm:mr-2;
+}
+
+/* Стили для чипов */
 .specimenChip {
-  border-radius: 16px;
-  padding: 0 2px;
-  height: auto;
+  @apply rounded-full py-0 px-0.5 inline-flex items-center;
 }
 
 .specimenChip span {
-  padding: 4px 8px;
-  white-space: normal;
-  line-height: 1.4;
+  @apply px-2 py-1 whitespace-normal leading-relaxed;
 }
 
-/* Анимации для плавных переходов */
+/* Анимации */
 .fadeIn {
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -84,8 +82,271 @@
   }
 }
 
-/* Фиксы для кнопок в модальных окнах */
+/* Кнопки в модальных окнах */
 .specimenModalButton {
-  min-width: 100px;
-  margin: 0 4px !important;
+  @apply min-w-[100px] mx-1;
+}
+
+/* Дополнительные эффекты и улучшения */
+.pageTitle {
+  @apply text-2xl sm:text-3xl font-bold mb-4 text-blue-700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.infoPanel {
+  @apply bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4;
+}
+
+.highlightedField {
+  @apply bg-yellow-50 border-yellow-300;
+}
+
+.dataField {
+  @apply rounded-lg border border-gray-200 p-3 bg-white flex flex-col;
+  transition: all 0.2s ease-in-out;
+}
+
+.dataField:hover {
+  @apply border-blue-300 bg-blue-50;
+}
+
+/* Основные стили для модуля образцов */
+
+/* Эффект наведения для кнопок */
+.buttonHover {
+  transition: all 0.2s ease-in-out;
+}
+
+.buttonHover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Контейнер для таблицы */
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для Paper контейнера MUI */
+.paperContainer {
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+/* Стили для формы */
+.formContainer {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .formContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .formContainer {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Стили для полей ввода формы */
+.formField {
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.formField:focus-within {
+  transform: translateY(-2px);
+}
+
+/* Эффект пульсации для загрузки */
+.pulseLoading {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Стили для вкладок */
+.tabsContainer {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.tabsContainer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.tabItem {
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 12px 16px;
+  margin-right: 8px;
+}
+
+.tabItem.active {
+  color: #2563eb;
+}
+
+.tabItem.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2563eb;
+  z-index: 1;
+}
+
+/* Стили для дополнительных элементов */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badgeSuccess {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: rgb(16, 185, 129);
+}
+
+.badgeWarning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: rgb(245, 158, 11);
+}
+
+.badgeDanger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: rgb(239, 68, 68);
+}
+
+.badgeInfo {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+}
+
+/* Стили для контейнера действий */
+.actionsContainer {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для секций */
+.section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Стили для заголовков секций */
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+/* Стили для чипсов */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  margin: 0.25rem;
+  font-size: 0.875rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+.chipPrimary {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.chipSecondary {
+  background-color: #f3e8ff;
+  color: #9333ea;
+}
+
+.chipSuccess {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.chipWarning {
+  background-color: #fff7ed;
+  color: #c2410c;
+}
+
+.chipError {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Стили для индикатора загрузки */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+  border-radius: 8px;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #2563eb;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 } 

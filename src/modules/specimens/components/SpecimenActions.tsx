@@ -1,33 +1,27 @@
-import AddIcon from '@mui/icons-material/Add';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-import LastPageIcon from '@mui/icons-material/LastPage';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import PrintIcon from '@mui/icons-material/Print';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { useState } from 'react';
+import styles from './specimens.module.css';
 import {
-  Box,
-  Button,
-  ButtonGroup,
-  Divider,
-  Paper,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import React from 'react';
-import {
-  SPACING,
-  actionsContainerStyles,
-  buttonGroupStyles,
-  buttonStyles,
-  containerStyles,
-  dividerStyles,
-  headingStyles,
+  buttonClasses,
+  containerClasses,
+  dividerClasses,
+  subheadingClasses,
 } from './styles';
+
+import {
+  AddIcon,
+  DeleteIcon,
+  ExitToAppIcon,
+  FileDownloadIcon,
+  FirstPageIcon,
+  LastPageIcon,
+  ListAltIcon,
+  MonitorHeartIcon,
+  NavigateBeforeIcon,
+  NavigateNextIcon,
+  PrintIcon,
+  SearchIcon,
+  VisibilityIcon,
+} from './icons';
 
 interface SpecimenActionsProps {
   currentIndex: number;
@@ -37,6 +31,7 @@ interface SpecimenActionsProps {
   onNavigateLast: () => void;
   onNavigatePrev: () => void;
   onNavigateNext: () => void;
+  onNavigateToIndex?: (index: number) => void;
   onAddNew: () => void;
   onPrintCurrent: () => void;
   onPrintList: () => void;
@@ -46,6 +41,7 @@ interface SpecimenActionsProps {
   onViewBiometry?: () => void; // Опционально: переход к биометрии (для цветоводства)
   onViewReports: () => void; // Переход к форме запросов
   onExit: () => void;
+  onDelete?: (id: number) => void; // Опционально: удаление текущего образца
 }
 
 export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
@@ -56,6 +52,7 @@ export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
   onNavigateLast,
   onNavigatePrev,
   onNavigateNext,
+  onNavigateToIndex,
   onAddNew,
   onPrintCurrent,
   onPrintList,
@@ -65,387 +62,293 @@ export const SpecimenActions: React.FC<SpecimenActionsProps> = ({
   onViewBiometry,
   onViewReports,
   onExit,
+  onDelete,
 }) => {
-  // Стили для заголовков разделов
-  const sectionHeadingStyles = {
-    ...headingStyles,
+  // Состояние для ввода номера образца
+  const [goToIndex, setGoToIndex] = useState<string>('');
+
+  // Обработчик перехода к конкретному образцу
+  const handleGoToIndex = () => {
+    const index = parseInt(goToIndex, 10);
+    if (
+      !isNaN(index) &&
+      index > 0 &&
+      index <= totalCount &&
+      onNavigateToIndex
+    ) {
+      onNavigateToIndex(index - 1); // Преобразуем номер образца в индекс (с нуля)
+      setGoToIndex(''); // Очищаем поле ввода
+    }
   };
 
-  // Стили для кнопок действий
-  const actionButtonStyles = {
-    ...buttonStyles,
-    flex: { xs: '1 0 45%', sm: '0 0 auto' },
+  // Обработчик нажатия Enter в поле ввода
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleGoToIndex();
+    }
   };
+
+  // Заголовки секций
+  const sectionHeadingClass = subheadingClasses.base;
+
+  // Определяем наличие текущего образца для действий удаления
+  const hasCurrentSpecimen =
+    totalCount > 0 && currentIndex >= 0 && currentIndex < totalCount;
+
+  // Классы для кнопок навигации
+  const navButtonBase =
+    'flex items-center justify-center p-2 transition-all duration-200 border border-gray-200 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600';
+  const navButtonDisabled = 'opacity-50 cursor-not-allowed bg-gray-50';
+  const navButtonEnabled =
+    'hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600';
 
   return (
-    <Paper sx={containerStyles}>
+    <div className={`${containerClasses.detail} ${styles.fadeIn} p-4`}>
       {/* Навигация */}
-      <Box sx={{ mb: SPACING.MD }}>
-        <Typography variant='h6' sx={sectionHeadingStyles}>
-          Навигация
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'flex-start',
-            mb: 1,
-          }}
-        >
-          <ButtonGroup variant='outlined' size='small' sx={buttonGroupStyles}>
-            <Tooltip title='Первая запись'>
-              {isLoading || currentIndex <= 0 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    onClick={onNavigateFirst}
-                    disabled={true}
-                    startIcon={<FirstPageIcon />}
-                  >
-                    Первая
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  onClick={onNavigateFirst}
-                  disabled={false}
-                  startIcon={<FirstPageIcon />}
-                >
-                  Первая
-                </Button>
-              )}
-            </Tooltip>
-            <Tooltip title='Предыдущая запись'>
-              {isLoading || currentIndex <= 0 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    onClick={onNavigatePrev}
-                    disabled={true}
-                    startIcon={<NavigateBeforeIcon />}
-                  >
-                    Пред.
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  onClick={onNavigatePrev}
-                  disabled={false}
-                  startIcon={<NavigateBeforeIcon />}
-                >
-                  Пред.
-                </Button>
-              )}
-            </Tooltip>
-            <Tooltip title='Следующая запись'>
-              {isLoading || currentIndex >= totalCount - 1 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    onClick={onNavigateNext}
-                    disabled={true}
-                    endIcon={<NavigateNextIcon />}
-                  >
-                    След.
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  onClick={onNavigateNext}
-                  disabled={false}
-                  endIcon={<NavigateNextIcon />}
-                >
-                  След.
-                </Button>
-              )}
-            </Tooltip>
-            <Tooltip title='Последняя запись'>
-              {isLoading || currentIndex >= totalCount - 1 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    onClick={onNavigateLast}
-                    disabled={true}
-                    endIcon={<LastPageIcon />}
-                  >
-                    Последняя
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  onClick={onNavigateLast}
-                  disabled={false}
-                  endIcon={<LastPageIcon />}
-                >
-                  Последняя
-                </Button>
-              )}
-            </Tooltip>
-          </ButtonGroup>
+      <div className='mb-5'>
+        <h2 className='mt-3 mb-3 text-base sm:text-lg font-semibold text-blue-700 flex items-center'>
+          <span className='bg-blue-100 p-1 rounded-full mr-2'>
+            <NavigateNextIcon size={18} className='text-blue-700' />
+          </span>
+          Навигация по образцам
+        </h2>
 
-          <Typography sx={{ ml: { sm: 2 }, mt: { xs: 1, sm: 0 } }}>
-            {totalCount > 0
-              ? `Запись ${currentIndex + 1} из ${totalCount}`
-              : 'Нет записей'}
-          </Typography>
-        </Box>
+        <div className='flex flex-col w-full gap-3'>
+          {/* Счетчик записей */}
+          <div className='flex items-center bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium w-full'>
+            <span className='text-blue-800 whitespace-nowrap'>
+              {totalCount > 0
+                ? `Образец ${currentIndex + 1} из ${totalCount}`
+                : 'Нет образцов'}
+            </span>
+          </div>
 
-        <Button
-          variant='contained'
-          color='primary'
-          startIcon={<AddIcon />}
-          onClick={onAddNew}
-          disabled={isLoading}
-          sx={{ mt: 1, ...buttonStyles }}
-        >
-          Добавить новый образец
-        </Button>
-      </Box>
+          {/* Кнопки навигации */}
+          <div className='flex w-full justify-center gap-1 mb-2'>
+            <button
+              onClick={onNavigateFirst}
+              disabled={isLoading || currentIndex <= 0}
+              className={`${navButtonBase} rounded-l-lg ${
+                isLoading || currentIndex <= 0
+                  ? navButtonDisabled
+                  : navButtonEnabled
+              }`}
+              title='Первый образец'
+            >
+              <FirstPageIcon size={20} />
+            </button>
+            <button
+              onClick={onNavigatePrev}
+              disabled={isLoading || currentIndex <= 0}
+              className={`${navButtonBase} ${
+                isLoading || currentIndex <= 0
+                  ? navButtonDisabled
+                  : navButtonEnabled
+              }`}
+              title='Предыдущий образец'
+            >
+              <NavigateBeforeIcon size={20} />
+            </button>
 
-      <Divider sx={dividerStyles} />
+            {/* Поле для быстрого перехода к образцу */}
+            {onNavigateToIndex && totalCount > 0 && (
+              <div className='flex items-center bg-white border border-gray-200 rounded-md overflow-hidden'>
+                <input
+                  type='number'
+                  min='1'
+                  max={totalCount}
+                  value={goToIndex}
+                  onChange={(e) => setGoToIndex(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className='w-16 text-center py-1 px-2 border-none focus:ring-0 focus:outline-none'
+                  placeholder='№'
+                  title='Введите номер образца и нажмите Enter'
+                  disabled={isLoading}
+                />
+                <button
+                  onClick={handleGoToIndex}
+                  disabled={isLoading || !goToIndex}
+                  className='bg-gray-100 hover:bg-gray-200 p-1 border-l border-gray-200'
+                  title='Перейти к образцу'
+                >
+                  <SearchIcon size={18} />
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={onNavigateNext}
+              disabled={isLoading || currentIndex >= totalCount - 1}
+              className={`${navButtonBase} ${
+                isLoading || currentIndex >= totalCount - 1
+                  ? navButtonDisabled
+                  : navButtonEnabled
+              }`}
+              title='Следующий образец'
+            >
+              <NavigateNextIcon size={20} />
+            </button>
+            <button
+              onClick={onNavigateLast}
+              disabled={isLoading || currentIndex >= totalCount - 1}
+              className={`${navButtonBase} rounded-r-lg ${
+                isLoading || currentIndex >= totalCount - 1
+                  ? navButtonDisabled
+                  : navButtonEnabled
+              }`}
+              title='Последний образец'
+            >
+              <LastPageIcon size={20} />
+            </button>
+          </div>
+
+          {/* Кнопка добавления */}
+          <button
+            onClick={onAddNew}
+            disabled={isLoading}
+            className='w-full rounded-lg m-0.5 normal-case px-4 py-2 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center transition-all duration-200 hover:shadow-md'
+            title='Добавить новый образец'
+          >
+            <AddIcon size={20} className='mr-1' />
+            <span>Новый образец</span>
+          </button>
+        </div>
+      </div>
+
+      <div className={dividerClasses.base}></div>
 
       {/* Печать и экспорт */}
-      <Box sx={{ mb: SPACING.MD }}>
-        <Typography variant='h6' sx={sectionHeadingStyles}>
+      <div className='mb-5'>
+        <h2
+          className={`${sectionHeadingClass} text-blue-700 flex items-center mb-3`}
+        >
+          <span className='bg-blue-100 p-1 rounded-full mr-2'>
+            <PrintIcon size={18} className='text-blue-700' />
+          </span>
           Печать и экспорт
-        </Typography>
-        <ButtonGroup
-          variant='outlined'
-          size='small'
-          orientation='horizontal'
-          sx={{
-            width: { xs: '100%', sm: 'auto' },
-            flexDirection: { xs: 'column', sm: 'row' },
-            '& .MuiButton-root': {
-              width: { xs: '100%', sm: 'auto' },
-              justifyContent: 'flex-start',
-            },
-          }}
+        </h2>
+        <div className='flex flex-wrap gap-2'>
+          <button
+            onClick={onPrintCurrent}
+            disabled={isLoading || !hasCurrentSpecimen}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm`}
+            title='Печать текущего образца'
+          >
+            <PrintIcon size={20} className='mr-1' />
+            <span>Текущий образец</span>
+          </button>
+          <button
+            onClick={onPrintList}
+            disabled={isLoading}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm`}
+            title='Печать списка образцов'
+          >
+            <ListAltIcon size={20} className='mr-1' />
+            <span>Список образцов</span>
+          </button>
+          <button
+            onClick={onExportToExcel}
+            disabled={isLoading}
+            className={`${buttonClasses.base} ${buttonClasses.success} flex items-center transition-all duration-200 hover:shadow-sm`}
+            title='Экспорт в Excel'
+          >
+            <FileDownloadIcon size={20} className='mr-1' />
+            <span>Excel</span>
+          </button>
+          <button
+            onClick={onExportToPdf}
+            disabled={isLoading}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm`}
+            title='Экспорт в PDF'
+          >
+            <FileDownloadIcon size={20} className='mr-1' />
+            <span>PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <div className={dividerClasses.base}></div>
+
+      {/* Дополнительные модули */}
+      <div className='mb-5'>
+        <h2
+          className={`${sectionHeadingClass} text-blue-700 flex items-center mb-3`}
         >
-          <Tooltip title='Печать текущей записи'>
-            {isLoading || totalCount === 0 ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  onClick={onPrintCurrent}
-                  disabled={true}
-                  startIcon={<PrintIcon />}
-                >
-                  Печать карточки
-                </Button>
-              </span>
-            ) : (
-              <Button
-                onClick={onPrintCurrent}
-                disabled={false}
-                startIcon={<PrintIcon />}
-              >
-                Печать карточки
-              </Button>
-            )}
-          </Tooltip>
-          <Tooltip title='Печать списка'>
-            {isLoading || totalCount === 0 ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  onClick={onPrintList}
-                  disabled={true}
-                  startIcon={<PrintIcon />}
-                >
-                  Печать списка
-                </Button>
-              </span>
-            ) : (
-              <Button
-                onClick={onPrintList}
-                disabled={false}
-                startIcon={<PrintIcon />}
-              >
-                Печать списка
-              </Button>
-            )}
-          </Tooltip>
-          <Tooltip title='Экспорт в Excel'>
-            {isLoading || totalCount === 0 ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  onClick={onExportToExcel}
-                  disabled={true}
-                  startIcon={<FileDownloadIcon />}
-                >
-                  Excel
-                </Button>
-              </span>
-            ) : (
-              <Button
-                onClick={onExportToExcel}
-                disabled={false}
-                startIcon={<FileDownloadIcon />}
-              >
-                Excel
-              </Button>
-            )}
-          </Tooltip>
-          <Tooltip title='Экспорт в PDF'>
-            {isLoading || totalCount === 0 ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  onClick={onExportToPdf}
-                  disabled={true}
-                  startIcon={<FileDownloadIcon />}
-                >
-                  PDF
-                </Button>
-              </span>
-            ) : (
-              <Button
-                onClick={onExportToPdf}
-                disabled={false}
-                startIcon={<FileDownloadIcon />}
-              >
-                PDF
-              </Button>
-            )}
-          </Tooltip>
-        </ButtonGroup>
-      </Box>
-
-      <Divider sx={dividerStyles} />
-
-      {/* Переход к другим формам */}
-      <Box sx={{ mb: SPACING.MD }}>
-        <Typography variant='h6' sx={sectionHeadingStyles}>
-          Переход к другим формам
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <span className='bg-blue-100 p-1 rounded-full mr-2'>
+            <VisibilityIcon size={18} className='text-blue-700' />
+          </span>
+          Дополнительные модули
+        </h2>
+        <div className='flex flex-wrap gap-2'>
           {onViewPhenology && (
-            <Tooltip title='Фенологические наблюдения'>
-              {isLoading || totalCount === 0 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    variant='outlined'
-                    onClick={onViewPhenology}
-                    disabled={true}
-                    startIcon={<VisibilityIcon />}
-                    size='small'
-                    sx={actionButtonStyles}
-                  >
-                    Фенология
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  variant='outlined'
-                  onClick={onViewPhenology}
-                  disabled={false}
-                  startIcon={<VisibilityIcon />}
-                  size='small'
-                  sx={actionButtonStyles}
-                >
-                  Фенология
-                </Button>
-              )}
-            </Tooltip>
+            <button
+              onClick={onViewPhenology}
+              disabled={isLoading || !hasCurrentSpecimen}
+              className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm hover:bg-blue-50`}
+              title='Фенологические наблюдения'
+            >
+              <MonitorHeartIcon size={20} className='mr-1' />
+              <span>Фенология</span>
+            </button>
           )}
-
           {onViewBiometry && (
-            <Tooltip title='Биометрия'>
-              {isLoading || totalCount === 0 ? (
-                <span style={{ display: 'inline-block' }}>
-                  <Button
-                    variant='outlined'
-                    onClick={onViewBiometry}
-                    disabled={true}
-                    startIcon={<MonitorHeartIcon />}
-                    size='small'
-                    sx={actionButtonStyles}
-                  >
-                    Биометрия
-                  </Button>
-                </span>
-              ) : (
-                <Button
-                  variant='outlined'
-                  onClick={onViewBiometry}
-                  disabled={false}
-                  startIcon={<MonitorHeartIcon />}
-                  size='small'
-                  sx={actionButtonStyles}
-                >
-                  Биометрия
-                </Button>
-              )}
-            </Tooltip>
+            <button
+              onClick={onViewBiometry}
+              disabled={isLoading || !hasCurrentSpecimen}
+              className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm hover:bg-blue-50`}
+              title='Биометрические показатели'
+            >
+              <VisibilityIcon size={20} className='mr-1' />
+              <span>Биометрия</span>
+            </button>
           )}
+          <button
+            onClick={onViewReports}
+            disabled={isLoading}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm hover:bg-blue-50`}
+            title='Формирование отчетов'
+          >
+            <ListAltIcon size={20} className='mr-1' />
+            <span>Отчеты</span>
+          </button>
+        </div>
+      </div>
 
-          <Tooltip title='Запросы'>
-            {isLoading ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  variant='outlined'
-                  onClick={onViewReports}
-                  disabled={true}
-                  startIcon={<ListAltIcon />}
-                  size='small'
-                  sx={actionButtonStyles}
-                >
-                  Запросы
-                </Button>
-              </span>
-            ) : (
-              <Button
-                variant='outlined'
-                onClick={onViewReports}
-                disabled={false}
-                startIcon={<ListAltIcon />}
-                size='small'
-                sx={actionButtonStyles}
-              >
-                Запросы
-              </Button>
-            )}
-          </Tooltip>
+      <div className={dividerClasses.base}></div>
 
-          <Tooltip title='Выход'>
-            {isLoading ? (
-              <span style={{ display: 'inline-block' }}>
-                <Button
-                  variant='outlined'
-                  onClick={onExit}
-                  disabled={true}
-                  startIcon={<ExitToAppIcon />}
-                  size='small'
-                  sx={actionButtonStyles}
-                >
-                  Выход
-                </Button>
-              </span>
-            ) : (
-              <Button
-                variant='outlined'
-                onClick={onExit}
-                disabled={false}
-                startIcon={<ExitToAppIcon />}
-                size='small'
-                sx={actionButtonStyles}
-              >
-                Выход
-              </Button>
-            )}
-          </Tooltip>
-        </Box>
-      </Box>
-
-      <Divider sx={dividerStyles} />
-
-      {/* Выход */}
-      <Box sx={actionsContainerStyles}>
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={onExit}
-          disabled={isLoading}
-          startIcon={<ExitToAppIcon />}
-          sx={buttonStyles}
+      {/* Системные действия */}
+      <div className='mb-2'>
+        <h2
+          className={`${sectionHeadingClass} text-blue-700 flex items-center mb-3`}
         >
-          Выход
-        </Button>
-      </Box>
-    </Paper>
+          <span className='bg-blue-100 p-1 rounded-full mr-2'>
+            <ExitToAppIcon size={18} className='text-blue-700' />
+          </span>
+          Системные действия
+        </h2>
+        <div className='flex flex-wrap gap-2'>
+          <button
+            onClick={onExit}
+            disabled={isLoading}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center transition-all duration-200 hover:shadow-sm`}
+            title='Выход в главное меню'
+          >
+            <ExitToAppIcon size={20} className='mr-1' />
+            <span>Выход</span>
+          </button>
+          {onDelete && (
+            <button
+              onClick={() => onDelete(currentIndex)}
+              disabled={isLoading || !hasCurrentSpecimen}
+              className={`${buttonClasses.base} ${buttonClasses.danger} flex items-center transition-all duration-200 hover:shadow-sm`}
+              title='Удалить текущий образец'
+            >
+              <DeleteIcon size={20} className='mr-1' />
+              <span>Удалить</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

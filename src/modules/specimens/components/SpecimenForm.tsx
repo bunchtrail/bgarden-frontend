@@ -1,32 +1,11 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import SaveIcon from '@mui/icons-material/Save';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  SelectChangeEvent,
-  TextField,
-  Typography,
-} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Specimen, SpecimenFormData } from '../types';
+import { CancelIcon, SaveIcon, InfoIcon, MapIcon, LeafIcon, NoteIcon } from './icons';
 import {
-  actionsContainerStyles,
-  buttonStyles,
-  containerStyles,
-  dividerStyles,
-  formStyles,
-  gridContainerStyles,
-  headingStyles,
-  subheadingStyles,
+  actionsContainerClasses,
+  buttonClasses,
+  formClasses,
+  headingClasses,
 } from './styles';
 
 interface SpecimenFormProps {
@@ -54,9 +33,9 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
     sectorType: 0,
     latitude: 0,
     longitude: 0,
-    regionId: 0,
+    regionId: 1,
     regionName: '',
-    familyId: 0,
+    familyId: 1,
     familyName: '',
     russianName: '',
     latinName: '',
@@ -72,7 +51,7 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
     ecologyAndBiology: '',
     economicUse: '',
     conservationStatus: '',
-    expositionId: 0,
+    expositionId: 1,
     expositionName: '',
     hasHerbarium: false,
     duplicatesInfo: '',
@@ -100,8 +79,7 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Очистка ошибки при изменении поля
+    // Сбрасываем ошибку для этого поля при изменении
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -111,39 +89,41 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
     }
   };
 
-  const handleSelectChange = (e: SelectChangeEvent) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
+    let updatedData = { ...formData };
 
-    // Получаем имя для выбранного значения из опций
-    let nameValue = '';
     if (name === 'familyId') {
-      const selectedFamily = familyOptions.find(
-        (option) => option.id === Number(value)
-      );
-      if (selectedFamily) {
-        nameValue = selectedFamily.name;
-      }
+      const selectedFamily = familyOptions.find((f) => f.id === Number(value));
+      updatedData = {
+        ...updatedData,
+        [name]: Number(value),
+        familyName: selectedFamily ? selectedFamily.name : '',
+      };
     } else if (name === 'expositionId') {
       const selectedExposition = expositionOptions.find(
-        (option) => option.id === Number(value)
+        (e) => e.id === Number(value)
       );
-      if (selectedExposition) {
-        nameValue = selectedExposition.name;
-      }
+      updatedData = {
+        ...updatedData,
+        [name]: Number(value),
+        expositionName: selectedExposition ? selectedExposition.name : '',
+      };
     } else if (name === 'regionId') {
-      const selectedRegion = regionOptions.find(
-        (option) => option.id === Number(value)
-      );
-      if (selectedRegion) {
-        nameValue = selectedRegion.name;
-      }
+      const selectedRegion = regionOptions.find((r) => r.id === Number(value));
+      updatedData = {
+        ...updatedData,
+        [name]: Number(value),
+        regionName: selectedRegion ? selectedRegion.name : '',
+      };
+    } else {
+      updatedData = {
+        ...updatedData,
+        [name]: Number(value),
+      };
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: Number(value),
-      ...(nameValue ? { [`${name.replace('Id', 'Name')}`]: nameValue } : {}),
-    }));
+    setFormData(updatedData);
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,402 +133,333 @@ export const SpecimenForm: React.FC<SpecimenFormProps> = ({
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value === '' ? 0 : Number(value),
-    }));
+    const numValue = value === '' ? 0 : Number(value);
+    setFormData((prev) => ({ ...prev, [name]: numValue }));
   };
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Проверка обязательных полей
-    if (!formData.inventoryNumber.trim()) {
+    // Обязательные поля
+    if (!formData.inventoryNumber) {
       newErrors.inventoryNumber = 'Инвентарный номер обязателен';
     }
 
-    if (!formData.genus.trim()) {
-      newErrors.genus = 'Род обязателен';
+    // Хотя бы одно из названий должно быть заполнено
+    if (!formData.russianName && !formData.latinName) {
+      newErrors.russianName = 'Должно быть указано хотя бы одно название';
+      newErrors.latinName = 'Должно быть указано хотя бы одно название';
     }
 
-    if (!formData.species.trim()) {
-      newErrors.species = 'Вид обязателен';
+    // Проверка на существование значений ID для связанных сущностей
+    if (!formData.familyId || formData.familyId <= 0) {
+      newErrors.familyId = 'Необходимо выбрать семейство';
     }
 
-    if (formData.familyId === 0) {
-      newErrors.familyId = 'Семейство обязательно';
+    if (!formData.expositionId || formData.expositionId <= 0) {
+      newErrors.expositionId = 'Необходимо выбрать местоположение';
     }
 
-    // Установка ошибок и возврат результата валидации
+    if (!formData.regionId || formData.regionId <= 0) {
+      newErrors.regionId = 'Необходимо выбрать регион';
+    }
+
+    // Проверка координат
+    if (formData.latitude < -90 || formData.latitude > 90) {
+      newErrors.latitude = 'Широта должна быть в диапазоне от -90 до 90';
+    }
+
+    if (formData.longitude < -180 || formData.longitude > 180) {
+      newErrors.longitude = 'Долгота должна быть в диапазоне от -180 до 180';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (validate()) {
       onSave(formData);
     }
   };
 
+  // Обновленный метод рендеринга текстового поля с улучшенным выравниванием
+  const renderTextField = (
+    label: string,
+    name: keyof SpecimenFormData,
+    required: boolean = false,
+    multiline: boolean = false,
+    rows: number = 1
+  ) => {
+    return (
+      <div className="mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start">
+          <label 
+            htmlFor={name.toString()} 
+            className="block text-sm font-medium text-gray-700 sm:w-1/3 sm:py-2"
+          >
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          <div className="mt-1 sm:mt-0 sm:w-2/3">
+            {multiline ? (
+              <textarea
+                id={name.toString()}
+                name={name.toString()}
+                rows={rows}
+                value={formData[name] as string}
+                onChange={handleChange}
+                className={formClasses.textarea}
+                required={required}
+              />
+            ) : (
+              <input
+                type="text"
+                id={name.toString()}
+                name={name.toString()}
+                value={formData[name] as string}
+                onChange={handleChange}
+                className={formClasses.input}
+                required={required}
+              />
+            )}
+            {errors[name] && (
+              <p className={formClasses.error}>{errors[name]}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Обновленный метод рендеринга числового поля с улучшенным выравниванием
+  const renderNumberField = (
+    label: string,
+    name: keyof SpecimenFormData,
+    required: boolean = false
+  ) => {
+    return (
+      <div className="mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start">
+          <label 
+            htmlFor={name.toString()} 
+            className="block text-sm font-medium text-gray-700 sm:w-1/3 sm:py-2"
+          >
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          <div className="mt-1 sm:mt-0 sm:w-2/3">
+            <input
+              type="number"
+              id={name.toString()}
+              name={name.toString()}
+              value={formData[name] as number}
+              onChange={handleNumberChange}
+              className={formClasses.input}
+              required={required}
+            />
+            {errors[name] && (
+              <p className={formClasses.error}>{errors[name]}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Обновленный метод рендеринга выпадающего списка с улучшенным выравниванием
+  const renderSelectField = (
+    label: string,
+    name: keyof SpecimenFormData,
+    options: { id: number; name: string }[],
+    required: boolean = false
+  ) => {
+    return (
+      <div className="mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start">
+          <label 
+            htmlFor={name.toString()} 
+            className="block text-sm font-medium text-gray-700 sm:w-1/3 sm:py-2"
+          >
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          <div className="mt-1 sm:mt-0 sm:w-2/3">
+            <select
+              id={name.toString()}
+              name={name.toString()}
+              value={formData[name] as number}
+              onChange={handleSelectChange}
+              className={formClasses.select}
+              required={required}
+            >
+              <option value="">Выберите {label.toLowerCase()}</option>
+              {options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+            {errors[name] && (
+              <p className={formClasses.error}>{errors[name]}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Обновленный метод рендеринга чекбокса с улучшенным выравниванием
+  const renderCheckboxField = (label: string, name: keyof SpecimenFormData) => {
+    return (
+      <div className="mb-4">
+        <div className="flex items-center">
+          <div className="sm:w-1/3"></div>
+          <div className="sm:w-2/3 flex items-center">
+            <input
+              type="checkbox"
+              id={name.toString()}
+              name={name.toString()}
+              checked={formData[name] as boolean}
+              onChange={handleCheckboxChange}
+              className={formClasses.checkbox + " mr-2"}
+            />
+            <label htmlFor={name.toString()} className="text-sm font-medium text-gray-700">
+              {label}
+            </label>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Paper sx={containerStyles}>
-      <Typography variant='h5' sx={headingStyles}>
-        {initialData ? 'Редактирование образца' : 'Новый образец'}
-      </Typography>
-      <Divider sx={dividerStyles} />
+    <form onSubmit={handleSubmit} className={formClasses.base}>
+      {/* Заголовок формы и основные действия */}
+      <div className={`${headingClasses.page} mb-6 text-center`}>
+        {initialData ? 'Редактирование образца' : 'Добавление нового образца'}
+      </div>
 
-      <Box component='form' onSubmit={handleSubmit} noValidate sx={formStyles}>
-        <Grid container sx={gridContainerStyles}>
-          {/* Основная информация */}
-          <Grid item xs={12}>
-            <Typography variant='h6' sx={subheadingStyles}>
-              Основная информация
-            </Typography>
-          </Grid>
+      {/* Основная информация - секция с визуальным выделением */}
+      <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm'>
+        <h3 className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}>
+          <InfoIcon className="w-5 h-5 mr-2 text-blue-600" />
+          Основная информация
+        </h3>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label='Инвентарный номер'
-              name='inventoryNumber'
-              value={formData.inventoryNumber}
-              onChange={handleChange}
-              error={!!errors.inventoryNumber}
-              helperText={errors.inventoryNumber}
-              disabled={isLoading}
-            />
-          </Grid>
+        <div className='space-y-2'>
+          {renderTextField('Инвентарный номер', 'inventoryNumber', true)}
+          {renderTextField('Русское название', 'russianName', true)}
+          {renderTextField('Латинское название', 'latinName', true)}
+          {renderSelectField('Семейство', 'familyId', familyOptions, true)}
 
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Семейство</InputLabel>
-              <Select
-                name='familyId'
-                value={
-                  formData.familyId !== undefined && formData.familyId !== null
-                    ? formData.familyId.toString()
-                    : '0'
-                }
-                onChange={handleSelectChange}
-                error={!!errors.familyId}
-                disabled={isLoading}
-                label='Семейство'
-              >
-                <MenuItem value='0'>-- Выберите семейство --</MenuItem>
-                {familyOptions.map((option) => (
-                  <MenuItem key={option.id} value={option.id.toString()}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            {renderTextField('Род', 'genus')}
+            {renderTextField('Вид', 'species')}
+          </div>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              required
-              fullWidth
-              label='Род'
-              name='genus'
-              value={formData.genus}
-              onChange={handleChange}
-              error={!!errors.genus}
-              helperText={errors.genus}
-              disabled={isLoading}
-            />
-          </Grid>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            {renderTextField('Сорт', 'cultivar')}
+            {renderTextField('Форма', 'form')}
+          </div>
+        </div>
+      </div>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              required
-              fullWidth
-              label='Вид'
-              name='species'
-              value={formData.species}
-              onChange={handleChange}
-              error={!!errors.species}
-              helperText={errors.species}
-              disabled={isLoading}
-            />
-          </Grid>
+      {/* Географическая информация - с единым стилем */}
+      <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm'>
+        <h3 className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}>
+          <MapIcon className="w-5 h-5 mr-2 text-green-600" />
+          Географическая информация
+        </h3>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label='Сорт'
-              name='cultivar'
-              value={formData.cultivar}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
+        <div className='space-y-2'>
+          {renderSelectField('Регион', 'regionId', regionOptions, true)}
+          {renderTextField('Страна происхождения', 'country')}
+          {renderTextField('Естественный ареал', 'naturalRange')}
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='Форма'
-              name='form'
-              value={formData.form}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            {renderNumberField('Широта', 'latitude')}
+            {renderNumberField('Долгота', 'longitude')}
+          </div>
+        </div>
+      </div>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='Определил'
-              name='determinedBy'
-              value={formData.determinedBy}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
+      {/* Экспозиционная информация - с единым стилем */}
+      <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm'>
+        <h3 className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}>
+          <LeafIcon className="w-5 h-5 mr-2 text-amber-600" />
+          Экспозиционная информация
+        </h3>
 
-          {/* Расположение */}
-          <Grid item xs={12}>
-            <Typography variant='h6' sx={subheadingStyles}>
-              Расположение
-            </Typography>
-          </Grid>
+        <div className='space-y-2'>
+          {renderSelectField(
+            'Экспозиция',
+            'expositionId',
+            expositionOptions,
+            true
+          )}
+          {renderNumberField('Год посадки', 'plantingYear')}
+          {renderCheckboxField('Наличие гербария', 'hasHerbarium')}
+          {renderTextField('Информация о дубликатах', 'duplicatesInfo')}
+        </div>
+      </div>
 
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Местоположение</InputLabel>
-              <Select
-                name='expositionId'
-                value={formData.expositionId.toString()}
-                onChange={handleSelectChange}
-                disabled={isLoading}
-                label='Местоположение'
-              >
-                <MenuItem value='0'>-- Выберите местоположение --</MenuItem>
-                {expositionOptions.map((option) => (
-                  <MenuItem key={option.id} value={option.id.toString()}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+      {/* Дополнительная информация - с единым стилем */}
+      <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm'>
+        <h3 className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}>
+          <NoteIcon className="w-5 h-5 mr-2 text-purple-600" />
+          Дополнительная информация
+        </h3>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='Год посадки'
-              name='plantingYear'
-              type='number'
-              value={formData.plantingYear || ''}
-              onChange={handleNumberChange}
-              disabled={isLoading}
-            />
-          </Grid>
+        <div className='space-y-2'>
+          {renderTextField('Синонимы', 'synonyms')}
+          {renderTextField('Определил', 'determinedBy')}
+          {renderTextField('Происхождение образца', 'sampleOrigin')}
+          {renderTextField(
+            'Экология и биология',
+            'ecologyAndBiology',
+            false,
+            true,
+            3
+          )}
+          {renderTextField(
+            'Хозяйственное значение',
+            'economicUse',
+            false,
+            true,
+            3
+          )}
+          {renderTextField('Статус охраны', 'conservationStatus')}
+          {renderTextField('Оригинальный селекционер', 'originalBreeder')}
+          {renderNumberField('Год селекции', 'originalYear')}
+          {renderTextField('Примечания', 'notes', false, true, 3)}
+          {renderTextField('Заполнил', 'filledBy')}
+        </div>
+      </div>
 
-          {/* Дополнительная информация */}
-          <Grid item xs={12}>
-            <Typography variant='h6' sx={subheadingStyles}>
-              Дополнительная информация
-            </Typography>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='Охранный статус вида'
-              name='conservationStatus'
-              value={formData.conservationStatus}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='Заполнил'
-              name='filledBy'
-              value={formData.filledBy}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Синонимы'
-              name='synonyms'
-              value={formData.synonyms}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Происхождение образца'
-              name='sampleOrigin'
-              value={formData.sampleOrigin}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Природный ареал'
-              name='naturalRange'
-              value={formData.naturalRange}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Экология и биология вида'
-              name='ecologyAndBiology'
-              value={formData.ecologyAndBiology}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Хозяйственное применение'
-              name='economicUse'
-              value={formData.economicUse}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label='Оригинатор'
-              name='originalBreeder'
-              value={formData.originalBreeder}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label='Год создания'
-              name='originalYear'
-              type='number'
-              value={formData.originalYear || ''}
-              onChange={handleNumberChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label='Страна'
-              name='country'
-              value={formData.country}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Информация о дубликатах в других гербариях'
-              name='duplicatesInfo'
-              value={formData.duplicatesInfo}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Иллюстрация'
-              name='illustration'
-              value={formData.illustration}
-              onChange={handleChange}
-              disabled={isLoading}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.hasHerbarium}
-                  onChange={handleCheckboxChange}
-                  name='hasHerbarium'
-                  disabled={isLoading}
-                />
-              }
-              label='Наличие гербария'
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label='Примечание'
-              name='notes'
-              value={formData.notes}
-              onChange={handleChange}
-              disabled={isLoading}
-              multiline
-              rows={4}
-            />
-          </Grid>
-
-          {/* Действия */}
-          <Grid item xs={12}>
-            <Box sx={actionsContainerStyles}>
-              <Button
-                variant='outlined'
-                startIcon={<CancelIcon />}
-                onClick={onCancel}
-                disabled={isLoading}
-                sx={buttonStyles}
-              >
-                Отмена
-              </Button>
-              <Button
-                type='submit'
-                variant='contained'
-                startIcon={<SaveIcon />}
-                disabled={isLoading}
-                sx={buttonStyles}
-              >
-                Сохранить
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </Paper>
+      {/* Кнопки действий */}
+      <div className={`${actionsContainerClasses.base} justify-center`}>
+        <div className='flex space-x-4'>
+          <button
+            type='button'
+            onClick={onCancel}
+            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center px-6 py-2`}
+            disabled={isLoading}
+          >
+            <CancelIcon className='w-5 h-5 mr-2' />
+            Отмена
+          </button>
+          <button
+            type='submit'
+            className={`${buttonClasses.base} ${buttonClasses.primary} flex items-center px-6 py-2`}
+            disabled={isLoading}
+          >
+            <SaveIcon className='w-5 h-5 mr-2' />
+            {isLoading ? 'Сохранение...' : 'Сохранить'}
+          </button>
+        </div>
+      </div>
+    </form>
   );
 };

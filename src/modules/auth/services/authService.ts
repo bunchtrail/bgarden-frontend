@@ -7,7 +7,8 @@ import {
     UserDto
 } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:7254/api';
+// Обновляем URL API для бэкенда ботанического сада
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
 
 // Создаем экземпляр axios с базовыми настройками
 const api: AxiosInstance = axios.create({
@@ -75,15 +76,9 @@ export const authService = {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 400) {
-                    throw {
-                        message: error.response?.data?.message || 'Ошибка при регистрации. Проверьте правильность введенных данных.',
-                        statusCode: 400
-                    };
+                    throw new Error(error.response?.data?.message || 'Ошибка при регистрации. Проверьте правильность введенных данных.');
                 }
-                throw {
-                    message: error.response?.data?.message || 'Ошибка при регистрации пользователя',
-                    statusCode: error.response?.status || 500
-                };
+                throw new Error(error.response?.data?.message || 'Ошибка при регистрации пользователя');
             }
             throw error;
         }
@@ -107,16 +102,9 @@ export const authService = {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 401) {
-                    throw {
-                        message: 'Неверное имя пользователя или пароль',
-                        statusCode: 401,
-                        isAuthError: true
-                    };
+                    throw new Error('Неверное имя пользователя или пароль');
                 }
-                throw {
-                    message: error.response?.data?.message || 'Ошибка при входе в систему',
-                    statusCode: error.response?.status || 500
-                };
+                throw new Error(error.response?.data?.message || 'Ошибка при входе в систему');
             }
             throw error;
         }

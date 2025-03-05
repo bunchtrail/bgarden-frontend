@@ -1,26 +1,22 @@
-import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Container,
-  Grid,
-  IconButton,
-  Modal,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { SpecimenActions } from '../modules/specimens/components/SpecimenActions';
+import { SpecimenForm } from '../modules/specimens/components/SpecimenForm';
+import styles from '../modules/specimens/components/specimens.module.css';
+import { SpecimensList } from '../modules/specimens/components/SpecimensList';
 import {
-  SectorType,
-  Specimen,
-  SpecimenActions,
-  SpecimenCard,
-  SpecimenFilterParams,
-  SpecimenForm,
-  SpecimenFormData,
-  SpecimensList,
-} from '../modules/specimens';
+  containerClasses,
+  headingClasses,
+  subheadingClasses,
+  tabClasses,
+} from '../modules/specimens/components/styles';
+import { SectorType, Specimen } from '../modules/specimens/types';
+
+// Импортируем необходимые зависимости и сервисы
+import {
+  expositionService,
+  specimenService,
+} from '../modules/specimens/services';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -28,222 +24,182 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
+const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
 
   return (
     <div
       role='tabpanel'
       hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
+      id={`specimens-tabpanel-${index}`}
+      aria-labelledby={`specimens-tab-${index}`}
+      className={`${styles.fadeIn} ${value === index ? 'block' : 'hidden'}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <div className='p-0'>{children}</div>}
     </div>
   );
-}
+};
 
-function a11yProps(index: number) {
+const a11yProps = (index: number) => {
   return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    id: `specimens-tab-${index}`,
+    'aria-controls': `specimens-tabpanel-${index}`,
   };
-}
+};
 
-/**
- * Страница для работы с образцами растений
- */
-const SpecimensPage: React.FC = () => {
+export const SpecimensPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const sectorParam = searchParams.get('sector');
 
-  // Получаем параметр sector из URL
-  const queryParams = new URLSearchParams(location.search);
-  const sectorParam = queryParams.get('sector');
-  const initialSectorType = sectorParam
+  // Определяем сектор по параметру URL
+  const sectorTypeParam = sectorParam
     ? (Number(sectorParam) as SectorType)
-    : undefined;
+    : SectorType.Dendrology;
 
-  // Состояние для демонстрации, в реальности данные бы подгружались из API
+  // Состояние
+  const [tabValue, setTabValue] = useState(0);
+  const [sectorType, setSectorType] = useState(sectorTypeParam);
+
+  // Состояние данных
   const [specimens, setSpecimens] = useState<Specimen[]>([]);
   const [filteredSpecimens, setFilteredSpecimens] = useState<Specimen[]>([]);
+  const [currentSpecimen, setCurrentSpecimen] = useState<Specimen | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [editingSpecimen, setEditingSpecimen] = useState<Specimen | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showCardModal, setShowCardModal] = useState(false);
+
+  // Состояние модального окна
   const [showFormModal, setShowFormModal] = useState(false);
-  const [editingSpecimen, setEditingSpecimen] = useState<Specimen | undefined>(
-    undefined
-  );
 
-  // Состояние для фильтров
-  const [currentFilters, setCurrentFilters] = useState<SpecimenFilterParams>({
-    sectorType: initialSectorType,
-  });
+  // Фильтры
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expositionFilter, setExpositionFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  // Состояние для табов
-  const [tabValue, setTabValue] = useState(0);
+  // Справочные данные
+  const [familyOptions, setFamilyOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [expositionOptions, setExpositionOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
 
-  // Моковые данные для выпадающих списков
-  const familyOptions = [
-    { id: 1, name: 'Розоцветные' },
-    { id: 2, name: 'Астровые' },
-    { id: 3, name: 'Бобовые' },
-    { id: 4, name: 'Злаковые' },
-  ];
+  // Функция для получения заголовка раздела в зависимости от типа сектора
+  const getSectionTitle = () => {
+    switch (sectorType) {
+      case SectorType.Dendrology:
+        return 'Управление дендрологической коллекцией';
+      case SectorType.Flora:
+        return 'Управление коллекцией флоры';
+      case SectorType.Flowering:
+        return 'Управление коллекцией цветочно-декоративных растений';
+      default:
+        return 'Управление коллекционным фондом';
+    }
+  };
 
-  const expositionOptions = [
-    { id: 1, name: 'Оранжерея №1' },
-    { id: 2, name: 'Экспозиция цветов' },
-    { id: 3, name: 'Дендрарий' },
-    { id: 4, name: 'Альпийская горка' },
-  ];
-
-  const sectorOptions = [
-    { id: SectorType.Dendrology, name: 'Дендрология' },
-    { id: SectorType.Floriculture, name: 'Цветоводство' },
-  ];
-
-  // Имитация загрузки данных
+  // Загрузка данных
   useEffect(() => {
-    const loadSampleData = async () => {
+    const loadInitialData = async () => {
       setIsLoading(true);
       try {
-        // В реальном приложении здесь будет вызов API
-        // Моковые данные для демонстрации
-        const mockData: Specimen[] = [
-          {
-            id: 1,
-            inventoryNumber: 'DEN-2023-001',
-            sectorType: SectorType.Dendrology,
-            latitude: 55.45,
-            longitude: 37.37,
-            regionId: 1,
-            regionName: 'Центральный регион',
-            familyId: 1,
-            familyName: 'Розоцветные',
-            russianName: 'Яблоня домашняя',
-            latinName: 'Malus domestica',
-            genus: 'Malus',
-            species: 'domestica',
-            cultivar: 'Антоновка',
-            form: '',
-            synonyms: 'Malus pumila',
-            determinedBy: 'Иванов И.И.',
-            plantingYear: 2020,
-            sampleOrigin: 'Районированный сорт',
-            naturalRange: 'Европейская часть России',
-            ecologyAndBiology: 'Листопадное дерево высотой до 10 м',
-            economicUse: 'Плодовое растение',
-            conservationStatus: '',
-            expositionId: 3,
-            expositionName: 'Дендрарий',
-            hasHerbarium: true,
-            duplicatesInfo: '',
-            originalBreeder: 'Мичурин И.В.',
-            originalYear: 1924,
-            country: 'Россия',
-            illustration: '',
-            notes: 'Хорошо адаптирована к местным условиям',
-            filledBy: 'Петров П.П.',
-          },
-          {
-            id: 2,
-            inventoryNumber: 'FLR-2023-105',
-            sectorType: SectorType.Floriculture,
-            latitude: 55.46,
-            longitude: 37.38,
-            regionId: 1,
-            regionName: 'Центральный регион',
-            familyId: 2,
-            familyName: 'Астровые',
-            russianName: 'Хризантема садовая',
-            latinName: 'Chrysanthemum morifolium',
-            genus: 'Chrysanthemum',
-            species: 'morifolium',
-            cultivar: 'Золотой шар',
-            form: '',
-            synonyms: 'Dendranthema grandiflora',
-            determinedBy: 'Сидорова А.А.',
-            plantingYear: 2022,
-            sampleOrigin: 'Интродуцент',
-            naturalRange: 'Восточная Азия',
-            ecologyAndBiology: 'Многолетнее травянистое растение',
-            economicUse: 'Декоративное растение',
-            conservationStatus: '',
-            expositionId: 2,
-            expositionName: 'Экспозиция цветов',
-            hasHerbarium: false,
-            duplicatesInfo: '',
-            originalBreeder: '',
-            originalYear: 0,
-            country: 'Япония',
-            illustration: '',
-            notes: 'Требует укрытия на зиму',
-            filledBy: 'Козлова Е.В.',
-          },
-        ];
+        // Загрузка экспозиций
+        const expositions = await expositionService.getAllExpositions();
+        setExpositionOptions(expositions);
 
-        setSpecimens(mockData);
+        // Загрузка семейств
+        // Временно используем заглушку, так как метод getFamiliesBySector отсутствует
+        setFamilyOptions([]);
 
-        // Применяем текущие фильтры к загруженным данным
-        const filtered = applyFilters(mockData, currentFilters);
-        setFilteredSpecimens(filtered);
+        // Загрузка образцов
+        const data = await specimenService.getSpecimensBySectorType(sectorType);
+        setSpecimens(data);
+        setFilteredSpecimens(data);
 
-        setIsLoading(false);
+        if (data.length > 0) {
+          setCurrentIndex(0);
+          setCurrentSpecimen(data[0]);
+        }
       } catch (error) {
         console.error('Ошибка загрузки данных:', error);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    loadSampleData();
-  }, [currentFilters]);
+    loadInitialData();
+  }, [sectorType]);
 
-  // Функция для применения фильтров к списку образцов
-  const applyFilters = (data: Specimen[], filters: SpecimenFilterParams) => {
-    let result = [...data];
+  // Используем useEffect с полной зависимостью от currentIndex
+  useEffect(() => {
+    if (
+      specimens.length > 0 &&
+      currentIndex >= 0 &&
+      currentIndex < specimens.length
+    ) {
+      setCurrentSpecimen(specimens[currentIndex]);
+    } else {
+      setCurrentSpecimen(null);
+    }
+  }, [specimens, currentIndex]);
 
-    // Фильтр по сектору
-    if (filters.sectorType !== undefined) {
-      result = result.filter(
-        (specimen) => specimen.sectorType === filters.sectorType
+  // Объединим обработчики фильтров в один общий
+  const handleFilterChange = (filterType: string, value: string) => {
+    if (filterType === 'exposition') {
+      setExpositionFilter(value);
+    } else if (filterType === 'status') {
+      setStatusFilter(value);
+    }
+
+    // Обновляем фильтрованные данные
+    let filtered = [...specimens];
+
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (specimen) =>
+          specimen.inventoryNumber.includes(searchQuery) ||
+          specimen.russianName.includes(searchQuery) ||
+          specimen.latinName.includes(searchQuery)
       );
     }
 
-    // Фильтр по семейству
-    if (filters.familyId !== undefined) {
-      result = result.filter(
-        (specimen) => specimen.familyId === filters.familyId
+    if (expositionFilter !== 'all') {
+      filtered = filtered.filter(
+        (specimen) => specimen.expositionName === expositionFilter
       );
     }
 
-    // Фильтр по поисковому полю
-    if (filters.searchField && filters.searchValue) {
-      const searchValue = filters.searchValue.toLowerCase();
-      result = result.filter((specimen) => {
-        const fieldValue = String(
-          specimen[filters.searchField as keyof Specimen]
-        ).toLowerCase();
-        return fieldValue.includes(searchValue);
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter((specimen) => {
+        // Логика фильтрации по статусу (пример)
+        if (statusFilter === 'active') return specimen.hasHerbarium;
+        if (statusFilter === 'inactive') return !specimen.hasHerbarium;
+        return true;
       });
     }
 
-    // Сбрасываем индекс текущего образца при изменении фильтров
-    if (result.length > 0) {
-      setCurrentIndex(0);
-    }
-
-    return result;
+    setFilteredSpecimens(filtered);
   };
 
-  // Обработчики навигации
+  // Обработчики событий
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  // Навигация по образцам
   const handleNavigateFirst = () => {
-    setCurrentIndex(0);
+    if (filteredSpecimens.length > 0) {
+      setCurrentIndex(0);
+    }
   };
 
   const handleNavigateLast = () => {
-    setCurrentIndex(filteredSpecimens.length - 1);
+    if (filteredSpecimens.length > 0) {
+      setCurrentIndex(filteredSpecimens.length - 1);
+    }
   };
 
   const handleNavigatePrev = () => {
@@ -258,341 +214,309 @@ const SpecimensPage: React.FC = () => {
     }
   };
 
-  // Обработчики действий с образцами
-  const handleViewSpecimen = (id: number) => {
-    const index = filteredSpecimens.findIndex((specimen) => specimen.id === id);
-    if (index !== -1) {
-      setCurrentIndex(index);
-      setShowCardModal(true);
-    }
+  // Действия с образцами
+  const handleViewDetail = (index: number) => {
+    setCurrentIndex(index);
+    setTabValue(0); // Переключаемся на вкладку с формой
   };
 
   const handleAddNew = () => {
-    setEditingSpecimen(undefined);
-
-    // Если задан фильтр по сектору, устанавливаем его значение по умолчанию для нового образца
-    if (currentFilters.sectorType !== undefined) {
-      const defaultData: Partial<SpecimenFormData> = {
-        sectorType: currentFilters.sectorType,
-      };
-      setEditingSpecimen(defaultData as unknown as Specimen);
-    }
-
+    setEditingSpecimen({
+      id: 0,
+      inventoryNumber: '',
+      sectorType,
+      latitude: 0,
+      longitude: 0,
+      regionId: 0,
+      regionName: '',
+      familyId: 0,
+      familyName: '',
+      russianName: '',
+      latinName: '',
+      genus: '',
+      species: '',
+      cultivar: '',
+      form: '',
+      synonyms: '',
+      determinedBy: '',
+      plantingYear: new Date().getFullYear(),
+      sampleOrigin: '',
+      naturalRange: '',
+      ecologyAndBiology: '',
+      economicUse: '',
+      conservationStatus: '',
+      expositionId: 0,
+      expositionName: '',
+      hasHerbarium: false,
+      duplicatesInfo: '',
+      originalBreeder: '',
+      originalYear: 0,
+      country: '',
+      illustration: '',
+      notes: '',
+      filledBy: '',
+    });
     setShowFormModal(true);
   };
 
-  const handleEditSpecimen = (id: number) => {
-    const specimen = filteredSpecimens.find((s) => s.id === id);
-    if (specimen) {
-      setEditingSpecimen(specimen);
-      setShowFormModal(true);
+  const handleSaveSpecimen = async (data: any) => {
+    setIsLoading(true);
+
+    try {
+      let savedSpecimen: Specimen;
+      if (data.id) {
+        savedSpecimen = await specimenService.updateSpecimen(data.id, data);
+      } else {
+        savedSpecimen = await specimenService.createSpecimen(data);
+      }
+
+      setSpecimens((prevSpecimens) => {
+        if (data.id) {
+          return prevSpecimens.map((s) =>
+            s.id === data.id ? savedSpecimen : s
+          );
+        } else {
+          return [...prevSpecimens, savedSpecimen];
+        }
+      });
+
+      setShowFormModal(false);
+      setEditingSpecimen(null);
+
+      // Показываем сообщение об успешном сохранении
+      alert('Образец успешно сохранен');
+    } catch (error) {
+      console.error('Ошибка при сохранении образца:', error);
+      // Показываем сообщение об ошибке
+      alert('Ошибка при сохранении образца');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSaveSpecimen = (data: SpecimenFormData) => {
-    setIsLoading(true);
+  const handleDeleteSpecimen = async (id: number) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этот образец?')) return;
 
-    // Имитация сохранения данных
-    setTimeout(() => {
-      if (data.id) {
-        // Обновление существующего образца
-        const updatedSpecimens = specimens.map((s) =>
-          s.id === data.id ? ({ ...data, id: data.id } as Specimen) : s
+    setIsLoading(true);
+    try {
+      await specimenService.deleteSpecimen(id);
+      const updatedSpecimens = specimens.filter((s) => s.id !== id);
+      setSpecimens(updatedSpecimens);
+
+      // Корректируем текущий индекс
+      if (currentIndex >= updatedSpecimens.length) {
+        setCurrentIndex(
+          updatedSpecimens.length > 0 ? updatedSpecimens.length - 1 : -1
         );
-        setSpecimens(updatedSpecimens);
-        // Применяем фильтры и обновляем состояние
-        const filtered = applyFilters(updatedSpecimens, currentFilters);
-        setFilteredSpecimens(filtered);
-      } else {
-        // Добавление нового образца
-        const newId = Math.max(...specimens.map((s) => s.id), 0) + 1;
-        const newSpecimen: Specimen = { ...data, id: newId } as Specimen;
-        const updatedSpecimens = [...specimens, newSpecimen];
-        setSpecimens(updatedSpecimens);
-        // Применяем фильтры и обновляем состояние
-        const filtered = applyFilters(updatedSpecimens, currentFilters);
-        setFilteredSpecimens(filtered);
       }
-
-      setShowFormModal(false);
-      setEditingSpecimen(undefined);
+    } catch (error) {
+      console.error('Ошибка удаления образца:', error);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
-  const handleSearch = (filterParams: SpecimenFilterParams) => {
-    setIsLoading(true);
-
-    // Имитация поиска
-    setTimeout(() => {
-      // Сохраняем текущие фильтры
-      const newFilters = { ...currentFilters, ...filterParams };
-      setCurrentFilters(newFilters);
-
-      // Применяем фильтры к данным и обновляем состояние
-      // Здесь мы не вызываем applyFilters напрямую, так как это произойдет
-      // автоматически из-за добавления currentFilters в зависимости useEffect
-      // который загружает данные
-
-      setIsLoading(false);
-    }, 500);
-  };
-
-  // Обработчики дополнительных действий
+  // Прочие обработчики
   const handlePrintCurrent = () => {
-    console.log('Печать карточки образца:', filteredSpecimens[currentIndex]);
-    // Реализация печати
+    if (currentSpecimen) {
+      // Временно заменили на console.log, так как метод printSpecimen отсутствует
+      console.log('Печать текущего образца:', currentSpecimen);
+    }
   };
 
   const handlePrintList = () => {
-    console.log('Печать списка образцов');
-    // Реализация печати списка
+    // Временно заменили на console.log, так как метод printSpecimensList отсутствует
+    console.log('Печать списка образцов:', filteredSpecimens);
   };
 
   const handleExportToExcel = () => {
-    console.log('Экспорт в Excel');
-    // Реализация экспорта
+    // Временно заменили на console.log, так как метод exportToExcel отсутствует
+    console.log('Экспорт в Excel:', filteredSpecimens);
   };
 
   const handleExportToPdf = () => {
-    console.log('Экспорт в PDF');
-    // Реализация экспорта
+    // Временно заменили на console.log, так как метод exportToPdf отсутствует
+    console.log('Экспорт в PDF:', filteredSpecimens);
   };
 
   const handleViewPhenology = () => {
-    console.log(
-      'Переход к фенологии для образца:',
-      filteredSpecimens[currentIndex].id
-    );
-    // Переход к фенологическим наблюдениям
+    if (currentSpecimen) {
+      navigate(`/phenology?specimenId=${currentSpecimen.id}`);
+    }
   };
 
   const handleViewBiometry = () => {
-    console.log(
-      'Переход к биометрии для образца:',
-      filteredSpecimens[currentIndex].id
-    );
-    // Переход к биометрии (только для цветоводства)
+    if (currentSpecimen) {
+      navigate(`/biometry?specimenId=${currentSpecimen.id}`);
+    }
   };
 
   const handleViewReports = () => {
-    console.log('Переход к форме запросов');
-    // Переход к форме запросов
+    navigate(`/reports?sector=${sectorType}`);
   };
 
   const handleExit = () => {
-    // Выход из приложения или возврат к предыдущей странице
     navigate('/');
   };
 
-  // Обработчик изменения табов
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+  // Обработчик поиска
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
 
-  // Получение текущего образца
-  const currentSpecimen = filteredSpecimens[currentIndex];
-
-  // Генерируем название страницы на основе выбранного сектора
-  const getSectionTitle = () => {
-    if (currentFilters.sectorType !== undefined) {
-      const sector = sectorOptions.find(
-        (opt) => opt.id === currentFilters.sectorType
-      );
-      return sector ? `${sector.name}: Образцы растений` : 'Образцы растений';
+    if (!query) {
+      setFilteredSpecimens(specimens);
+      return;
     }
-    return 'Образцы растений';
+
+    const lowerQuery = query.toLowerCase();
+    const filtered = specimens.filter(
+      (specimen) =>
+        specimen.russianName.toLowerCase().includes(lowerQuery) ||
+        specimen.latinName.toLowerCase().includes(lowerQuery) ||
+        specimen.inventoryNumber.toLowerCase().includes(lowerQuery)
+    );
+
+    setFilteredSpecimens(filtered);
   };
 
   return (
-    <Container
-      maxWidth='xl'
-      sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 1, sm: 2, md: 3 } }}
-    >
-      <Typography
-        variant='h4'
-        gutterBottom
-        sx={{ fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}
-      >
-        {getSectionTitle()}
-      </Typography>
+    <div className={`${containerClasses.page} ${styles.fadeIn}`}>
+      <h1 className={headingClasses.page}>{getSectionTitle()}</h1>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', overflowX: 'auto' }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label='режимы работы с образцами'
-          variant='scrollable'
-          scrollButtons='auto'
-        >
-          <Tab label='Режим карточки' {...a11yProps(0)} />
-          <Tab label='Режим списка' {...a11yProps(1)} />
-        </Tabs>
-      </Box>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+        {/* Левая колонка с панелью действий */}
+        <div className='md:col-span-1'>
+          <SpecimenActions
+            currentIndex={currentIndex}
+            totalCount={filteredSpecimens.length}
+            isLoading={isLoading}
+            onNavigateFirst={handleNavigateFirst}
+            onNavigateLast={handleNavigateLast}
+            onNavigatePrev={handleNavigatePrev}
+            onNavigateNext={handleNavigateNext}
+            onAddNew={handleAddNew}
+            onPrintCurrent={handlePrintCurrent}
+            onPrintList={handlePrintList}
+            onExportToExcel={handleExportToExcel}
+            onExportToPdf={handleExportToPdf}
+            onViewPhenology={handleViewPhenology}
+            onViewBiometry={handleViewBiometry}
+            onViewReports={handleViewReports}
+            onExit={handleExit}
+            onDelete={handleDeleteSpecimen}
+          />
+        </div>
 
-      <TabPanel value={tabValue} index={0}>
-        {/* Режим отображения и редактирования одного образца */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
-            {currentSpecimen ? (
-              <SpecimenCard specimen={currentSpecimen} />
-            ) : (
-              <Box sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant='h6'>
-                  {isLoading ? 'Загрузка...' : 'Нет данных для отображения'}
-                </Typography>
-              </Box>
-            )}
-          </Grid>
-
-          <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
-            <SpecimenActions
-              currentIndex={currentIndex}
-              totalCount={filteredSpecimens.length}
-              isLoading={isLoading}
-              onNavigateFirst={handleNavigateFirst}
-              onNavigateLast={handleNavigateLast}
-              onNavigatePrev={handleNavigatePrev}
-              onNavigateNext={handleNavigateNext}
-              onAddNew={handleAddNew}
-              onPrintCurrent={handlePrintCurrent}
-              onPrintList={handlePrintList}
-              onExportToExcel={handleExportToExcel}
-              onExportToPdf={handleExportToPdf}
-              onViewPhenology={handleViewPhenology}
-              onViewBiometry={
-                currentSpecimen?.sectorType === SectorType.Floriculture
-                  ? handleViewBiometry
-                  : undefined
-              }
-              onViewReports={handleViewReports}
-              onExit={handleExit}
-            />
-          </Grid>
-        </Grid>
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={1}>
-        {/* Режим списка образцов */}
-        <SpecimensList
-          specimens={filteredSpecimens}
-          onViewSpecimen={handleViewSpecimen}
-          onEditSpecimen={handleEditSpecimen}
-          onSearch={handleSearch}
-          isLoading={isLoading}
-          familyOptions={familyOptions}
-          sectorOptions={sectorOptions}
-        />
-      </TabPanel>
-
-      {/* Модальное окно просмотра карточки */}
-      <Modal
-        open={showCardModal}
-        onClose={() => setShowCardModal(false)}
-        aria-labelledby='modal-card-title'
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: { xs: '95%', sm: '90%', md: '80%' },
-            maxWidth: 800,
-            bgcolor: 'background.paper',
-            borderRadius: 1,
-            boxShadow: 24,
-            p: { xs: 2, sm: 4 },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              mb: 2,
-              position: 'sticky',
-              top: 0,
-              bgcolor: 'background.paper',
-              zIndex: 1,
-              py: 1,
-            }}
+        {/* Правая колонка с основным содержимым */}
+        <div className='md:col-span-3'>
+          <div
+            className={`${styles.paperContainer} rounded-lg shadow-md overflow-hidden bg-white`}
           >
-            <Typography id='modal-card-title' variant='h6' component='h2'>
-              Карточка образца
-            </Typography>
-            <IconButton onClick={() => setShowCardModal(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
+            <div className='border-b border-gray-200'>
+              <div className={tabClasses.base}>
+                <button
+                  className={`px-4 py-2 border-b-2 ${
+                    tabValue === 0
+                      ? 'border-blue-500 ' + tabClasses.active
+                      : 'border-transparent ' + tabClasses.inactive
+                  }`}
+                  onClick={(e) => handleTabChange(e, 0)}
+                  {...a11yProps(0)}
+                >
+                  Форма образца
+                </button>
+                <button
+                  className={`px-4 py-2 border-b-2 ${
+                    tabValue === 1
+                      ? 'border-blue-500 ' + tabClasses.active
+                      : 'border-transparent ' + tabClasses.inactive
+                  }`}
+                  onClick={(e) => handleTabChange(e, 1)}
+                  {...a11yProps(1)}
+                >
+                  Список образцов
+                </button>
+              </div>
+            </div>
 
-          <Box sx={{ overflow: 'auto', flex: 1 }}>
-            {currentSpecimen && <SpecimenCard specimen={currentSpecimen} />}
-          </Box>
-        </Box>
-      </Modal>
+            <TabPanel value={tabValue} index={0}>
+              <div className='p-4'>
+                {currentSpecimen ? (
+                  <SpecimenForm
+                    initialData={currentSpecimen}
+                    onSave={handleSaveSpecimen}
+                    onCancel={() => setTabValue(1)} // Возврат к списку
+                    isLoading={isLoading}
+                    familyOptions={familyOptions}
+                    expositionOptions={expositionOptions}
+                  />
+                ) : (
+                  <div className='flex flex-col items-center justify-center p-8'>
+                    <h2 className={subheadingClasses.base}>
+                      Нет доступных образцов
+                    </h2>
+                    <p className='text-gray-600 mt-2 text-center'>
+                      Добавьте новый образец или измените параметры фильтрации
+                      для отображения данных.
+                    </p>
+                    <button
+                      onClick={handleAddNew}
+                      className={`mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors ${styles.buttonHover}`}
+                    >
+                      Добавить новый образец
+                    </button>
+                  </div>
+                )}
+              </div>
+            </TabPanel>
 
-      {/* Модальное окно формы редактирования/создания */}
-      <Modal
-        open={showFormModal}
-        onClose={() => setShowFormModal(false)}
-        aria-labelledby='modal-form-title'
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: { xs: '95%', sm: '90%', md: '85%' },
-            maxWidth: 1000,
-            bgcolor: 'background.paper',
-            borderRadius: 1,
-            boxShadow: 24,
-            p: { xs: 2, sm: 4 },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              mb: 2,
-              position: 'sticky',
-              top: 0,
-              bgcolor: 'background.paper',
-              zIndex: 1,
-              py: 1,
-            }}
-          >
-            <Typography id='modal-form-title' variant='h6' component='h2'>
-              {editingSpecimen?.id ? 'Редактирование образца' : 'Новый образец'}
-            </Typography>
-            <IconButton onClick={() => setShowFormModal(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
+            <TabPanel value={tabValue} index={1}>
+              <SpecimensList
+                specimens={filteredSpecimens}
+                isLoading={isLoading}
+                onViewSpecimen={handleViewDetail}
+                onEditSpecimen={() => {}}
+                onSearch={(params) => {
+                  if (params.searchValue) {
+                    handleFilterChange('exposition', params.searchValue);
+                  }
+                }}
+                familyOptions={familyOptions}
+                sectorOptions={[
+                  { id: SectorType.Dendrology, name: 'Дендрология' },
+                  { id: SectorType.Flora, name: 'Флора' },
+                  {
+                    id: SectorType.Flowering,
+                    name: 'Цветочно-декоративные растения',
+                  },
+                ]}
+              />
+            </TabPanel>
+          </div>
+        </div>
+      </div>
 
-          <Box sx={{ overflow: 'auto', flex: 1 }}>
-            <SpecimenForm
-              initialData={editingSpecimen}
-              onSave={handleSaveSpecimen}
-              onCancel={() => setShowFormModal(false)}
-              isLoading={isLoading}
-              familyOptions={familyOptions}
-              expositionOptions={expositionOptions}
-            />
-          </Box>
-        </Box>
-      </Modal>
-    </Container>
+      {/* Модальное окно для добавления нового образца */}
+      {showFormModal && (
+        <div className='fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4'>
+          <div className='bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto'>
+            <div className='p-6'>
+              <h2 className={headingClasses.base}>Добавить новый образец</h2>
+              <SpecimenForm
+                initialData={editingSpecimen || undefined}
+                onSave={handleSaveSpecimen}
+                onCancel={() => {
+                  setShowFormModal(false);
+                  setEditingSpecimen(null);
+                }}
+                isLoading={isLoading}
+                familyOptions={familyOptions}
+                expositionOptions={expositionOptions}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
-
-export default SpecimensPage;

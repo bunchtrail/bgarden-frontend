@@ -1,0 +1,28 @@
+- **specimens**
+  - **components**
+    - **icons**
+      - `index.tsx` (9.5 KB)
+    - `index.ts` (372.0 B)
+    - `LoadingIndicator.tsx` (4.2 KB)
+    - `SpecimenActions.tsx` (13.5 KB)
+    - `SpecimenCard.tsx` (7.2 KB)
+    - `SpecimenForm.tsx` (16.7 KB)
+    - `SpecimenFormContainer.tsx` (7.5 KB)
+    - `specimens.module.css` (7.0 KB)
+    - `specimens.module.css.d.ts` (89.0 B)
+    - `SpecimensList.tsx` (16.4 KB)
+    - `styles.ts` (5.6 KB)
+  - **contexts**
+  - **docs**
+    - `Структура_specimens_от_05-03-2025.md` (825.0 B)
+  - **hooks**
+  - `index.ts` (526.0 B)
+  - `README.md` (2.8 KB)
+  - **services**
+    - `expositionService.ts` (2.8 KB)
+    - `familyService.ts` (2.7 KB)
+    - `index.ts` (250.0 B)
+    - `regionService.ts` (2.7 KB)
+    - `specimenService.ts` (3.3 KB)
+  - **types**
+    - `index.ts` (1.5 KB)

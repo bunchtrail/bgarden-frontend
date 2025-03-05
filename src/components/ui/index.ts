@@ -1,7 +1,15 @@
-export * from './Button';
-export { default as Button } from './Button';
-export * from './Card';
-export { default as Card, CardBody, CardFooter, CardHeader, CardImage, CardTitle } from './Card';
-export * from './ErrorMessage';
-export { default as ErrorMessage } from './ErrorMessage';
+/**
+ * Экспорт всех UI компонентов
+ */
+
+export * from './Form';
+export { default as Form } from './Form';
+
+export * from './Table';
+export { default as Table } from './Table';
+
+export { default as Chip } from './Chip';
+
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
 

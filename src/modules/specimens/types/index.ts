@@ -36,8 +36,25 @@ export interface Specimen {
 
 export enum SectorType {
   Dendrology = 0,
-  Floriculture = 1,
-  // Добавьте другие типы секторов по мере необходимости
+  Flora = 1,
+  Flowering = 2
+}
+
+export enum UserRole {
+  /**
+   * Администратор системы (полный доступ)
+   */
+  Administrator = 1,
+  
+  /**
+   * Работник ботанического сада (расширенный доступ)
+   */
+  Employee = 2,
+  
+  /**
+   * Клиент (ограниченный доступ, только для просмотра)
+   */
+  Client = 3
 }
 
 export interface SpecimenFormData extends Omit<Specimen, 'id'> {

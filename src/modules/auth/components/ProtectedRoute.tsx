@@ -1,4 +1,3 @@
-import { Box, Button, Typography } from '@mui/material';
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,30 +20,31 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!isAuthenticated || !user) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '50vh',
-          padding: 3,
-        }}
-      >
-        <Typography variant='h5' gutterBottom>
-          Требуется авторизация
-        </Typography>
-        <Typography variant='body1' color='text.secondary' gutterBottom>
+      <div className='flex flex-col items-center justify-center min-h-[50vh] p-4'>
+        <h2 className='text-xl font-semibold mb-2'>Требуется авторизация</h2>
+        <p className='text-gray-600 mb-4'>
           {error || 'Для доступа к этой странице необходимо войти в систему.'}
-        </Typography>
-        <Button component={Link} to='/login' variant='contained' sx={{ mt: 2 }}>
-          Перейти на страницу входа
-        </Button>
-      </Box>
+        </p>
+        <Link to='/login'>
+          <button className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2'>
+            Перейти на страницу входа
+          </button>
+        </Link>
+      </div>
     );
   }
 
   if (requiredRole && user.role !== requiredRole) {
+    // Для роли Administrator доступны все роли
+    if (user.role === UserRole.Administrator) {
+      return <>{children}</>;
+    }
+
+    // Для роли Employee доступны Employee и Client
+    if (user.role === UserRole.Employee && requiredRole === UserRole.Client) {
+      return <>{children}</>;
+    }
+
     return <Navigate to='/' />;
   }
 

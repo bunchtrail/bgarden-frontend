@@ -1,164 +1,152 @@
-import { SxProps, Theme } from '@mui/material';
-import {
-  BORDER_RADIUS,
-  SPACING,
-  headingStyles as baseHeadingStyles,
-  buttonBaseStyles,
-  ellipsisTextStyles,
-  wordBreakStyles,
-} from '../../../styles';
-
+// Файл был переименован из styles.ts в tailwind-styles.ts для совместимости
 // Константы для модуля specimens
-export const SPECIMEN_SPACING = {
-  ...SPACING,
-  FIELD_GAP: 2,
-  SECTION_GAP: 3,
+// Используем глобальные константы из global-styles.ts
+import {
+  SPACING as GLOBAL_SPACING,
+  buttonClasses as globalButtonClasses,
+  chipClasses as globalChipClasses,
+  containerClasses as globalContainerClasses,
+  formClasses as globalFormClasses,
+  layoutClasses,
+  tableClasses,
+  textClasses,
+  textUtilClasses
+} from '../../../styles/global-styles';
+
+// Экспортируем константы для обратной совместимости
+export const SPECIMEN_SPACING = GLOBAL_SPACING;
+
+// Улучшенные Tailwind классы с использованием глобальных стилей
+export const specimenContainerClasses = {
+  base: `${globalContainerClasses.base}`,
+  withHover: `${globalContainerClasses.withHover}`,
+  card: `${globalContainerClasses.base} ${globalContainerClasses.withHover} bg-white`,
+  detail: `${globalContainerClasses.base} bg-white`,
 };
 
-// Базовые контейнеры
-export const specimenContainerStyles: SxProps<Theme> = {
-  borderRadius: BORDER_RADIUS.LARGE,
-  mb: SPECIMEN_SPACING.MD,
-  p: { xs: SPECIMEN_SPACING.SM, sm: SPECIMEN_SPACING.MD },
-  width: '100%',
-  // Предотвращаем неожиданные переполнения
-  maxWidth: '100%',
-  overflow: 'hidden',
+export const headingClasses = {
+  base: 'text-lg font-semibold text-gray-800 mb-2',
+  heading: 'text-xl font-semibold text-gray-800 mb-3',
+  subheading: 'text-base font-medium text-gray-700 mb-2',
+  body: 'text-base text-gray-600',
+  multiline: 'text-base text-gray-600 whitespace-pre-line',
+  secondary: 'text-sm text-gray-500',
+  page: 'text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 text-gray-800'
 };
 
-// Стили для заголовков с переопределением
-export const headingStyles: SxProps<Theme> = {
-  ...baseHeadingStyles,
-  fontSize: { xs: '1.2rem', sm: '1.5rem' },
-  lineHeight: 1.4,
+export const specimenTextClasses = {
+  base: textClasses.body,
+  secondary: `${textClasses.body} ${textClasses.secondary}`,
+  label: 'font-medium',
 };
 
-// Стили для текстовых полей 
-export const specimenTextStyles: SxProps<Theme> = {
-  ...wordBreakStyles,
-  mb: SPECIMEN_SPACING.SM,
-  lineHeight: 1.5,
+export const multilineFieldClasses = {
+  base: textClasses.multiline,
 };
 
-// Стили для полей ввода с многострочным текстом
-export const multilineFieldStyles: SxProps<Theme> = {
-  ...wordBreakStyles,
-  whiteSpace: 'pre-line',
-  lineHeight: 1.5,
+export const tableCellClasses = (extraClasses = '') => 
+  `${tableClasses.cell} ${extraClasses}`;
+
+export const chipClasses = {
+  ...globalChipClasses,
+  base: globalChipClasses.base,
+  success: globalChipClasses.success,
+  warning: globalChipClasses.warning,
+  danger: globalChipClasses.danger,
+  neutral: globalChipClasses.neutral,
+  herbarium: `${globalChipClasses.base} ${globalChipClasses.success}`,
+  conservation: `${globalChipClasses.base} ${globalChipClasses.warning}`,
 };
 
-// Стили для ячеек таблицы с фиксированной шириной
-export const tableCellStyles = (maxWidth: string | object): SxProps<Theme> => ({
-  maxWidth,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  padding: `${SPECIMEN_SPACING.SM}px ${SPECIMEN_SPACING.SM}px`,
-});
-
-// Стили для меток элементов
-export const chipStyles: SxProps<Theme> = {
-  maxWidth: '100%',
-  ...ellipsisTextStyles,
-  m: 0.5,
-  height: 'auto',
-  '& .MuiChip-label': {
-    padding: '4px 8px',
-    overflowWrap: 'break-word',
-    whiteSpace: 'normal',
-    lineHeight: 1.4,
-  }
+export const gridContainerClasses = {
+  base: 'w-full mb-3 gap-4',
+  responsive: layoutClasses.gridSm2,
 };
 
-// Сетка и контейнеры 
-export const gridContainerStyles: SxProps<Theme> = {
-  spacing: SPECIMEN_SPACING.SM,
-  width: '100%',
-  mb: SPECIMEN_SPACING.MD,
+export const formClasses = {
+  ...globalFormClasses,
+  control: 'mb-6 w-full flex flex-col sm:flex-row sm:items-start',
+  label: 'font-medium text-gray-700 sm:py-2',
+  input: 'rounded-md w-full border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 shadow-sm',
+  select: 'rounded-md w-full border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 shadow-sm',
+  textarea: 'rounded-md w-full border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 shadow-sm',
+  checkbox: 'rounded h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 shadow-sm',
+  error: 'text-red-600 text-sm mt-1',
+  section: 'bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6',
+  sectionTitle: 'text-xl font-semibold mb-4 pb-2 border-b border-gray-300',
 };
 
-// Стили для форм
-export const formStyles: SxProps<Theme> = {
-  '& .MuiFormControl-root': {
-    mb: SPECIMEN_SPACING.SM,
-    width: '100%',
-  },
-  '& .MuiInputBase-root': {
-    borderRadius: BORDER_RADIUS.MEDIUM,
-  }
+export const actionsContainerClasses = {
+  base: `${layoutClasses.flexWrap} sm:flex-nowrap ${layoutClasses.flexBetween} gap-2 mt-4 w-full`,
 };
 
-// Стили для панели действий
-export const actionsContainerStyles: SxProps<Theme> = {
-  display: 'flex',
-  flexWrap: { xs: 'wrap', sm: 'nowrap' },
-  justifyContent: 'flex-end',
-  gap: SPECIMEN_SPACING.SM,
-  mt: SPECIMEN_SPACING.MD,
-  width: '100%',
+export const buttonClasses = {
+  ...globalButtonClasses,
 };
 
-// Стили для кнопок
-export const buttonStyles: SxProps<Theme> = {
-  ...buttonBaseStyles,
-  width: { xs: '100%', sm: 'auto' },
-  borderRadius: BORDER_RADIUS.PILL,
-  m: 0.5,
-  textTransform: 'none',
+export const tableContainerClasses = {
+  base: tableClasses.container,
+  table: tableClasses.table,
+  header: tableClasses.header,
+  row: tableClasses.row,
 };
 
-// Фиксированные стили таблицы
-export const tableContainerStyles: SxProps<Theme> = {
-  overflow: 'auto',
-  maxHeight: 'calc(100vh - 300px)',
-  width: '100%',
-  '&::-webkit-scrollbar': {
-    width: '8px',
-    height: '8px',
-  },
-  '&::-webkit-scrollbar-thumb': {
-    borderRadius: '8px',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
+export const tabsContainerClasses = {
+  base: 'border-b border-gray-200 mb-4',
+  tab: 'mx-1 py-2 px-4 text-center cursor-pointer relative',
+  activeTab: 'text-blue-600 font-medium',
+  inactiveTab: 'text-gray-500 hover:text-gray-700',
+  tabIndicator: 'absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 transform',
 };
 
-// Стили табов для Specimen страницы
-export const tabsContainerStyles: SxProps<Theme> = {
-  borderBottom: 1,
-  borderColor: 'divider',
-  mb: SPECIMEN_SPACING.MD,
+export const subheadingClasses = {
+  base: textClasses.subheading,
 };
 
-// Стили для подзаголовков (для обратной совместимости)
-export const subheadingStyles: SxProps<Theme> = {
-  mt: SPECIMEN_SPACING.MD,
-  mb: SPECIMEN_SPACING.SM,
-  fontSize: { xs: '1rem', sm: '1.1rem' },
+export const dividerClasses = {
+  base: 'my-4 border-t border-gray-200',
 };
 
-// Стили для разделителей (для обратной совместимости)
-export const dividerStyles: SxProps<Theme> = {
-  my: SPECIMEN_SPACING.MD,
+export const containerClasses = {
+  base: 'w-full flex flex-col',
+  withHover: 'w-full flex flex-col transition-all duration-300 hover:shadow-md',
+  card: 'w-full p-4 rounded-lg shadow-sm bg-white',
+  detail: 'w-full p-4 bg-white rounded-lg shadow-sm',
+  page: 'container mx-auto px-4 sm:px-6 mt-4 sm:mt-8 mb-8 max-w-7xl'
 };
 
-// Стили для контейнеров (для обратной совместимости)
-export const containerStyles: SxProps<Theme> = specimenContainerStyles;
-
-// Стили для кнопок в группе (для обратной совместимости)
-export const buttonGroupStyles: SxProps<Theme> = {
-  flexWrap: { xs: 'wrap', sm: 'nowrap' },
-  mb: { xs: SPECIMEN_SPACING.SM, sm: 0 },
-  '& .MuiButton-root': {
-    flexGrow: { xs: 1, sm: 0 },
-    minWidth: { xs: '45%', sm: 'auto' },
-    mb: { xs: 1, sm: 0 },
-    '&:hover': {
-      backgroundColor: 'rgba(25, 118, 210, 0.04)',
-      borderColor: 'primary.main',
-    }
-  },
+export const buttonGroupClasses = {
+  base: `${layoutClasses.flexWrap} sm:flex-nowrap mb-2 sm:mb-0`,
+  button: 'flex-grow sm:flex-grow-0 min-w-[45%] sm:min-w-min mb-1 sm:mb-0 hover:bg-blue-50 hover:border-blue-600',
 };
 
-// Экспорт для обратной совместимости
-export { SPACING, ellipsisTextStyles, wordBreakStyles };
+export const wordBreakClasses = {
+  base: textUtilClasses.break,
+};
+
+export const ellipsisClasses = {
+  base: textUtilClasses.truncate,
+};
+
+// Добавляем новые современные стили для карточек образцов
+export const specimenCardStyles = {
+  imageContainer: 'relative overflow-hidden rounded-t-lg h-32 sm:h-40',
+  image: 'absolute inset-0 w-full h-full object-cover',
+  infoContainer: 'p-4',
+  title: `${textClasses.heading} text-blue-700`,
+  latinName: `${textClasses.secondary} italic`,
+  statusPill: `${globalChipClasses.base} ${globalChipClasses.warning} absolute top-2 right-2`,
+};
+
+// экспортируем для обратной совместимости
+export const SPACING = SPECIMEN_SPACING;
+export const wordBreakStyles = { class: wordBreakClasses.base };
+export const ellipsisTextStyles = { class: ellipsisClasses.base };
+
+// Классы для вкладок
+export const tabClasses = {
+  base: 'bg-white border-b border-gray-200',
+  active: 'text-blue-600 font-medium',
+  inactive: 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+};
 

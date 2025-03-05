@@ -1,39 +1,14 @@
-import EditIcon from '@mui/icons-material/Edit';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import SearchIcon from '@mui/icons-material/Search';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import {
-  Box,
-  Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  SelectChangeEvent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from '@mui/material';
 import React, { useState } from 'react';
 import { SectorType, Specimen, SpecimenFilterParams } from '../types';
+import { EditIcon, FilterListIcon, SearchIcon, VisibilityIcon } from './icons';
 import styles from './specimens.module.css';
 import {
-  SPECIMEN_SPACING,
-  headingStyles,
-  specimenContainerStyles,
-  tableCellStyles,
-  tableContainerStyles,
+  buttonClasses,
+  formClasses,
+  headingClasses,
+  specimenContainerClasses,
+  tableCellClasses,
+  tableContainerClasses,
 } from './styles';
 
 interface SpecimensListProps {
@@ -74,7 +49,7 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -82,39 +57,43 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
 
   // Обработчики фильтров
   const handleSearchFieldChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setFilterParams((prev) => ({
-      ...prev,
+    setFilterParams({
+      ...filterParams,
       searchField: event.target.value as keyof Specimen,
-    }));
+    });
   };
 
   const handleSearchValueChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setFilterParams((prev) => ({
-      ...prev,
+    setFilterParams({
+      ...filterParams,
       searchValue: event.target.value,
-    }));
+    });
   };
 
-  const handleFamilyFilterChange = (event: SelectChangeEvent) => {
-    setFilterParams((prev) => ({
-      ...prev,
-      familyId:
-        event.target.value === 'all' ? undefined : Number(event.target.value),
-    }));
+  const handleFamilyFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setFilterParams({
+      ...filterParams,
+      familyId: event.target.value
+        ? parseInt(event.target.value, 10)
+        : undefined,
+    });
   };
 
-  const handleSectorFilterChange = (event: SelectChangeEvent) => {
-    setFilterParams((prev) => ({
-      ...prev,
-      sectorType:
-        event.target.value === 'all'
-          ? undefined
-          : (Number(event.target.value) as SectorType),
-    }));
+  const handleSectorFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setFilterParams({
+      ...filterParams,
+      sectorType: event.target.value
+        ? (parseInt(event.target.value, 10) as SectorType)
+        : undefined,
+    });
   };
 
   const handleSearch = () => {
@@ -127,225 +106,329 @@ export const SpecimensList: React.FC<SpecimensListProps> = ({
     }
   };
 
-  // Отображение образцов с учетом пагинации
-  const paginatedSpecimens = specimens.slice(
+  // Данные для отображения в таблице
+  const displayedSpecimens = specimens.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
   return (
-    <Box sx={{ width: '100%' }} className={styles.fadeIn}>
-      {/* Фильтры */}
-      <Paper sx={specimenContainerStyles}>
-        <Toolbar sx={{ pl: { sm: SPECIMEN_SPACING.SM }, pr: { xs: 1, sm: 1 } }}>
-          <Typography variant='h6' component='div' sx={headingStyles}>
-            Образцы растений
-          </Typography>
-        </Toolbar>
-        <Divider sx={{ mb: SPECIMEN_SPACING.SM }} />
-
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: SPECIMEN_SPACING.SM,
-            mb: SPECIMEN_SPACING.SM,
-          }}
-          className={styles.specimenFilterContainer}
+    <div
+      className={`${specimenContainerClasses.detail} ${styles.fadeIn} p-6 bg-white rounded-lg shadow-sm`}
+    >
+      {/* Заголовок и фильтры */}
+      <div className='mb-6'>
+        <h2
+          className={`${headingClasses.page} text-center border-b border-gray-200 pb-3 mb-6`}
         >
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Поле поиска</InputLabel>
-            <Select
-              value={filterParams.searchField || 'inventoryNumber'}
-              onChange={
-                handleSearchFieldChange as unknown as (
-                  event: SelectChangeEvent<string>
-                ) => void
-              }
-              label='Поле поиска'
-              disabled={isLoading}
-            >
-              <MenuItem value='inventoryNumber'>Инв. номер</MenuItem>
-              <MenuItem value='genus'>Род</MenuItem>
-              <MenuItem value='species'>Вид</MenuItem>
-              <MenuItem value='cultivar'>Сорт</MenuItem>
-              <MenuItem value='form'>Форма</MenuItem>
-              <MenuItem value='determinedBy'>Определил</MenuItem>
-            </Select>
-          </FormControl>
+          Список образцов
+        </h2>
 
-          <TextField
-            label='Поиск'
-            variant='outlined'
-            value={filterParams.searchValue || ''}
-            onChange={handleSearchValueChange}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    edge='end'
-                    onClick={handleSearch}
-                    disabled={isLoading}
-                  >
-                    <SearchIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ flexGrow: 1 }}
-          />
-        </Box>
-
-        <Box
-          sx={{ display: 'flex', flexWrap: 'wrap', gap: SPECIMEN_SPACING.SM }}
-        >
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Семейство</InputLabel>
-            <Select
-              value={String(filterParams.familyId || 'all')}
-              onChange={handleFamilyFilterChange}
-              label='Семейство'
-              disabled={isLoading}
-            >
-              <MenuItem value='all'>Все семейства</MenuItem>
-              {familyOptions.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Сектор</InputLabel>
-            <Select
-              value={String(filterParams.sectorType || 'all')}
-              onChange={handleSectorFilterChange}
-              label='Сектор'
-              disabled={isLoading}
-            >
-              <MenuItem value='all'>Все секторы</MenuItem>
-              {sectorOptions.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Box
-            sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}
+        <div className='bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm mb-6'>
+          <h3
+            className={`${headingClasses.heading} flex items-center mb-4 pb-2 border-b border-gray-300`}
           >
-            <Tooltip title='Применить фильтры'>
-              {isLoading ? (
-                <span>
-                  <IconButton onClick={handleSearch} disabled={true}>
-                    <FilterListIcon />
-                  </IconButton>
-                </span>
-              ) : (
-                <IconButton onClick={handleSearch} disabled={false}>
-                  <FilterListIcon />
-                </IconButton>
-              )}
-            </Tooltip>
-          </Box>
-        </Box>
-      </Paper>
+            <FilterListIcon className='w-5 h-5 mr-2 text-blue-600' />
+            Параметры фильтрации
+          </h3>
 
-      {/* Таблица */}
-      <Paper
-        sx={{ width: '100%', overflow: 'hidden', mt: SPECIMEN_SPACING.MD }}
-      >
-        <TableContainer
-          sx={tableContainerStyles}
-          className={styles.specimenTableContainer}
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-4'>
+            <div>
+              <label
+                className={`${formClasses.label} block mb-2 text-sm font-medium text-gray-700`}
+              >
+                Поле для поиска
+              </label>
+              <select
+                className={`${formClasses.select} w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                value={filterParams.searchField as string}
+                onChange={handleSearchFieldChange}
+                disabled={isLoading}
+              >
+                <option value='inventoryNumber'>Инвентарный номер</option>
+                <option value='russianName'>Русское название</option>
+                <option value='latinName'>Латинское название</option>
+                <option value='familyName'>Семейство</option>
+                <option value='genus'>Род</option>
+                <option value='species'>Вид</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                className={`${formClasses.label} block mb-2 text-sm font-medium text-gray-700`}
+              >
+                Значение для поиска
+              </label>
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400'>
+                  <SearchIcon className='w-5 h-5' />
+                </div>
+                <input
+                  type='text'
+                  className={`${formClasses.input} w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                  placeholder='Поиск...'
+                  value={filterParams.searchValue}
+                  onChange={handleSearchValueChange}
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                className={`${formClasses.label} block mb-2 text-sm font-medium text-gray-700`}
+              >
+                Семейство
+              </label>
+              <select
+                className={`${formClasses.select} w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                value={filterParams.familyId || ''}
+                onChange={handleFamilyFilterChange}
+                disabled={isLoading}
+              >
+                <option value=''>Все семейства</option>
+                {familyOptions.map((family) => (
+                  <option key={family.id} value={family.id}>
+                    {family.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                className={`${formClasses.label} block mb-2 text-sm font-medium text-gray-700`}
+              >
+                Сектор
+              </label>
+              <select
+                className={`${formClasses.select} w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                value={
+                  filterParams.sectorType !== undefined
+                    ? filterParams.sectorType
+                    : ''
+                }
+                onChange={handleSectorFilterChange}
+                disabled={isLoading}
+              >
+                <option value=''>Все секторы</option>
+                {sectorOptions.map((sector) => (
+                  <option key={sector.id} value={sector.id}>
+                    {sector.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className='flex justify-center'>
+            <button
+              className={`${buttonClasses.base} ${buttonClasses.primary} flex items-center px-6 py-2`}
+              onClick={handleSearch}
+              disabled={isLoading}
+            >
+              <SearchIcon className='w-5 h-5 mr-2' />
+              Найти
+            </button>
+          </div>
+        </div>
+
+        {/* Таблица результатов */}
+        <div
+          className={`${tableContainerClasses.base} overflow-hidden rounded-lg shadow-sm border border-gray-200`}
         >
-          <Table
-            stickyHeader
-            aria-label='таблица образцов растений'
-            size='small'
-            className={styles.specimensTable}
-          >
-            <TableHead>
-              <TableRow>
-                <TableCell>Инв. номер</TableCell>
-                <TableCell sx={tableCellStyles('150px')}>Сектор</TableCell>
-                <TableCell sx={tableCellStyles('200px')}>Семейство</TableCell>
-                <TableCell sx={tableCellStyles('200px')}>Род</TableCell>
-                <TableCell sx={tableCellStyles('200px')}>Вид</TableCell>
-                <TableCell sx={tableCellStyles('200px')}>Сорт</TableCell>
-                <TableCell sx={tableCellStyles('150px')}>Экспозиция</TableCell>
-                <TableCell sx={{ width: 100, textAlign: 'center' }}>
+          <table className={`${tableContainerClasses.table} w-full`}>
+            <thead className={`${tableContainerClasses.header} bg-gray-50`}>
+              <tr>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Инв. номер
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Русское название
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Латинское название
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Семейство
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Год посадки
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
+                  Экспозиция
+                </th>
+                <th
+                  className={`${tableCellClasses()} px-4 py-3 text-center text-sm font-medium text-gray-700 uppercase tracking-wider`}
+                >
                   Действия
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedSpecimens.map((specimen) => (
-                <TableRow hover key={specimen.id}>
-                  <TableCell>{specimen.inventoryNumber}</TableCell>
-                  <TableCell sx={tableCellStyles('150px')}>
-                    {specimen.sectorType === SectorType.Dendrology
-                      ? 'Дендрология'
-                      : 'Цветоводство'}
-                  </TableCell>
-                  <TableCell sx={tableCellStyles('200px')}>
-                    {specimen.familyName}
-                  </TableCell>
-                  <TableCell sx={tableCellStyles('200px')}>
-                    {specimen.genus}
-                  </TableCell>
-                  <TableCell sx={tableCellStyles('200px')}>
-                    {specimen.species}
-                  </TableCell>
-                  <TableCell sx={tableCellStyles('200px')}>
-                    {specimen.cultivar}
-                  </TableCell>
-                  <TableCell sx={tableCellStyles('150px')}>
-                    {specimen.expositionName}
-                  </TableCell>
-                  <TableCell sx={{ width: 100, textAlign: 'center' }}>
-                    <Box className={styles.actionButtonsContainer}>
-                      <Tooltip title='Просмотр'>
-                        <IconButton
-                          size='small'
-                          onClick={() => onViewSpecimen(specimen.id)}
-                        >
-                          <VisibilityIcon fontSize='small' />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title='Редактировать'>
-                        <IconButton
-                          size='small'
-                          onClick={() => onEditSpecimen(specimen.id)}
-                        >
-                          <EditIcon fontSize='small' />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          component='div'
-          count={specimens.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage='Строк на странице:'
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}–${to} из ${count}`
-          }
-        />
-      </Paper>
-    </Box>
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-white divide-y divide-gray-200'>
+              {displayedSpecimens.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className='px-4 py-4 text-center text-gray-500 italic'
+                  >
+                    {isLoading
+                      ? 'Загрузка данных...'
+                      : 'Нет данных для отображения'}
+                  </td>
+                </tr>
+              ) : (
+                displayedSpecimens.map((specimen, index) => (
+                  <tr
+                    key={specimen.id}
+                    className={`${tableContainerClasses.row} hover:bg-blue-50 transition-colors duration-150`}
+                  >
+                    <td
+                      className={`${tableCellClasses()} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.inventoryNumber}
+                    </td>
+                    <td
+                      className={`${tableCellClasses()} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.russianName}
+                    </td>
+                    <td
+                      className={`${tableCellClasses(
+                        'italic'
+                      )} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.latinName}
+                    </td>
+                    <td
+                      className={`${tableCellClasses()} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.familyName}
+                    </td>
+                    <td
+                      className={`${tableCellClasses()} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.plantingYear}
+                    </td>
+                    <td
+                      className={`${tableCellClasses()} px-4 py-3 text-sm text-gray-700`}
+                    >
+                      {specimen.expositionName}
+                    </td>
+                    <td
+                      className={`${styles.actionButtonsContainer} px-4 py-3 text-center`}
+                    >
+                      <button
+                        onClick={() => onViewSpecimen(specimen.id)}
+                        className='bg-blue-50 hover:bg-blue-100 p-2 rounded-full text-blue-700 transition-colors duration-150 mr-2'
+                        title='Просмотр'
+                      >
+                        <VisibilityIcon className='w-5 h-5' />
+                      </button>
+                      <button
+                        onClick={() => onEditSpecimen(specimen.id)}
+                        className='bg-green-50 hover:bg-green-100 p-2 rounded-full text-green-700 transition-colors duration-150'
+                        title='Редактировать'
+                      >
+                        <EditIcon className='w-5 h-5' />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Пагинация */}
+        <div className='flex items-center justify-between px-5 py-4 mt-4 border border-gray-200 rounded-lg bg-gray-50 shadow-sm'>
+          <div className='flex items-center'>
+            <label className='mr-2 text-sm font-medium text-gray-700'>
+              Записей на странице:
+            </label>
+            <select
+              className='border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1 px-2'
+              value={rowsPerPage}
+              onChange={handleChangeRowsPerPage}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          <div className='flex items-center space-x-2'>
+            <button
+              onClick={() => handleChangePage(null, 0)}
+              disabled={page === 0}
+              className={`px-3 py-1.5 rounded-md border ${
+                page === 0
+                  ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'text-blue-600 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              Первая
+            </button>
+            <button
+              onClick={() => handleChangePage(null, page - 1)}
+              disabled={page === 0}
+              className={`px-3 py-1.5 rounded-md border ${
+                page === 0
+                  ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'text-blue-600 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              Пред.
+            </button>
+            <span className='px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md'>
+              Страница {page + 1} из{' '}
+              {Math.max(1, Math.ceil(specimens.length / rowsPerPage))}
+            </span>
+            <button
+              onClick={() => handleChangePage(null, page + 1)}
+              disabled={page >= Math.ceil(specimens.length / rowsPerPage) - 1}
+              className={`px-3 py-1.5 rounded-md border ${
+                page >= Math.ceil(specimens.length / rowsPerPage) - 1
+                  ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'text-blue-600 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              След.
+            </button>
+            <button
+              onClick={() =>
+                handleChangePage(
+                  null,
+                  Math.max(0, Math.ceil(specimens.length / rowsPerPage) - 1)
+                )
+              }
+              disabled={page >= Math.ceil(specimens.length / rowsPerPage) - 1}
+              className={`px-3 py-1.5 rounded-md border ${
+                page >= Math.ceil(specimens.length / rowsPerPage) - 1
+                  ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'text-blue-600 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              Последняя
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
