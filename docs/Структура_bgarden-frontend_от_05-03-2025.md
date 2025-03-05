@@ -5,6 +5,7 @@
     - `key.pem` (1.7 KB)
   - **docs**
     - `Структура_bgarden-frontend_от_04-03-2025.md` (3.1 KB)
+    - `Структура_bgarden-frontend_от_05-03-2025.md` (3.1 KB)
   - `eslint.config.js` (734.0 B)
   - `index.html` (366.0 B)
   - `package-lock.json` (210.2 KB)

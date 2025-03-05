@@ -9,6 +9,7 @@ import {
   RegisterPage,
   SpecimensPage,
 } from './pages';
+import TailwindTest from './components/TailwindTest';
 
 export const routes = [
   {
@@ -52,6 +53,14 @@ export const routes = [
         <ProtectedRoute>
           <SpecimensPage />
         </ProtectedRoute>
+      </Layout>
+    ),
+  },
+  {
+    path: '/tailwind-test',
+    element: (
+      <Layout>
+        <TailwindTest />
       </Layout>
     ),
   },

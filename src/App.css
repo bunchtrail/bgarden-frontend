@@ -4,6 +4,50 @@
   padding: 0;
 }
 
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 1rem;  /* 16px */
+  padding-right: 1rem; /* 16px */
+  padding-top: 0.5rem; /* 8px */
+  padding-bottom: 0.5rem; /* 8px */
+  background-color: rgb(37 99 235); /* bg-blue-600 */
+  color: white;
+  font-weight: 500;
+  border-radius: 9999px;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 200ms;
+}
+.btn-primary:hover {
+  background-color: rgb(29 78 216); /* bg-blue-700 */
+}
+.btn-primary:focus {
+  outline: none;
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity));
+  --tw-ring-offset-width: 2px;
+}
+
+.card-wrapper {
+  background-color: white;
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  transition-property: box-shadow;
+  transition-duration: 300ms;
+}
+.card-wrapper:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  .card-wrapper {
+    background-color: rgb(31 41 55); /* bg-gray-800 */
+  }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

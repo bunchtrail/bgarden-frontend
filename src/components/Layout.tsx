@@ -1,14 +1,7 @@
-import {
-  AppBar,
-  Box,
-  Button,
-  Container,
-  Toolbar,
-  Typography,
-} from '@mui/material';
 import React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../modules/auth';
+import { Button } from './ui';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,61 +17,40 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar
-        position='static'
-        elevation={0}
-        sx={{
-          bgcolor: 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-          '@media (prefers-color-scheme: dark)': {
-            bgcolor: 'rgba(0, 0, 0, 0.7)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          },
-        }}
-      >
-        <Container maxWidth='xl'>
-          <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-            <Typography
-              variant='h6'
-              component='div'
-              sx={{
-                fontWeight: 600,
-                letterSpacing: '-0.02em',
-                color: '#1d1d1f',
-                '@media (prefers-color-scheme: dark)': {
-                  color: '#f5f5f7',
-                },
-              }}
-            >
-              <RouterLink
-                to='/'
-                style={{ color: 'inherit', textDecoration: 'none' }}
-              >
+    <div className='flex flex-col min-h-screen'>
+      <header className='sticky top-0 z-10 bg-white/80 dark:bg-black/70 backdrop-blur-md border-b border-gray-100 dark:border-gray-800'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='flex justify-between items-center h-16'>
+            <h1 className='text-lg font-semibold tracking-tight text-secondary-dark dark:text-secondary-light'>
+              <RouterLink to='/' className='text-inherit no-underline'>
                 Ботанический сад
               </RouterLink>
-            </Typography>
+            </h1>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <div className='flex items-center gap-2'>
               {isAuthenticated ? (
                 <>
                   <Button
+                    variant='text'
                     color='primary'
-                    component={RouterLink}
-                    to='/profile'
-                    sx={{
-                      padding: '8px 16px',
-                    }}
+                    onClick={() => navigate('/profile')}
+                    className='whitespace-nowrap'
                   >
                     Профиль
                   </Button>
                   <Button
+                    variant='text'
+                    color='primary'
+                    onClick={() => navigate('/tailwind-test')}
+                    className='whitespace-nowrap'
+                  >
+                    Tailwind Тест
+                  </Button>
+                  <Button
+                    variant='text'
                     color='primary'
                     onClick={handleLogout}
-                    sx={{
-                      padding: '8px 16px',
-                    }}
+                    className='whitespace-nowrap'
                   >
                     Выйти
                   </Button>
@@ -86,66 +58,46 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               ) : (
                 <>
                   <Button
+                    variant='text'
                     color='primary'
-                    component={RouterLink}
-                    to='/login'
-                    sx={{
-                      padding: '8px 16px',
-                    }}
+                    onClick={() => navigate('/tailwind-test')}
+                    className='whitespace-nowrap'
+                  >
+                    Tailwind Тест
+                  </Button>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={() => navigate('/login')}
+                    className='whitespace-nowrap'
                   >
                     Вход
                   </Button>
                   <Button
+                    variant='filled'
                     color='primary'
-                    component={RouterLink}
-                    to='/register'
-                    variant='contained'
-                    sx={{
-                      padding: '8px 16px',
-                      boxShadow: 'none',
-                    }}
+                    onClick={() => navigate('/register')}
+                    className='whitespace-nowrap'
                   >
                     Регистрация
                   </Button>
                 </>
               )}
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <Box component='main' sx={{ flexGrow: 1 }}>
-        {children}
-      </Box>
+      <main className='flex-grow'>{children}</main>
 
-      <Box
-        component='footer'
-        sx={{
-          py: 4,
-          textAlign: 'center',
-          borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-          backgroundColor: '#fbfbfd',
-          '@media (prefers-color-scheme: dark)': {
-            backgroundColor: '#000',
-            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          },
-        }}
-      >
-        <Container>
-          <Typography
-            variant='body2'
-            sx={{
-              color: '#86868b',
-              '@media (prefers-color-scheme: dark)': {
-                color: '#86868b',
-              },
-            }}
-          >
+      <footer className='py-4 text-center border-t border-gray-100 bg-gray-50 dark:bg-black dark:border-gray-800'>
+        <div className='container mx-auto px-4'>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             © {new Date().getFullYear()} Ботанический сад
-          </Typography>
-        </Container>
-      </Box>
-    </Box>
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 };
 

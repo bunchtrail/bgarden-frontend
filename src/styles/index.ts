@@ -2,11 +2,15 @@
  * Экспорт всех стилей из единой точки входа
  */
 
-// Импорт reset.css для сброса и нормализации стилей
-import './buttonGroupFix.css';
-import './index.css';
-import './reset.css';
-import './variables.css';
+// Экспортируем стили Tailwind
+import * as TailwindStyles from './tailwind/common';
+export { TailwindStyles };
+
+// Импортируем CSS файлы
+  import './buttonGroupFix.css';
+  import './index.css';
+  import './reset.css';
+  import './variables.css';
 
 // Экспорт всех компонентов стилей
 export * from './components';
