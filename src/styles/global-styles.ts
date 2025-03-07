@@ -121,7 +121,7 @@ export const textUtilClasses = {
 
 // Классы для хедера и футера
 export const headerClasses = {
-  header: 'bg-white shadow-sm py-3 px-4 sm:px-6',
+ 
   container: 'container mx-auto flex justify-between items-center',
   logoContainer: 'flex items-center',
   logo: 'h-10 w-auto',

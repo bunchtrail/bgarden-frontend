@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_07-03-2025.md` (5.8 KB)
+    - `Структура_bgarden-frontend_от_07-03-2025.md` (6.3 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (672.6 KB)
   - `package.json` (1.4 KB)
@@ -36,7 +36,7 @@
         - `Chip.tsx` (839.0 B)
         - `Footer.tsx` (1.2 KB)
         - `Form.tsx` (2.7 KB)
-        - `Header.tsx` (6.2 KB)
+        - `Header.tsx` (1.7 KB)
         - `index.ts` (350.0 B)
         - `Table.tsx` (2.7 KB)
     - `index.css` (443.0 B)
@@ -87,6 +87,23 @@
           - `mapService.ts` (3.3 KB)
         - **types**
           - `index.ts` (1.6 KB)
+      - **navigation**
+        - **components**
+          - **configs**
+            - `defaultNavConfig.tsx` (1.8 KB)
+          - **icons**
+            - `index.tsx` (1.2 KB)
+          - `index.ts` (170.0 B)
+          - `Navbar.tsx` (5.6 KB)
+          - `NavbarItem.tsx` (3.4 KB)
+        - **contexts**
+        - **hooks**
+          - `index.ts` (50.0 B)
+          - `useNavigation.ts` (1.8 KB)
+        - `index.ts` (378.0 B)
+        - `README.md` (3.1 KB)
+        - **types**
+          - `index.ts` (390.0 B)
       - **specimens**
         - **components**
           - `ErrorPanel.tsx` (1.9 KB)
@@ -173,7 +190,7 @@
     - `setupTests.ts` (241.0 B)
     - **styles**
       - `animations.css` (1.3 KB)
-      - `global-styles.ts` (5.3 KB)
+      - `global-styles.ts` (5.2 KB)
       - `index.ts` (366.0 B)
     - **types**
     - **utils**
