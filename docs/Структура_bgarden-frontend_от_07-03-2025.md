@@ -5,15 +5,16 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_07-03-2025.md` (5.3 KB)
+    - `Структура_bgarden-frontend_от_07-03-2025.md` (5.8 KB)
   - `icons_backup.tsx` (10.2 KB)
-  - `package-lock.json` (669.7 KB)
-  - `package.json` (1.3 KB)
+  - `package-lock.json` (672.6 KB)
+  - `package.json` (1.4 KB)
   - `postcss.config.js` (82.0 B)
   - **public**
     - `favicon.ico` (3.8 KB)
     - **images**
       - `logo.jpg` (263.3 KB)
+      - **markers**
       - `placeholder-info.txt` (588.0 B)
     - `index.html` (1.7 KB)
     - `logo192.png` (5.2 KB)
@@ -69,6 +70,23 @@
           - `index.ts` (57.0 B)
         - **types**
           - `index.ts` (579.0 B)
+      - **map**
+        - **components**
+          - `GardenMap.tsx` (6.7 KB)
+          - `index.ts` (231.0 B)
+          - `map.module.css` (3.3 KB)
+          - `MapAreas.tsx` (2.7 KB)
+          - `MapControls.tsx` (5.9 KB)
+          - `MarkerCluster.tsx` (3.6 KB)
+        - **hooks**
+          - `index.ts` (90.0 B)
+          - `useMap.ts` (4.3 KB)
+        - `index.ts` (456.0 B)
+        - **services**
+          - `index.ts` (78.0 B)
+          - `mapService.ts` (3.3 KB)
+        - **types**
+          - `index.ts` (1.6 KB)
       - **specimens**
         - **components**
           - `ErrorPanel.tsx` (1.9 KB)
@@ -146,7 +164,7 @@
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
       - `HomePage.tsx` (15.5 KB)
-      - `MapPage.tsx` (2.7 KB)
+      - `MapPage.tsx` (6.6 KB)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)

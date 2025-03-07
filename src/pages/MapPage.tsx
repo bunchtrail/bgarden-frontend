@@ -1,57 +1,153 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  AreaType,
+  GardenMap,
+  MapAreas,
+  MarkerType,
+  useMap,
+} from '../modules/map';
+import {
+  containerClasses,
+  layoutClasses,
+  textClasses,
+} from '../styles/global-styles';
 
 /**
  * Страница с интерактивной картой ботанического сада
  * Доступна для всех пользователей, включая Клиентов
  */
 const MapPage: React.FC = () => {
+  // Состояние для фильтров
+  const [activeFilters, setActiveFilters] = useState({
+    plants: true,
+    expositions: true,
+    facilities: false,
+    entrances: true,
+    sectors: true,
+    greenhouses: false,
+  });
+
+  // Использование хука для получения данных карты с фильтрацией по типам
+  const {
+    markers,
+    areas,
+    layers,
+    loading,
+    error,
+    options,
+    setMarkerTypeFilter,
+    setAreaTypeFilter,
+  } = useMap(
+    { center: [55.75, 37.61], zoom: 14 }, // Координаты ботанического сада
+    [MarkerType.PLANT, MarkerType.EXPOSITION, MarkerType.ENTRANCE], // Типы маркеров по умолчанию
+    [AreaType.EXPOSITION, AreaType.SECTOR] // Типы областей по умолчанию
+  );
+
+  // Обработчик изменения фильтров
+  const handleFilterChange = (filterType: string) => {
+    const newFilters = {
+      ...activeFilters,
+      [filterType]: !activeFilters[filterType as keyof typeof activeFilters],
+    };
+    setActiveFilters(newFilters);
+
+    // Формирование массива активных фильтров для маркеров
+    const markerFilters: MarkerType[] = [];
+    if (newFilters.plants) markerFilters.push(MarkerType.PLANT);
+    if (newFilters.expositions) markerFilters.push(MarkerType.EXPOSITION);
+    if (newFilters.facilities) markerFilters.push(MarkerType.FACILITY);
+    if (newFilters.entrances) markerFilters.push(MarkerType.ENTRANCE);
+
+    setMarkerTypeFilter(markerFilters.length > 0 ? markerFilters : null);
+
+    // Формирование массива активных фильтров для областей
+    const areaFilters: AreaType[] = [];
+    if (newFilters.expositions) areaFilters.push(AreaType.EXPOSITION);
+    if (newFilters.sectors) areaFilters.push(AreaType.SECTOR);
+    if (newFilters.greenhouses) areaFilters.push(AreaType.GREENHOUSE);
+
+    setAreaTypeFilter(areaFilters.length > 0 ? areaFilters : null);
+  };
+
   return (
-    <div className='max-w-5xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6 text-green-800'>
+    <div className='max-w-6xl mx-auto px-4'>
+      <h1 className={`${textClasses.heading} text-3xl text-green-800 mb-6`}>
         Интерактивная карта ботанического сада
       </h1>
 
-      <div className='bg-white shadow-md rounded-lg p-6 mb-6'>
-        <h2 className='text-xl font-semibold mb-4 text-green-700'>
-          Функция в разработке
-        </h2>
-        <p className='text-gray-600 mb-4'>
-          Интерактивная карта ботанического сада находится в разработке. Скоро
-          здесь появится возможность просматривать различные зоны и экспозиции,
-          узнавать о растениях и планировать маршрут посещения.
+      <div className={`mb-6 ${containerClasses.base} p-4 bg-green-50`}>
+        <p className='text-gray-700'>
+          Используйте интерактивную карту для навигации по ботаническому саду.
+          Вы можете просматривать различные зоны и экспозиции, узнавать о
+          растениях и планировать маршрут посещения.
         </p>
-
-        <div className='bg-green-50 border border-green-200 rounded-lg p-4 text-green-800'>
-          <p className='font-medium'>Планируемые возможности:</p>
-          <ul className='list-disc list-inside mt-2 space-y-1'>
-            <li>Интерактивная карта территории</li>
-            <li>Поиск и фильтрация растений</li>
-            <li>Построение маршрутов посещения</li>
-            <li>Информация о текущих экспозициях</li>
-            <li>Сезонные особенности сада</li>
-          </ul>
-        </div>
       </div>
 
-      <div className='bg-gray-100 border border-gray-200 rounded-lg p-8 flex items-center justify-center'>
-        <div className='text-center'>
-          <svg
-            className='w-16 h-16 mx-auto text-gray-400'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-            xmlns='http://www.w3.org/2000/svg'
+      {/* Контейнер для карты */}
+      <div className='relative mb-8'>
+        {loading ? (
+          <div className='h-[700px] flex items-center justify-center bg-gray-50 rounded-xl'>
+            <div className='flex flex-col items-center'>
+              <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-700'></div>
+              <p className='mt-4 text-gray-600'>Загрузка карты...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className='h-[700px] flex items-center justify-center bg-red-50 rounded-xl'>
+            <div className='text-center text-red-600 p-6'>
+              <h3 className='text-xl font-bold mb-2'>Ошибка загрузки карты</h3>
+              <p>{error}</p>
+              <p className='mt-4'>
+                Пожалуйста, попробуйте обновить страницу или свяжитесь с
+                администратором.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <GardenMap
+            markers={markers}
+            options={options}
+            availableLayers={layers}
+            className='w-full'
+            initialFilters={activeFilters}
+            onFilterChange={handleFilterChange}
           >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={1.5}
-              d='M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7'
-            />
-          </svg>
-          <p className='mt-4 text-gray-600'>
-            Здесь будет размещена карта ботанического сада
-          </p>
+            <MapAreas areas={areas} />
+          </GardenMap>
+        )}
+      </div>
+
+      <div className={`${containerClasses.base} mt-6`}>
+        <h2 className={`${textClasses.subheading} text-green-700 mb-4`}>
+          Условные обозначения
+        </h2>
+        <div
+          className={`${layoutClasses.grid} sm:grid-cols-2 md:grid-cols-3 gap-4`}
+        >
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-green-100 border-2 border-green-600 rounded-full mr-3'></div>
+            <span>Растения</span>
+          </div>
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-blue-100 border-2 border-blue-600 rounded-full mr-3'></div>
+            <span>Экспозиции</span>
+          </div>
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-gray-100 border-2 border-gray-600 rounded-full mr-3'></div>
+            <span>Инфраструктура</span>
+          </div>
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-red-100 border-2 border-red-600 rounded-full mr-3'></div>
+            <span>Входы</span>
+          </div>
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-blue-100 border-2 border-blue-600 mr-3'></div>
+            <span>Секторы</span>
+          </div>
+          <div className='flex items-center p-2 bg-white rounded-md shadow-sm'>
+            <div className='w-8 h-8 flex items-center justify-center bg-amber-100 border-2 border-amber-600 mr-3'></div>
+            <span>Оранжереи</span>
+          </div>
         </div>
       </div>
     </div>

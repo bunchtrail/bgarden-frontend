@@ -1,0 +1,142 @@
+/* Стили для контейнера карты */
+.garden-map-container {
+  width: 100%;
+  height: 700px; /* Увеличиваем высоту для лучшего отображения */
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* При наведении увеличиваем тень для эффекта глубины */
+.garden-map-container:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для кластеров маркеров */
+:global(.marker-cluster) {
+  background-clip: padding-box;
+  border-radius: 50%;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+:global(.marker-cluster:hover) {
+  transform: scale(1.1);
+}
+
+:global(.marker-cluster div) {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(38, 126, 64, 0.85);
+  color: #fff;
+  font-weight: bold;
+}
+
+:global(.marker-cluster-small) {
+  background-color: rgba(205, 235, 215, 0.7);
+}
+
+:global(.marker-cluster-medium) {
+  background-color: rgba(110, 204, 140, 0.7);
+}
+
+:global(.marker-cluster-large) {
+  background-color: rgba(38, 126, 64, 0.7);
+}
+
+/* Стили для попапов на карте */
+:global(.leaflet-popup-content-wrapper) {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+:global(.leaflet-popup-content) {
+  margin: 12px 14px;
+  line-height: 1.5;
+}
+
+:global(.leaflet-popup-tip) {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для элементов управления на карте */
+:global(.map-controls) {
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0.95;
+}
+
+:global(.map-controls:hover) {
+  opacity: 1;
+}
+
+/* Адаптивные стили для карты */
+@media (max-width: 1024px) {
+  .garden-map-container {
+    height: 600px;
+  }
+  
+  :global(.map-controls) {
+    width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .garden-map-container {
+    height: 500px;
+    border-radius: 0.5rem;
+  }
+  
+  :global(.map-controls) {
+    width: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .garden-map-container {
+    height: 400px;
+  }
+  
+  :global(.map-controls) {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Улучшенные стили для зум-контролов */
+:global(.leaflet-control-zoom) {
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+:global(.leaflet-control-zoom-in),
+:global(.leaflet-control-zoom-out) {
+  background-color: white !important;
+  color: #16a34a !important;
+  transition: all 0.2s ease !important;
+}
+
+:global(.leaflet-control-zoom-in:hover),
+:global(.leaflet-control-zoom-out:hover) {
+  background-color: #f0fdf4 !important;
+  color: #15803d !important;
+} 
