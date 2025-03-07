@@ -26,7 +26,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   const showError = hasError && (isTouched || formSubmitted);
 
   return (
-    <div className='mb-4 group'>
+    <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
       <div className='flex flex-col sm:flex-row sm:items-start'>
         <label
           htmlFor={name.toString()}
@@ -47,11 +47,13 @@ export const TextField: React.FC<TextFieldProps> = ({
               onChange={handleChange}
               className={`${formClasses.textarea} ${
                 showError ? 'border-red-500 ring-red-500' : ''
-              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300`}
+              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm`}
               required={required}
               aria-invalid={showError}
               aria-describedby={showError ? `${name}-error` : undefined}
               placeholder={`Введите ${label.toLowerCase()}`}
+              onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
+              onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
             />
           ) : (
             <input
@@ -62,23 +64,32 @@ export const TextField: React.FC<TextFieldProps> = ({
               onChange={handleChange}
               className={`${formClasses.input} ${
                 showError ? 'border-red-500 ring-red-500' : ''
-              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300`}
+              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm hover:shadow`}
               required={required}
               aria-invalid={showError}
               aria-describedby={showError ? `${name}-error` : undefined}
               placeholder={`Введите ${label.toLowerCase()}`}
+              onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
+              onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
             />
           )}
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn`}
+              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
             >
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
               {errors[name]}
             </p>
           )}
           {!showError && isTouched && formData[name] && (
-            <span className='absolute right-2 top-2 text-green-500'>✓</span>
+            <span className='absolute right-2 top-2 text-green-500 animate-fadeIn'>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </span>
           )}
         </div>
       </div>
@@ -105,7 +116,7 @@ export const NumberField: React.FC<NumberFieldProps> = ({
   const showError = hasError && (isTouched || formSubmitted);
 
   return (
-    <div className='mb-4 group'>
+    <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
       <div className='flex flex-col sm:flex-row sm:items-start'>
         <label
           htmlFor={name.toString()}
@@ -133,7 +144,7 @@ export const NumberField: React.FC<NumberFieldProps> = ({
             onChange={handleNumberChange}
             className={`${formClasses.input} ${
               showError ? 'border-red-500 ring-red-500' : ''
-            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300`}
+            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm hover:shadow`}
             required={required}
             aria-invalid={showError}
             aria-describedby={showError ? `${name}-error` : undefined}
@@ -142,20 +153,32 @@ export const NumberField: React.FC<NumberFieldProps> = ({
                 ? `${min} - ${max}`
                 : `Введите ${label.toLowerCase()}`
             }
+            onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
+            onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
           />
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn`}
+              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
             >
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
               {errors[name]}
             </p>
           )}
           {!showError && isTouched && formData[name] && (
-            <span className='absolute right-2 top-2 text-green-500'>✓</span>
+            <span className='absolute right-2 top-2 text-green-500 animate-fadeIn'>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </span>
           )}
           {min !== undefined && max !== undefined && (
-            <p className='text-xs text-gray-500 mt-1'>
+            <p className='text-xs text-gray-500 mt-1 flex items-center'>
+              <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
+              </svg>
               Допустимый диапазон: {min} - {max}
             </p>
           )}
@@ -183,7 +206,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   const showError = hasError && (isTouched || formSubmitted);
 
   return (
-    <div className='mb-4 group'>
+    <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
       <div className='flex flex-col sm:flex-row sm:items-start'>
         <label
           htmlFor={name.toString()}
@@ -202,10 +225,12 @@ export const SelectField: React.FC<SelectFieldProps> = ({
             onChange={handleSelectChange}
             className={`${formClasses.select} ${
               showError ? 'border-red-500 ring-red-500' : ''
-            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 appearance-none pr-8`}
+            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 appearance-none pr-8 shadow-sm hover:shadow`}
             required={required}
             aria-invalid={showError}
             aria-describedby={showError ? `${name}-error` : undefined}
+            onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
+            onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
           >
             <option value=''>Выберите {label.toLowerCase()}</option>
             {options.map((option) => (
@@ -216,7 +241,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           </select>
           <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700'>
             <svg
-              className='h-4 w-4 fill-current'
+              className='h-4 w-4 fill-current text-blue-500'
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 20 20'
             >
@@ -226,8 +251,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn`}
+              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
             >
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
               {errors[name]}
             </p>
           )}
@@ -235,7 +263,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({
             isTouched &&
             formData[name] &&
             formData[name] !== '' && (
-              <span className='absolute right-8 top-2 text-green-500'>✓</span>
+              <span className='absolute right-8 top-2 text-green-500 animate-fadeIn'>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </span>
             )}
         </div>
       </div>

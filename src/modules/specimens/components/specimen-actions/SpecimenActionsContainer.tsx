@@ -50,9 +50,9 @@ export const SpecimenActionsContainer: React.FC<
   currentId,
 }) => {
   return (
-    <div className={containerClasses.detail}>
-      <div className="mb-4">
-        <h3 className={subheadingClasses.base}>Навигация</h3>
+    <div className={`${containerClasses.detail} p-4 space-y-6`}>
+      <div>
+        <h3 className={`${subheadingClasses.base} mb-3`}>Навигация</h3>
         <NavigationActions
           currentIndex={currentIndex}
           totalCount={totalCount}
@@ -64,11 +64,11 @@ export const SpecimenActionsContainer: React.FC<
           isLoading={isLoading}
         />
       </div>
-      
+
       <hr className={dividerClasses.base} />
-      
-      <div className="mb-4">
-        <h3 className={subheadingClasses.base}>Печать и экспорт</h3>
+
+      <div>
+        <h3 className={`${subheadingClasses.base} mb-3`}>Печать и экспорт</h3>
         <ExportActions
           onPrintCurrent={onPrintCurrent}
           onPrintList={onPrintList}
@@ -77,11 +77,11 @@ export const SpecimenActionsContainer: React.FC<
           isLoading={isLoading}
         />
       </div>
-      
+
       <hr className={dividerClasses.base} />
-      
-      <div className="mb-4">
-        <h3 className={subheadingClasses.base}>Действия</h3>
+
+      <div>
+        <h3 className={`${subheadingClasses.base} mb-3`}>Действия</h3>
         <AdditionalActions
           onAddNew={onAddNew}
           onViewReports={onViewReports}

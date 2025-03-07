@@ -66,48 +66,73 @@ export const FormTabs: React.FC<TabsProps> = ({
     ].some((field) => !!errors[field]),
   ];
 
+  // Функция для получения градиентного цвета фона вкладки
+  const getTabBackground = (color: string, isActive: boolean) => {
+    if (!isActive) return 'bg-white';
+
+    const gradients = {
+      blue: 'bg-gradient-to-r from-blue-50 to-blue-100',
+      green: 'bg-gradient-to-r from-green-50 to-green-100',
+      amber: 'bg-gradient-to-r from-amber-50 to-amber-100',
+      purple: 'bg-gradient-to-r from-purple-50 to-purple-100',
+    };
+
+    return gradients[color as keyof typeof gradients] || 'bg-white';
+  };
+
   return (
-    <div className='mb-8 border-b border-gray-200'>
-      <ul
-        className={`${layoutClasses.flex} flex-wrap -mb-px text-sm font-medium`}
-      >
+    <div className='mb-8 rounded-lg shadow-sm border border-gray-200 overflow-hidden'>
+      <ul className={`${layoutClasses.flex} flex-wrap bg-white rounded-t-lg`}>
         {tabs.map((tab, index) => {
           const isActive = activeTab === tab.tab;
           const hasError = tabHasErrors[index];
-          const borderColorClass = isActive
-            ? `border-${tab.color}-600`
-            : 'border-transparent hover:border-gray-300';
           const textColorClass = isActive
             ? `text-${tab.color}-600`
             : 'text-gray-500 hover:text-gray-700';
+          const bgClass = getTabBackground(tab.color, isActive);
 
           return (
-            <li key={index} className='mr-2'>
+            <li key={index} className='flex-grow'>
               <button
                 type='button'
                 onClick={() => setActiveTab(tab.tab)}
-                className={`inline-flex items-center px-4 py-3 border-b-2 rounded-t-lg ${borderColorClass} ${textColorClass} transition-all duration-200 group relative`}
+                className={`w-full flex items-center justify-center px-3 py-4 ${textColorClass} ${bgClass} transition-all duration-300 relative ${
+                  isActive ? 'font-medium shadow-inner' : 'hover:bg-gray-50'
+                }`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span
-                  className={`transform transition-transform duration-200 ${
-                    isActive ? 'scale-110' : 'group-hover:scale-110'
+                <div
+                  className={`flex items-center transition-transform duration-300 ${
+                    isActive ? 'scale-110' : 'group-hover:scale-105'
                   }`}
                 >
-                  {tab.icon}
-                </span>
-                <span className='font-medium'>{tab.name}</span>
+                  <span
+                    className={`transform transition-all duration-300 ${
+                      isActive ? 'scale-125' : ''
+                    }`}
+                  >
+                    {tab.icon}
+                  </span>
+                  <span
+                    className={`hidden sm:inline ml-2 transition-all duration-300 ${
+                      isActive ? 'font-medium' : ''
+                    }`}
+                  >
+                    {tab.name}
+                  </span>
+                  <span className='sm:hidden ml-1 text-xs'>{index + 1}</span>
+                </div>
                 {hasError && (
                   <span
-                    className={`bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ml-2 animate-pulse`}
+                    className={`absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse`}
                   >
                     !
                   </span>
                 )}
                 {isActive && (
                   <span
-                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-${tab.color}-600 transform scale-x-100 transition-transform duration-300`}
-                  ></span>
+                    className={`absolute bottom-0 left-0 w-full h-1 bg-${tab.color}-500 animate-pulse`}
+                  />
                 )}
               </button>
             </li>

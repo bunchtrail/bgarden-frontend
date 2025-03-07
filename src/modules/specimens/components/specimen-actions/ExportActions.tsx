@@ -1,8 +1,5 @@
 import React from 'react';
-import { 
-  FileDownloadIcon, 
-  PrintIcon 
-} from '../icons';
+import { FileDownloadIcon, PrintIcon } from '../icons';
 import { buttonClasses } from '../styles';
 
 interface ExportActionsProps {
@@ -20,55 +17,56 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
   onExportToPdf,
   isLoading = false,
 }) => {
+  // Функция для единообразного применения стилей кнопок
+  const getButtonStyle = (isDisabled: boolean) => {
+    return `${buttonClasses.base} ${buttonClasses.outline} ${
+      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+    }`;
+  };
+
   return (
-    <div className="flex items-center space-x-2">
+    <div className='flex flex-wrap items-center gap-2'>
       <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle(isLoading)}
         onClick={onPrintCurrent}
         disabled={isLoading}
-        title="Распечатать текущий образец"
-        aria-label="Распечатать текущий образец"
+        title='Распечатать текущий образец'
+        aria-label='Распечатать текущий образец'
       >
-        <PrintIcon />
+        <PrintIcon className='mr-1' /> <span className='text-xs'>Текущий</span>
       </button>
-      
+
       <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle(isLoading)}
         onClick={onPrintList}
         disabled={isLoading}
-        title="Распечатать список образцов"
-        aria-label="Распечатать список образцов"
+        title='Распечатать список образцов'
+        aria-label='Распечатать список образцов'
       >
-        <PrintIcon /> <span className="text-xs ml-1">Список</span>
+        <PrintIcon className='mr-1' /> <span className='text-xs'>Список</span>
       </button>
-      
+
       <button
-        className={`${buttonClasses.base} ${buttonClasses.success} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle(isLoading)}
         onClick={onExportToExcel}
         disabled={isLoading}
-        title="Экспорт в Excel"
-        aria-label="Экспорт в Excel"
+        title='Экспорт в Excel'
+        aria-label='Экспорт в Excel'
       >
-        <FileDownloadIcon /> <span className="text-xs ml-1">Excel</span>
+        <FileDownloadIcon className='mr-1' />{' '}
+        <span className='text-xs'>Excel</span>
       </button>
-      
+
       <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle(isLoading)}
         onClick={onExportToPdf}
         disabled={isLoading}
-        title="Экспорт в PDF"
-        aria-label="Экспорт в PDF"
+        title='Экспорт в PDF'
+        aria-label='Экспорт в PDF'
       >
-        <FileDownloadIcon /> <span className="text-xs ml-1">PDF</span>
+        <FileDownloadIcon className='mr-1' />{' '}
+        <span className='text-xs'>PDF</span>
       </button>
     </div>
   );
-}; 
+};

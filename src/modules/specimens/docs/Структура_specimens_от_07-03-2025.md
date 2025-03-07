@@ -6,23 +6,23 @@
     - `index.ts` (827.0 B)
     - `LoadingIndicator.tsx` (4.2 KB)
     - **specimen-actions**
-      - `AdditionalActions.tsx` (3.0 KB)
-      - `ExportActions.tsx` (2.2 KB)
+      - `AdditionalActions.tsx` (3.5 KB)
+      - `ExportActions.tsx` (2.3 KB)
       - `index.ts` (155.0 B)
-      - `NavigationActions.tsx` (4.1 KB)
-      - `SpecimenActionsContainer.tsx` (2.8 KB)
+      - `NavigationActions.tsx` (4.2 KB)
+      - `SpecimenActionsContainer.tsx` (2.7 KB)
     - **specimen-card**
       - `index.ts` (48.0 B)
       - `SpecimenCard.tsx` (8.6 KB)
     - **specimen-form**
       - `AdditionalInfoSection.tsx` (6.1 KB)
-      - `BasicInfoSection.tsx` (4.7 KB)
+      - `BasicInfoSection.tsx` (6.4 KB)
       - `ExpositionInfoSection.tsx` (3.7 KB)
-      - `FormFields.tsx` (9.8 KB)
+      - `FormFields.tsx` (12.9 KB)
       - `GeographicInfoSection.tsx` (3.9 KB)
       - `index.ts` (729.0 B)
-      - `SpecimenFormContainer.tsx` (18.1 KB)
-      - `Tabs.tsx` (3.8 KB)
+      - `SpecimenFormContainer.tsx` (20.4 KB)
+      - `Tabs.tsx` (4.9 KB)
       - `types.ts` (3.5 KB)
     - **specimen-gallery**
       - `index.ts` (53.0 B)
@@ -45,7 +45,7 @@
     - `specimens.module.css` (7.0 KB)
     - `specimens.module.css.d.ts` (89.0 B)
     - `SpecimensList.ts` (366.0 B)
-    - `styles.ts` (5.6 KB)
+    - `styles.ts` (5.8 KB)
   - **contexts**
   - **docs**
     - `Структура_specimens_от_07-03-2025.md` (2.2 KB)

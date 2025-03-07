@@ -3,7 +3,6 @@ import { Specimen, SpecimenFormData } from '../../types';
 import { CancelIcon, SaveIcon } from '../icons';
 import {
   actionsContainerClasses,
-  buttonClasses,
   formClasses,
   headingClasses,
 } from '../styles';
@@ -315,212 +314,291 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     e.preventDefault();
     setFormSubmitted(true);
 
+    // Проверяем валидность всех полей
     if (validate()) {
       onSave(formData);
     } else {
-      // Если есть ошибки, переключаемся на вкладку с первой ошибкой
-      const firstErrorField = Object.keys(errors)[0];
-      if (firstErrorField) {
-        // Определяем, к какой вкладке относится поле с ошибкой
-        if (
-          [
-            'inventoryNumber',
-            'russianName',
-            'latinName',
-            'familyId',
-            'genus',
-            'species',
-            'cultivar',
-            'form',
-          ].includes(firstErrorField)
-        ) {
-          setActiveTab(SpecimenFormTab.BasicInfo); // Основная информация
-        } else if (
-          [
-            'regionId',
-            'country',
-            'naturalRange',
-            'latitude',
-            'longitude',
-          ].includes(firstErrorField)
-        ) {
-          setActiveTab(SpecimenFormTab.GeographicInfo); // Географическая информация
-        } else if (
-          [
-            'expositionId',
-            'plantingYear',
-            'hasHerbarium',
-            'duplicatesInfo',
-          ].includes(firstErrorField)
-        ) {
-          setActiveTab(SpecimenFormTab.ExpositionInfo); // Экспозиционная информация
-        } else {
-          setActiveTab(SpecimenFormTab.AdditionalInfo); // Дополнительная информация
-        }
+      // Находим первую вкладку с ошибкой и переключаемся на нее
+      if (
+        [
+          'inventoryNumber',
+          'russianName',
+          'latinName',
+          'familyId',
+          'genus',
+          'species',
+          'cultivar',
+          'form',
+        ].some((field) => !!errors[field])
+      ) {
+        setActiveTab(SpecimenFormTab.BasicInfo);
+      } else if (
+        ['regionId', 'country', 'naturalRange', 'latitude', 'longitude'].some(
+          (field) => !!errors[field]
+        )
+      ) {
+        setActiveTab(SpecimenFormTab.GeographicInfo);
+      } else if (
+        ['expositionId', 'plantingYear', 'hasHerbarium', 'duplicatesInfo'].some(
+          (field) => !!errors[field]
+        )
+      ) {
+        setActiveTab(SpecimenFormTab.ExpositionInfo);
+      } else if (
+        [
+          'synonyms',
+          'determinedBy',
+          'sampleOrigin',
+          'ecologyAndBiology',
+          'economicUse',
+          'conservationStatus',
+          'originalBreeder',
+          'originalYear',
+          'notes',
+          'filledBy',
+        ].some((field) => !!errors[field])
+      ) {
+        setActiveTab(SpecimenFormTab.AdditionalInfo);
       }
     }
   };
 
+  const renderActiveTabContent = () => {
+    switch (activeTab) {
+      case SpecimenFormTab.BasicInfo:
+        return (
+          <BasicInfoSection
+            formData={formData}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            validateField={validateField}
+            familyOptions={familyOptions}
+            handleChange={handleChange}
+            handleSelectChange={handleSelectChange}
+          />
+        );
+      case SpecimenFormTab.GeographicInfo:
+        return (
+          <GeographicInfoSection
+            formData={formData}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            validateField={validateField}
+            regionOptions={regionOptions}
+            handleChange={handleChange}
+            handleSelectChange={handleSelectChange}
+            handleNumberChange={handleNumberChange}
+          />
+        );
+      case SpecimenFormTab.ExpositionInfo:
+        return (
+          <ExpositionInfoSection
+            formData={formData}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            validateField={validateField}
+            expositionOptions={expositionOptions}
+            handleChange={handleChange}
+            handleSelectChange={handleSelectChange}
+            handleNumberChange={handleNumberChange}
+            handleCheckboxChange={handleCheckboxChange}
+          />
+        );
+      case SpecimenFormTab.AdditionalInfo:
+        return (
+          <AdditionalInfoSection
+            formData={formData}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            validateField={validateField}
+            handleChange={handleChange}
+            handleNumberChange={handleNumberChange}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Навигационные кнопки для вкладок
+  const renderTabNavigation = () => {
+    return (
+      <div className='flex justify-between items-center mt-8 mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200 shadow-sm'>
+        <button
+          type='button'
+          onClick={() => {
+            if (activeTab > SpecimenFormTab.BasicInfo) {
+              setActiveTab(activeTab - 1);
+            }
+          }}
+          disabled={activeTab === SpecimenFormTab.BasicInfo}
+          className={`flex items-center justify-center px-4 py-2 rounded-lg bg-white border ${
+            activeTab === SpecimenFormTab.BasicInfo
+              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+              : 'border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
+          }`}
+        >
+          <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20'>
+            <path
+              fillRule='evenodd'
+              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
+              clipRule='evenodd'
+            />
+          </svg>
+          Назад
+        </button>
+
+        <div className='flex space-x-1'>
+          {[0, 1, 2, 3].map((tabIndex) => (
+            <button
+              key={tabIndex}
+              type='button'
+              onClick={() => setActiveTab(tabIndex)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                activeTab === tabIndex
+                  ? 'bg-blue-600 scale-125'
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+              aria-label={`Перейти к вкладке ${tabIndex + 1}`}
+            />
+          ))}
+        </div>
+
+        <button
+          type='button'
+          onClick={() => {
+            if (activeTab < SpecimenFormTab.AdditionalInfo) {
+              setActiveTab(activeTab + 1);
+            }
+          }}
+          disabled={activeTab === SpecimenFormTab.AdditionalInfo}
+          className={`flex items-center justify-center px-4 py-2 rounded-lg bg-white border ${
+            activeTab === SpecimenFormTab.AdditionalInfo
+              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+              : 'border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
+          }`}
+        >
+          Далее
+          <svg className='w-5 h-5 ml-2' fill='currentColor' viewBox='0 0 20 20'>
+            <path
+              fillRule='evenodd'
+              d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+              clipRule='evenodd'
+            />
+          </svg>
+        </button>
+      </div>
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className={formClasses.base}>
-      {/* Заголовок формы и основные действия */}
-      <div className={`mb-6`}>
-        <div className='text-center bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-lg p-4 shadow-sm border border-gray-100'>
-          <h1 className={`${headingClasses.page} mb-2`}>
-            {initialData
-              ? 'Редактирование образца'
-              : 'Добавление нового образца'}
-          </h1>
-          <p className='text-gray-600 max-w-2xl mx-auto'>
-            Заполните информацию об образце растения. Используйте вкладки ниже
-            для навигации по разделам формы. Поля, отмеченные{' '}
-            <span className='text-red-500'>*</span>, обязательны для заполнения.
-          </p>
-        </div>
+      <div
+        className={`${headingClasses.page} flex items-center justify-between`}
+      >
+        <h2 className='text-3xl font-bold text-gray-800 flex items-center'>
+          {initialData ? (
+            <>
+              <span className='w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
+                <svg
+                  className='w-6 h-6 text-amber-600'
+                  fill='currentColor'
+                  viewBox='0 0 20 20'
+                >
+                  <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
+                </svg>
+              </span>
+              <span className='bg-gradient-to-r from-amber-700 to-amber-500 bg-clip-text text-transparent'>
+                Редактирование образца
+              </span>
+            </>
+          ) : (
+            <>
+              <span className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
+                <svg
+                  className='w-6 h-6 text-green-600'
+                  fill='currentColor'
+                  viewBox='0 0 20 20'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </span>
+              <span className='bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent'>
+                Создание нового образца
+              </span>
+            </>
+          )}
+        </h2>
       </div>
 
-      {/* Вкладки для навигации */}
       <FormTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         errors={errors}
       />
 
-      {/* Кнопка перехода к следующей вкладке, показывается внизу текущей вкладки */}
-      {activeTab < SpecimenFormTab.AdditionalInfo && (
-        <div className='flex justify-end mb-4'>
-          <button
-            type='button'
-            onClick={() => setActiveTab(activeTab + 1)}
-            className={`${buttonClasses.base} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 flex items-center px-4 py-2 rounded-md transition-colors duration-200`}
-          >
-            Следующий раздел
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5 ml-2'
-              viewBox='0 0 20 20'
-              fill='currentColor'
-            >
-              <path
-                fillRule='evenodd'
-                d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-                clipRule='evenodd'
-              />
-            </svg>
-          </button>
-        </div>
-      )}
+      {renderActiveTabContent()}
 
-      {/* Отображение секции в зависимости от активной вкладки */}
-      {activeTab === SpecimenFormTab.BasicInfo && (
-        <BasicInfoSection
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          validateField={validateField}
-          familyOptions={familyOptions}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-        />
-      )}
+      {renderTabNavigation()}
 
-      {activeTab === SpecimenFormTab.GeographicInfo && (
-        <GeographicInfoSection
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          validateField={validateField}
-          regionOptions={regionOptions}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          handleNumberChange={handleNumberChange}
-        />
-      )}
-
-      {activeTab === SpecimenFormTab.ExpositionInfo && (
-        <ExpositionInfoSection
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          validateField={validateField}
-          expositionOptions={expositionOptions}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          handleNumberChange={handleNumberChange}
-          handleCheckboxChange={handleCheckboxChange}
-        />
-      )}
-
-      {activeTab === SpecimenFormTab.AdditionalInfo && (
-        <AdditionalInfoSection
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          validateField={validateField}
-          handleChange={handleChange}
-          handleNumberChange={handleNumberChange}
-        />
-      )}
-
-      {/* TODO: Добавить другие секции */}
-
-      {/* Кнопки действий */}
-      <div
-        className={`${actionsContainerClasses.base} justify-center sticky bottom-0 bg-white p-4 border-t border-gray-200 shadow-md z-10 transition-all duration-300`}
-      >
-        <div className='flex space-x-4'>
-          <button
-            type='button'
-            onClick={onCancel}
-            className={`${buttonClasses.base} ${buttonClasses.secondary} flex items-center px-6 py-2 transition-colors duration-200 rounded-md`}
-            disabled={isLoading}
-          >
-            <CancelIcon className='w-5 h-5 mr-2' />
-            Отмена
-          </button>
-          <button
-            type='submit'
-            className={`${buttonClasses.base} ${buttonClasses.primary} flex items-center px-6 py-2 transition-colors duration-200 shadow-sm hover:shadow rounded-md`}
-            disabled={isLoading}
-          >
-            <SaveIcon className='w-5 h-5 mr-2' />
-            {isLoading ? (
-              <>
-                <svg
-                  className='animate-spin -ml-1 mr-2 h-4 w-4 text-white'
-                  xmlns='http://www.w3.org/2000/svg'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                >
-                  <circle
-                    className='opacity-25'
-                    cx='12'
-                    cy='12'
-                    r='10'
-                    stroke='currentColor'
-                    strokeWidth='4'
-                  ></circle>
-                  <path
-                    className='opacity-75'
-                    fill='currentColor'
-                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                  ></path>
-                </svg>
-                Сохранение...
-              </>
-            ) : (
-              'Сохранить'
-            )}
-          </button>
-        </div>
+      <div className={`${actionsContainerClasses.base} mt-8`}>
+        <button
+          type='button'
+          onClick={onCancel}
+          className='flex items-center justify-center px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-300 shadow-sm hover:shadow'
+          disabled={isLoading}
+        >
+          <CancelIcon className='w-5 h-5 mr-2 text-gray-500' />
+          Отмена
+        </button>
+        <button
+          type='submit'
+          className='flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-sm hover:shadow'
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <svg
+                className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+              >
+                <circle
+                  className='opacity-25'
+                  cx='12'
+                  cy='12'
+                  r='10'
+                  stroke='currentColor'
+                  strokeWidth='4'
+                ></circle>
+                <path
+                  className='opacity-75'
+                  fill='currentColor'
+                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                ></path>
+              </svg>
+              Сохранение...
+            </>
+          ) : (
+            <>
+              <SaveIcon className='w-5 h-5 mr-2' />
+              Сохранить
+            </>
+          )}
+        </button>
       </div>
     </form>
   );

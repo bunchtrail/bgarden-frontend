@@ -29,12 +29,29 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
   currentId,
   isLoading = false,
 }) => {
+  // Функция для единообразного применения стилей кнопок
+  const getButtonStyle = (type: 'primary' | 'danger' | 'default', isDisabled: boolean) => {
+    const baseStyle = `${buttonClasses.base} ${buttonClasses.outline}`;
+    
+    if (type === 'primary') {
+      return `${baseStyle} text-green-700 border-green-600 hover:bg-green-50 ${
+        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`;
+    } else if (type === 'danger') {
+      return `${baseStyle} text-red-700 border-red-600 hover:bg-red-50 ${
+        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`;
+    } else {
+      return `${baseStyle} ${
+        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`;
+    }
+  };
+
   return (
-    <div className='flex items-center space-x-2'>
+    <div className='flex flex-wrap items-center gap-2'>
       <button
-        className={`${buttonClasses.success} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle('primary', isLoading)}
         onClick={onAddNew}
         disabled={isLoading}
         title='Добавить новый образец'
@@ -45,9 +62,7 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
 
       {onViewPhenology && (
         <button
-          className={`${buttonClasses.secondary} ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={getButtonStyle('default', isLoading)}
           onClick={onViewPhenology}
           disabled={isLoading}
           title='Фенология'
@@ -59,9 +74,7 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
 
       {onViewBiometry && (
         <button
-          className={`${buttonClasses.secondary} ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={getButtonStyle('default', isLoading)}
           onClick={onViewBiometry}
           disabled={isLoading}
           title='Биометрия'
@@ -72,9 +85,7 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
       )}
 
       <button
-        className={`${buttonClasses.secondary} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        className={getButtonStyle('default', isLoading)}
         onClick={onViewReports}
         disabled={isLoading}
         title='Запросы и отчеты'
@@ -85,9 +96,7 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
 
       {onDelete && currentId && (
         <button
-          className={`${buttonClasses.danger} ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={getButtonStyle('danger', isLoading)}
           onClick={() => onDelete(currentId)}
           disabled={isLoading}
           title='Удалить образец'
@@ -98,7 +107,7 @@ export const AdditionalActions: React.FC<AdditionalActionsProps> = ({
       )}
 
       <button
-        className={buttonClasses.secondary}
+        className={getButtonStyle('default', false)}
         onClick={onExit}
         title='Выйти'
         aria-label='Выйти'

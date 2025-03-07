@@ -46,40 +46,71 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
     }
   };
 
+  // Функция для единообразного применения стилей кнопок
+  const getButtonStyle = (isDisabled: boolean) => {
+    return `${buttonClasses.base} ${buttonClasses.outline} ${
+      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+    }`;
+  };
+
   return (
-    <div className='flex items-center space-x-2'>
-      <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          currentIndex === 0 || isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-        onClick={onNavigateFirst}
-        disabled={currentIndex === 0 || isLoading}
-        title='Первый образец'
-        aria-label='Первый образец'
-      >
-        <FirstPageIcon />
-      </button>
+    <div className='flex flex-wrap items-center gap-2'>
+      <div className='flex items-center'>
+        <button
+          className={getButtonStyle(currentIndex === 0 || isLoading)}
+          onClick={onNavigateFirst}
+          disabled={currentIndex === 0 || isLoading}
+          title='Первый образец'
+          aria-label='Первый образец'
+        >
+          <FirstPageIcon />
+        </button>
 
-      <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          currentIndex === 0 || isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-        onClick={onNavigatePrev}
-        disabled={currentIndex === 0 || isLoading}
-        title='Предыдущий образец'
-        aria-label='Предыдущий образец'
-      >
-        <NavigateBeforeIcon />
-      </button>
+        <button
+          className={getButtonStyle(currentIndex === 0 || isLoading)}
+          onClick={onNavigatePrev}
+          disabled={currentIndex === 0 || isLoading}
+          title='Предыдущий образец'
+          aria-label='Предыдущий образец'
+        >
+          <NavigateBeforeIcon />
+        </button>
+      </div>
 
-      <div className='mx-2 text-sm'>
-        <span className='mr-1'>{currentIndex + 1}</span>
-        <span className='text-gray-500'>из</span>
-        <span className='ml-1'>{totalCount}</span>
+      <div className='px-2 py-1 bg-gray-100 rounded text-sm flex items-center'>
+        <span className='font-medium'>{currentIndex + 1}</span>
+        <span className='text-gray-500 mx-1'>из</span>
+        <span className='font-medium'>{totalCount}</span>
+      </div>
+
+      <div className='flex items-center'>
+        <button
+          className={getButtonStyle(
+            currentIndex === totalCount - 1 || isLoading
+          )}
+          onClick={onNavigateNext}
+          disabled={currentIndex === totalCount - 1 || isLoading}
+          title='Следующий образец'
+          aria-label='Следующий образец'
+        >
+          <NavigateNextIcon />
+        </button>
+
+        <button
+          className={getButtonStyle(
+            currentIndex === totalCount - 1 || isLoading
+          )}
+          onClick={onNavigateLast}
+          disabled={currentIndex === totalCount - 1 || isLoading}
+          title='Последний образец'
+          aria-label='Последний образец'
+        >
+          <LastPageIcon />
+        </button>
       </div>
 
       {onNavigateToIndex && (
-        <div className='flex items-center'>
+        <div className='flex items-center ml-2'>
           <input
             type='number'
             min={1}
@@ -92,7 +123,7 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
             disabled={isLoading}
           />
           <button
-            className={`${buttonClasses.secondary} text-xs ml-1 py-1 px-2`}
+            className={`${buttonClasses.outline} text-xs ml-1 py-1 px-2`}
             onClick={handleGoToIndex}
             disabled={!indexInput || isLoading}
           >
@@ -100,34 +131,6 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
           </button>
         </div>
       )}
-
-      <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          currentIndex === totalCount - 1 || isLoading
-            ? 'opacity-50 cursor-not-allowed'
-            : ''
-        }`}
-        onClick={onNavigateNext}
-        disabled={currentIndex === totalCount - 1 || isLoading}
-        title='Следующий образец'
-        aria-label='Следующий образец'
-      >
-        <NavigateNextIcon />
-      </button>
-
-      <button
-        className={`${buttonClasses.base} ${buttonClasses.secondary} ${
-          currentIndex === totalCount - 1 || isLoading
-            ? 'opacity-50 cursor-not-allowed'
-            : ''
-        }`}
-        onClick={onNavigateLast}
-        disabled={currentIndex === totalCount - 1 || isLoading}
-        title='Последний образец'
-        aria-label='Последний образец'
-      >
-        <LastPageIcon />
-      </button>
     </div>
   );
 };

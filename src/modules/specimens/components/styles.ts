@@ -2,15 +2,15 @@
 // Константы для модуля specimens
 // Используем глобальные константы из global-styles.ts
 import {
-  SPACING as GLOBAL_SPACING,
-  buttonClasses as globalButtonClasses,
-  chipClasses as globalChipClasses,
-  containerClasses as globalContainerClasses,
-  formClasses as globalFormClasses,
-  layoutClasses,
-  tableClasses,
-  textClasses,
-  textUtilClasses
+    SPACING as GLOBAL_SPACING,
+    buttonClasses as globalButtonClasses,
+    chipClasses as globalChipClasses,
+    containerClasses as globalContainerClasses,
+    formClasses as globalFormClasses,
+    layoutClasses,
+    tableClasses,
+    textClasses,
+    textUtilClasses
 } from '../../../styles/global-styles';
 
 // Экспортируем константы для обратной совместимости
@@ -82,6 +82,7 @@ export const actionsContainerClasses = {
 
 export const buttonClasses = {
   ...globalButtonClasses,
+  outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-2 px-3 rounded-md flex items-center justify-center transition-colors duration-200',
 };
 
 export const tableContainerClasses = {
