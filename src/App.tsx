@@ -12,8 +12,8 @@ import ErrorPage from './pages/ErrorPage';
 import ExpositionDetailPage from './pages/ExpositionDetailPage';
 import ExpositionsPage from './pages/ExpositionsPage';
 import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
 import NotFoundPage from './pages/NotFoundPage';
-import SpecimenDetailPage from './pages/SpecimenDetailPage';
 import { SpecimensPage } from './pages/SpecimensPage';
 
 function App() {
@@ -24,22 +24,48 @@ function App() {
           <Header />
           <main className='flex-grow container mx-auto px-4 py-6'>
             <Routes>
-              {/* Публичные маршруты */}
+              {/* Публичные маршруты - доступны всем */}
               <Route path='/' element={<HomePage />} />
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
-              <Route path='/specimens' element={<SpecimensPage />} />
+
+              {/* Интерактивная карта - доступна всем пользователям без авторизации */}
+              <Route path='/map' element={<MapPage />} />
+
+              {/* Маршруты только для сотрудников и администраторов */}
               <Route
-                path='/specimen-detail/:id'
-                element={<SpecimenDetailPage />}
-              />
-              <Route path='/expositions' element={<ExpositionsPage />} />
-              <Route
-                path='/expositions/:id'
-                element={<ExpositionDetailPage />}
+                path='/specimens'
+                element={
+                  <ProtectedRoute
+                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                  >
+                    <SpecimensPage />
+                  </ProtectedRoute>
+                }
               />
 
-              {/* Защищенные маршруты */}
+              <Route
+                path='/expositions'
+                element={
+                  <ProtectedRoute
+                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                  >
+                    <ExpositionsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/expositions/:id'
+                element={
+                  <ProtectedRoute
+                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                  >
+                    <ExpositionDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Защищенные маршруты для всех авторизованных пользователей */}
               <Route
                 path='/profile'
                 element={
@@ -49,11 +75,11 @@ function App() {
                 }
               />
 
-              {/* Маршруты для админа/редактора (пример) */}
+              {/* Маршруты для администратора */}
               <Route
                 path='/admin'
                 element={
-                  <ProtectedRoute requiredRole={UserRole.Administrator}>
+                  <ProtectedRoute requiredRoles={UserRole.Administrator}>
                     <ErrorPage
                       title='В разработке'
                       message='Административная панель находится в разработке'

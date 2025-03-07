@@ -5,12 +5,14 @@ import { UserRole } from '../types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: UserRole;
+  requiredRoles?: UserRole | UserRole[];
+  redirectPath?: string;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  requiredRole,
+  requiredRoles,
+  redirectPath = '/'
 }) => {
   const { isAuthenticated, user, loading, error } = useAuth();
 
@@ -34,19 +36,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (requiredRole && user.role !== requiredRole) {
-    // Для роли Administrator доступны все роли
-    if (user.role === UserRole.Administrator) {
-      return <>{children}</>;
-    }
-
-    // Для роли Employee доступны Employee и Client
-    if (user.role === UserRole.Employee && requiredRole === UserRole.Client) {
-      return <>{children}</>;
-    }
-
-    return <Navigate to='/' />;
+  if (!requiredRoles) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+
+  if (user.role === UserRole.Administrator) {
+    return <>{children}</>;
+  }
+
+  if (user.role === UserRole.Employee && roles.includes(UserRole.Client)) {
+    return <>{children}</>;
+  }
+
+  if (roles.includes(user.role)) {
+    return <>{children}</>;
+  }
+
+  return <Navigate to={redirectPath} />;
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../modules/auth';
+import { UserRole } from '../../modules/auth/types';
 import { headerClasses } from '../../styles/global-styles';
 
 interface HeaderProps {
@@ -23,6 +24,11 @@ const Header: React.FC<HeaderProps> = ({
     logout(true);
   };
 
+  // Проверяем, есть ли у пользователя доступ к разделам сотрудников
+  const hasEmployeeAccess =
+    user &&
+    (user.role === UserRole.Administrator || user.role === UserRole.Employee);
+
   return (
     <header className={headerClasses.header}>
       <div className={headerClasses.container}>
@@ -35,12 +41,31 @@ const Header: React.FC<HeaderProps> = ({
           <Link to='/' className={headerClasses.navLink}>
             Главная
           </Link>
-          <Link to='/specimens' className={headerClasses.navLink}>
-            Дендрология
+
+          {/* Интерактивная карта - доступна всем пользователям */}
+          <Link to='/map' className={headerClasses.navLink}>
+            Карта сада
           </Link>
-          <Link to='/expositions' className={headerClasses.navLink}>
-            Экспозиции
-          </Link>
+
+          {/* Разделы только для сотрудников и администраторов */}
+          {hasEmployeeAccess && (
+            <>
+              <Link to='/specimens' className={headerClasses.navLink}>
+                Дендрология
+              </Link>
+              <Link to='/expositions' className={headerClasses.navLink}>
+                Экспозиции
+              </Link>
+            </>
+          )}
+
+          {/* Раздел только для администраторов */}
+          {user && user.role === UserRole.Administrator && (
+            <Link to='/admin' className={headerClasses.navLink}>
+              Админ-панель
+            </Link>
+          )}
+
           {user ? (
             <>
               <Link to='/profile' className={headerClasses.navLink}>
@@ -82,15 +107,54 @@ const Header: React.FC<HeaderProps> = ({
       {isMenuOpen && (
         <div className='md:hidden py-2 px-4 bg-white'>
           <div className='flex flex-col space-y-2'>
-            <Link to='/' className={headerClasses.navLink}>
+            <Link
+              to='/'
+              className={headerClasses.navLink}
+              onClick={() => setIsMenuOpen(false)}
+            >
               Главная
             </Link>
-            <Link to='/specimens' className={headerClasses.navLink}>
-              Дендрология
+
+            {/* Интерактивная карта в мобильном меню */}
+            <Link
+              to='/map'
+              className={headerClasses.navLink}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Карта сада
             </Link>
-            <Link to='/expositions' className={headerClasses.navLink}>
-              Экспозиции
-            </Link>
+
+            {/* Разделы только для сотрудников и администраторов в мобильном меню */}
+            {hasEmployeeAccess && (
+              <>
+                <Link
+                  to='/specimens'
+                  className={headerClasses.navLink}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Дендрология
+                </Link>
+                <Link
+                  to='/expositions'
+                  className={headerClasses.navLink}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Экспозиции
+                </Link>
+              </>
+            )}
+
+            {/* Раздел для администраторов в мобильном меню */}
+            {user && user.role === UserRole.Administrator && (
+              <Link
+                to='/admin'
+                className={headerClasses.navLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Админ-панель
+              </Link>
+            )}
+
             {user ? (
               <>
                 <Link

@@ -1,11 +1,11 @@
-- **new-front**
+- **bgarden-frontend**
   - **.cursor**
     - **rules**
       - `changes.mdc` (1.4 KB)
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_new-front_от_05-03-2025.md` (3.7 KB)
+    - `Структура_bgarden-frontend_от_07-03-2025.md` (3.8 KB)
   - `package-lock.json` (669.1 KB)
   - `package.json` (1.2 KB)
   - `postcss.config.js` (82.0 B)
@@ -22,7 +22,7 @@
   - `README.md` (3.4 KB)
   - **src**
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (3.0 KB)
+    - `App.tsx` (3.9 KB)
     - **components**
       - `Button.tsx` (1.0 KB)
       - `Card.tsx` (1.9 KB)
@@ -34,7 +34,7 @@
         - `Chip.tsx` (839.0 B)
         - `Footer.tsx` (1.2 KB)
         - `Form.tsx` (2.7 KB)
-        - `Header.tsx` (3.9 KB)
+        - `Header.tsx` (6.2 KB)
         - `index.ts` (350.0 B)
         - `Table.tsx` (2.7 KB)
     - `index.css` (443.0 B)
@@ -72,15 +72,18 @@
         - **components**
           - **icons**
             - `index.tsx` (9.5 KB)
-          - `index.ts` (372.0 B)
+          - `index.ts` (544.0 B)
           - `LoadingIndicator.tsx` (4.2 KB)
           - `SpecimenActions.tsx` (13.5 KB)
           - `SpecimenCard.tsx` (7.2 KB)
-          - `SpecimenForm.tsx` (16.7 KB)
-          - `SpecimenFormContainer.tsx` (7.5 KB)
+          - `SpecimenForm.tsx` (27.8 KB)
+          - `SpecimenFormContainer.tsx` (7.3 KB)
+          - `SpecimenGallery.tsx` (6.1 KB)
+          - `SpecimenLocationMap.tsx` (2.9 KB)
           - `specimens.module.css` (7.0 KB)
           - `specimens.module.css.d.ts` (89.0 B)
           - `SpecimensList.tsx` (16.4 KB)
+          - `SpecimenTaxonomy.tsx` (3.5 KB)
           - `styles.ts` (5.6 KB)
         - **contexts**
         - **docs**
@@ -91,7 +94,7 @@
         - **services**
           - `expositionService.ts` (2.8 KB)
           - `familyService.ts` (2.7 KB)
-          - `index.ts` (250.0 B)
+          - `index.ts` (244.0 B)
           - `regionService.ts` (2.7 KB)
           - `specimenService.ts` (3.3 KB)
         - **types**
@@ -104,9 +107,9 @@
       - `ErrorPage.tsx` (1.5 KB)
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (2.4 KB)
+      - `HomePage.tsx` (15.5 KB)
+      - `MapPage.tsx` (2.7 KB)
       - `NotFoundPage.tsx` (458.0 B)
-      - `SpecimenDetailPage.tsx` (20.0 KB)
       - `SpecimensPage.tsx` (17.9 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
