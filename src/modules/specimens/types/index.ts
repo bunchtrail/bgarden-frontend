@@ -67,6 +67,7 @@ export interface SpecimenFilterParams {
   familyId?: number;
   sectorType?: SectorType;
   regionId?: number;
+  expositionId?: number;
 }
 
 // Интерфейс для данных биометрии растений

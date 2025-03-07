@@ -1,0 +1,1 @@
+export { SpecimenTaxonomy } from './SpecimenTaxonomy'; 

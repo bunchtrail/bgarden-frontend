@@ -1,14 +1,14 @@
 import React from 'react';
-import { Specimen } from '../types';
-import { InfoIcon, LeafIcon, MapIcon } from './icons';
-import styles from './specimens.module.css';
+import { Specimen } from '../../types';
+import { InfoIcon, LeafIcon, MapIcon } from '../icons';
+import styles from '../specimens.module.css';
 import {
   chipClasses,
   specimenCardStyles,
   specimenContainerClasses,
   specimenTextClasses,
   wordBreakClasses,
-} from './styles';
+} from '../styles';
 
 interface SpecimenCardProps {
   specimen: Specimen;

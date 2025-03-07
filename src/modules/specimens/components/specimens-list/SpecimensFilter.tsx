@@ -10,6 +10,7 @@ interface SpecimensFilterProps {
   familyOptions: { id: number; name: string }[];
   sectorOptions: { id: number; name: string }[];
   regionOptions: { id: number; name: string }[];
+  expositionOptions?: { id: number; name: string }[];
 }
 
 export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
@@ -19,6 +20,7 @@ export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
   familyOptions,
   sectorOptions,
   regionOptions,
+  expositionOptions = [],
 }) => {
   const handleSearchFieldChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -69,6 +71,15 @@ export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
     });
   };
 
+  const handleExpositionFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    onFilterChange({
+      ...filterParams,
+      expositionId: event.target.value ? Number(event.target.value) : undefined,
+    });
+  };
+
   const handleSearch = () => {
     onSearch(filterParams);
   };
@@ -84,7 +95,7 @@ export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
       <h3 className='text-lg font-medium mb-3 flex items-center'>
         <FilterListIcon className='mr-2' /> Поиск и фильтры
       </h3>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-4'>
         {/* Поле поиска */}
         <div className='mb-4'>
           <label htmlFor='searchField' className={formClasses.label}>
@@ -186,6 +197,28 @@ export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
             ))}
           </select>
         </div>
+
+        {/* Фильтр по экспозиции */}
+        {expositionOptions.length > 0 && (
+          <div className='mb-4'>
+            <label htmlFor='expositionFilter' className={formClasses.label}>
+              Экспозиция
+            </label>
+            <select
+              id='expositionFilter'
+              className={formClasses.select}
+              value={filterParams.expositionId || ''}
+              onChange={handleExpositionFilterChange}
+            >
+              <option value=''>Все экспозиции</option>
+              {expositionOptions.map((exposition) => (
+                <option key={exposition.id} value={exposition.id}>
+                  {exposition.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Кнопка поиска */}

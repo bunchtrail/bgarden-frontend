@@ -1,6 +1,6 @@
 import React from 'react';
-import { Specimen } from '../types';
-import { headingClasses, specimenContainerClasses } from './styles';
+import { Specimen } from '../../types';
+import { headingClasses, specimenContainerClasses } from '../styles';
 
 interface SpecimenTaxonomyProps {
   specimen: Specimen;

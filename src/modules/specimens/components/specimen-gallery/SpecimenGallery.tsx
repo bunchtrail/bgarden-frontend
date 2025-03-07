@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { specimenContainerClasses } from './styles';
+import { specimenContainerClasses } from '../styles';
 
 interface SpecimenImage {
   id: number;
@@ -175,4 +175,4 @@ export const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({
       )}
     </>
   );
-};
+}; 

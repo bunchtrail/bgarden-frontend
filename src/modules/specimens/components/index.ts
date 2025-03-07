@@ -1,12 +1,20 @@
 export * from './icons';
-export { SpecimenActions } from './SpecimenActions';
-export { SpecimenCard } from './SpecimenCard';
-export { SpecimenForm } from './SpecimenForm';
-export { SpecimenFormContainer } from './SpecimenFormContainer';
-export { SpecimenGallery } from './SpecimenGallery';
-export { SpecimenLocationMap } from './SpecimenLocationMap';
-export { SpecimensList } from './SpecimensList';
-export { SpecimenTaxonomy } from './SpecimenTaxonomy';
+export { SpecimenActionsContainer as SpecimenActions } from './specimen-actions';
+export { SpecimenCard } from './specimen-card';
+export { SpecimenFormContainer as SpecimenForm } from './specimen-form';
+export { SpecimenGallery } from './specimen-gallery';
+export { SpecimenLocationMap } from './specimen-location-map';
+export { SpecimenTaxonomy } from './specimen-taxonomy';
+export { SpecimensListContainer as SpecimensList } from './specimens-list';
 
-// Также экспортируем стили
+// Реэкспорт компонентов
+export * from './SpecimenActions';
+export * from './SpecimenForm';
+export * from './SpecimensList';
+export * from './SpecimenFormModal';
+export * from './ErrorPanel';
+export * from './LoadingIndicator';
+
+// Стили
 export * from './styles';
+export * from './specimens.module.css';

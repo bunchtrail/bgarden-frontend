@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { headingClasses, specimenContainerClasses } from './styles';
+import { headingClasses, specimenContainerClasses } from '../styles';
 
 interface SpecimenLocationMapProps {
   latitude: number;

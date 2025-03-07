@@ -15,6 +15,15 @@ interface SpecimensListContainerProps {
   familyOptions?: { id: number; name: string }[];
   sectorOptions?: { id: number; name: string }[];
   regionOptions?: { id: number; name: string }[];
+  expositionOptions?: { id: number; name: string }[];
+  // Параметры пагинации
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  // Обработчик фильтрации
+  onFilterChange?: (filterType: string, value: string | number) => void;
 }
 
 export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
@@ -26,10 +35,24 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
   familyOptions = [],
   sectorOptions = [],
   regionOptions = [],
+  expositionOptions = [],
+  page: externalPage,
+  pageSize: externalPageSize,
+  totalCount: externalTotalCount,
+  onPageChange,
+  onPageSizeChange,
+  onFilterChange,
 }) => {
-  // Состояние для пагинации
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  // Состояние для локальной пагинации, если не предоставлены внешние обработчики
+  const [localPage, setLocalPage] = useState(0);
+  const [localRowsPerPage, setLocalRowsPerPage] = useState(10);
+
+  // Используем внешнее состояние пагинации, если оно предоставлено, иначе локальное
+  const page = externalPage !== undefined ? externalPage : localPage;
+  const rowsPerPage =
+    externalPageSize !== undefined ? externalPageSize : localRowsPerPage;
+  const totalCount =
+    externalTotalCount !== undefined ? externalTotalCount : specimens.length;
 
   // Состояние для фильтров
   const [filterParams, setFilterParams] = useState<SpecimenFilterParams>({
@@ -42,24 +65,51 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
 
   // Обработчик изменения страницы
   const handleChangePage = (newPage: number) => {
-    setPage(newPage);
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setLocalPage(newPage);
+    }
   };
 
   // Обработчик изменения количества строк на странице
   const handleChangeRowsPerPage = (newRowsPerPage: number) => {
-    setRowsPerPage(newRowsPerPage);
-    setPage(0); // Сбрасываем на первую страницу при изменении количества строк
+    if (onPageSizeChange) {
+      onPageSizeChange(newRowsPerPage);
+    } else {
+      setLocalRowsPerPage(newRowsPerPage);
+      setLocalPage(0); // Сбрасываем на первую страницу при изменении количества строк
+    }
   };
 
   // Обработчик изменения фильтров
   const handleFilterChange = (newFilterParams: SpecimenFilterParams) => {
     setFilterParams(newFilterParams);
+
+    // Вызываем внешний обработчик фильтрации, если он предоставлен
+    if (onFilterChange) {
+      if (newFilterParams.familyId !== undefined) {
+        onFilterChange('family', newFilterParams.familyId);
+      }
+      if (newFilterParams.regionId !== undefined) {
+        onFilterChange('region', newFilterParams.regionId);
+      }
+      if (newFilterParams.sectorType !== undefined) {
+        onFilterChange('sector', newFilterParams.sectorType);
+      }
+    }
   };
 
   // Обработчик поиска
   const handleSearch = (filterParams: SpecimenFilterParams) => {
     onSearch(filterParams);
-    setPage(0); // Сбрасываем на первую страницу при новом поиске
+
+    // Сбрасываем на первую страницу при новом поиске
+    if (onPageChange) {
+      onPageChange(0);
+    } else {
+      setLocalPage(0);
+    }
   };
 
   return (
@@ -74,6 +124,7 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
         familyOptions={familyOptions}
         sectorOptions={sectorOptions}
         regionOptions={regionOptions}
+        expositionOptions={expositionOptions}
       />
 
       {/* Компонент таблицы */}
@@ -90,7 +141,7 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
       <SpecimensPagination
         page={page}
         rowsPerPage={rowsPerPage}
-        totalCount={specimens.length}
+        totalCount={totalCount}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />

@@ -1,0 +1,1 @@
+export { SpecimenLocationMap } from './SpecimenLocationMap';

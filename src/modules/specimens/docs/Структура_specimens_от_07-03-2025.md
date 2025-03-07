@@ -1,8 +1,9 @@
 - **specimens**
   - **components**
+    - `ErrorPanel.tsx` (1.9 KB)
     - **icons**
       - `index.tsx` (9.5 KB)
-    - `index.ts` (544.0 B)
+    - `index.ts` (827.0 B)
     - `LoadingIndicator.tsx` (4.2 KB)
     - **specimen-actions**
       - `AdditionalActions.tsx` (3.0 KB)
@@ -10,6 +11,9 @@
       - `index.ts` (155.0 B)
       - `NavigationActions.tsx` (4.1 KB)
       - `SpecimenActionsContainer.tsx` (2.8 KB)
+    - **specimen-card**
+      - `index.ts` (48.0 B)
+      - `SpecimenCard.tsx` (8.6 KB)
     - **specimen-form**
       - `AdditionalInfoSection.tsx` (6.1 KB)
       - `BasicInfoSection.tsx` (4.7 KB)
@@ -20,27 +24,37 @@
       - `SpecimenFormContainer.tsx` (18.1 KB)
       - `Tabs.tsx` (3.8 KB)
       - `types.ts` (3.5 KB)
-    - `SpecimenActions.tsx` (1.2 KB)
-    - `SpecimenCard.tsx` (8.6 KB)
-    - `SpecimenForm.tsx` (831.0 B)
-    - `SpecimenFormContainer.tsx` (7.3 KB)
-    - `SpecimenGallery.tsx` (6.1 KB)
-    - `SpecimenLocationMap.tsx` (2.9 KB)
+    - **specimen-gallery**
+      - `index.ts` (53.0 B)
+      - `SpecimenGallery.tsx` (6.1 KB)
+    - **specimen-location-map**
+      - `index.ts` (62.0 B)
+      - `SpecimenLocationMap.tsx` (2.9 KB)
+    - **specimen-taxonomy**
+      - `index.ts` (55.0 B)
+      - `SpecimenTaxonomy.tsx` (3.5 KB)
+    - `SpecimenActions.ts` (376.0 B)
+    - `SpecimenForm.ts` (362.0 B)
+    - `SpecimenFormModal.tsx` (3.2 KB)
     - **specimens-list**
       - `index.ts` (154.0 B)
-      - `SpecimensFilter.tsx` (6.4 KB)
-      - `SpecimensListContainer.tsx` (3.3 KB)
+      - `SpecimensFilter.tsx` (7.5 KB)
+      - `SpecimensListContainer.tsx` (5.2 KB)
       - `SpecimensPagination.tsx` (2.6 KB)
       - `SpecimensTable.tsx` (3.9 KB)
     - `specimens.module.css` (7.0 KB)
     - `specimens.module.css.d.ts` (89.0 B)
-    - `SpecimensList.tsx` (824.0 B)
-    - `SpecimenTaxonomy.tsx` (3.5 KB)
+    - `SpecimensList.ts` (366.0 B)
     - `styles.ts` (5.6 KB)
   - **contexts**
   - **docs**
-    - `Структура_specimens_от_07-03-2025.md` (1.8 KB)
+    - `Структура_specimens_от_07-03-2025.md` (2.2 KB)
   - **hooks**
+    - `index.ts` (152.0 B)
+    - `useReferenceLists.ts` (2.3 KB)
+    - `useSpecimenFilters.ts` (5.7 KB)
+    - `useSpecimenPagination.ts` (2.9 KB)
+    - `useSpecimens.ts` (7.7 KB)
   - `index.ts` (654.0 B)
   - `README.md` (2.8 KB)
   - **services**

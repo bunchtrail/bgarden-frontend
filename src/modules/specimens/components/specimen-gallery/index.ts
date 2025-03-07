@@ -1,0 +1,1 @@
+export { SpecimenGallery } from './SpecimenGallery'; 
