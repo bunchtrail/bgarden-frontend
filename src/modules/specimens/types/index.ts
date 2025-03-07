@@ -66,4 +66,53 @@ export interface SpecimenFilterParams {
   searchValue?: string;
   familyId?: number;
   sectorType?: SectorType;
+}
+
+// Интерфейс для данных биометрии растений
+export interface Biometry {
+  id: number;
+  specimenId: number;
+  specimenInfo?: string;
+  measurementDate: Date;
+  height?: number;
+  flowerDiameter?: number;
+  notes?: string;
+}
+
+// Интерфейс для формы биометрии
+export interface BiometryFormData extends Omit<Biometry, 'id'> {
+  id?: number;
+}
+
+// Интерфейс для данных фенологии растений
+export interface Phenology {
+  id: number;
+  specimenId: number;
+  specimenInfo?: string;
+  year: number;
+  floweringStart?: Date;
+  floweringEnd?: Date;
+  fruitingDate?: Date;
+  notes?: string;
+}
+
+// Интерфейс для формы фенологии
+export interface PhenologyFormData extends Omit<Phenology, 'id'> {
+  id?: number;
+}
+
+// Интерфейс для данных семейства растений
+export interface Family {
+  id: number;
+  name: string;
+  description?: string;
+  specimensCount?: number;
+}
+
+// Интерфейс для данных региона
+export interface Region {
+  id: number;
+  name: string;
+  description?: string;
+  climate?: string;
 } 

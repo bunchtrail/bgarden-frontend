@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_07-03-2025.md` (3.8 KB)
+    - `Структура_bgarden-frontend_от_07-03-2025.md` (3.9 KB)
   - `package-lock.json` (669.1 KB)
   - `package.json` (1.2 KB)
   - `postcss.config.js` (82.0 B)
@@ -89,16 +89,18 @@
         - **docs**
           - `Структура_specimens_от_05-03-2025.md` (825.0 B)
         - **hooks**
-        - `index.ts` (526.0 B)
+        - `index.ts` (654.0 B)
         - `README.md` (2.8 KB)
         - **services**
+          - `biometryService.ts` (2.9 KB)
           - `expositionService.ts` (2.8 KB)
           - `familyService.ts` (2.7 KB)
-          - `index.ts` (244.0 B)
+          - `index.ts` (352.0 B)
+          - `phenologyService.ts` (3.2 KB)
           - `regionService.ts` (2.7 KB)
           - `specimenService.ts` (3.3 KB)
         - **types**
-          - `index.ts` (1.5 KB)
+          - `index.ts` (2.7 KB)
     - **pages**
       - **auth**
         - `LoginPage.tsx` (4.5 KB)
