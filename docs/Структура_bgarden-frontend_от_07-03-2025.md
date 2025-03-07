@@ -5,9 +5,10 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_07-03-2025.md` (3.9 KB)
-  - `package-lock.json` (669.1 KB)
-  - `package.json` (1.2 KB)
+    - `Структура_bgarden-frontend_от_07-03-2025.md` (5.3 KB)
+  - `icons_backup.tsx` (10.2 KB)
+  - `package-lock.json` (669.7 KB)
+  - `package.json` (1.3 KB)
   - `postcss.config.js` (82.0 B)
   - **public**
     - `favicon.ico` (3.8 KB)
@@ -70,25 +71,60 @@
           - `index.ts` (579.0 B)
       - **specimens**
         - **components**
+          - `ErrorPanel.tsx` (1.9 KB)
           - **icons**
-            - `index.tsx` (9.5 KB)
-          - `index.ts` (544.0 B)
+            - `index.tsx` (9.7 KB)
+          - `index.ts` (789.0 B)
           - `LoadingIndicator.tsx` (4.2 KB)
-          - `SpecimenActions.tsx` (13.5 KB)
-          - `SpecimenCard.tsx` (7.2 KB)
-          - `SpecimenForm.tsx` (27.8 KB)
-          - `SpecimenFormContainer.tsx` (7.3 KB)
-          - `SpecimenGallery.tsx` (6.1 KB)
-          - `SpecimenLocationMap.tsx` (2.9 KB)
+          - **specimen-actions**
+            - `AdditionalActions.tsx` (3.5 KB)
+            - `ExportActions.tsx` (2.3 KB)
+            - `index.ts` (155.0 B)
+            - `NavigationActions.tsx` (4.2 KB)
+            - `SpecimenActionsContainer.tsx` (2.7 KB)
+          - **specimen-card**
+            - `index.ts` (48.0 B)
+            - `SpecimenCard.tsx` (8.6 KB)
+          - **specimen-form**
+            - `AdditionalInfoSection.tsx` (6.1 KB)
+            - `BasicInfoSection.tsx` (6.3 KB)
+            - `ExpositionInfoSection.tsx` (3.7 KB)
+            - `FormFields.tsx` (15.4 KB)
+            - `GeographicInfoSection.tsx` (3.9 KB)
+            - `index.ts` (729.0 B)
+            - `SpecimenFormContainer.tsx` (24.2 KB)
+            - `Tabs.tsx` (6.2 KB)
+            - `types.ts` (3.5 KB)
+          - **specimen-gallery**
+            - `index.ts` (53.0 B)
+            - `SpecimenGallery.tsx` (6.1 KB)
+          - **specimen-location-map**
+            - `index.ts` (62.0 B)
+            - `SpecimenLocationMap.tsx` (2.9 KB)
+          - **specimen-taxonomy**
+            - `index.ts` (55.0 B)
+            - `SpecimenTaxonomy.tsx` (3.5 KB)
+          - `SpecimenActions.ts` (376.0 B)
+          - `SpecimenForm.ts` (362.0 B)
+          - **specimens-list**
+            - `index.ts` (151.0 B)
+            - `SpecimensFilter.tsx` (7.8 KB)
+            - `SpecimensListContainer.tsx` (5.3 KB)
+            - `SpecimensPagination.tsx` (5.4 KB)
+            - `SpecimensTable.tsx` (10.9 KB)
           - `specimens.module.css` (7.0 KB)
           - `specimens.module.css.d.ts` (89.0 B)
-          - `SpecimensList.tsx` (16.4 KB)
-          - `SpecimenTaxonomy.tsx` (3.5 KB)
-          - `styles.ts` (5.6 KB)
+          - `SpecimensList.ts` (366.0 B)
+          - `styles.ts` (5.9 KB)
         - **contexts**
         - **docs**
-          - `Структура_specimens_от_05-03-2025.md` (825.0 B)
+          - `Структура_specimens_от_07-03-2025.md` (2.2 KB)
         - **hooks**
+          - `index.ts` (152.0 B)
+          - `useReferenceLists.ts` (2.3 KB)
+          - `useSpecimenFilters.ts` (5.7 KB)
+          - `useSpecimenPagination.ts` (2.9 KB)
+          - `useSpecimens.ts` (7.7 KB)
         - `index.ts` (654.0 B)
         - `README.md` (2.8 KB)
         - **services**
@@ -97,7 +133,7 @@
           - `familyService.ts` (2.7 KB)
           - `index.ts` (352.0 B)
           - `phenologyService.ts` (3.2 KB)
-          - `regionService.ts` (2.7 KB)
+          - `regionService.ts` (5.5 KB)
           - `specimenService.ts` (3.3 KB)
         - **types**
           - `index.ts` (2.7 KB)
@@ -112,7 +148,7 @@
       - `HomePage.tsx` (15.5 KB)
       - `MapPage.tsx` (2.7 KB)
       - `NotFoundPage.tsx` (458.0 B)
-      - `SpecimensPage.tsx` (17.9 KB)
+      - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **services**

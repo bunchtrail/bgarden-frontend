@@ -2,19 +2,26 @@
 // Константы для модуля specimens
 // Используем глобальные константы из global-styles.ts
 import {
-    SPACING as GLOBAL_SPACING,
-    buttonClasses as globalButtonClasses,
-    chipClasses as globalChipClasses,
-    containerClasses as globalContainerClasses,
-    formClasses as globalFormClasses,
-    layoutClasses,
-    tableClasses,
-    textClasses,
-    textUtilClasses
+  SPACING as GLOBAL_SPACING,
+  animationClasses as globalAnimationClasses,
+  buttonClasses as globalButtonClasses,
+  chipClasses as globalChipClasses,
+  containerClasses as globalContainerClasses,
+  formClasses as globalFormClasses,
+  layoutClasses as globalLayoutClasses,
+  tableClasses,
+  textClasses,
+  textUtilClasses
 } from '../../../styles/global-styles';
 
 // Экспортируем константы для обратной совместимости
 export const SPECIMEN_SPACING = GLOBAL_SPACING;
+
+// Экспортируем layoutClasses из глобальных стилей
+export const layoutClasses = globalLayoutClasses;
+
+// Экспортируем animationClasses из глобальных стилей
+export const animationClasses = globalAnimationClasses;
 
 // Улучшенные Tailwind классы с использованием глобальных стилей
 export const specimenContainerClasses = {

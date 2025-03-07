@@ -4,7 +4,6 @@ import {
   ErrorPanel,
   SpecimenActions,
   SpecimenForm,
-  SpecimenFormModal,
   SpecimensList,
   containerClasses,
   headingClasses,
@@ -71,8 +70,7 @@ export const SpecimensPage: React.FC = () => {
 
   // Состояние интерфейса
   const [tabValue, setTabValue] = useState(0);
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [editingSpecimen, setEditingSpecimen] = useState<Specimen | null>(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   // Хуки для работы с данными
   const {
@@ -138,7 +136,17 @@ export const SpecimensPage: React.FC = () => {
 
   // Обработчики событий
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+    if (isAddingNew && newValue === 1) {
+      // Если пытаемся переключиться на список во время добавления, спрашиваем подтверждение
+      if (
+        window.confirm('Вы уверены, что хотите отменить добавление образца?')
+      ) {
+        setIsAddingNew(false);
+        setTabValue(newValue);
+      }
+    } else {
+      setTabValue(newValue);
+    }
   };
 
   const handleAddNew = () => {
@@ -178,8 +186,8 @@ export const SpecimensPage: React.FC = () => {
       filledBy: '',
     };
 
-    setEditingSpecimen(newSpecimen);
-    setShowFormModal(true);
+    setIsAddingNew(true);
+    setTabValue(0); // Переключаемся на вкладку с формой
   };
 
   const handleSaveSpecimen = async (data: any) => {
@@ -190,8 +198,8 @@ export const SpecimensPage: React.FC = () => {
         await createSpecimen(data as Omit<Specimen, 'id'>);
       }
 
-      setShowFormModal(false);
-      setEditingSpecimen(null);
+      setIsAddingNew(false);
+      setTabValue(1); // Переключаемся на список после сохранения
 
       // Показываем сообщение об успешном сохранении
       alert('Образец успешно сохранен');
@@ -270,7 +278,7 @@ export const SpecimensPage: React.FC = () => {
       {/* Панель ошибок */}
       <ErrorPanel error={error} className='mb-4' />
 
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
         {/* Левая колонка с панелью действий */}
         <div className='md:col-span-1'>
           <SpecimenActions
@@ -291,7 +299,7 @@ export const SpecimensPage: React.FC = () => {
             onViewReports={handleViewReports}
             onExit={handleExit}
             onDelete={
-              currentSpecimen
+              currentSpecimen && !isAddingNew
                 ? () => handleDeleteSpecimen(currentSpecimen.id)
                 : undefined
             }
@@ -314,7 +322,7 @@ export const SpecimensPage: React.FC = () => {
                   onClick={(e) => handleTabChange(e, 0)}
                   {...a11yProps(0)}
                 >
-                  Форма образца
+                  {isAddingNew ? 'Новый образец' : 'Форма образца'}
                 </button>
                 <button
                   className={`px-4 py-2 border-b-2 ${
@@ -332,11 +340,16 @@ export const SpecimensPage: React.FC = () => {
 
             <TabPanel value={tabValue} index={0}>
               <div className='p-4'>
-                {currentSpecimen ? (
+                {isAddingNew || currentSpecimen ? (
                   <SpecimenForm
-                    initialData={currentSpecimen}
+                    initialData={
+                      isAddingNew ? undefined : currentSpecimen || undefined
+                    }
                     onSave={handleSaveSpecimen}
-                    onCancel={() => setTabValue(1)} // Возврат к списку
+                    onCancel={() => {
+                      setIsAddingNew(false);
+                      setTabValue(1);
+                    }}
                     isLoading={isLoading}
                     familyOptions={familyOptions}
                     expositionOptions={expositionOptions}
@@ -367,11 +380,12 @@ export const SpecimensPage: React.FC = () => {
                 specimens={paginatedData}
                 isLoading={isLoading}
                 onViewSpecimen={handleViewDetail}
-                onEditSpecimen={(index) => {
-                  const specimen = filteredSpecimens[index];
+                onEditSpecimen={(id) => {
+                  const specimen = filteredSpecimens.find((s) => s.id === id);
                   if (specimen) {
-                    setEditingSpecimen(specimen);
-                    setShowFormModal(true);
+                    setIsAddingNew(false);
+                    setTabValue(0);
+                    navigateToIndex(filteredSpecimens.indexOf(specimen));
                   }
                 }}
                 onSearch={(filterParams) => {
@@ -403,21 +417,6 @@ export const SpecimensPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Модальное окно для добавления/редактирования образца */}
-      <SpecimenFormModal
-        isOpen={showFormModal}
-        onClose={() => {
-          setShowFormModal(false);
-          setEditingSpecimen(null);
-        }}
-        initialData={editingSpecimen}
-        onSave={handleSaveSpecimen}
-        isLoading={isLoading}
-        familyOptions={familyOptions}
-        expositionOptions={expositionOptions}
-        regionOptions={regionOptions}
-      />
     </div>
   );
 };

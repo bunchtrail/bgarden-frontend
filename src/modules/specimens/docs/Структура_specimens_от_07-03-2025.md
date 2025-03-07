@@ -3,7 +3,7 @@
     - `ErrorPanel.tsx` (1.9 KB)
     - **icons**
       - `index.tsx` (9.5 KB)
-    - `index.ts` (827.0 B)
+    - `index.ts` (789.0 B)
     - `LoadingIndicator.tsx` (4.2 KB)
     - **specimen-actions**
       - `AdditionalActions.tsx` (3.5 KB)
@@ -16,13 +16,13 @@
       - `SpecimenCard.tsx` (8.6 KB)
     - **specimen-form**
       - `AdditionalInfoSection.tsx` (6.1 KB)
-      - `BasicInfoSection.tsx` (6.4 KB)
+      - `BasicInfoSection.tsx` (6.5 KB)
       - `ExpositionInfoSection.tsx` (3.7 KB)
-      - `FormFields.tsx` (12.9 KB)
+      - `FormFields.tsx` (15.4 KB)
       - `GeographicInfoSection.tsx` (3.9 KB)
       - `index.ts` (729.0 B)
-      - `SpecimenFormContainer.tsx` (20.4 KB)
-      - `Tabs.tsx` (4.9 KB)
+      - `SpecimenFormContainer.tsx` (24.9 KB)
+      - `Tabs.tsx` (6.2 KB)
       - `types.ts` (3.5 KB)
     - **specimen-gallery**
       - `index.ts` (53.0 B)
@@ -35,7 +35,6 @@
       - `SpecimenTaxonomy.tsx` (3.5 KB)
     - `SpecimenActions.ts` (376.0 B)
     - `SpecimenForm.ts` (362.0 B)
-    - `SpecimenFormModal.tsx` (3.2 KB)
     - **specimens-list**
       - `index.ts` (154.0 B)
       - `SpecimensFilter.tsx` (7.5 KB)

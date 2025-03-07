@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Specimen, SpecimenFilterParams } from '../../types';
-import { headingClasses } from '../styles';
+import { containerClasses, headingClasses } from '../styles';
 import { SpecimensFilter } from './SpecimensFilter';
 import { SpecimensPagination } from './SpecimensPagination';
 import { SpecimensTable } from './SpecimensTable';
@@ -113,38 +113,42 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
   };
 
   return (
-    <div>
-      <h2 className={headingClasses.heading}>Список образцов растений</h2>
+    <div className={containerClasses.page}>
+      <h2 className={headingClasses.page}>Список образцов растений</h2>
 
-      {/* Компонент фильтрации */}
-      <SpecimensFilter
-        filterParams={filterParams}
-        onFilterChange={handleFilterChange}
-        onSearch={handleSearch}
-        familyOptions={familyOptions}
-        sectorOptions={sectorOptions}
-        regionOptions={regionOptions}
-        expositionOptions={expositionOptions}
-      />
+      <div className={`${containerClasses.base} mb-6 animate-fadeIn`}>
+        {/* Компонент фильтрации */}
+        <SpecimensFilter
+          filterParams={filterParams}
+          onFilterChange={handleFilterChange}
+          onSearch={handleSearch}
+          familyOptions={familyOptions}
+          sectorOptions={sectorOptions}
+          regionOptions={regionOptions}
+          expositionOptions={expositionOptions}
+        />
+      </div>
 
-      {/* Компонент таблицы */}
-      <SpecimensTable
-        specimens={specimens}
-        onViewSpecimen={onViewSpecimen}
-        onEditSpecimen={onEditSpecimen}
-        isLoading={isLoading}
-        page={page}
-        rowsPerPage={rowsPerPage}
-      />
+      <div className={`${containerClasses.base} animate-fadeIn`}>
+        {/* Компонент таблицы */}
+        <SpecimensTable
+          specimens={specimens}
+          onViewSpecimen={onViewSpecimen}
+          onEditSpecimen={onEditSpecimen}
+          isLoading={isLoading}
+          page={page}
+          rowsPerPage={rowsPerPage}
+        />
 
-      {/* Компонент пагинации */}
-      <SpecimensPagination
-        page={page}
-        rowsPerPage={rowsPerPage}
-        totalCount={totalCount}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
+        {/* Компонент пагинации */}
+        <SpecimensPagination
+          page={page}
+          rowsPerPage={rowsPerPage}
+          totalCount={totalCount}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </div>
     </div>
   );
 };

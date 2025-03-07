@@ -16,23 +16,23 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   handleSelectChange,
 }) => {
   return (
-    <div className='mb-6 bg-white p-5 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md animate-fadeIn'>
+    <div className='bg-white p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md animate-fadeIn'>
       <h3
-        className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}
+        className={`${headingClasses.heading} flex items-center text-xl mb-6 pb-3 border-b border-gray-200`}
       >
-        <span className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
+        <span className='w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
           <InfoIcon className='w-5 h-5 text-blue-600' />
         </span>
-        <span className='bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent'>
+        <span className='bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent font-semibold'>
           Основная информация
         </span>
       </h3>
 
-      <div className='space-y-5'>
+      <div className='space-y-6'>
         <div className='bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6 shadow-sm'>
           <div className='flex items-start'>
             <svg
-              className='w-5 h-5 mr-2 text-blue-600 mt-0.5 flex-shrink-0'
+              className='w-5 h-5 mr-3 text-blue-600 mt-0.5 flex-shrink-0'
               fill='currentColor'
               viewBox='0 0 20 20'
             >
@@ -56,7 +56,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='md:col-span-2'>
+          <div className='md:col-span-2 bg-gray-50 p-3 rounded-lg shadow-inner border border-gray-200'>
             <TextField
               label='Инвентарный номер'
               name='inventoryNumber'
@@ -111,7 +111,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         </div>
 
         <div className='p-5 bg-gray-50 rounded-lg border border-gray-200 transition-all duration-200 hover:border-blue-300 shadow-sm mt-6'>
-          <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+          <h4 className='font-medium text-gray-700 mb-4 flex items-center'>
             <svg
               className='w-5 h-5 mr-2 text-blue-600'
               fill='currentColor'
@@ -123,7 +123,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               Таксономическая классификация
             </span>
           </h4>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-5 mt-3'>
             <TextField
               label='Род'
               name='genus'
@@ -147,7 +147,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             />
           </div>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4'>
             <TextField
               label='Сорт'
               name='cultivar'

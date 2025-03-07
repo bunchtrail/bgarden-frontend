@@ -108,7 +108,7 @@ export const DeleteIcon: React.FC<IconProps> = ({
   >
     <path d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' />
   </svg>
-);
+      );
 
 export const EditIcon: React.FC<IconProps> = ({
   className = '',
@@ -124,6 +124,23 @@ export const EditIcon: React.FC<IconProps> = ({
     className={className}
   >
     <path d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' />
+  </svg>
+);
+
+export const PrintIcon: React.FC<IconProps> = ({
+  className = '',
+  size = 24,
+  color = 'currentColor',
+}) => (
+  <svg
+    xmlns='http://www.w3.org/2000/svg'
+    width={size}
+    height={size}
+    fill={color}
+    viewBox='0 0 24 24'
+    className={className}
+  >
+    <path d='M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z' />
   </svg>
 );
 
@@ -178,7 +195,7 @@ export const VisibilityIcon: React.FC<IconProps> = ({
   </svg>
 );
 
-export const NoteIcon: React.FC<IconProps> = ({
+export const ExitToAppIcon: React.FC<IconProps> = ({
   className = '',
   size = 24,
   color = 'currentColor',
@@ -191,60 +208,7 @@ export const NoteIcon: React.FC<IconProps> = ({
     viewBox='0 0 24 24'
     className={className}
   >
-    <path d='M22 10l-6-6H4c-1.1 0-2 .9-2 2v12.01c0 1.1.9 1.99 2 1.99h16c1.1 0 2-.9 2-2v-8zm-7-4.5l5.5 5.5H15V5.5z' />
-  </svg>
-);
-
-// Иконки сортировки
-export const SortUpIcon: React.FC<IconProps> = ({
-  className = '',
-  size = 24,
-  color = 'currentColor',
-}) => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    width={size}
-    height={size}
-    fill={color}
-    viewBox='0 0 24 24'
-    className={className}
-  >
-    <path d='M7 14l5-5 5 5H7z' />
-  </svg>
-);
-
-export const SortDownIcon: React.FC<IconProps> = ({
-  className = '',
-  size = 24,
-  color = 'currentColor',
-}) => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    width={size}
-    height={size}
-    fill={color}
-    viewBox='0 0 24 24'
-    className={className}
-  >
-    <path d='M7 10l5 5 5-5H7z' />
-  </svg>
-);
-
-// Дополнительные иконки
-export const PrintIcon: React.FC<IconProps> = ({
-  className = '',
-  size = 24,
-  color = 'currentColor',
-}) => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    width={size}
-    height={size}
-    fill={color}
-    viewBox='0 0 24 24'
-    className={className}
-  >
-    <path d='M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z' />
+    <path d='M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' />
   </svg>
 );
 
@@ -265,6 +229,23 @@ export const FileDownloadIcon: React.FC<IconProps> = ({
   </svg>
 );
 
+export const ListAltIcon: React.FC<IconProps> = ({
+  className = '',
+  size = 24,
+  color = 'currentColor',
+}) => (
+  <svg
+    xmlns='http://www.w3.org/2000/svg'
+    width={size}
+    height={size}
+    fill={color}
+    viewBox='0 0 24 24'
+    className={className}
+  >
+    <path d='M19 5v14H5V5h14m1.1-2H3.9c-.5 0-.9.4-.9.9v16.2c0 .4.4.9.9.9h16.2c.4 0 .9-.5.9-.9V3.9c0-.5-.5-.9-.9-.9zM11 7h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2z' />
+  </svg>
+);
+
 export const MonitorHeartIcon: React.FC<IconProps> = ({
   className = '',
   size = 24,
@@ -279,23 +260,6 @@ export const MonitorHeartIcon: React.FC<IconProps> = ({
     className={className}
   >
     <path d='M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM3.55 18.54l1.41 1.41L7.5 17.4l1.44 1.44C9.49 19.38 10.23 20 11 20c1.1 0 2-.9 2-2h2c0 1.1.9 2 2 2s2-.9 2-2h2c0 1.1.9 2 2 2v-2c0-1.1-.9-2-2-2h-2c0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-1.1-.9-2-2-2c-.77 0-1.51.62-1.96 1.16L10 14.16l-2.55 2.55L3.55 18.54z' />
-  </svg>
-);
-
-export const ExitToAppIcon: React.FC<IconProps> = ({
-  className = '',
-  size = 24,
-  color = 'currentColor',
-}) => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    width={size}
-    height={size}
-    fill={color}
-    viewBox='0 0 24 24'
-    className={className}
-  >
-    <path d='M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' />
   </svg>
 );
 
@@ -316,6 +280,24 @@ export const SaveIcon: React.FC<IconProps> = ({
   </svg>
 );
 
+export const CancelIcon: React.FC<IconProps> = ({
+  className = '',
+  size = 24,
+  color = 'currentColor',
+}) => (
+  <svg
+    xmlns='http://www.w3.org/2000/svg'
+    width={size}
+    height={size}
+    fill={color}
+    viewBox='0 0 24 24'
+    className={className}
+  >
+    <path d='M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z' />
+  </svg>
+);
+
+// Иконки для заголовков секций
 export const InfoIcon: React.FC<IconProps> = ({
   className = '',
   size = 24,
@@ -367,7 +349,7 @@ export const LeafIcon: React.FC<IconProps> = ({
   </svg>
 );
 
-export const CancelIcon: React.FC<IconProps> = ({
+export const NoteIcon: React.FC<IconProps> = ({
   className = '',
   size = 24,
   color = 'currentColor',
@@ -380,6 +362,41 @@ export const CancelIcon: React.FC<IconProps> = ({
     viewBox='0 0 24 24'
     className={className}
   >
-    <path d='M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z' />
+    <path d='M22 10l-6-6H4c-1.1 0-2 .9-2 2v12.01c0 1.1.9 1.99 2 1.99h16c1.1 0 2-.9 2-2v-8zm-7-4.5l5.5 5.5H15V5.5z' />
+  </svg>
+);
+
+// Иконки сортировки
+export const SortUpIcon: React.FC<IconProps> = ({
+  className = '',
+  size = 24,
+  color = 'currentColor',
+}) => (
+  <svg
+    xmlns='http://www.w3.org/2000/svg'
+    width={size}
+    height={size}
+    fill={color}
+    viewBox='0 0 24 24'
+    className={className}
+  >
+    <path d='M7 14l5-5 5 5H7z' />
+  </svg>
+);
+
+export const SortDownIcon: React.FC<IconProps> = ({
+  className = '',
+  size = 24,
+  color = 'currentColor',
+}) => (
+  <svg
+    xmlns='http://www.w3.org/2000/svg'
+    width={size}
+    height={size}
+    fill={color}
+    viewBox='0 0 24 24'
+    className={className}
+  >
+    <path d='M7 10l5 5 5-5H7z' />
   </svg>
 );

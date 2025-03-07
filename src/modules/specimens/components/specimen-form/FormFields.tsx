@@ -27,7 +27,7 @@ export const TextField: React.FC<TextFieldProps> = ({
 
   return (
     <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
-      <div className='flex flex-col sm:flex-row sm:items-start'>
+      <div className='flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0'>
         <label
           htmlFor={name.toString()}
           className={`block text-sm font-medium ${
@@ -35,7 +35,7 @@ export const TextField: React.FC<TextFieldProps> = ({
           } sm:w-1/3 sm:py-2 transition-colors duration-200`}
         >
           {label}
-          {required && <span className='text-red-500 ml-1'>*</span>}
+          {required && <span className='text-red-500 ml-1 font-bold'>*</span>}
         </label>
         <div className='mt-1 sm:mt-0 sm:w-2/3 relative'>
           {multiline ? (
@@ -46,14 +46,13 @@ export const TextField: React.FC<TextFieldProps> = ({
               value={formData[name] as string}
               onChange={handleChange}
               className={`${formClasses.textarea} ${
-                showError ? 'border-red-500 ring-red-500' : ''
-              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm`}
+                showError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 bg-white'
+              } transition-all duration-200 focus:ring-2 focus:ring-blue-300 group-hover:border-blue-300 shadow-sm w-full px-3 py-2 rounded-md text-gray-700 focus:outline-none`}
               required={required}
               aria-invalid={showError}
               aria-describedby={showError ? `${name}-error` : undefined}
               placeholder={`Введите ${label.toLowerCase()}`}
-              onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
-              onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
+              onBlur={() => markFieldAsTouched(name)}
             />
           ) : (
             <input
@@ -63,20 +62,19 @@ export const TextField: React.FC<TextFieldProps> = ({
               value={formData[name] as string}
               onChange={handleChange}
               className={`${formClasses.input} ${
-                showError ? 'border-red-500 ring-red-500' : ''
-              } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm hover:shadow`}
+                showError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 bg-white'
+              } transition-all duration-200 focus:ring-2 focus:ring-blue-300 hover:border-blue-400 shadow-sm w-full px-3 py-2 rounded-md text-gray-700 focus:outline-none`}
               required={required}
               aria-invalid={showError}
               aria-describedby={showError ? `${name}-error` : undefined}
               placeholder={`Введите ${label.toLowerCase()}`}
-              onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
-              onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
+              onBlur={() => markFieldAsTouched(name)}
             />
           )}
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
+              className='text-sm text-red-600 mt-1 animate-fadeIn flex items-center'
             >
               <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -85,7 +83,7 @@ export const TextField: React.FC<TextFieldProps> = ({
             </p>
           )}
           {!showError && isTouched && formData[name] && (
-            <span className='absolute right-2 top-2 text-green-500 animate-fadeIn'>
+            <span className='absolute right-3 top-3 text-green-500 animate-fadeIn'>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
@@ -114,10 +112,16 @@ export const NumberField: React.FC<NumberFieldProps> = ({
   const hasError = !!errors[name];
   const isTouched = touchedFields[name];
   const showError = hasError && (isTouched || formSubmitted);
+  
+  // Корректное отображение числовых значений - не показывать 0 как значение по умолчанию
+  // Приводим к строке, чтобы избежать проблем с типами для React-компонента input
+  const displayValue = formData[name] === 0 && !isTouched 
+    ? '' 
+    : String(formData[name]);
 
   return (
     <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
-      <div className='flex flex-col sm:flex-row sm:items-start'>
+      <div className='flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0'>
         <label
           htmlFor={name.toString()}
           className={`block text-sm font-medium ${
@@ -125,41 +129,41 @@ export const NumberField: React.FC<NumberFieldProps> = ({
           } sm:w-1/3 sm:py-2 transition-colors duration-200`}
         >
           {label}
-          {required && <span className='text-red-500 ml-1'>*</span>}
+          {required && <span className='text-red-500 ml-1 font-bold'>*</span>}
         </label>
         <div className='mt-1 sm:mt-0 sm:w-2/3 relative'>
           <input
             type='number'
             id={name.toString()}
             name={name.toString()}
-            value={
-              formData[name] !== undefined
-                ? typeof formData[name] === 'boolean'
-                  ? ''
-                  : String(formData[name])
-                : ''
-            }
+            value={displayValue}
             min={min}
             max={max}
             onChange={handleNumberChange}
             className={`${formClasses.input} ${
-              showError ? 'border-red-500 ring-red-500' : ''
-            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 shadow-sm hover:shadow`}
+              showError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 bg-white'
+            } transition-all duration-200 focus:ring-2 focus:ring-blue-300 hover:border-blue-400 shadow-sm w-full px-3 py-2 rounded-md text-gray-700 focus:outline-none`}
             required={required}
             aria-invalid={showError}
             aria-describedby={showError ? `${name}-error` : undefined}
-            placeholder={
-              min !== undefined && max !== undefined
-                ? `${min} - ${max}`
-                : `Введите ${label.toLowerCase()}`
-            }
-            onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
-            onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
+            placeholder={min !== undefined && max !== undefined ? `${min} - ${max}` : `Введите ${label.toLowerCase()}`}
+            onBlur={() => markFieldAsTouched(name)}
           />
+          
+          {/* Пояснение к числовому полю */}
+          {min !== undefined && max !== undefined && (
+            <p className='text-xs text-gray-500 mt-1 flex items-center'>
+              <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
+              </svg>
+              Допустимый диапазон: {min} - {max}
+            </p>
+          )}
+          
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
+              className='text-sm text-red-600 mt-1 animate-fadeIn flex items-center'
             >
               <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -168,19 +172,11 @@ export const NumberField: React.FC<NumberFieldProps> = ({
             </p>
           )}
           {!showError && isTouched && formData[name] && (
-            <span className='absolute right-2 top-2 text-green-500 animate-fadeIn'>
+            <span className='absolute right-3 top-3 text-green-500 animate-fadeIn'>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </span>
-          )}
-          {min !== undefined && max !== undefined && (
-            <p className='text-xs text-gray-500 mt-1 flex items-center'>
-              <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
-              </svg>
-              Допустимый диапазон: {min} - {max}
-            </p>
           )}
         </div>
       </div>
@@ -204,10 +200,13 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   const hasError = !!errors[name];
   const isTouched = touchedFields[name];
   const showError = hasError && (isTouched || formSubmitted);
+  
+  // Находим текущее выбранное значение для отображения
+  const selectedOption = options.find(option => option.id === formData[name]);
 
   return (
     <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
-      <div className='flex flex-col sm:flex-row sm:items-start'>
+      <div className='flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0'>
         <label
           htmlFor={name.toString()}
           className={`block text-sm font-medium ${
@@ -215,43 +214,48 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           } sm:w-1/3 sm:py-2 transition-colors duration-200`}
         >
           {label}
-          {required && <span className='text-red-500 ml-1'>*</span>}
+          {required && <span className='text-red-500 ml-1 font-bold'>*</span>}
         </label>
         <div className='mt-1 sm:mt-0 sm:w-2/3 relative'>
           <select
             id={name.toString()}
             name={name.toString()}
-            value={formData[name] as number}
+            value={formData[name] as string | number}
             onChange={handleSelectChange}
-            className={`${formClasses.select} ${
-              showError ? 'border-red-500 ring-red-500' : ''
-            } transition-all duration-200 focus:scale-[1.01] group-hover:border-blue-300 appearance-none pr-8 shadow-sm hover:shadow`}
+            className={`appearance-none ${formClasses.select} ${
+              showError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 bg-white'
+            } transition-all duration-200 focus:ring-2 focus:ring-blue-300 hover:border-blue-400 shadow-sm w-full pl-3 pr-10 py-2 rounded-md text-gray-700 focus:outline-none`}
             required={required}
             aria-invalid={showError}
             aria-describedby={showError ? `${name}-error` : undefined}
-            onFocus={(e) => e.target.classList.add('ring-2', 'ring-blue-100')}
-            onBlur={(e) => e.target.classList.remove('ring-2', 'ring-blue-100')}
+            onBlur={() => markFieldAsTouched(name)}
           >
-            <option value=''>Выберите {label.toLowerCase()}</option>
+            <option value="">Выберите {label.toLowerCase()}</option>
             {options.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.name}
               </option>
             ))}
           </select>
-          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700'>
-            <svg
-              className='h-4 w-4 fill-current text-blue-500'
-              xmlns='http://www.w3.org/2000/svg'
-              viewBox='0 0 20 20'
-            >
-              <path d='M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z' />
+          
+          {/* Отображение текущего выбранного значения */}
+          {selectedOption && !showError && (
+            <div className="absolute top-2 right-10 pointer-events-none">
+              <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
+                {selectedOption.name}
+              </span>
+            </div>
+          )}
+          
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </div>
           {showError && (
             <p
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn flex items-center mt-1`}
+              className='text-sm text-red-600 mt-1 animate-fadeIn flex items-center'
             >
               <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -259,23 +263,20 @@ export const SelectField: React.FC<SelectFieldProps> = ({
               {errors[name]}
             </p>
           )}
-          {!showError &&
-            isTouched &&
-            formData[name] &&
-            formData[name] !== '' && (
-              <span className='absolute right-8 top-2 text-green-500 animate-fadeIn'>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </span>
-            )}
+          {!showError && isTouched && formData[name] && (
+            <span className='absolute right-8 top-3 text-green-500 animate-fadeIn'>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </span>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// Компонент флажка
+// Компонент чекбокса
 export const CheckboxField: React.FC<CheckboxFieldProps> = ({
   label,
   name,
@@ -290,42 +291,66 @@ export const CheckboxField: React.FC<CheckboxFieldProps> = ({
   const hasError = !!errors[name];
   const isTouched = touchedFields[name];
   const showError = hasError && (isTouched || formSubmitted);
+  const isChecked = formData[name] as boolean;
 
   return (
-    <div className='mb-4 group'>
-      <div className='flex flex-col sm:flex-row sm:items-start'>
-        <div className='sm:w-1/3'></div>
-        <div className='mt-1 sm:mt-0 sm:w-2/3'>
+    <div className='mb-4 group transition-all duration-300 hover:bg-gray-50 rounded-lg p-2'>
+      <div className='flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0'>
+        <div className='sm:w-1/3 sm:py-2'>
+          <label
+            htmlFor={name.toString()}
+            className={`inline-flex items-center ${
+              hasError ? 'text-red-700' : 'text-gray-700'
+            } transition-colors duration-200`}
+          >
+            <span className="block text-sm font-medium">{label}</span>
+          </label>
+        </div>
+        <div className='mt-1 sm:mt-0 sm:w-2/3 relative'>
           <div className='flex items-center'>
-            <input
-              type='checkbox'
-              id={name.toString()}
-              name={name.toString()}
-              checked={Boolean(formData[name])}
-              onChange={handleCheckboxChange}
-              className={`${formClasses.checkbox} transition-all duration-200 h-5 w-5 cursor-pointer hover:ring-2 hover:ring-blue-200 border-gray-300 rounded`}
-              aria-describedby={hint ? `${name}-hint` : undefined}
-            />
-            <label
-              htmlFor={name.toString()}
-              className='ml-2 block text-sm text-gray-700 font-medium cursor-pointer select-none'
-            >
-              {label}
-            </label>
+            <div className='relative'>
+              <input
+                type='checkbox'
+                id={name.toString()}
+                name={name.toString()}
+                checked={isChecked}
+                onChange={handleCheckboxChange}
+                className={`h-5 w-5 rounded border-2 focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-colors duration-200 
+                  ${hasError ? 'border-red-500' : isChecked ? 'border-blue-500 bg-blue-500' : 'border-gray-300 bg-white'}`}
+                aria-invalid={showError}
+                aria-describedby={showError ? `${name}-error` : undefined}
+                onBlur={() => markFieldAsTouched(name)}
+              />
+              {isChecked && (
+                <svg className="absolute top-0.5 left-0.5 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            
+            <span className={`ml-3 text-sm ${isChecked ? 'font-medium text-blue-600' : 'text-gray-600'}`}>
+              {isChecked ? 'Да' : 'Нет'}
+            </span>
+            
+            {hint && (
+              <div className="ml-2 group relative">
+                <span className="inline-block w-4 h-4 bg-blue-100 text-blue-600 rounded-full cursor-help">?</span>
+                <div className="absolute left-0 bottom-full mb-2 w-48 rounded bg-gray-800 text-white text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                  {hint}
+                  <span className="absolute left-1 top-full w-2 h-2 bg-gray-800 transform rotate-45"></span>
+                </div>
+              </div>
+            )}
           </div>
-          {hint && (
-            <p
-              id={`${name}-hint`}
-              className='mt-1 text-sm text-gray-500 group-hover:text-gray-700 transition-colors duration-200'
-            >
-              {hint}
-            </p>
-          )}
+          
           {showError && (
-            <p
+            <p 
               id={`${name}-error`}
-              className={`${formClasses.error} animate-fadeIn`}
+              className='text-sm text-red-600 mt-1 animate-fadeIn flex items-center'
             >
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
               {errors[name]}
             </p>
           )}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { buttonClasses } from '../styles';
 
 interface SpecimensPaginationProps {
   page: number;
@@ -41,48 +42,124 @@ export const SpecimensPagination: React.FC<SpecimensPaginationProps> = ({
     return null;
   }
 
-  return (
-    <div className='flex flex-col md:flex-row justify-between items-center mt-4 text-sm'>
-      <div className='mb-2 md:mb-0 text-gray-600'>
-        Показано {startItem}-{endItem} из {totalCount} образцов
-      </div>
+  // Вычисляем номера страниц для отображения
+  const displayMaxPages = 5; // Максимальное количество номеров страниц
+  let pageNumbers = [];
 
-      <div className='flex items-center'>
-        <div className='mr-4'>
-          <label htmlFor='rowsPerPage' className='mr-2 text-gray-600'>
-            Строк на странице:
-          </label>
-          <select
-            id='rowsPerPage'
-            className='border rounded px-2 py-1 text-sm'
-            value={rowsPerPage}
-            onChange={handleRowsPerPageChange}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+  if (totalPages <= displayMaxPages) {
+    // Если всего страниц меньше или равно максимальному количеству, показываем все
+    pageNumbers = Array.from({ length: totalPages }, (_, i) => i);
+  } else {
+    // Иначе, показываем страницы рядом с текущей
+    const startPage = Math.max(
+      0,
+      Math.min(
+        page - Math.floor(displayMaxPages / 2),
+        totalPages - displayMaxPages
+      )
+    );
+    pageNumbers = Array.from(
+      { length: displayMaxPages },
+      (_, i) => startPage + i
+    );
+  }
+
+  return (
+    <div className='w-full mt-6 border-t border-gray-200 pt-4'>
+      <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
+        <div className='text-gray-600 text-sm'>
+          Показано <span className='font-medium'>{startItem}</span>-
+          <span className='font-medium'>{endItem}</span> из{' '}
+          <span className='font-medium'>{totalCount}</span> образцов
         </div>
 
-        <div className='flex items-center'>
-          <button
-            className='px-3 py-1 rounded border mr-1 disabled:opacity-50 disabled:cursor-not-allowed'
-            onClick={handlePrevPage}
-            disabled={page === 0}
-          >
-            ←
-          </button>
-          <span className='mx-2 text-gray-700'>
-            Страница {page + 1} из {totalPages}
-          </span>
-          <button
-            className='px-3 py-1 rounded border ml-1 disabled:opacity-50 disabled:cursor-not-allowed'
-            onClick={handleNextPage}
-            disabled={page >= totalPages - 1}
-          >
-            →
-          </button>
+        <div className='flex items-center gap-4'>
+          <div className='flex items-center'>
+            <label htmlFor='rowsPerPage' className='mr-2 text-sm text-gray-600'>
+              Строк:
+            </label>
+            <select
+              id='rowsPerPage'
+              className='border border-gray-300 rounded-md text-sm py-1 px-2 bg-white focus:border-blue-500 focus:ring-blue-500 shadow-sm'
+              value={rowsPerPage}
+              onChange={handleRowsPerPageChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          <div className='flex items-center gap-1'>
+            <button
+              className={`${buttonClasses.base} ${
+                page === 0
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:bg-blue-50'
+              } w-9 h-9 p-0 flex items-center justify-center rounded-md border border-gray-300`}
+              onClick={handlePrevPage}
+              disabled={page === 0}
+              aria-label='Предыдущая страница'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                className='h-5 w-5'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M15 19l-7-7 7-7'
+                />
+              </svg>
+            </button>
+
+            {pageNumbers.map((pageNum) => (
+              <button
+                key={pageNum}
+                className={`${
+                  buttonClasses.base
+                } w-9 h-9 p-0 flex items-center justify-center rounded-md border ${
+                  pageNum === page
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-gray-300 text-gray-700 hover:bg-blue-50'
+                }`}
+                onClick={() => onChangePage(pageNum)}
+              >
+                {pageNum + 1}
+              </button>
+            ))}
+
+            <button
+              className={`${buttonClasses.base} ${
+                page >= totalPages - 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:bg-blue-50'
+              } w-9 h-9 p-0 flex items-center justify-center rounded-md border border-gray-300`}
+              onClick={handleNextPage}
+              disabled={page >= totalPages - 1}
+              aria-label='Следующая страница'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                className='h-5 w-5'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

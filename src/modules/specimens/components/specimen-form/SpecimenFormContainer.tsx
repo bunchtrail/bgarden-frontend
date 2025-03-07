@@ -78,10 +78,15 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     {}
   );
   const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(!!initialData?.id);
 
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
+      setIsEditMode(!!initialData.id);
+    } else {
+      setFormData(emptyFormData);
+      setIsEditMode(false);
     }
   }, [initialData]);
 
@@ -428,86 +433,43 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   };
 
-  // Навигационные кнопки для вкладок
-  const renderTabNavigation = () => {
-    return (
-      <div className='flex justify-between items-center mt-8 mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200 shadow-sm'>
-        <button
-          type='button'
-          onClick={() => {
-            if (activeTab > SpecimenFormTab.BasicInfo) {
-              setActiveTab(activeTab - 1);
-            }
-          }}
-          disabled={activeTab === SpecimenFormTab.BasicInfo}
-          className={`flex items-center justify-center px-4 py-2 rounded-lg bg-white border ${
-            activeTab === SpecimenFormTab.BasicInfo
-              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
-          }`}
-        >
-          <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20'>
-            <path
-              fillRule='evenodd'
-              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
-          Назад
-        </button>
-
-        <div className='flex space-x-1'>
-          {[0, 1, 2, 3].map((tabIndex) => (
-            <button
-              key={tabIndex}
-              type='button'
-              onClick={() => setActiveTab(tabIndex)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                activeTab === tabIndex
-                  ? 'bg-blue-600 scale-125'
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-              aria-label={`Перейти к вкладке ${tabIndex + 1}`}
-            />
-          ))}
-        </div>
-
-        <button
-          type='button'
-          onClick={() => {
-            if (activeTab < SpecimenFormTab.AdditionalInfo) {
-              setActiveTab(activeTab + 1);
-            }
-          }}
-          disabled={activeTab === SpecimenFormTab.AdditionalInfo}
-          className={`flex items-center justify-center px-4 py-2 rounded-lg bg-white border ${
-            activeTab === SpecimenFormTab.AdditionalInfo
-              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
-          }`}
-        >
-          Далее
-          <svg className='w-5 h-5 ml-2' fill='currentColor' viewBox='0 0 20 20'>
-            <path
-              fillRule='evenodd'
-              d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
-        </button>
-      </div>
-    );
+  // Обработчики для переключателя режимов
+  const handleAddNewMode = () => {
+    if (isLoading) return;
+    
+    // Убираем диалог подтверждения и сразу переключаемся в режим добавления
+    setFormData(emptyFormData);
+    setErrors({});
+    setTouchedFields({});
+    setFormSubmitted(false);
+    setIsEditMode(false);
+    setActiveTab(SpecimenFormTab.BasicInfo);
+    
+    // Не вызываем onCancel(), чтобы не перенаправлять на страницу списка образцов
+  };
+  
+  // Обработчик для переключения в режим редактирования
+  const handleEditMode = () => {
+    if (isLoading || !initialData?.id) return;
+    
+    // Если есть данные для редактирования, восстанавливаем их
+    if (initialData) {
+      setFormData(initialData);
+      setErrors({});
+      setTouchedFields({});
+      setFormSubmitted(false);
+      setIsEditMode(true);
+      setActiveTab(SpecimenFormTab.BasicInfo);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={formClasses.base}>
-      <div
-        className={`${headingClasses.page} flex items-center justify-between`}
-      >
-        <h2 className='text-3xl font-bold text-gray-800 flex items-center'>
-          {initialData ? (
+    <form onSubmit={handleSubmit} className={`${formClasses.base} max-w-4xl mx-auto`}>
+      <div className={`${headingClasses.page} flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4`}>
+        <h2 className='text-2xl sm:text-3xl font-bold text-gray-800 flex items-center'>
+          {isEditMode ? (
             <>
-              <span className='w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
+              <span className='w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3 shadow-md'>
                 <svg
                   className='w-6 h-6 text-amber-600'
                   fill='currentColor'
@@ -517,12 +479,12 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
                 </svg>
               </span>
               <span className='bg-gradient-to-r from-amber-700 to-amber-500 bg-clip-text text-transparent'>
-                Редактирование образца
+                Редактирование образца #{formData.inventoryNumber}
               </span>
             </>
           ) : (
             <>
-              <span className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
+              <span className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-md'>
                 <svg
                   className='w-6 h-6 text-green-600'
                   fill='currentColor'
@@ -536,68 +498,161 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
                 </svg>
               </span>
               <span className='bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent'>
-                Создание нового образца
+                Добавление нового образца
               </span>
             </>
           )}
         </h2>
+        
+        <div className='flex items-center'>
+          {/* Переключатель режима работы с образцом */}
+          <div className='mr-4 bg-gray-100 p-1 rounded-lg shadow-inner border border-gray-200'>
+            <div className='flex items-center'>
+              <button 
+                type='button' 
+                onClick={handleAddNewMode} 
+                className={`px-3 py-1.5 text-sm rounded-md transition-all ${!isEditMode 
+                  ? 'bg-green-500 text-white shadow-sm' 
+                  : 'text-gray-600 hover:bg-gray-200'}`}
+                disabled={isLoading}
+                title="Создать новый образец"
+              >
+                <span className='flex items-center'>
+                  <svg className='w-4 h-4 mr-1' fill='currentColor' viewBox='0 0 20 20'>
+                    <path fillRule='evenodd' d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z' clipRule='evenodd' />
+                  </svg>
+                  Новый
+                </span>
+              </button>
+              <button 
+                type='button'
+                onClick={handleEditMode} 
+                className={`px-3 py-1.5 text-sm rounded-md transition-all ${isEditMode 
+                  ? 'bg-amber-500 text-white shadow-sm' 
+                  : 'text-gray-600 hover:bg-gray-200'}`}
+                disabled={isLoading || !initialData?.id}
+                title={!initialData?.id ? "Нет данных для редактирования" : "Режим редактирования образца"}
+              >
+                <span className='flex items-center'>
+                  <svg className='w-4 h-4 mr-1' fill='currentColor' viewBox='0 0 20 20'>
+                    <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
+                  </svg>
+                  Редактировать
+                </span>
+              </button>
+            </div>
+          </div>
+          
+          {/* Кнопка сохранения */}
+          <button
+            type='submit'
+            className='px-3 py-1.5 bg-white border border-green-500 text-green-600 text-sm rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 flex items-center'
+            disabled={isLoading}
+            title={isEditMode ? "Сохранить изменения в образце" : "Создать новый образец"}
+          >
+            <SaveIcon className='w-4 h-4 mr-1.5' />
+            <span>{isLoading ? 'Сохранение...' : isEditMode ? 'Сохранить изменения' : 'Создать образец'}</span>
+          </button>
+        </div>
       </div>
 
-      <FormTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        errors={errors}
-      />
+      {/* Визуальный индикатор прогресса */}
+      <div className='mb-2 bg-gray-100 rounded-lg p-3 flex items-center justify-between'>
+        <div className='flex items-center'>
+          <span className='text-sm font-medium text-gray-700 mr-3'>Прогресс заполнения:</span>
+          <div className='w-40 h-2 bg-gray-200 rounded-full overflow-hidden'>
+            <div 
+              className='h-full bg-gradient-to-r from-blue-500 to-green-500'
+              style={{ width: `${(activeTab + 1) / Object.keys(SpecimenFormTab).length * 100}%` }}
+            />
+          </div>
+        </div>
+        <div className='text-xs text-gray-500 px-2 py-1 bg-white rounded-md border border-gray-200 shadow-sm'>
+          {activeTab === SpecimenFormTab.BasicInfo && 'Шаг 1 из 4: Основная информация'}
+          {activeTab === SpecimenFormTab.GeographicInfo && 'Шаг 2 из 4: Географическая информация'}
+          {activeTab === SpecimenFormTab.ExpositionInfo && 'Шаг 3 из 4: Экспозиционная информация'}
+          {activeTab === SpecimenFormTab.AdditionalInfo && 'Шаг 4 из 4: Дополнительная информация'}
+        </div>
+      </div>
 
-      {renderActiveTabContent()}
+      {/* Вкладки формы */}
+      <div className='bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-4'>
+        <FormTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          errors={errors}
+        />
+      </div>
 
-      {renderTabNavigation()}
+      {/* Контейнер для основного содержимого формы */}
+      <div className="transition-all duration-500 ease-in-out bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        <div className="animate-fadeIn">{renderActiveTabContent()}</div>
+      </div>
 
-      <div className={`${actionsContainerClasses.base} mt-8`}>
+      {/* Навигация по вкладкам */}
+      <div className='flex justify-between items-center mt-6 mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm'>
         <button
           type='button'
-          onClick={onCancel}
-          className='flex items-center justify-center px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-300 shadow-sm hover:shadow'
-          disabled={isLoading}
+          onClick={() => {
+            if (activeTab > SpecimenFormTab.BasicInfo) {
+              setActiveTab(activeTab - 1);
+            }
+          }}
+          disabled={activeTab === SpecimenFormTab.BasicInfo}
+          className={`flex items-center justify-center px-4 py-2 rounded-lg ${
+            activeTab === SpecimenFormTab.BasicInfo
+              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
+          }`}
         >
-          <CancelIcon className='w-5 h-5 mr-2 text-gray-500' />
-          Отмена
+          <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20'>
+            <path
+              fillRule='evenodd'
+              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
+              clipRule='evenodd'
+            />
+          </svg>
+          Назад
         </button>
+
+        {/* Счетчик заполненных полей */}
+        <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 text-sm text-gray-700 flex flex-col items-center">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Заполнено полей: {Object.keys(touchedFields).length}</span>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            {Object.keys(errors).length > 0 ? 
+              <span className="text-red-500">Ошибок: {Object.keys(errors).length}</span> : 
+              <span className="text-green-500">Все заполненные поля валидны</span>
+            }
+          </div>
+        </div>
+
         <button
-          type='submit'
-          className='flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-sm hover:shadow'
-          disabled={isLoading}
+          type='button'
+          onClick={() => {
+            if (activeTab < SpecimenFormTab.AdditionalInfo) {
+              setActiveTab(activeTab + 1);
+            }
+          }}
+          disabled={activeTab === SpecimenFormTab.AdditionalInfo}
+          className={`flex items-center justify-center px-4 py-2 rounded-lg ${
+            activeTab === SpecimenFormTab.AdditionalInfo
+              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
+          }`}
         >
-          {isLoading ? (
-            <>
-              <svg
-                className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-              >
-                <circle
-                  className='opacity-25'
-                  cx='12'
-                  cy='12'
-                  r='10'
-                  stroke='currentColor'
-                  strokeWidth='4'
-                ></circle>
-                <path
-                  className='opacity-75'
-                  fill='currentColor'
-                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                ></path>
-              </svg>
-              Сохранение...
-            </>
-          ) : (
-            <>
-              <SaveIcon className='w-5 h-5 mr-2' />
-              Сохранить
-            </>
-          )}
+          Далее
+          <svg className='w-5 h-5 ml-2' fill='currentColor' viewBox='0 0 20 20'>
+            <path
+              fillRule='evenodd'
+              d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+              clipRule='evenodd'
+            />
+          </svg>
         </button>
       </div>
     </form>
