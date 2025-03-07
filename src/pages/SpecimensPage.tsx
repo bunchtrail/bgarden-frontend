@@ -15,6 +15,8 @@ import { SectorType, Specimen } from '../modules/specimens/types';
 // Импортируем необходимые зависимости и сервисы
 import {
   expositionService,
+  familyService,
+  regionService,
   specimenService,
 } from '../modules/specimens/services';
 
@@ -86,6 +88,9 @@ export const SpecimensPage: React.FC = () => {
   const [expositionOptions, setExpositionOptions] = useState<
     { id: number; name: string }[]
   >([]);
+  const [regionOptions, setRegionOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
 
   // Функция для получения заголовка раздела в зависимости от типа сектора
   const getSectionTitle = () => {
@@ -106,22 +111,64 @@ export const SpecimensPage: React.FC = () => {
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
-        // Загрузка экспозиций
-        const expositions = await expositionService.getAllExpositions();
+        // Загрузка экспозиций и других справочников параллельно
+        const [expositions, families, regions, data] = await Promise.all([
+          expositionService.getAllExpositions(),
+          familyService.getAllFamilies(),
+          regionService.getAllRegions(),
+          specimenService.getSpecimensBySectorType(sectorType),
+        ]);
+
         setExpositionOptions(expositions);
+        setFamilyOptions(families);
 
-        // Загрузка семейств
-        // Временно используем заглушку, так как метод getFamiliesBySector отсутствует
-        setFamilyOptions([]);
+        console.log('Загруженные регионы:', regions);
 
-        // Загрузка образцов
-        const data = await specimenService.getSpecimensBySectorType(sectorType);
-        setSpecimens(data);
-        setFilteredSpecimens(data);
+        // Если регионов нет или их мало, используем временное сопоставление
+        if (!regions || regions.length === 0) {
+          const sectorData = [
+            { id: 1, name: 'Дендрарий', sectorType: 0 },
+            { id: 2, name: 'Участок флоры', sectorType: 1 },
+            { id: 3, name: 'Участок цветоводства', sectorType: 2 },
+          ];
 
-        if (data.length > 0) {
+          const sectorRegionMapping =
+            regionService.getSectorRegionMapping(sectorData);
+          const temporaryRegions = Object.values(sectorRegionMapping);
+          setRegionOptions(temporaryRegions);
+          console.log(
+            'Используем временное сопоставление регионов:',
+            temporaryRegions
+          );
+        } else {
+          setRegionOptions(regions);
+        }
+
+        console.log('Загруженные экземпляры:', data);
+
+        // Если у экземпляров нет regionName, добавляем его
+        const enhancedData = data.map((specimen) => {
+          if (!specimen.regionName && specimen.regionId) {
+            // Ищем регион по ID
+            const matchedRegion =
+              regions.find((r) => r.id === specimen.regionId) ||
+              regionOptions.find((r) => r.id === specimen.regionId);
+            if (matchedRegion) {
+              return {
+                ...specimen,
+                regionName: matchedRegion.name,
+              };
+            }
+          }
+          return specimen;
+        });
+
+        setSpecimens(enhancedData);
+        setFilteredSpecimens(enhancedData);
+
+        if (enhancedData.length > 0) {
           setCurrentIndex(0);
-          setCurrentSpecimen(data[0]);
+          setCurrentSpecimen(enhancedData[0]);
         }
       } catch (error) {
         console.error('Ошибка загрузки данных:', error);
@@ -449,6 +496,7 @@ export const SpecimensPage: React.FC = () => {
                     isLoading={isLoading}
                     familyOptions={familyOptions}
                     expositionOptions={expositionOptions}
+                    regionOptions={regionOptions}
                   />
                 ) : (
                   <div className='flex flex-col items-center justify-center p-8'>
@@ -482,6 +530,7 @@ export const SpecimensPage: React.FC = () => {
                   }
                 }}
                 familyOptions={familyOptions}
+                regionOptions={regionOptions}
                 sectorOptions={[
                   { id: SectorType.Dendrology, name: 'Дендрология' },
                   { id: SectorType.Flora, name: 'Флора' },
@@ -512,6 +561,7 @@ export const SpecimensPage: React.FC = () => {
                 isLoading={isLoading}
                 familyOptions={familyOptions}
                 expositionOptions={expositionOptions}
+                regionOptions={regionOptions}
               />
             </div>
           </div>
