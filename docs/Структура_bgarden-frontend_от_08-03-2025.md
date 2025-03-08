@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_07-03-2025.md` (6.3 KB)
+    - `Структура_bgarden-frontend_от_08-03-2025.md` (6.3 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (672.6 KB)
   - `package.json` (1.4 KB)
@@ -26,11 +26,11 @@
     - `App.test.tsx` (273.0 B)
     - `App.tsx` (3.9 KB)
     - **components**
-      - `Button.tsx` (1.0 KB)
+      - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
       - **icons**
       - `Navbar.tsx` (4.6 KB)
-      - `SectorCard.tsx` (1.4 KB)
+      - `SectorCard.tsx` (1.7 KB)
       - `SectorSelector.tsx` (2.2 KB)
       - **ui**
         - `Chip.tsx` (839.0 B)
@@ -174,13 +174,13 @@
           - `index.ts` (2.7 KB)
     - **pages**
       - **auth**
-        - `LoginPage.tsx` (4.5 KB)
+        - `LoginPage.tsx` (4.3 KB)
         - `ProfilePage.tsx` (4.2 KB)
-        - `RegisterPage.tsx` (8.3 KB)
+        - `RegisterPage.tsx` (7.6 KB)
       - `ErrorPage.tsx` (1.5 KB)
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (15.5 KB)
+      - `HomePage.tsx` (14.2 KB)
       - `MapPage.tsx` (6.6 KB)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
@@ -190,7 +190,7 @@
     - `setupTests.ts` (241.0 B)
     - **styles**
       - `animations.css` (1.3 KB)
-      - `global-styles.ts` (5.2 KB)
+      - `global-styles.ts` (9.1 KB)
       - `index.ts` (366.0 B)
     - **types**
     - **utils**

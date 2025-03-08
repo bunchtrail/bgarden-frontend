@@ -4,7 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
-
+/bgarden-mobile
+/bgarden-mobile/node_modules
+/bgarden-mobile/.pnp
+/bgarden-mobile/.pnp.js
 # testing
 /coverage
 

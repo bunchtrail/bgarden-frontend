@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  buttonClasses,
-  chipClasses,
-  containerClasses,
-  textClasses,
-} from '../styles/global-styles';
+import { appStyles } from '../styles/global-styles';
 
 interface CardProps {
   title: string;
@@ -28,13 +23,13 @@ const Card: React.FC<CardProps> = ({
   onClick,
 }) => {
   const cardClasses = withHover
-    ? `${containerClasses.base} ${containerClasses.withHover} ${className}`
-    : `${containerClasses.base} ${className}`;
+    ? `${appStyles.card.base} ${appStyles.card.interactive} ${className}`
+    : `${appStyles.card.base} ${className}`;
 
   return (
     <div className={cardClasses}>
       {imageUrl && (
-        <div className='h-48 overflow-hidden rounded-t-lg -mt-4 -mx-4 sm:-mx-6 mb-3'>
+        <div className='h-48 overflow-hidden rounded-t-2xl'>
           <img
             className='w-full h-full object-cover transition-transform duration-500 hover:scale-105'
             src={imageUrl}
@@ -42,34 +37,36 @@ const Card: React.FC<CardProps> = ({
           />
         </div>
       )}
-      <div className='py-2'>
-        <h2 className={textClasses.heading}>{title}</h2>
-        <p className={`${textClasses.body} ${textClasses.secondary}`}>
+      <div className={appStyles.card.body}>
+        <h2 className={appStyles.card.title}>{title}</h2>
+        <p className={`${appStyles.text.body} ${appStyles.text.secondary} mt-2`}>
           {description}
         </p>
-      </div>
-      {tags && tags.length > 0 && (
-        <div className='flex flex-wrap mt-2'>
-          {tags.map((tag, index) => (
-            <span
-              key={index}
-              className={`${chipClasses.base} ${chipClasses.neutral}`}
+        
+        {tags && tags.length > 0 && (
+          <div className='flex flex-wrap mt-3'>
+            {tags.map((tag, index) => (
+              <span
+                key={index}
+                className={`${appStyles.chip.base} ${appStyles.chip.neutral}`}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        
+        {buttonText && (
+          <div className='mt-4'>
+            <button 
+              onClick={onClick}
+              className={`${appStyles.button.base} ${appStyles.button.primary}`}
             >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-      {buttonText && (
-        <div className='mt-4'>
-          <button 
-            onClick={onClick}
-            className={`${buttonClasses.base} ${buttonClasses.primary}`}
-          >
-            {buttonText}
-          </button>
-        </div>
-      )}
+              {buttonText}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

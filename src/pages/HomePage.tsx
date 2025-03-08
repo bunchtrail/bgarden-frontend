@@ -4,7 +4,7 @@ import SectorCard from '../components/SectorCard';
 import { useAuth } from '../modules/auth/contexts/AuthContext';
 import { UserRole } from '../modules/auth/types';
 import { SectorType } from '../modules/specimens/types';
-import { layoutClasses } from '../styles/global-styles';
+import { appStyles, layoutClasses } from '../styles/global-styles';
 
 /**
  * Главная страница с адаптивным отображением в зависимости от типа пользователя
@@ -54,14 +54,6 @@ const HomePage: React.FC = () => {
       imageUrl: placeholderImages.map,
       link: '/map',
     },
-    {
-      id: 'info',
-      title: 'Справочная информация',
-      description:
-        'Узнайте больше о видах растений, представленных в нашем ботаническом саду.',
-      imageUrl: placeholderImages.info,
-      link: '/map',
-    },
   ];
 
   const employeeTools = [
@@ -96,20 +88,26 @@ const HomePage: React.FC = () => {
     return (
       <div>
         <div className='text-center mb-8'>
-          <h1 className='text-3xl font-extrabold text-gray-900 sm:text-4xl mb-4'>
+          <h1
+            className={`text-3xl font-semibold text-[#1D1D1F] sm:text-4xl mb-4 tracking-tight`}
+          >
             Добро пожаловать в Ботанический сад
           </h1>
-          <p className='max-w-2xl mx-auto text-lg text-gray-600 mb-6'>
+          <p className={`max-w-2xl mx-auto text-lg text-[#86868B] mb-6`}>
             Исследуйте удивительный мир растений и планируйте ваше посещение
           </p>
           <div className='flex gap-4 justify-center mb-8'>
             <Link to='/login'>
-              <button className='bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md'>
+              <button
+                className={`${appStyles.button.base} ${appStyles.button.primary}`}
+              >
                 Войти в систему
               </button>
             </Link>
             <Link to='/register'>
-              <button className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md'>
+              <button
+                className={`${appStyles.button.base} ${appStyles.button.secondary}`}
+              >
                 Зарегистрироваться
               </button>
             </Link>
@@ -118,17 +116,18 @@ const HomePage: React.FC = () => {
 
         <div className={layoutClasses.gridSm2}>
           {publicFeatures.map((feature) => (
-            <div
-              key={feature.id}
-              className='bg-white rounded-lg shadow-md overflow-hidden'
-            >
-              <div className='p-6'>
-                <h3 className='text-xl font-semibold text-gray-900 mb-2'>
-                  {feature.title}
-                </h3>
-                <p className='text-gray-600 mb-4'>{feature.description}</p>
+            <div key={feature.id} className={appStyles.card.base}>
+              <div className={appStyles.card.body}>
+                <h3 className={appStyles.card.title}>{feature.title}</h3>
+                <p
+                  className={`${appStyles.text.body} ${appStyles.text.secondary} mt-2 mb-4`}
+                >
+                  {feature.description}
+                </p>
                 <Link to={feature.link}>
-                  <button className='bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md'>
+                  <button
+                    className={`${appStyles.button.base} ${appStyles.button.success} mt-2`}
+                  >
                     Перейти
                   </button>
                 </Link>
@@ -145,10 +144,12 @@ const HomePage: React.FC = () => {
     return (
       <div>
         <div className='text-center mb-6'>
-          <h1 className='text-2xl font-bold text-green-800 mb-2'>
+          <h1 className={`text-2xl font-medium text-[#1D1D1F] mb-2`}>
             Ботанический сад
           </h1>
-          <p className='max-w-xl mx-auto text-sm text-gray-600 border-b border-gray-200 pb-4'>
+          <p
+            className={`max-w-xl mx-auto text-sm text-[#86868B] border-b border-[#E5E5EA] pb-4`}
+          >
             Рабочая панель сотрудника
           </p>
         </div>
@@ -161,25 +162,25 @@ const HomePage: React.FC = () => {
                   to={`/specimens?sector=${sector.id}`}
                   className='block h-full'
                 >
-                  <div className='bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-col'>
-                    <div className='h-40 overflow-hidden'>
+                  <div className={appStyles.card.sectorCard}>
+                    <div className={appStyles.card.sectorImage}>
                       <img
                         src={sector.imageUrl}
                         alt={sector.title}
-                        className='w-full h-full object-cover transition-all duration-500 group-hover:scale-110'
+                        className={appStyles.card.sectorImageInner}
                       />
                     </div>
-                    <div className='p-4 flex-1 flex flex-col'>
-                      <h2 className='text-xl font-bold text-green-800 mb-2 text-center'>
+                    <div className={appStyles.card.sectorContent}>
+                      <h2 className={appStyles.card.sectorTitle}>
                         {sector.title}
                       </h2>
-                      <p className='text-gray-600 text-sm flex-1 mb-3'>
+                      <p className={appStyles.card.sectorDescription}>
                         {sector.description}
                       </p>
-                      <div className='flex items-center justify-center mt-auto'>
-                        <span className='bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-full inline-flex items-center justify-center'>
+                      <div className='flex items-center justify-center'>
+                        <span className={appStyles.card.sectorButton}>
                           <svg
-                            className='w-4 h-4 mr-1'
+                            className='w-3 h-3 mr-1'
                             fill='none'
                             stroke='currentColor'
                             viewBox='0 0 24 24'
@@ -205,12 +206,8 @@ const HomePage: React.FC = () => {
 
         <div className='flex gap-4 flex-wrap justify-center items-start mt-6'>
           {employeeTools.map((tool) => (
-            <Link
-              key={tool.id}
-              to={tool.link}
-              className='bg-white px-4 py-3 rounded-md shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex items-center group w-full sm:w-auto'
-            >
-              <div className='mr-2 p-2 rounded-full bg-green-100 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors'>
+            <Link key={tool.id} to={tool.link} className={appStyles.tool.base}>
+              <div className={appStyles.tool.icon}>
                 {tool.id === 'specimens' ? (
                   <svg
                     className='w-5 h-5'
@@ -243,18 +240,16 @@ const HomePage: React.FC = () => {
                   </svg>
                 )}
               </div>
-              <span className='text-gray-700 font-medium group-hover:text-gray-900'>
-                {tool.title}
-              </span>
+              <span className={appStyles.tool.title}>{tool.title}</span>
             </Link>
           ))}
 
           {user.role === UserRole.Administrator && (
             <Link
               to='/admin'
-              className='bg-blue-50 px-4 py-3 rounded-md shadow-sm border border-blue-200 hover:shadow-md transition-all duration-200 flex items-center group w-full sm:w-auto'
+              className={`${appStyles.tool.base} bg-[#F2F8F5] border-[#D1E7DB]`}
             >
-              <div className='mr-2 p-2 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors'>
+              <div className={appStyles.tool.adminIcon}>
                 <svg
                   className='w-5 h-5'
                   fill='none'
@@ -276,17 +271,14 @@ const HomePage: React.FC = () => {
                   />
                 </svg>
               </div>
-              <span className='text-blue-700 font-medium group-hover:text-blue-900'>
+              <span className={appStyles.tool.title}>
                 Административная панель
               </span>
             </Link>
           )}
 
-          <Link
-            to='/map'
-            className='bg-white px-4 py-3 rounded-md shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex items-center group w-full sm:w-auto'
-          >
-            <div className='mr-2 p-2 rounded-full bg-green-100 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors'>
+          <Link to='/map' className={appStyles.tool.base}>
+            <div className={appStyles.tool.icon}>
               <svg
                 className='w-5 h-5'
                 fill='none'
@@ -302,9 +294,7 @@ const HomePage: React.FC = () => {
                 />
               </svg>
             </div>
-            <span className='text-gray-700 font-medium group-hover:text-gray-900'>
-              Карта сада
-            </span>
+            <span className={appStyles.tool.title}>Карта сада</span>
           </Link>
         </div>
       </div>

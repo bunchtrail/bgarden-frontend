@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SectorType } from '../modules/specimens/types';
-import { buttonClasses, containerClasses, textClasses } from '../styles/global-styles';
+import { appStyles } from '../styles/global-styles';
 
 interface SectorCardProps {
   id: SectorType;
@@ -19,21 +19,35 @@ const SectorCard: React.FC<SectorCardProps> = ({
   return (
     <Link
       to={`/specimens?sector=${id}`}
-      className='block w-full'
+      className='block w-full h-full'
     >
-      <div className={`${containerClasses.base} ${containerClasses.withHover} h-full flex flex-col`}>
-        <div className='h-48 overflow-hidden rounded-t-lg -mt-4 -mx-4 sm:-mx-6 mb-3'>
+      <div className={appStyles.card.sectorCard}>
+        <div className={appStyles.card.sectorImage}>
           <img
             src={imageUrl}
             alt={title}
-            className='w-full h-full object-cover transition-transform duration-500 hover:scale-110'
+            className={appStyles.card.sectorImageInner}
           />
         </div>
-        <div className='p-2 flex-1 flex flex-col'>
-          <h3 className={textClasses.heading}>{title}</h3>
-          <p className={`${textClasses.body} ${textClasses.secondary} flex-1`}>{description}</p>
-          <div className='mt-auto'>
-            <span className={`${buttonClasses.base} ${buttonClasses.success} inline-block`}>
+        <div className={appStyles.card.sectorContent}>
+          <h3 className={appStyles.card.sectorTitle}>{title}</h3>
+          <p className={appStyles.card.sectorDescription}>{description}</p>
+          <div className='flex items-center justify-center'>
+            <span className={appStyles.card.sectorButton}>
+              <svg
+                className='w-3 h-3 mr-1'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 5l7 7-7 7'
+                />
+              </svg>
               Перейти к разделу
             </span>
           </div>

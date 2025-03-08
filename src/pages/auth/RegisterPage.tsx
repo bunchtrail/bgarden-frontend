@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/contexts/AuthContext';
+import { appStyles } from '../../styles/global-styles';
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -66,17 +67,17 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-[#F5F5F7] py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-md w-full space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
+          <h2 className='mt-6 text-center text-3xl font-semibold text-[#1D1D1F] tracking-tight'>
             Регистрация
           </h2>
-          <p className='mt-2 text-center text-sm text-gray-600'>
+          <p className='mt-2 text-center text-sm text-[#86868B]'>
             Уже есть аккаунт?{' '}
             <Link
               to='/login'
-              className='font-medium text-green-600 hover:text-green-500'
+              className='font-medium text-[#0A84FF] hover:text-[#0071E3] transition-colors duration-200'
             >
               Войдите в систему
             </Link>
@@ -85,123 +86,127 @@ const RegisterPage: React.FC = () => {
 
         {/* Форма регистрации */}
         <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-          <div className='rounded-md shadow-sm -space-y-px'>
-            <div className='grid grid-cols-2 gap-4 mb-4'>
+          <div className={`${appStyles.card.base} ${appStyles.card.body} py-8`}>
+            <div className='space-y-5'>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <label htmlFor='firstName' className={appStyles.form.label}>
+                    Имя
+                  </label>
+                  <input
+                    id='firstName'
+                    name='firstName'
+                    type='text'
+                    required
+                    className={appStyles.form.input}
+                    placeholder='Введите имя'
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor='lastName' className={appStyles.form.label}>
+                    Фамилия
+                  </label>
+                  <input
+                    id='lastName'
+                    name='lastName'
+                    type='text'
+                    required
+                    className={appStyles.form.input}
+                    placeholder='Введите фамилию'
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <div>
-                <label htmlFor='firstName' className='sr-only'>
-                  Имя
+                <label htmlFor='username' className={appStyles.form.label}>
+                  Имя пользователя
                 </label>
                 <input
-                  id='firstName'
-                  name='firstName'
+                  id='username'
+                  name='username'
                   type='text'
+                  autoComplete='username'
                   required
-                  className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                  placeholder='Имя'
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  className={appStyles.form.input}
+                  placeholder='Введите имя пользователя'
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
+
               <div>
-                <label htmlFor='lastName' className='sr-only'>
-                  Фамилия
+                <label htmlFor='email' className={appStyles.form.label}>
+                  Email
                 </label>
                 <input
-                  id='lastName'
-                  name='lastName'
-                  type='text'
+                  id='email'
+                  name='email'
+                  type='email'
+                  autoComplete='email'
                   required
-                  className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                  placeholder='Фамилия'
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  className={appStyles.form.input}
+                  placeholder='Введите email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label htmlFor='password' className={appStyles.form.label}>
+                  Пароль
+                </label>
+                <input
+                  id='password'
+                  name='password'
+                  type='password'
+                  autoComplete='new-password'
+                  required
+                  className={appStyles.form.input}
+                  placeholder='Введите пароль'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label htmlFor='confirmPassword' className={appStyles.form.label}>
+                  Подтверждение пароля
+                </label>
+                <input
+                  id='confirmPassword'
+                  name='confirmPassword'
+                  type='password'
+                  autoComplete='new-password'
+                  required
+                  className={appStyles.form.input}
+                  placeholder='Повторите пароль'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className='mb-4'>
-              <label htmlFor='username' className='sr-only'>
-                Имя пользователя
-              </label>
-              <input
-                id='username'
-                name='username'
-                type='text'
-                autoComplete='username'
-                required
-                className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Имя пользователя'
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
+            {(error || formError) && (
+              <div className={`${appStyles.form.error} mt-4`}>
+                {formError || error}
+              </div>
+            )}
 
-            <div className='mb-4'>
-              <label htmlFor='email' className='sr-only'>
-                Email
-              </label>
-              <input
-                id='email'
-                name='email'
-                type='email'
-                autoComplete='email'
-                required
-                className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <div className='mt-6'>
+              <button
+                type='submit'
+                disabled={loading}
+                className={`${appStyles.button.base} ${appStyles.button.primary} w-full ${
+                  loading ? appStyles.button.disabled : ''
+                }`}
+              >
+                {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+              </button>
             </div>
-
-            <div className='mb-4'>
-              <label htmlFor='password' className='sr-only'>
-                Пароль
-              </label>
-              <input
-                id='password'
-                name='password'
-                type='password'
-                autoComplete='new-password'
-                required
-                className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Пароль'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <div className='mb-4'>
-              <label htmlFor='confirmPassword' className='sr-only'>
-                Подтверждение пароля
-              </label>
-              <input
-                id='confirmPassword'
-                name='confirmPassword'
-                type='password'
-                autoComplete='new-password'
-                required
-                className='appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm'
-                placeholder='Подтверждение пароля'
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {(error || formError) && (
-            <div className='text-red-500 text-sm text-center'>
-              {formError || error}
-            </div>
-          )}
-
-          <div>
-            <button
-              type='submit'
-              disabled={loading}
-              className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              {loading ? 'Регистрация...' : 'Зарегистрироваться'}
-            </button>
           </div>
         </form>
       </div>
