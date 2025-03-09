@@ -27,12 +27,6 @@ export const defaultNavConfig: NavConfig = {
           path: '/expositions',
           requiredAuth: false,
         },
-        {
-          id: 'map',
-          label: 'Карта сада',
-          path: '/map',
-          requiredAuth: false,
-        },
       ],
     },
     {

@@ -5,16 +5,15 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_08-03-2025.md` (6.3 KB)
+    - `Структура_bgarden-frontend_от_09-03-2025.md` (5.7 KB)
   - `icons_backup.tsx` (10.2 KB)
-  - `package-lock.json` (672.6 KB)
-  - `package.json` (1.4 KB)
+  - `package-lock.json` (673.2 KB)
+  - `package.json` (1.5 KB)
   - `postcss.config.js` (82.0 B)
   - **public**
     - `favicon.ico` (3.8 KB)
     - **images**
       - `logo.jpg` (263.3 KB)
-      - **markers**
       - `placeholder-info.txt` (588.0 B)
     - `index.html` (1.7 KB)
     - `logo192.png` (5.2 KB)
@@ -24,7 +23,7 @@
   - `README.md` (3.4 KB)
   - **src**
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (3.9 KB)
+    - `App.tsx` (3.7 KB)
     - **components**
       - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
@@ -36,7 +35,7 @@
         - `Chip.tsx` (839.0 B)
         - `Footer.tsx` (1.2 KB)
         - `Form.tsx` (2.7 KB)
-        - `Header.tsx` (1.7 KB)
+        - `Header.tsx` (1.4 KB)
         - `index.ts` (350.0 B)
         - `Table.tsx` (2.7 KB)
     - `index.css` (443.0 B)
@@ -70,27 +69,10 @@
           - `index.ts` (57.0 B)
         - **types**
           - `index.ts` (579.0 B)
-      - **map**
-        - **components**
-          - `GardenMap.tsx` (6.7 KB)
-          - `index.ts` (231.0 B)
-          - `map.module.css` (3.3 KB)
-          - `MapAreas.tsx` (2.7 KB)
-          - `MapControls.tsx` (5.9 KB)
-          - `MarkerCluster.tsx` (3.6 KB)
-        - **hooks**
-          - `index.ts` (90.0 B)
-          - `useMap.ts` (4.3 KB)
-        - `index.ts` (456.0 B)
-        - **services**
-          - `index.ts` (78.0 B)
-          - `mapService.ts` (3.3 KB)
-        - **types**
-          - `index.ts` (1.6 KB)
       - **navigation**
         - **components**
           - **configs**
-            - `defaultNavConfig.tsx` (1.8 KB)
+            - `defaultNavConfig.tsx` (1.7 KB)
           - **icons**
             - `index.tsx` (1.2 KB)
           - `index.ts` (170.0 B)
@@ -108,8 +90,8 @@
         - **components**
           - `ErrorPanel.tsx` (4.2 KB)
           - **icons**
-            - `index.tsx` (9.7 KB)
-          - `index.ts` (789.0 B)
+            - `index.tsx` (9.2 KB)
+          - `index.ts` (725.0 B)
           - `LoadingIndicator.tsx` (4.2 KB)
           - **specimen-actions**
             - `AdditionalActions.tsx` (3.5 KB)
@@ -133,9 +115,6 @@
           - **specimen-gallery**
             - `index.ts` (53.0 B)
             - `SpecimenGallery.tsx` (6.1 KB)
-          - **specimen-location-map**
-            - `index.ts` (62.0 B)
-            - `SpecimenLocationMap.tsx` (2.9 KB)
           - **specimen-taxonomy**
             - `index.ts` (55.0 B)
             - `SpecimenTaxonomy.tsx` (3.5 KB)
@@ -180,8 +159,7 @@
       - `ErrorPage.tsx` (1.5 KB)
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (14.2 KB)
-      - `MapPage.tsx` (6.6 KB)
+      - `HomePage.tsx` (13.3 KB)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)

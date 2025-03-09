@@ -1,6 +1,6 @@
 import React from 'react';
 import { Specimen } from '../../types';
-import { InfoIcon, LeafIcon, MapIcon } from '../icons';
+import { InfoIcon, LeafIcon } from '../icons';
 import styles from '../specimens.module.css';
 import {
   chipClasses,
@@ -122,7 +122,7 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({
 
           <div className='bg-gray-50 p-3 rounded-lg border border-gray-100'>
             <h3 className='text-sm font-semibold text-gray-700 mb-2 flex items-center'>
-              <MapIcon className='w-4 h-4 mr-1.5 text-green-600' />
+              <InfoIcon className='w-4 h-4 mr-1.5 text-green-600' />
               Местоположение и информация
             </h3>
             <div className='space-y-1.5'>

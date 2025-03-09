@@ -12,7 +12,6 @@ import ErrorPage from './pages/ErrorPage';
 import ExpositionDetailPage from './pages/ExpositionDetailPage';
 import ExpositionsPage from './pages/ExpositionsPage';
 import HomePage from './pages/HomePage';
-import MapPage from './pages/MapPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { SpecimensPage } from './pages/SpecimensPage';
 
@@ -28,9 +27,6 @@ function App() {
               <Route path='/' element={<HomePage />} />
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
-
-              {/* Интерактивная карта - доступна всем пользователям без авторизации */}
-              <Route path='/map' element={<MapPage />} />
 
               {/* Маршруты только для сотрудников и администраторов */}
               <Route
