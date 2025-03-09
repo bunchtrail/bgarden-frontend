@@ -66,6 +66,13 @@ const HomePage: React.FC = () => {
       link: '/specimens',
     },
     {
+      id: 'map',
+      title: 'Карта сада',
+      description:
+        'Интерактивная карта ботанического сада с возможностью просмотра и управления расположением растений.',
+      link: '/map',
+    },
+    {
       id: 'expositions',
       title: 'Экспозиции',
       description:
@@ -98,18 +105,18 @@ const HomePage: React.FC = () => {
             Исследуйте удивительный мир растений и планируйте ваше посещение
           </p>
           <div className='flex gap-4 justify-center mb-8'>
-            <Link to='/login'>
+            <Link to='/specimens'>
               <button
                 className={`${appStyles.button.base} ${appStyles.button.primary}`}
               >
-                Войти в систему
+                Каталог растений
               </button>
             </Link>
-            <Link to='/register'>
+            <Link to='/map'>
               <button
                 className={`${appStyles.button.base} ${appStyles.button.secondary}`}
               >
-                Зарегистрироваться
+                Карта сада
               </button>
             </Link>
           </div>

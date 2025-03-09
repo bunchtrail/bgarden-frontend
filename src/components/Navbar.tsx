@@ -36,6 +36,12 @@ const Navbar: React.FC = () => {
             >
               Каталог растений
             </Link>
+            <Link
+              to='/map'
+              className='px-3 py-2 rounded-md hover:bg-green-600 transition-colors'
+            >
+              Карта сада
+            </Link>
             {user ? (
               <>
                 <Link
@@ -104,6 +110,13 @@ const Navbar: React.FC = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Каталог растений
+            </Link>
+            <Link
+              to='/map'
+              className='block px-3 py-2 rounded-md hover:bg-green-600 transition-colors'
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Карта сада
             </Link>
             {user ? (
               <>

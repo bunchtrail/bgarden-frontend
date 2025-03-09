@@ -12,6 +12,7 @@ import ErrorPage from './pages/ErrorPage';
 import ExpositionDetailPage from './pages/ExpositionDetailPage';
 import ExpositionsPage from './pages/ExpositionsPage';
 import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { SpecimensPage } from './pages/SpecimensPage';
 
@@ -57,6 +58,18 @@ function App() {
                     requiredRoles={[UserRole.Administrator, UserRole.Employee]}
                   >
                     <ExpositionDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Маршрут для страницы карты */}
+              <Route
+                path='/map'
+                element={
+                  <ProtectedRoute
+                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                  >
+                    <MapPage />
                   </ProtectedRoute>
                 }
               />

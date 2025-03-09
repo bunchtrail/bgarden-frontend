@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_09-03-2025.md` (5.7 KB)
+    - `Структура_bgarden-frontend_от_09-03-2025.md` (6.4 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (673.2 KB)
   - `package.json` (1.5 KB)
@@ -23,12 +23,12 @@
   - `README.md` (3.4 KB)
   - **src**
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (3.7 KB)
+    - `App.tsx` (4.1 KB)
     - **components**
       - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
       - **icons**
-      - `Navbar.tsx` (4.6 KB)
+      - `Navbar.tsx` (5.1 KB)
       - `SectorCard.tsx` (1.7 KB)
       - `SectorSelector.tsx` (2.2 KB)
       - **ui**
@@ -69,6 +69,30 @@
           - `index.ts` (57.0 B)
         - **types**
           - `index.ts` (579.0 B)
+      - **map**
+        - **components**
+          - **forms**
+            - `PlantAddForm.tsx` (7.7 KB)
+            - `PlantEditForm.tsx` (6.5 KB)
+          - **layers**
+            - `PlantLayer.tsx` (1.7 KB)
+          - `Map.tsx` (2.5 KB)
+          - `MapContainer.tsx` (2.1 KB)
+          - `MapControls.tsx` (4.0 KB)
+          - **markers**
+            - `PlantMarker.tsx` (2.7 KB)
+        - **contexts**
+          - `MapContext.tsx` (3.6 KB)
+        - **hooks**
+          - `index.ts` (63.0 B)
+          - `useMapControls.ts` (2.1 KB)
+        - `index.ts` (420.0 B)
+        - `README.md` (4.0 KB)
+        - **services**
+          - `mapService.ts` (3.2 KB)
+        - **types**
+          - `index.ts` (1.7 KB)
+        - **utils**
       - **navigation**
         - **components**
           - **configs**
@@ -159,7 +183,8 @@
       - `ErrorPage.tsx` (1.5 KB)
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (13.3 KB)
+      - `HomePage.tsx` (13.6 KB)
+      - `MapPage.tsx` (1.5 KB)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)
