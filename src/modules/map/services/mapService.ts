@@ -189,6 +189,97 @@ class MapService {
       throw error;
     }
   }
+  
+  // Загрузка пользовательского изображения карты
+  async uploadMapImage(mapId: number, file: File): Promise<MapData> {
+    try {
+      // Создаем FormData для отправки файла
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      console.log(`Загрузка изображения карты для ID ${mapId}`);
+      
+      // Изменяем заголовки для multipart/form-data
+      const response = await api.post<MapData>(`/Map/${mapId}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Ошибка при загрузке изображения карты для ID ${mapId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Получение полного URL для изображения карты
+  getMapImageUrl(filePath: string): string {
+    if (!filePath) {
+      return '';
+    }
+    
+    // Если путь уже полный URL, возвращаем его
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return filePath;
+    }
+    
+    // Убеждаемся, что путь начинается с /
+    const normalizedPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+    
+    // Формируем полный URL
+    return `${API_URL.replace('/api', '')}${normalizedPath}`;
+  }
+  
+  // Переключение активного статуса карты
+  async toggleMapActive(mapId: number, isActive: boolean): Promise<MapData> {
+    try {
+      const response = await api.put<MapData>(`/Map/${mapId}/active`, { isActive });
+      return response.data;
+    } catch (error) {
+      console.error(`Ошибка при изменении статуса карты с ID ${mapId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Создание новой карты
+  async createMap(mapData: Omit<MapData, 'id' | 'filePath' | 'contentType' | 'fileSize' | 'uploadDate' | 'lastUpdated' | 'specimensCount'>): Promise<MapData> {
+    try {
+      const response = await api.post<MapData>('/Map', {
+        ...mapData,
+        id: 0, // API ожидает id=0 для новых записей
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка при создании новой карты:', error);
+      throw error;
+    }
+  }
+  
+  // Обновление информации о карте
+  async updateMap(id: number, mapData: Partial<MapData>): Promise<MapData> {
+    try {
+      const response = await api.put<MapData>(`/Map/${id}`, {
+        ...mapData,
+        id,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Ошибка при обновлении информации о карте с ID ${id}:`, error);
+      throw error;
+    }
+  }
+  
+  // Удаление карты
+  async deleteMap(id: number): Promise<boolean> {
+    try {
+      const response = await api.delete(`/Map/${id}`);
+      return response.status === 204;
+    } catch (error) {
+      console.error(`Ошибка при удалении карты с ID ${id}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Экспортируем экземпляр сервиса для использования в приложении

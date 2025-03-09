@@ -17,6 +17,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mapImageUrl, setMapImageUrl] = useState<string>('');
 
   // Загрузка данных карты при монтировании
   useEffect(() => {
@@ -25,21 +26,27 @@ const MapContainer: React.FC<MapContainerProps> = ({
         setLoading(true);
         // Используем новый метод для получения активной карты
         let data = null;
-        
+
         if (mapId) {
           // Если указан конкретный ID карты, используем его
           data = await mapService.getMapById(mapId);
         } else {
           // Иначе получаем активную карту
           data = await mapService.getActiveMap();
-          
+
           // Если активная карта не найдена, пробуем получить карту с ID = 1
           if (!data) {
             data = await mapService.getMapById(1);
           }
         }
-        
-        setMapData(data);
+
+        if (data) {
+          setMapData(data);
+          // Получаем полный URL для изображения карты
+          const imageUrl = mapService.getMapImageUrl(data.filePath);
+          setMapImageUrl(imageUrl);
+        }
+
         setError(null);
       } catch (err) {
         console.error('Ошибка при загрузке карты:', err);
@@ -68,6 +75,37 @@ const MapContainer: React.FC<MapContainerProps> = ({
     );
   }
 
+  // Если у карты есть изображение, показываем его
+  if (mapData && mapImageUrl) {
+    return (
+      <MapProvider>
+        <div className='map-container-wrapper'>
+          <div className='map-header mb-4'>
+            <h2 className='text-2xl font-bold'>
+              {mapData?.name || 'Карта ботанического сада'}
+            </h2>
+            {mapData?.description && (
+              <p className='text-gray-600 mt-2'>{mapData.description}</p>
+            )}
+          </div>
+
+          {/* Отображение пользовательской карты как подложки */}
+          <div className='custom-map-image mb-4'>
+            <img
+              src={mapImageUrl}
+              alt={mapData.name}
+              className='w-full rounded-lg shadow-md'
+              style={{ maxHeight: '300px', objectFit: 'contain' }}
+            />
+          </div>
+
+          <Map mapId={mapId} sectorType={sectorType} />
+        </div>
+      </MapProvider>
+    );
+  }
+
+  // Если изображения нет, показываем только карту Leaflet
   return (
     <MapProvider>
       <div className='map-container-wrapper'>
