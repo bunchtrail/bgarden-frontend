@@ -106,7 +106,7 @@
           - `index.ts` (390.0 B)
       - **specimens**
         - **components**
-          - `ErrorPanel.tsx` (1.9 KB)
+          - `ErrorPanel.tsx` (4.2 KB)
           - **icons**
             - `index.tsx` (9.7 KB)
           - `index.ts` (789.0 B)
@@ -122,13 +122,13 @@
             - `SpecimenCard.tsx` (8.6 KB)
           - **specimen-form**
             - `AdditionalInfoSection.tsx` (6.1 KB)
-            - `BasicInfoSection.tsx` (6.3 KB)
+            - `BasicInfoSection.tsx` (5.6 KB)
             - `ExpositionInfoSection.tsx` (3.7 KB)
-            - `FormFields.tsx` (15.4 KB)
+            - `FormFields.tsx` (14.6 KB)
             - `GeographicInfoSection.tsx` (3.9 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (24.2 KB)
-            - `Tabs.tsx` (6.2 KB)
+            - `SpecimenFormContainer.tsx` (23.9 KB)
+            - `Tabs.tsx` (4.0 KB)
             - `types.ts` (3.5 KB)
           - **specimen-gallery**
             - `index.ts` (53.0 B)
@@ -150,7 +150,7 @@
           - `specimens.module.css` (7.0 KB)
           - `specimens.module.css.d.ts` (89.0 B)
           - `SpecimensList.ts` (366.0 B)
-          - `styles.ts` (5.9 KB)
+          - `styles.ts` (11.7 KB)
         - **contexts**
         - **docs**
           - `Структура_specimens_от_07-03-2025.md` (2.2 KB)
@@ -161,7 +161,7 @@
           - `useSpecimenPagination.ts` (2.9 KB)
           - `useSpecimens.ts` (7.7 KB)
         - `index.ts` (654.0 B)
-        - `README.md` (2.8 KB)
+        - `README.md` (4.6 KB)
         - **services**
           - `biometryService.ts` (2.9 KB)
           - `expositionService.ts` (2.8 KB)

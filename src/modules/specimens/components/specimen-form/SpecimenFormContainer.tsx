@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
+import { MessagePanel, MessageType } from '../ErrorPanel';
 import { CancelIcon, SaveIcon } from '../icons';
 import {
   actionsContainerClasses,
+  animationClasses,
+  containerClasses,
   formClasses,
   headingClasses,
 } from '../styles';
@@ -67,18 +70,27 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     filledBy: '',
   };
 
+  // Проверка, есть ли начальные данные, иначе используем пустую форму
   const [formData, setFormData] = useState<SpecimenFormData>(
     initialData || emptyFormData
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<SpecimenFormTab>(
-    SpecimenFormTab.BasicInfo
-  );
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
     {}
   );
-  const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
-  const [isEditMode, setIsEditMode] = useState<boolean>(!!initialData?.id);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState<SpecimenFormTab>(
+    SpecimenFormTab.MainInfo
+  );
+  const [isEditMode, setIsEditMode] = useState(!!initialData?.id);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [formMessage, setFormMessage] = useState<{
+    type: MessageType;
+    text: string;
+  } | null>(null);
+
+  // Состояние для отображения расширенных полей
+  const [showExtendedFields, setShowExtendedFields] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -98,7 +110,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let updatedData = { ...formData, [name]: value };
     markFieldAsTouched(name);
 
     // Сбрасываем ошибку для этого поля при изменении
@@ -110,10 +122,26 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       });
     }
 
+    setFormData(updatedData);
+
     // Валидация на лету
-    if (formSubmitted) {
-      validateField(name, value);
-    }
+    validateField(name, value);
+
+    // Автоматически сохраняем черновик при изменении
+    const draftTimer = setTimeout(() => {
+      localStorage.setItem('specimenFormDraft', JSON.stringify(updatedData));
+      setIsDraftSaved(true);
+      setFormMessage({
+        type: MessageType.SUCCESS,
+        text: 'Черновик автоматически сохранен',
+      });
+      setTimeout(() => {
+        setIsDraftSaved(false);
+        setFormMessage(null);
+      }, 2000);
+    }, 1000);
+
+    return () => clearTimeout(draftTimer);
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -121,6 +149,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     let updatedData = { ...formData };
     markFieldAsTouched(name);
 
+    // Обработка связанных полей при выборе из списка
     if (name === 'familyId') {
       const selectedFamily = familyOptions.find((f) => f.id === Number(value));
       updatedData = {
@@ -151,12 +180,17 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       };
     }
 
-    setFormData(updatedData);
-
-    // Валидация на лету
-    if (formSubmitted) {
-      validateField(name, value);
+    // Очищаем ошибки для данного поля
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
+
+    setFormData(updatedData);
+    validateField(name, value);
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,11 +353,34 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     e.preventDefault();
     setFormSubmitted(true);
 
-    // Проверяем валидность всех полей
-    if (validate()) {
-      onSave(formData);
+    const isValid = validate();
+    if (isValid) {
+      try {
+        onSave(formData);
+        // Показываем сообщение об успешном сохранении
+        setFormMessage({
+          type: MessageType.SUCCESS,
+          text: 'Данные успешно сохранены',
+        });
+        // Очищаем форму если это не режим редактирования
+        if (!isEditMode) {
+          setFormData(emptyFormData);
+          setTouchedFields({});
+        }
+        // Удаляем черновик после успешного сохранения
+        localStorage.removeItem('specimenFormDraft');
+      } catch (error) {
+        setFormMessage({
+          type: MessageType.ERROR,
+          text: 'Ошибка при сохранении данных',
+        });
+      }
     } else {
-      // Находим первую вкладку с ошибкой и переключаемся на нее
+      setFormMessage({
+        type: MessageType.ERROR,
+        text: 'Форма содержит ошибки. Проверьте заполнение полей.',
+      });
+      // Автоматически переходим к вкладке с ошибками
       if (
         [
           'inventoryNumber',
@@ -334,99 +391,147 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
           'species',
           'cultivar',
           'form',
+          'regionId',
+          'country',
+          'naturalRange',
+          'latitude',
+          'longitude',
         ].some((field) => !!errors[field])
       ) {
-        setActiveTab(SpecimenFormTab.BasicInfo);
-      } else if (
-        ['regionId', 'country', 'naturalRange', 'latitude', 'longitude'].some(
-          (field) => !!errors[field]
-        )
-      ) {
-        setActiveTab(SpecimenFormTab.GeographicInfo);
-      } else if (
-        ['expositionId', 'plantingYear', 'hasHerbarium', 'duplicatesInfo'].some(
-          (field) => !!errors[field]
-        )
-      ) {
-        setActiveTab(SpecimenFormTab.ExpositionInfo);
-      } else if (
-        [
-          'synonyms',
-          'determinedBy',
-          'sampleOrigin',
-          'ecologyAndBiology',
-          'economicUse',
-          'conservationStatus',
-          'originalBreeder',
-          'originalYear',
-          'notes',
-          'filledBy',
-        ].some((field) => !!errors[field])
-      ) {
+        setActiveTab(SpecimenFormTab.MainInfo);
+      } else {
         setActiveTab(SpecimenFormTab.AdditionalInfo);
       }
     }
   };
 
+  // Обновлённый рендер контента вкладок с объединением разделов
   const renderActiveTabContent = () => {
     switch (activeTab) {
-      case SpecimenFormTab.BasicInfo:
+      case SpecimenFormTab.MainInfo:
         return (
-          <BasicInfoSection
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            validateField={validateField}
-            familyOptions={familyOptions}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-          />
+          <div className='space-y-6'>
+            {/* Основная информация */}
+            <div
+              className={`${containerClasses.card} ${animationClasses.smoothTransition} ${animationClasses.elevate}`}
+            >
+              <h3 className={`${headingClasses.modern} mb-4`}>
+                Основная информация
+              </h3>
+              <BasicInfoSection
+                formData={formData}
+                errors={errors}
+                touchedFields={touchedFields}
+                formSubmitted={formSubmitted}
+                markFieldAsTouched={markFieldAsTouched}
+                validateField={validateField}
+                familyOptions={familyOptions}
+                handleChange={handleChange}
+                handleSelectChange={handleSelectChange}
+              />
+            </div>
+
+            {/* Географическая информация */}
+            <div
+              className={`${containerClasses.card} ${animationClasses.smoothTransition} ${animationClasses.elevate}`}
+            >
+              <h3 className={`${headingClasses.modern} mb-4`}>
+                Географическая информация
+              </h3>
+              <GeographicInfoSection
+                formData={formData}
+                errors={errors}
+                touchedFields={touchedFields}
+                formSubmitted={formSubmitted}
+                markFieldAsTouched={markFieldAsTouched}
+                validateField={validateField}
+                regionOptions={regionOptions}
+                handleChange={handleChange}
+                handleSelectChange={handleSelectChange}
+                handleNumberChange={handleNumberChange}
+              />
+            </div>
+          </div>
         );
-      case SpecimenFormTab.GeographicInfo:
-        return (
-          <GeographicInfoSection
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            validateField={validateField}
-            regionOptions={regionOptions}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-            handleNumberChange={handleNumberChange}
-          />
-        );
-      case SpecimenFormTab.ExpositionInfo:
-        return (
-          <ExpositionInfoSection
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            validateField={validateField}
-            expositionOptions={expositionOptions}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-            handleNumberChange={handleNumberChange}
-            handleCheckboxChange={handleCheckboxChange}
-          />
-        );
+
       case SpecimenFormTab.AdditionalInfo:
         return (
-          <AdditionalInfoSection
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            validateField={validateField}
-            handleChange={handleChange}
-            handleNumberChange={handleNumberChange}
-          />
+          <div className='space-y-6'>
+            {/* Экспозиционная информация */}
+            <div
+              className={`${containerClasses.card} ${animationClasses.smoothTransition} ${animationClasses.elevate}`}
+            >
+              <h3 className={`${headingClasses.modern} mb-4`}>
+                Экспозиционная информация
+              </h3>
+              <ExpositionInfoSection
+                formData={formData}
+                errors={errors}
+                touchedFields={touchedFields}
+                formSubmitted={formSubmitted}
+                markFieldAsTouched={markFieldAsTouched}
+                validateField={validateField}
+                expositionOptions={expositionOptions}
+                handleChange={handleChange}
+                handleSelectChange={handleSelectChange}
+                handleNumberChange={handleNumberChange}
+                handleCheckboxChange={handleCheckboxChange}
+              />
+            </div>
+
+            {/* Дополнительная информация */}
+            <div
+              className={`${containerClasses.card} ${animationClasses.smoothTransition} ${animationClasses.elevate}`}
+            >
+              <div className='flex justify-between items-center mb-4'>
+                <h3 className={`${headingClasses.modern}`}>
+                  Дополнительная информация
+                </h3>
+                <button
+                  type='button'
+                  onClick={() => setShowExtendedFields(!showExtendedFields)}
+                  className='text-sm text-blue-600 hover:text-blue-800 focus:outline-none transition-colors flex items-center gap-1'
+                >
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      showExtendedFields ? 'rotate-180' : ''
+                    }`}
+                    fill='currentColor'
+                    viewBox='0 0 20 20'
+                  >
+                    <path
+                      fillRule='evenodd'
+                      d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                  {showExtendedFields
+                    ? 'Скрыть дополнительные поля'
+                    : 'Показать дополнительные поля'}
+                </button>
+              </div>
+              {showExtendedFields ? (
+                <div className={`${animationClasses.fadeIn}`}>
+                  <AdditionalInfoSection
+                    formData={formData}
+                    errors={errors}
+                    touchedFields={touchedFields}
+                    formSubmitted={formSubmitted}
+                    markFieldAsTouched={markFieldAsTouched}
+                    validateField={validateField}
+                    handleChange={handleChange}
+                    handleNumberChange={handleNumberChange}
+                  />
+                </div>
+              ) : (
+                <p className='text-sm text-gray-500 italic bg-gray-50 p-4 rounded-lg'>
+                  Нажмите "Показать дополнительные поля" для заполнения
+                  необязательных данных, таких как синонимы, информация о
+                  происхождении и экономическом использовании.
+                </p>
+              )}
+            </div>
+          </div>
         );
       default:
         return null;
@@ -436,22 +541,22 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
   // Обработчики для переключателя режимов
   const handleAddNewMode = () => {
     if (isLoading) return;
-    
+
     // Убираем диалог подтверждения и сразу переключаемся в режим добавления
     setFormData(emptyFormData);
     setErrors({});
     setTouchedFields({});
     setFormSubmitted(false);
     setIsEditMode(false);
-    setActiveTab(SpecimenFormTab.BasicInfo);
-    
+    setActiveTab(SpecimenFormTab.MainInfo);
+
     // Не вызываем onCancel(), чтобы не перенаправлять на страницу списка образцов
   };
-  
+
   // Обработчик для переключения в режим редактирования
   const handleEditMode = () => {
     if (isLoading || !initialData?.id) return;
-    
+
     // Если есть данные для редактирования, восстанавливаем их
     if (initialData) {
       setFormData(initialData);
@@ -459,202 +564,125 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       setTouchedFields({});
       setFormSubmitted(false);
       setIsEditMode(true);
-      setActiveTab(SpecimenFormTab.BasicInfo);
+      setActiveTab(SpecimenFormTab.MainInfo);
     }
   };
 
+  // Проверка, есть ли сохраненный черновик
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('specimenFormDraft');
+    if (savedDraft && !initialData) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+        if (
+          window.confirm(
+            'Найден несохраненный черновик формы. Хотите восстановить данные?'
+          )
+        ) {
+          setFormData(parsedDraft);
+          setFormMessage({
+            type: MessageType.INFO,
+            text: 'Черновик восстановлен. Вы можете продолжить редактирование.',
+          });
+        } else {
+          localStorage.removeItem('specimenFormDraft');
+        }
+      } catch (e) {
+        localStorage.removeItem('specimenFormDraft');
+      }
+    }
+  }, [initialData]);
+
   return (
-    <form onSubmit={handleSubmit} className={`${formClasses.base} max-w-4xl mx-auto`}>
-      <div className={`${headingClasses.page} flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4`}>
-        <h2 className='text-2xl sm:text-3xl font-bold text-gray-800 flex items-center'>
-          {isEditMode ? (
-            <>
-              <span className='w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3 shadow-md'>
-                <svg
-                  className='w-6 h-6 text-amber-600'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
-                </svg>
-              </span>
-              <span className='bg-gradient-to-r from-amber-700 to-amber-500 bg-clip-text text-transparent'>
-                Редактирование образца #{formData.inventoryNumber}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-md'>
-                <svg
-                  className='w-6 h-6 text-green-600'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              </span>
-              <span className='bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent'>
-                Добавление нового образца
-              </span>
-            </>
-          )}
-        </h2>
-        
-        <div className='flex items-center'>
-          {/* Переключатель режима работы с образцом */}
-          <div className='mr-4 bg-gray-100 p-1 rounded-lg shadow-inner border border-gray-200'>
-            <div className='flex items-center'>
-              <button 
-                type='button' 
-                onClick={handleAddNewMode} 
-                className={`px-3 py-1.5 text-sm rounded-md transition-all ${!isEditMode 
-                  ? 'bg-green-500 text-white shadow-sm' 
-                  : 'text-gray-600 hover:bg-gray-200'}`}
-                disabled={isLoading}
-                title="Создать новый образец"
-              >
-                <span className='flex items-center'>
-                  <svg className='w-4 h-4 mr-1' fill='currentColor' viewBox='0 0 20 20'>
-                    <path fillRule='evenodd' d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z' clipRule='evenodd' />
-                  </svg>
-                  Новый
-                </span>
-              </button>
-              <button 
-                type='button'
-                onClick={handleEditMode} 
-                className={`px-3 py-1.5 text-sm rounded-md transition-all ${isEditMode 
-                  ? 'bg-amber-500 text-white shadow-sm' 
-                  : 'text-gray-600 hover:bg-gray-200'}`}
-                disabled={isLoading || !initialData?.id}
-                title={!initialData?.id ? "Нет данных для редактирования" : "Режим редактирования образца"}
-              >
-                <span className='flex items-center'>
-                  <svg className='w-4 h-4 mr-1' fill='currentColor' viewBox='0 0 20 20'>
-                    <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
-                  </svg>
-                  Редактировать
-                </span>
-              </button>
-            </div>
-          </div>
-          
-          {/* Кнопка сохранения */}
-          <button
-            type='submit'
-            className='px-3 py-1.5 bg-white border border-green-500 text-green-600 text-sm rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 flex items-center'
-            disabled={isLoading}
-            title={isEditMode ? "Сохранить изменения в образце" : "Создать новый образец"}
-          >
-            <SaveIcon className='w-4 h-4 mr-1.5' />
-            <span>{isLoading ? 'Сохранение...' : isEditMode ? 'Сохранить изменения' : 'Создать образец'}</span>
-          </button>
+    <div className={`${containerClasses.glassCard} p-6 max-w-5xl mx-auto`}>
+      {formMessage && (
+        <div className='mb-4'>
+          <MessagePanel
+            message={formMessage.text}
+            type={formMessage.type}
+            onClose={() => setFormMessage(null)}
+          />
         </div>
-      </div>
+      )}
 
-      {/* Визуальный индикатор прогресса */}
-      <div className='mb-2 bg-gray-100 rounded-lg p-3 flex items-center justify-between'>
-        <div className='flex items-center'>
-          <span className='text-sm font-medium text-gray-700 mr-3'>Прогресс заполнения:</span>
-          <div className='w-40 h-2 bg-gray-200 rounded-full overflow-hidden'>
-            <div 
-              className='h-full bg-gradient-to-r from-blue-500 to-green-500'
-              style={{ width: `${(activeTab + 1) / Object.keys(SpecimenFormTab).length * 100}%` }}
-            />
-          </div>
-        </div>
-        <div className='text-xs text-gray-500 px-2 py-1 bg-white rounded-md border border-gray-200 shadow-sm'>
-          {activeTab === SpecimenFormTab.BasicInfo && 'Шаг 1 из 4: Основная информация'}
-          {activeTab === SpecimenFormTab.GeographicInfo && 'Шаг 2 из 4: Географическая информация'}
-          {activeTab === SpecimenFormTab.ExpositionInfo && 'Шаг 3 из 4: Экспозиционная информация'}
-          {activeTab === SpecimenFormTab.AdditionalInfo && 'Шаг 4 из 4: Дополнительная информация'}
-        </div>
-      </div>
+      <h2 className={`${headingClasses.modern} mb-6 text-center`}>
+        {isEditMode ? 'Редактирование образца' : 'Добавление нового образца'}
+      </h2>
 
-      {/* Вкладки формы */}
-      <div className='bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-4'>
+      <p className='text-gray-600 mb-6 text-center max-w-2xl mx-auto'>
+        Заполните необходимую информацию об образце. Поля, отмеченные{' '}
+        <span className='text-red-500 font-bold'>*</span>, обязательны для
+        заполнения.
+      </p>
+
+      <form onSubmit={handleSubmit} className={formClasses.form}>
         <FormTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           errors={errors}
         />
-      </div>
 
-      {/* Контейнер для основного содержимого формы */}
-      <div className="transition-all duration-500 ease-in-out bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-        <div className="animate-fadeIn">{renderActiveTabContent()}</div>
-      </div>
-
-      {/* Навигация по вкладкам */}
-      <div className='flex justify-between items-center mt-6 mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm'>
-        <button
-          type='button'
-          onClick={() => {
-            if (activeTab > SpecimenFormTab.BasicInfo) {
-              setActiveTab(activeTab - 1);
-            }
-          }}
-          disabled={activeTab === SpecimenFormTab.BasicInfo}
-          className={`flex items-center justify-center px-4 py-2 rounded-lg ${
-            activeTab === SpecimenFormTab.BasicInfo
-              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
-          }`}
-        >
-          <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20'>
-            <path
-              fillRule='evenodd'
-              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
-          Назад
-        </button>
-
-        {/* Счетчик заполненных полей */}
-        <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 text-sm text-gray-700 flex flex-col items-center">
-          <div className="flex items-center">
-            <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>Заполнено полей: {Object.keys(touchedFields).length}</span>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {Object.keys(errors).length > 0 ? 
-              <span className="text-red-500">Ошибок: {Object.keys(errors).length}</span> : 
-              <span className="text-green-500">Все заполненные поля валидны</span>
-            }
-          </div>
+        <div className={`py-6 ${animationClasses.fadeIn}`}>
+          {renderActiveTabContent()}
         </div>
 
-        <button
-          type='button'
-          onClick={() => {
-            if (activeTab < SpecimenFormTab.AdditionalInfo) {
-              setActiveTab(activeTab + 1);
-            }
-          }}
-          disabled={activeTab === SpecimenFormTab.AdditionalInfo}
-          className={`flex items-center justify-center px-4 py-2 rounded-lg ${
-            activeTab === SpecimenFormTab.AdditionalInfo
-              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition-all duration-300'
-          }`}
-        >
-          Далее
-          <svg className='w-5 h-5 ml-2' fill='currentColor' viewBox='0 0 20 20'>
-            <path
-              fillRule='evenodd'
-              d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
-        </button>
-      </div>
-    </form>
+        <div className={actionsContainerClasses.container}>
+          <button
+            type='button'
+            className={actionsContainerClasses.secondaryButton}
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            <CancelIcon className='w-5 h-5 mr-2' />
+            Отмена
+          </button>
+          <button
+            type='submit'
+            className={actionsContainerClasses.primaryButton}
+            disabled={isLoading}
+          >
+            <SaveIcon className='w-5 h-5 mr-2' />
+            {isLoading ? (
+              <span className='flex items-center'>
+                <svg
+                  className='animate-spin -ml-1 mr-2 h-4 w-4 text-white'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  ></circle>
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                  ></path>
+                </svg>
+                Сохранение...
+              </span>
+            ) : (
+              'Сохранить'
+            )}
+          </button>
+        </div>
+
+        <div className='text-center text-gray-500 text-xs mt-8'>
+          Внесённые изменения автоматически сохраняются как черновик в локальном
+          хранилище браузера
+        </div>
+      </form>
+
+      {isDraftSaved && (
+        <div className='fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md shadow-md animate-fadeIn'>
+          Черновик автоматически сохранен
+        </div>
+      )}
+    </div>
   );
 };

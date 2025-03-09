@@ -1,6 +1,6 @@
 import React from 'react';
-import { layoutClasses } from '../../../../styles/global-styles';
-import { InfoIcon, LeafIcon, MapIcon, NoteIcon } from '../icons';
+import { InfoIcon, NoteIcon } from '../icons';
+import { animationClasses, tabClasses } from '../styles';
 import { SpecimenFormTab, TabsProps } from './types';
 
 export const FormTabs: React.FC<TabsProps> = ({
@@ -13,29 +13,15 @@ export const FormTabs: React.FC<TabsProps> = ({
       name: 'Основная информация',
       icon: <InfoIcon className='w-5 h-5 text-blue-600' />,
       color: 'blue',
-      tab: SpecimenFormTab.BasicInfo,
-      shortDescription: 'Основные данные образца: название, классификация'
-    },
-    {
-      name: 'Географическая информация',
-      icon: <MapIcon className='w-5 h-5 text-green-600' />,
-      color: 'green',
-      tab: SpecimenFormTab.GeographicInfo,
-      shortDescription: 'Расположение и происхождение образца'
-    },
-    {
-      name: 'Экспозиционная информация',
-      icon: <LeafIcon className='w-5 h-5 text-amber-600' />,
-      color: 'amber',
-      tab: SpecimenFormTab.ExpositionInfo,
-      shortDescription: 'Информация о размещении в экспозиции'
+      tab: SpecimenFormTab.MainInfo,
+      shortDescription: 'Основные данные и расположение образца',
     },
     {
       name: 'Дополнительная информация',
       icon: <NoteIcon className='w-5 h-5 text-purple-600' />,
       color: 'purple',
       tab: SpecimenFormTab.AdditionalInfo,
-      shortDescription: 'Научные и прочие данные об образце'
+      shortDescription: 'Экспозиционные, научные и прочие данные об образце',
     },
   ];
 
@@ -49,14 +35,17 @@ export const FormTabs: React.FC<TabsProps> = ({
       'species',
       'cultivar',
       'form',
+      'regionId',
+      'country',
+      'naturalRange',
+      'latitude',
+      'longitude',
     ].some((field) => !!errors[field]),
-    ['regionId', 'country', 'naturalRange', 'latitude', 'longitude'].some(
-      (field) => !!errors[field]
-    ),
-    ['expositionId', 'plantingYear', 'hasHerbarium', 'duplicatesInfo'].some(
-      (field) => !!errors[field]
-    ),
     [
+      'expositionId',
+      'plantingYear',
+      'hasHerbarium',
+      'duplicatesInfo',
       'synonyms',
       'determinedBy',
       'sampleOrigin',
@@ -70,94 +59,69 @@ export const FormTabs: React.FC<TabsProps> = ({
     ].some((field) => !!errors[field]),
   ];
 
-  // Получение стилей для каждой вкладки
-  const getTabStyles = (color: string, isActive: boolean, hasError: boolean) => {
-    const baseClasses = 'flex items-center justify-center px-4 py-3 text-sm font-medium transition-all duration-300';
-    
-    if (hasError) {
-      return `${baseClasses} ${isActive 
-        ? `bg-${color}-100 text-${color}-700 border-b-2 border-red-500` 
-        : 'text-red-600 hover:text-red-700 hover:bg-red-50'}`;
-    }
-    
-    if (isActive) {
-      return `${baseClasses} bg-${color}-50 text-${color}-700 border-b-2 border-${color}-500 shadow-inner`;
-    }
-    
-    return `${baseClasses} text-gray-600 hover:text-${color}-600 hover:bg-${color}-50`;
-  };
-
-  // Текущий активный таб и индекс
-  const currentTabIndex = tabs.findIndex(tab => tab.tab === activeTab);
-  const currentTab = tabs[currentTabIndex];
-
   return (
-    <>
-      <ul className={`${layoutClasses.flex} flex-wrap border-b border-gray-200`}>
-        {tabs.map((tab, index) => {
-          const isActive = activeTab === tab.tab;
-          const hasError = tabHasErrors[index];
-          const tabStyle = getTabStyles(tab.color, isActive, hasError);
-          
-          // Добавляем индикатор завершенности
-          const isCompleted = index < currentTabIndex;
+    <div
+      className={`${tabClasses.pillContainer} ${animationClasses.smoothTransition}`}
+    >
+      {tabs.map((tab, index) => {
+        const isActive = activeTab === tab.tab;
+        const hasError = tabHasErrors[index];
 
-          return (
-            <li key={index} className='flex-1' role="presentation">
-              <button
-                type='button'
-                onClick={() => setActiveTab(tab.tab)}
-                className={tabStyle}
-                aria-current={isActive ? 'page' : undefined}
-                role="tab"
-                aria-selected={isActive}
-                title={tab.shortDescription}
+        // Базовые классы
+        let tabClsName = `${tabClasses.pillTab} ${animationClasses.smoothTransition}`;
+
+        // Добавляем активные/неактивные классы
+        tabClsName += isActive
+          ? ` ${tabClasses.pillActive}`
+          : ` ${tabClasses.pillInactive}`;
+
+        // Если есть ошибки, добавляем соответствующий стиль
+        if (hasError) {
+          tabClsName += isActive
+            ? ' border-red-200 bg-red-50 text-red-600'
+            : ' text-red-600 ring-1 ring-red-200';
+        }
+
+        return (
+          <button
+            key={index}
+            type='button'
+            onClick={() => setActiveTab(tab.tab)}
+            className={tabClsName}
+            title={tab.shortDescription}
+          >
+            <span className='flex items-center justify-center'>
+              <span
+                className={`inline-flex mr-2 ${isActive ? 'scale-110' : ''} ${
+                  animationClasses.smoothTransition
+                }`}
               >
-                <span className='flex items-center'>
-                  {isCompleted && !hasError ? (
-                    <span className='w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2'>
-                      <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                  ) : (
-                    <span className={`${isActive ? 'scale-110' : ''} flex items-center justify-center w-5 h-5 mr-2 transition-transform duration-300`}>
-                      {tab.icon}
-                    </span>
-                  )}
-                  <span className='hidden sm:inline transition-all duration-300'>
-                    {tab.name}
-                  </span>
-                  <span className='inline sm:hidden text-xs font-bold ml-1 bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center'>
-                    {index + 1}
-                  </span>
-                  
-                  {hasError && (
-                    <span className='ml-1.5 flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-xs font-medium bg-red-100 text-red-800'>
-                      !
-                    </span>
-                  )}
+                {tab.icon}
+              </span>
+              <span className='hidden sm:inline'>{tab.name}</span>
+              <span className='inline sm:hidden font-semibold'>
+                {index + 1}
+              </span>
+
+              {hasError && (
+                <span className='ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-red-600'>
+                  <svg
+                    className='h-3.5 w-3.5'
+                    viewBox='0 0 20 20'
+                    fill='currentColor'
+                  >
+                    <path
+                      fillRule='evenodd'
+                      d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
                 </span>
-              </button>
-              
-              {isActive && (
-                <div className={`h-0.5 bg-${tab.color}-500 animate-pulse`} />
               )}
-            </li>
-          );
-        })}
-      </ul>
-      
-      {/* Описание текущей вкладки */}
-      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm flex items-center">
-        <span className="block mr-2">
-          {currentTab.icon}
-        </span>
-        <div>
-          <h3 className="font-medium text-gray-800">{currentTab.name}</h3>
-          <p className="text-xs text-gray-600">{currentTab.shortDescription}</p>
-        </div>
-      </div>
-    </>
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 };

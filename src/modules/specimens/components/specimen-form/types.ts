@@ -2,10 +2,8 @@ import { SpecimenFormData } from '../../types';
 
 // Перечисление для вкладок формы
 export enum SpecimenFormTab {
-  BasicInfo = 0,
-  GeographicInfo = 1,
-  ExpositionInfo = 2,
-  AdditionalInfo = 3
+  MainInfo = 0,  // Объединение BasicInfo и GeographicInfo
+  AdditionalInfo = 1  // Объединение ExpositionInfo и AdditionalInfo
 }
 
 // Общие пропсы для всех компонентов формы

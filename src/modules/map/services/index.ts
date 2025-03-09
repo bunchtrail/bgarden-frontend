@@ -1,2 +1,2 @@
 // Экспорт сервисов карты
-export * from './mapService';
+export * from './map';

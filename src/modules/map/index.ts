@@ -4,13 +4,18 @@
  */
 
 // Экспорт компонентов
-export * from './components';
-
-// Экспорт сервисов
-export * from './services';
-
-// Экспорт типов
-export * from './types';
+export { GardenMap } from './components/GardenMap';
+export { MapAreas } from './components/MapAreas';
+export { MapControls } from './components/MapControls';
+export { MapSchemaUploadModal } from './components/MapSchemaUploadModal';
+export { MarkerCluster } from './components/MarkerCluster';
 
 // Экспорт хуков
-export * from './hooks';
+export { useMap } from './hooks/useMap';
+
+// Экспорт всех типов
+export * from './types';
+
+// Экспорт сервисов
+export * as mapService from './services/mapService';
+

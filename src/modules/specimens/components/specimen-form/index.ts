@@ -8,10 +8,10 @@ export * from './FormFields';
 export * from './Tabs';
 
 // Экспорт секций формы
-export * from './BasicInfoSection';
-export * from './GeographicInfoSection';
-export * from './ExpositionInfoSection';
 export * from './AdditionalInfoSection';
+export * from './BasicInfoSection';
+export * from './ExpositionInfoSection';
+export * from './GeographicInfoSection';
 
 // Экспорт контейнера формы
 export * from './SpecimenFormContainer';

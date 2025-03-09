@@ -276,7 +276,7 @@ export const SpecimensPage: React.FC = () => {
       <h1 className={headingClasses.page}>{getSectionTitle()}</h1>
 
       {/* Панель ошибок */}
-      <ErrorPanel error={error} className='mb-4' />
+      <ErrorPanel message={error || ''}  className='mb-4' />
 
       <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
         {/* Левая колонка с панелью действий */}
