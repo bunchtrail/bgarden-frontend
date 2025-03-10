@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Specimen } from '../../../specimens/types';
 import { useMapContext } from '../../contexts/MapContext';
-import { mapService } from '../../services/mapService';
+import { useMapService } from '../../hooks';
 import PlantMarker from '../markers/PlantMarker';
 
 const PlantLayer: React.FC = () => {
   const { state, setLoading, setError } = useMapContext();
+  const { getAllSpecimens, getSpecimensBySector } = useMapService();
   const [specimens, setSpecimens] = useState<Specimen[]>([]);
   const isLoadingRef = useRef(false);
 
@@ -18,12 +19,9 @@ const PlantLayer: React.FC = () => {
       isLoadingRef.current = true;
       setLoading(true);
 
-      // Получаем все образцы растений из API
-      const allSpecimens = await mapService.getAllSpecimens();
-
-      // Фильтруем образцы по выбранному сектору
-      const filteredSpecimens = allSpecimens.filter(
-        (specimen) => specimen.sectorType === state.selectedSector
+      // Используем метод из хука для получения образцов по сектору
+      const filteredSpecimens = await getSpecimensBySector(
+        state.selectedSector
       );
 
       setSpecimens(filteredSpecimens);
@@ -36,7 +34,7 @@ const PlantLayer: React.FC = () => {
       setLoading(false);
       isLoadingRef.current = false;
     }
-  }, [state.selectedSector, setError, setLoading]);
+  }, [state.selectedSector, setError, setLoading, getSpecimensBySector]);
 
   // Загрузка образцов растений при изменении сектора или готовности карты
   useEffect(() => {
@@ -47,7 +45,6 @@ const PlantLayer: React.FC = () => {
     if (!isLoadingRef.current) {
       loadSpecimens();
     }
-
   }, [state.mapReady, state.mapInstance, state.selectedSector, loadSpecimens]);
 
   // Если карта не готова, ничего не рендерим

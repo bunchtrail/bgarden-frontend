@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { mapService } from '../../services/mapService';
+import { useMapService } from '../../hooks';
 import { MapData } from '../../types';
 
 interface MapUploadFormProps {
@@ -14,6 +14,7 @@ const MapUploadForm: React.FC<MapUploadFormProps> = ({
   onSuccess,
   onCancel,
 }) => {
+  const { uploadMapImage } = useMapService();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,14 +67,14 @@ const MapUploadForm: React.FC<MapUploadFormProps> = ({
     setError(null);
 
     try {
-      // Загружаем файл карты
-      const updatedMap = await mapService.uploadMapImage(mapId, file);
+      // Загружаем файл карты с использованием хука
+      const updatedMap = await uploadMapImage(mapId, file);
 
       // Показываем уведомление об успешной загрузке
       toast.success('Карта успешно загружена');
 
       // Вызываем коллбэк успешной загрузки, если он предоставлен
-      if (onSuccess) {
+      if (onSuccess && updatedMap) {
         onSuccess(updatedMap);
       }
     } catch (err) {

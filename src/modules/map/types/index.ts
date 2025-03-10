@@ -15,6 +15,12 @@ export interface MapData {
   specimensCount: number;
 }
 
+// Тип для ошибок в модуле карты
+export interface MapError {
+  message: string;
+  details?: any;
+}
+
 // Режимы взаимодействия с картой
 export enum MapMode {
   VIEW = 'view', // Режим просмотра

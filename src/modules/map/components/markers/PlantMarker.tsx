@@ -2,7 +2,7 @@ import L from 'leaflet';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Specimen } from '../../../specimens/types';
 import { useMapContext } from '../../contexts/MapContext';
-import { mapService } from '../../services/mapService';
+import { useMapService } from '../../hooks';
 import { MapMode } from '../../types';
 
 interface PlantMarkerProps {
@@ -11,20 +11,28 @@ interface PlantMarkerProps {
 
 const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
   const { state, selectSpecimen } = useMapContext();
+  const { deleteSpecimen, getMapImageUrl } = useMapService();
   const markerRef = useRef<L.Marker | null>(null);
 
-  // Функция удаления образца обернута в useCallback
-  const deleteSpecimen = useCallback(async (id: number) => {
-    try {
-      await mapService.deleteSpecimen(id);
-      // После успешного удаления обновляем список образцов
-      // Это произойдет автоматически при перезагрузке PlantLayer
-      alert('Растение успешно удалено!');
-    } catch (error) {
-      console.error('Ошибка при удалении растения:', error);
-      alert('Не удалось удалить растение');
-    }
-  }, []);
+  // Обработчик удаления образца
+  const handleDeleteSpecimen = useCallback(
+    async (id: number) => {
+      try {
+        const success = await deleteSpecimen(id);
+        if (success) {
+          // После успешного удаления обновляем список образцов
+          // Это произойдет автоматически при перезагрузке PlantLayer
+          alert('Растение успешно удалено!');
+        } else {
+          alert('Не удалось удалить растение');
+        }
+      } catch (error) {
+        console.error('Ошибка при удалении растения:', error);
+        alert('Не удалось удалить растение');
+      }
+    },
+    [deleteSpecimen]
+  );
 
   // Обработчик клика по маркеру
   const handleMarkerClick = useCallback(() => {
@@ -43,13 +51,13 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
             }"?`
           )
         ) {
-          deleteSpecimen(specimen.id);
+          handleDeleteSpecimen(specimen.id);
         }
         break;
       default:
         break;
     }
-  }, [state.mode, specimen, selectSpecimen, deleteSpecimen]);
+  }, [state.mode, specimen, selectSpecimen, handleDeleteSpecimen]);
 
   useEffect(() => {
     // Проверяем, что карта существует и готова

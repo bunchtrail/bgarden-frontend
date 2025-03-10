@@ -5,9 +5,9 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_09-03-2025.md` (6.4 KB)
+    - `Структура_bgarden-frontend_от_10-03-2025.md` (6.7 KB)
   - `icons_backup.tsx` (10.2 KB)
-  - `package-lock.json` (673.2 KB)
+  - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
   - `postcss.config.js` (82.0 B)
   - **public**
@@ -72,26 +72,33 @@
       - **map**
         - **components**
           - **forms**
-            - `PlantAddForm.tsx` (7.7 KB)
+            - `MapUploadForm.tsx` (5.0 KB)
+            - `PlantAddForm.tsx` (9.5 KB)
             - `PlantEditForm.tsx` (6.5 KB)
           - **layers**
-            - `PlantLayer.tsx` (1.7 KB)
-          - `Map.tsx` (2.5 KB)
-          - `MapContainer.tsx` (2.1 KB)
-          - `MapControls.tsx` (4.0 KB)
+            - `PlantLayer.tsx` (2.8 KB)
+          - `Map.tsx` (5.0 KB)
+          - `MapContainer.tsx` (4.1 KB)
+          - `MapControls.tsx` (7.9 KB)
+          - `MapList.tsx` (5.8 KB)
           - **markers**
-            - `PlantMarker.tsx` (2.7 KB)
+            - `PlantMarker.tsx` (4.6 KB)
+          - **pages**
+            - `MapManagementPage.tsx` (6.6 KB)
         - **contexts**
-          - `MapContext.tsx` (3.6 KB)
+          - `MapContext.tsx` (4.0 KB)
+        - **docs**
+          - `Структура_map_от_09-03-2025.md` (787.0 B)
         - **hooks**
-          - `index.ts` (63.0 B)
+          - `index.ts` (124.0 B)
           - `useMapControls.ts` (2.1 KB)
-        - `index.ts` (420.0 B)
+          - `useMapService.ts` (9.9 KB)
+        - `index.ts` (958.0 B)
         - `README.md` (4.0 KB)
         - **services**
-          - `mapService.ts` (3.2 KB)
+          - `mapService.ts` (10.6 KB)
         - **types**
-          - `index.ts` (1.7 KB)
+          - `index.ts` (1.8 KB)
         - **utils**
       - **navigation**
         - **components**
@@ -184,7 +191,7 @@
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
       - `HomePage.tsx` (13.6 KB)
-      - `MapPage.tsx` (1.5 KB)
+      - `MapPage.tsx` (9.7 KB)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)
