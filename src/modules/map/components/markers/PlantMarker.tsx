@@ -37,8 +37,8 @@ const createCustomIcon = (specimen: Specimen, isSelected: boolean = false) => {
     width: ${size}rem;
     height: ${size}rem;
     display: block;
-    left: -${size/2}rem;
-    top: -${size/2}rem;
+    left: -${size / 2}rem;
+    top: -${size / 2}rem;
     position: relative;
     border-radius: ${size}rem ${size}rem 0;
     transform: rotate(45deg);
@@ -58,11 +58,11 @@ const createCustomIcon = (specimen: Specimen, isSelected: boolean = false) => {
 
 const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
   const { state, selectSpecimen } = useMapContext();
-  const { deleteSpecimen, getMapImageUrl } = useMapService();
+  const { deleteSpecimen, getMapImageUrl: _getMapImageUrl } = useMapService();
   const markerRef = useRef<L.Marker | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
-  
+
   // Проверяем, выбрано ли текущее растение
   const isSelected = state.selectedSpecimen?.id === specimen.id;
 
@@ -71,7 +71,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
     async (id: number) => {
       try {
         setIsDeleting(true);
-        
+
         // Создаем модальное окно для подтверждения удаления
         if (
           window.confirm(
@@ -83,7 +83,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
           const success = await deleteSpecimen(id);
           if (success) {
             setDeleteSuccess(true);
-            
+
             // Добавляем визуальный эффект удаления
             if (markerRef.current && state.mapInstance) {
               // Анимируем маркер перед удалением
@@ -93,7 +93,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
                 markerElement.style.opacity = '0';
                 markerElement.style.transform = 'scale(0.5)';
               }
-              
+
               // Удаляем после небольшой задержки для анимации
               setTimeout(() => {
                 try {
@@ -102,16 +102,19 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
                     markerRef.current = null;
                   }
                 } catch (error) {
-                  console.error('Ошибка при анимированном удалении маркера:', error);
+                  console.error(
+                    'Ошибка при анимированном удалении маркера:',
+                    error
+                  );
                 }
               }, 500);
             }
-            
+
             // Показываем уведомление
             if (state.mode === MapMode.DELETE_PLANT) {
               // Создаем временное уведомление на карте
               const notification = new L.Control({ position: 'topright' });
-              notification.onAdd = function() {
+              notification.onAdd = function () {
                 const div = L.DomUtil.create('div', 'delete-notification');
                 div.innerHTML = `
                   <div class="bg-green-100 text-green-800 p-3 rounded shadow-md border border-green-200 flex items-center">
@@ -123,10 +126,10 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
                 `;
                 return div;
               };
-              
+
               if (state.mapInstance) {
                 notification.addTo(state.mapInstance);
-                
+
                 // Удаляем уведомление через 3 секунды
                 setTimeout(() => {
                   try {
@@ -141,7 +144,9 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
             }
           } else {
             console.error(`Не удалось удалить растение с ID ${id}`);
-            window.alert(`Не удалось удалить растение. Попробуйте снова позже.`);
+            window.alert(
+              `Не удалось удалить растение. Попробуйте снова позже.`
+            );
           }
         }
       } catch (error) {
@@ -151,14 +156,20 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
         setIsDeleting(false);
       }
     },
-    [deleteSpecimen, specimen.russianName, specimen.latinName, state.mapInstance, state.mode]
+    [
+      deleteSpecimen,
+      specimen.russianName,
+      specimen.latinName,
+      state.mapInstance,
+      state.mode,
+    ]
   );
 
   // Обработчик клика по маркеру
   const handleMarkerClick = useCallback(() => {
     // Если уже идет процесс удаления, игнорируем клики
     if (isDeleting) return;
-    
+
     switch (state.mode) {
       case MapMode.VIEW:
         // В режиме просмотра просто выбираем образец
@@ -189,6 +200,11 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
   useEffect(() => {
     // Проверяем, что карта существует и готова
     if (!state.mapInstance || !state.mapReady) {
+      console.log(
+        `Карта не готова для образца ${specimen.id} (${
+          specimen.russianName || specimen.latinName
+        })`
+      );
       return;
     }
 
@@ -200,7 +216,11 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
       isNaN(specimen.longitude)
     ) {
       console.warn(
-        `Образец ${specimen.id} не имеет корректных координат (lat: ${specimen.latitude}, lng: ${specimen.longitude})`
+        `Образец ${specimen.id} (${
+          specimen.russianName || specimen.latinName
+        }) не имеет корректных координат (lat: ${specimen.latitude}, lng: ${
+          specimen.longitude
+        })`
       );
       return;
     }
@@ -208,6 +228,12 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
     try {
       // Создаем маркер на карте с проверкой валидности координат
       if (!markerRef.current) {
+        console.log(
+          `Создаем маркер для образца ${specimen.id} (${
+            specimen.russianName || specimen.latinName
+          }), координаты: ${specimen.latitude}, ${specimen.longitude}`
+        );
+
         // Создаем кастомную иконку для маркера
         const customIcon = createCustomIcon(specimen, isSelected);
 
@@ -218,6 +244,9 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
 
         // Привязываем маркер к карте
         markerRef.current.addTo(state.mapInstance);
+        console.log(
+          `Маркер для образца ${specimen.id} успешно добавлен на карту`
+        );
 
         // Улучшенный стиль всплывающей подсказки
         markerRef.current.bindTooltip(
@@ -239,9 +268,9 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
 
         // Обработчик клика по маркеру
         markerRef.current.on('click', handleMarkerClick);
-        
+
         // Визуальный эффект при наведении
-        markerRef.current.on('mouseover', function() {
+        markerRef.current.on('mouseover', function () {
           if (markerRef.current && !isDeleting) {
             const element = markerRef.current.getElement();
             if (element) {
@@ -251,8 +280,8 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
             }
           }
         });
-        
-        markerRef.current.on('mouseout', function() {
+
+        markerRef.current.on('mouseout', function () {
           if (markerRef.current && !isDeleting) {
             const element = markerRef.current.getElement();
             if (element) {
@@ -282,6 +311,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
       return undefined;
     }
   }, [
+    specimen,
     specimen.id,
     specimen.latitude,
     specimen.longitude,
@@ -292,7 +322,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
     state.mapInstance,
     handleMarkerClick,
     isSelected,
-    isDeleting
+    isDeleting,
   ]);
 
   // Если образец был успешно удален, не рендерим ничего

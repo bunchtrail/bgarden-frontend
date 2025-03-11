@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer } from '../..';
 import {
@@ -14,6 +14,8 @@ import { MapData } from '../../types';
 const MapPage: React.FC = () => {
   const { getActiveMap, getAllMaps, getSpecimensBySector, loading, error } =
     useMapService();
+  const initialLoadRef = useRef(false);
+  const _initialStatsLoadRef = useRef(false);
   const [selectedSector, setSelectedSector] = useState<SectorType>(
     SectorType.Dendrology
   );
@@ -29,21 +31,30 @@ const MapPage: React.FC = () => {
 
   // Загрузка карт при монтировании компонента
   useEffect(() => {
+    if (initialLoadRef.current) return;
+
     const loadData = async () => {
-      // Получаем активную карту
-      const active = await getActiveMap();
-      if (active) {
-        setActiveMap(active);
-        setSelectedMapId(active.id);
-      }
+      try {
+        // Получаем активную карту
+        const active = await getActiveMap();
+        if (active) {
+          setActiveMap(active);
+          setSelectedMapId(active.id);
+        }
 
-      // Получаем все карты
-      const allMaps = await getAllMaps();
-      setMaps(allMaps);
+        // Получаем все карты
+        const allMaps = await getAllMaps();
+        setMaps(allMaps);
 
-      // Если нет активной карты, но есть хотя бы одна карта, выбираем первую
-      if (!active && allMaps.length > 0) {
-        setSelectedMapId(allMaps[0].id);
+        // Если нет активной карты, но есть хотя бы одна карта, выбираем первую
+        if (!active && allMaps.length > 0) {
+          setSelectedMapId(allMaps[0].id);
+        }
+
+        // Помечаем, что начальная загрузка выполнена
+        initialLoadRef.current = true;
+      } catch (error) {
+        console.error('Ошибка при загрузке данных карты:', error);
       }
     };
 
@@ -59,16 +70,27 @@ const MapPage: React.FC = () => {
         setStatsLoading(true);
         const specimens = await getSpecimensBySector(selectedSector);
 
-        // Подсчет общего количества образцов
-        setSpecimensCount(specimens.length);
+        // Используем функциональную форму setState для безопасного обновления
+        // на основе предыдущего состояния
+        const specimenCount = specimens.length;
+        setSpecimensCount((prev) => {
+          // Обновляем только если значение изменилось
+          return prev !== specimenCount ? specimenCount : prev;
+        });
 
         // Подсчет уникальных видов (по latinName)
         const uniqueSpecies = new Set(specimens.map((s) => s.latinName));
-        setUniqueSpeciesCount(uniqueSpecies.size);
+        const uniqueSpeciesCount = uniqueSpecies.size;
+        setUniqueSpeciesCount((prev) => {
+          return prev !== uniqueSpeciesCount ? uniqueSpeciesCount : prev;
+        });
 
         // Подсчет уникальных семейств (по familyId)
         const uniqueFamilies = new Set(specimens.map((s) => s.familyId));
-        setFamiliesCount(uniqueFamilies.size);
+        const familiesCount = uniqueFamilies.size;
+        setFamiliesCount((prev) => {
+          return prev !== familiesCount ? familiesCount : prev;
+        });
       } catch (error) {
         console.error('Ошибка при загрузке статистики образцов:', error);
       } finally {
@@ -76,6 +98,7 @@ const MapPage: React.FC = () => {
       }
     };
 
+    // Загружаем статистику только при изменении сектора или при первой загрузке
     loadSpecimensStats();
   }, [selectedSector, getSpecimensBySector]);
 

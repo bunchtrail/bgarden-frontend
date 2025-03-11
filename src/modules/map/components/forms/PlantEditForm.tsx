@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import {
+  FamilyDto,
+  familyService,
+} from '../../../specimens/services/familyService';
+import {
+  RegionDto,
+  regionService,
+} from '../../../specimens/services/regionService';
+import { specimenService } from '../../../specimens/services/specimenService';
 import { Specimen } from '../../../specimens/types';
 import { useMapContext } from '../../contexts/MapContext';
-import { mapService } from '../../services/mapService';
 import { MapMode } from '../../types';
 
 interface PlantEditFormProps {
@@ -18,11 +26,57 @@ interface ValidationErrors {
 }
 
 const PlantEditForm: React.FC<PlantEditFormProps> = ({ specimen }) => {
-  const { state, setMode } = useMapContext();
+  const { state: _state, setMode } = useMapContext();
   const [formData, setFormData] = useState<Specimen>(specimen);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Состояния для списков семейств и регионов
+  const [families, setFamilies] = useState<FamilyDto[]>([]);
+  const [regions, setRegions] = useState<RegionDto[]>([]);
+  const [isLoadingFamilies, setIsLoadingFamilies] = useState(false);
+  const [isLoadingRegions, setIsLoadingRegions] = useState(false);
+  const [familiesError, setFamiliesError] = useState<string | null>(null);
+  const [regionsError, setRegionsError] = useState<string | null>(null);
+
+  // Загрузка списков семейств и регионов при монтировании компонента
+  useEffect(() => {
+    const loadFamilies = async () => {
+      setIsLoadingFamilies(true);
+      setFamiliesError(null);
+      try {
+        const data = await familyService.getAllFamilies();
+        setFamilies(data);
+      } catch (error: any) {
+        console.error('Ошибка при загрузке семейств:', error);
+        setFamiliesError(
+          error.message || 'Не удалось загрузить список семейств'
+        );
+      } finally {
+        setIsLoadingFamilies(false);
+      }
+    };
+
+    const loadRegions = async () => {
+      setIsLoadingRegions(true);
+      setRegionsError(null);
+      try {
+        const data = await regionService.getAllRegions();
+        setRegions(data);
+      } catch (error: any) {
+        console.error('Ошибка при загрузке регионов:', error);
+        setRegionsError(
+          error.message || 'Не удалось загрузить список регионов'
+        );
+      } finally {
+        setIsLoadingRegions(false);
+      }
+    };
+
+    loadFamilies();
+    loadRegions();
+  }, []);
 
   // Обновляем данные формы при изменении выбранного образца
   useEffect(() => {
@@ -98,8 +152,8 @@ const PlantEditForm: React.FC<PlantEditFormProps> = ({ specimen }) => {
     try {
       setSaving(true);
 
-      // Отправка данных на сервер
-      await mapService.updateSpecimen(formData.id, formData);
+      // Используем сервис образцов вместо сервиса карты
+      await specimenService.updateSpecimen(formData.id, formData);
 
       // Показываем сообщение об успехе
       setSuccess('Растение успешно обновлено!');
@@ -269,10 +323,21 @@ const PlantEditForm: React.FC<PlantEditFormProps> = ({ specimen }) => {
               errors.familyId ? 'border-red-500' : 'border-gray-300'
             }`}
             required
+            disabled={isLoadingFamilies || saving}
           >
             <option value='0'>Выберите семейство...</option>
-            {/* Здесь должен быть список семейств */}
+            {families.map((family) => (
+              <option key={family.id} value={family.id}>
+                {family.name} {family.latinName ? `(${family.latinName})` : ''}
+              </option>
+            ))}
           </select>
+          {isLoadingFamilies && (
+            <p className='mt-1 text-sm text-blue-600'>Загрузка семейств...</p>
+          )}
+          {familiesError && (
+            <p className='mt-1 text-sm text-red-600'>{familiesError}</p>
+          )}
           {errors.familyId && (
             <p className='mt-1 text-sm text-red-600'>{errors.familyId}</p>
           )}
@@ -291,10 +356,21 @@ const PlantEditForm: React.FC<PlantEditFormProps> = ({ specimen }) => {
               errors.regionId ? 'border-red-500' : 'border-gray-300'
             }`}
             required
+            disabled={isLoadingRegions || saving}
           >
             <option value='0'>Выберите регион...</option>
-            {/* Здесь должен быть список регионов */}
+            {regions.map((region) => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
           </select>
+          {isLoadingRegions && (
+            <p className='mt-1 text-sm text-blue-600'>Загрузка регионов...</p>
+          )}
+          {regionsError && (
+            <p className='mt-1 text-sm text-red-600'>{regionsError}</p>
+          )}
           {errors.regionId && (
             <p className='mt-1 text-sm text-red-600'>{errors.regionId}</p>
           )}

@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - `Структура_bgarden-frontend_от_10-03-2025.md` (6.8 KB)
+    - `Структура_bgarden-frontend_от_11-03-2025.md` (7.4 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -73,35 +73,47 @@
         - **components**
           - **forms**
             - `MapUploadForm.tsx` (5.0 KB)
-            - `PlantAddForm.tsx` (16.9 KB)
-            - `PlantEditForm.tsx` (12.4 KB)
+            - `PlantAddForm.tsx` (22.0 KB)
+            - `PlantEditForm.tsx` (15.2 KB)
           - **layers**
-            - `PlantLayer.tsx` (2.8 KB)
-          - `Map.tsx` (6.0 KB)
-          - `MapContainer.tsx` (8.2 KB)
-          - `MapControls.tsx` (13.4 KB)
+            - `PlantLayer.tsx` (5.0 KB)
+          - `Map.tsx` (6.8 KB)
+          - `MapContainer.tsx` (11.7 KB)
+          - `MapControls.tsx` (13.6 KB)
           - `MapList.tsx` (5.8 KB)
           - **markers**
-            - `PlantMarker.tsx` (12.0 KB)
+            - `PlantMarker.tsx` (12.4 KB)
+          - **modals**
+            - **plant**
+              - `index.ts` (74.0 B)
+              - `MapPlantDetailsModal.tsx` (3.7 KB)
           - **pages**
             - `MapManagementPage.tsx` (6.6 KB)
-            - `MapPage.tsx` (11.0 KB)
+            - `MapPage.tsx` (12.2 KB)
         - **contexts**
-          - `MapContext.tsx` (4.5 KB)
+          - `MapContext.tsx` (4.4 KB)
         - **docs**
-          - `Структура_map_от_10-03-2025.md` (935.0 B)
+          - `Работа_с_картой_в_простом_режиме.md` (5.1 KB)
+          - `Структура_map_от_11-03-2025.md` (1.4 KB)
+          - `Улучшения_структуры_модуля_карты.md` (4.4 KB)
           - `Управление_растениями_на_карте.md` (9.5 KB)
         - **hooks**
-          - `index.ts` (124.0 B)
+          - `index.ts` (189.0 B)
+          - `useErrorHandler.ts` (1.8 KB)
           - `useMapControls.ts` (2.1 KB)
-          - `useMapService.ts` (9.9 KB)
+          - `useMapService.ts` (10.4 KB)
         - `index.ts` (1.1 KB)
         - `README.md` (4.0 KB)
         - **services**
-          - `mapService.ts` (10.6 KB)
+          - `mapService.ts` (14.3 KB)
+          - `specimenService.ts` (3.9 KB)
         - **types**
-          - `index.ts` (2.0 KB)
+          - `index.ts` (1.9 KB)
         - **utils**
+          - **mapHelpers**
+            - `formatters.ts` (1.5 KB)
+            - `index.ts` (159.0 B)
+            - `validation.ts` (1.8 KB)
       - **navigation**
         - **components**
           - **configs**
@@ -184,6 +196,8 @@
           - `specimenService.ts` (3.3 KB)
         - **types**
           - `index.ts` (2.7 KB)
+      - **utils**
+        - **mapHelpers**
     - **pages**
       - **auth**
         - `LoginPage.tsx` (4.3 KB)

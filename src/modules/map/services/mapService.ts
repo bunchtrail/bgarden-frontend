@@ -23,12 +23,58 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Создаем простую систему кеширования для запросов
+const requestCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60 * 1000; // Время жизни кеша в миллисекундах (1 минута)
+const DEBOUNCE_TIME = 300; // Время дебаунса в миллисекундах
+
+// Функция для дебаунса запросов
+function debounce<T extends (...args: any[]) => Promise<any>>(func: T, wait: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  let lastResult: any;
+
+  return function(...args: Parameters<T>): ReturnType<T> {
+    return new Promise((resolve, reject) => {
+      const later = () => {
+        timeout = null as any;
+        func(...args)
+          .then(resolve)
+          .catch(reject);
+      };
+
+      if (lastResult) {
+        resolve(lastResult);
+        return;
+      }
+
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    }) as ReturnType<T>;
+  };
+}
+
 // Класс сервиса для работы с API карт
 class MapService {
   // Получение карты по ID
   async getMapById(id: number): Promise<MapData> {
+    const cacheKey = `map_${id}`;
+    const cached = requestCache.get(cacheKey);
+    
+    // Используем кеш, если он существует и не устарел
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log(`Использую кешированные данные для карты с ID ${id}`);
+      return cached.data;
+    }
+    
     try {
       const response = await api.get<MapData>(`/Map/${id}`);
+      
+      // Сохраняем результат в кеш
+      requestCache.set(cacheKey, {
+        data: response.data,
+        timestamp: Date.now()
+      });
+      
       return response.data;
     } catch (error) {
       console.error(`Ошибка при получении карты с ID ${id}:`, error);
@@ -38,35 +84,82 @@ class MapService {
   
   // Получение карты со всеми образцами растений
   async getMapWithSpecimens(id: number): Promise<MapData> {
+    const cacheKey = `map_specimens_${id}`;
+    const cached = requestCache.get(cacheKey);
+    
+    // Используем кеш, если он существует и не устарел
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log(`Использую кешированные данные для карты с образцами с ID ${id}`);
+      return cached.data;
+    }
+    
     try {
       const response = await api.get<MapData>(`/Map/${id}/specimens`);
+      
+      // Сохраняем результат в кеш
+      requestCache.set(cacheKey, {
+        data: response.data,
+        timestamp: Date.now()
+      });
+      
       return response.data;
     } catch (error) {
-      console.error(`Ошибка при получении карты с образцами:`, error);
+      console.error(`Ошибка при получении карты с образцами с ID ${id}:`, error);
       throw error;
     }
   }
   
   // Получение списка всех карт
   async getAllMaps(): Promise<MapData[]> {
+    const cacheKey = 'all_maps';
+    const cached = requestCache.get(cacheKey);
+    
+    // Используем кеш, если он существует и не устарел
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log('Использую кешированные данные для списка всех карт');
+      return cached.data;
+    }
+    
     try {
       const response = await api.get<MapData[]>('/Map');
+      
+      // Сохраняем результат в кеш
+      requestCache.set(cacheKey, {
+        data: response.data,
+        timestamp: Date.now()
+      });
+      
       return response.data;
     } catch (error) {
       console.error('Ошибка при получении списка карт:', error);
-      return [];
+      throw error;
     }
   }
   
   // Получение активной карты
   async getActiveMap(): Promise<MapData | null> {
+    const cacheKey = 'active_map';
+    const cached = requestCache.get(cacheKey);
+    
+    // Используем кеш, если он существует и не устарел
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log('Использую кешированные данные для активной карты');
+      return cached.data;
+    }
+    
     try {
       const response = await api.get<MapData[]>('/Map/active');
-      // Предполагается, что API возвращает массив, но активная карта только одна
-      return response.data && response.data.length > 0 ? response.data[0] : null;
+      
+      // Сохраняем результат в кеш
+      requestCache.set(cacheKey, {
+        data: response.data.length > 0 ? response.data[0] : null,
+        timestamp: Date.now()
+      });
+      
+      return response.data.length > 0 ? response.data[0] : null;
     } catch (error) {
       console.error('Ошибка при получении активной карты:', error);
-      return null;
+      throw error;
     }
   }
   
@@ -283,4 +376,11 @@ class MapService {
 }
 
 // Экспортируем экземпляр сервиса для использования в приложении
-export const mapService = new MapService(); 
+export const mapService = new MapService();
+// Экспортируем дебаунсированные версии методов для использования в UI
+export const debouncedMapService = {
+  getMapById: debounce(mapService.getMapById.bind(mapService), DEBOUNCE_TIME),
+  getMapWithSpecimens: debounce(mapService.getMapWithSpecimens.bind(mapService), DEBOUNCE_TIME),
+  getAllMaps: debounce(mapService.getAllMaps.bind(mapService), DEBOUNCE_TIME),
+  getActiveMap: debounce(mapService.getActiveMap.bind(mapService), DEBOUNCE_TIME)
+}; 

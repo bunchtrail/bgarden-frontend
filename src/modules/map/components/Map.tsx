@@ -7,7 +7,9 @@ import PlantLayer from './layers/PlantLayer';
 import MapControls from './MapControls';
 
 // Необходимо для исправления проблемы с иконками маркеров в Leaflet
+// @ts-ignore
 import icon from 'leaflet/dist/images/marker-icon.png';
+// @ts-ignore
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 let DefaultIcon = L.icon({
@@ -50,9 +52,11 @@ const Map: React.FC<MapProps> = ({
       initializingRef.current ||
       initializedRef.current
     ) {
+      console.log('Пропускаем инициализацию карты (уже инициализирована или в процессе)');
       return;
     }
 
+    console.log('Начинаем инициализацию карты...');
     // Устанавливаем флаг, что инициализация началась
     initializingRef.current = true;
 
@@ -63,6 +67,8 @@ const Map: React.FC<MapProps> = ({
         attributionControl: false, // Отключаем стандартные атрибуты
       }).setView([55.75, 37.61], 13);
 
+      console.log('Карта создана, добавляем слои и контролы...');
+      
       // Добавляем улучшенный стиль карты вместо стандартного OSM
       L.tileLayer(
         'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -103,9 +109,15 @@ const Map: React.FC<MapProps> = ({
         setTimeout(() => {
           if (mapRef.current) {
             initializedRef.current = true;
-            setMapReady(true);
+            // Проверяем, что карта еще не отмечена как готовая,
+            // чтобы избежать циклических обновлений
+            if (!state.mapReady) {
+              console.log('Карта инициализирована, устанавливаем состояние готовности...');
+              setMapReady(true);
+            }
             // Запускаем обновление размера карты для корректного отображения
             mapRef.current.invalidateSize();
+            console.log('Размер карты обновлен');
           }
           // Снимаем флаг инициализации
           initializingRef.current = false;
@@ -129,7 +141,10 @@ const Map: React.FC<MapProps> = ({
         initializedRef.current = false;
 
         // Только потом меняем состояние контекста
-        setMapReady(false);
+        // Проверяем текущее состояние карты
+        if (state.mapReady) {
+          setMapReady(false);
+        }
 
         try {
           mapRef.current.remove();
@@ -142,7 +157,7 @@ const Map: React.FC<MapProps> = ({
         setMap(null);
       }
     };
-  }, [setMap, setMapReady, setError]);
+  }, [setMap, setMapReady, setError, state.mapReady]);
 
   return (
     <div className='map-container'>

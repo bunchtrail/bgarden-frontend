@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SectorType } from '../../specimens/types';
 import { MapProvider, useMapContext } from '../contexts/MapContext';
 import { mapService } from '../services/mapService';
-import { MapData } from '../types';
+import { MapData, MapMode } from '../types';
 import Map from './Map';
 import MapControls from './MapControls';
 
@@ -19,9 +19,8 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mapImageUrl, setMapImageUrl] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'image' | 'interactive'>(
-    'interactive'
-  );
+  // Всегда используем только простой режим
+  const [viewMode] = useState<'image' | 'interactive'>('image');
 
   // Загрузка данных карты при монтировании
   useEffect(() => {
@@ -29,7 +28,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
       try {
         setLoading(true);
         // Используем новый метод для получения активной карты
-        let data = null;
+        let data: MapData | null = null;
 
         if (mapId) {
           // Если указан конкретный ID карты, используем его
@@ -47,7 +46,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
         if (data) {
           setMapData(data);
           // Получаем полный URL для изображения карты
-          const imageUrl = mapService.getMapImageUrl(data.filePath);
+          const imageUrl = mapService.getMapImageUrl(data?.filePath || '');
           setMapImageUrl(imageUrl);
         }
 
@@ -79,7 +78,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
     );
   }
 
-  // Если у карты есть изображение, показываем режим переключения и соответствующий режим
+  // Если у карты есть изображение, показываем соответствующий режим
   if (mapData && mapImageUrl) {
     return (
       <MapProvider>
@@ -87,7 +86,6 @@ const MapContainer: React.FC<MapContainerProps> = ({
           mapData={mapData}
           mapImageUrl={mapImageUrl}
           viewMode={viewMode}
-          setViewMode={setViewMode}
           mapId={mapId}
           sectorType={sectorType}
         />
@@ -119,16 +117,65 @@ const MapContainerContent: React.FC<{
   mapData: MapData;
   mapImageUrl: string;
   viewMode: 'image' | 'interactive';
-  setViewMode: React.Dispatch<React.SetStateAction<'image' | 'interactive'>>;
   mapId: number;
   sectorType: SectorType;
-}> = ({ mapData, mapImageUrl, viewMode, setViewMode, mapId, sectorType }) => {
-  const { setSimpleImageMode } = useMapContext();
+}> = ({ mapData, mapImageUrl, viewMode, mapId, sectorType }) => {
+  const { setSimpleImageMode, state, setMode } = useMapContext();
+  // Используем ref для отслеживания, было ли обновление режима
+  const initialModeSetRef = useRef(false);
+  // Используем ref для сохранения предыдущего значения viewMode
+  const prevViewModeRef = useRef(viewMode);
+  // Добавляем состояние для хранения координат точки на карте
+  const [simpleImageMarker, setSimpleImageMarker] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
-  // Устанавливаем режим простого изображения при изменении viewMode
+  // Устанавливаем режим простого изображения при первичном рендере или при изменении viewMode
   useEffect(() => {
-    setSimpleImageMode(viewMode === 'image');
+    // Обновляем режим только при первом рендере или при изменении viewMode
+    if (!initialModeSetRef.current || prevViewModeRef.current !== viewMode) {
+      prevViewModeRef.current = viewMode;
+
+      // Используем timeout для разделения обновлений состояний
+      const timeout = setTimeout(() => {
+        setSimpleImageMode(viewMode === 'image');
+        initialModeSetRef.current = true;
+      }, 0);
+
+      return () => clearTimeout(timeout);
+    }
   }, [viewMode, setSimpleImageMode]);
+
+  // Добавляем обработчик событий для слушания кликов по изображению карты
+  useEffect(() => {
+    const handleImageMapClick = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        // Получаем оригинальные нормализованные координаты из события
+        const normalizedX = customEvent.detail.lng - 37;
+        const normalizedY = 56 - customEvent.detail.lat;
+
+        // Устанавливаем маркер для отображения на изображении
+        setSimpleImageMarker({ x: normalizedX, y: normalizedY });
+      }
+    };
+
+    // Регистрируем слушатель событий
+    document.addEventListener('map-image-click', handleImageMapClick);
+
+    // Удаляем слушатель при размонтировании компонента
+    return () => {
+      document.removeEventListener('map-image-click', handleImageMapClick);
+    };
+  }, []);
+
+  // Очищаем маркер при изменении режима или карты
+  useEffect(() => {
+    if (state.mode !== MapMode.ADD_PLANT) {
+      setSimpleImageMarker(null);
+    }
+  }, [state.mode, mapId]);
 
   return (
     <div className='map-container-wrapper'>
@@ -141,88 +188,98 @@ const MapContainerContent: React.FC<{
         )}
       </div>
 
-      <div className='flex justify-end mb-3'>
-        <div className='inline-flex rounded-lg shadow-sm'>
-          <button
-            type='button'
-            onClick={() => setViewMode('image')}
-            className={`px-4 py-2 text-sm font-medium rounded-l-lg border ${
-              viewMode === 'image'
-                ? 'bg-[#0A84FF] text-white border-[#0A84FF]'
-                : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
-            }`}
-          >
-            Простой вид
-          </button>
-          <button
-            type='button'
-            onClick={() => setViewMode('interactive')}
-            className={`px-4 py-2 text-sm font-medium rounded-r-lg border ${
-              viewMode === 'interactive'
-                ? 'bg-[#0A84FF] text-white border-[#0A84FF]'
-                : 'bg-white text-[#1D1D1F] border-[#E5E5EA] hover:bg-[#F5F5F7]'
-            }`}
-          >
-            Интерактивный вид
-          </button>
-        </div>
+      {/* Информационное сообщение о том, что интерактивный режим временно отключен */}
+      <div className='mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
+        <p className='text-yellow-800'>
+          Интерактивный режим временно отключен. Используется только простой
+          режим.
+        </p>
       </div>
 
-      {viewMode === 'image' ? (
-        <div className='custom-map-image-container'>
-          <div className='custom-map-image mb-4 relative'>
-            <div
-              className='map-image-interactive-area'
+      <div className='custom-map-image-container'>
+        <div className='custom-map-image mb-4 relative'>
+          <div
+            className='map-image-interactive-area'
+            style={{
+              position: 'relative',
+              maxHeight: '600px',
+              margin: '0 auto',
+            }}
+          >
+            <img
+              src={mapImageUrl}
+              alt={mapData.name}
+              className='w-full rounded-lg shadow-md'
               style={{
-                position: 'relative',
                 maxHeight: '600px',
+                objectFit: 'contain',
                 margin: '0 auto',
+                display: 'block',
+              }}
+            />
+
+            <div
+              className='absolute inset-0 cursor-crosshair'
+              onClick={(e) => {
+                // Обработка клика по изображению для добавления растений
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left; // x позиция внутри элемента
+                const y = e.clientY - rect.top; // y позиция внутри элемента
+
+                // Нормализуем координаты (0-1)
+                const normalizedX = x / rect.width;
+                const normalizedY = y / rect.height;
+
+                console.log(
+                  `Клик по карте: x=${normalizedX.toFixed(
+                    4
+                  )}, y=${normalizedY.toFixed(4)}`
+                );
+
+                // Преобразуем нормализованные координаты в псевдо-географические для совместимости
+                // с существующей логикой форм
+                const geoLat = 56 - normalizedY; // Инвертируем Y, так как 0 - верх изображения
+                const geoLng = 37 + normalizedX;
+
+                // Устанавливаем маркер для отображения на изображении карты
+                setSimpleImageMarker({ x: normalizedX, y: normalizedY });
+
+                // При клике в режиме добавления растения, передаем координаты в форму
+                if (state.mode === MapMode.ADD_PLANT) {
+                  // Создаем объект события для передачи координат в формы через хук
+                  const mapClickEvent = new CustomEvent('map-image-click', {
+                    detail: { lat: geoLat, lng: geoLng },
+                  });
+
+                  // Отправляем событие, которое будет перехвачено в PlantAddForm
+                  document.dispatchEvent(mapClickEvent);
+                }
               }}
             >
-              <img
-                src={mapImageUrl}
-                alt={mapData.name}
-                className='w-full rounded-lg shadow-md'
-                style={{
-                  maxHeight: '600px',
-                  objectFit: 'contain',
-                  margin: '0 auto',
-                  display: 'block',
-                }}
-              />
+              {/* Добавляем подсказку в режиме добавления растения */}
+              {state.mode === MapMode.ADD_PLANT && (
+                <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg opacity-80'>
+                  Кликните по карте, чтобы выбрать местоположение растения
+                </div>
+              )}
 
-              {/* Здесь можно добавить обработку кликов по изображению */}
-              <div
-                className='absolute inset-0 cursor-crosshair'
-                onClick={(e) => {
-                  // Обработка клика по изображению для добавления растений
-                  // Координаты клика можно использовать для позиционирования маркеров
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left; // x позиция внутри элемента
-                  const y = e.clientY - rect.top; // y позиция внутри элемента
-
-                  // Нормализуем координаты (0-1)
-                  const normalizedX = x / rect.width;
-                  const normalizedY = y / rect.height;
-
-                  console.log(
-                    `Клик по карте: x=${normalizedX.toFixed(
-                      4
-                    )}, y=${normalizedY.toFixed(4)}`
-                  );
-
-                  // Здесь можно добавить логику для создания маркера растения
-                }}
-              />
+              {/* Отображаем маркер на карте если он установлен */}
+              {simpleImageMarker && (
+                <div
+                  className='absolute w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2'
+                  style={{
+                    left: `${simpleImageMarker.x * 100}%`,
+                    top: `${simpleImageMarker.y * 100}%`,
+                  }}
+                />
+              )}
             </div>
           </div>
 
           {/* Элементы управления для режима простого изображения */}
           <MapControls standaloneMode={true} />
         </div>
-      ) : (
-        <Map mapId={mapId} sectorType={sectorType} />
-      )}
+      </div>
     </div>
   );
 };

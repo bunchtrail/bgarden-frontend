@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useMapContext } from '../contexts/MapContext';
 import { MapMode } from '../types';
 import PlantAddForm from './forms/PlantAddForm';
@@ -12,14 +12,25 @@ const MapControls: React.FC<MapControlsProps> = ({
   standaloneMode = false,
 }) => {
   const { state, setMode, setMapReady } = useMapContext();
+  const mapReadySetRef = useRef(false);
 
   // Если компонент работает в автономном режиме (для простого изображения),
   // устанавливаем mapReady в true
   useEffect(() => {
-    if (standaloneMode || state.isSimpleImageMode) {
-      setMapReady(true);
+    if (
+      (standaloneMode || state.isSimpleImageMode) &&
+      !mapReadySetRef.current &&
+      !state.mapReady
+    ) {
+      mapReadySetRef.current = true;
+      // Используем setTimeout для отложенного вызова, чтобы предотвратить бесконечный цикл обновлений
+      const timeoutId = setTimeout(() => {
+        setMapReady(true);
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [standaloneMode, state.isSimpleImageMode, setMapReady]);
+  }, [standaloneMode, state.isSimpleImageMode, setMapReady, state.mapReady]);
 
   // Функция для отображения подсказки в зависимости от режима
   const renderModeHelp = () => {

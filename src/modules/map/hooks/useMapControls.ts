@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useMapContext } from '../contexts/MapContext';
 import { mapService } from '../services/mapService';
+import { specimenService } from '../../specimens/services/specimenService';
 import { MapMode } from '../types';
 
 /**
@@ -45,7 +46,7 @@ export const useMapControls = () => {
   const deletePlant = useCallback(async (id: number) => {
     try {
       setLoading(true);
-      await mapService.deleteSpecimen(id);
+      await specimenService.deleteSpecimen(id);
       selectSpecimen(null);
       setMode(MapMode.VIEW);
       return true;

@@ -103,8 +103,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const setError = (error: string | null) =>
     dispatch({ type: 'SET_ERROR', payload: error });
 
-  const setSimpleImageMode = (isSimpleMode: boolean) =>
-    dispatch({ type: 'SET_SIMPLE_IMAGE_MODE', payload: isSimpleMode });
+  const setSimpleImageMode = (isSimpleMode: boolean) => {
+    if (state.isSimpleImageMode !== isSimpleMode) {
+      dispatch({ type: 'SET_SIMPLE_IMAGE_MODE', payload: isSimpleMode });
+    }
+  };
 
   const value = {
     state,

@@ -1,20 +1,22 @@
 import { useCallback, useState } from 'react';
+import { specimenService } from '../../specimens/services/specimenService';
 import { SectorType, Specimen } from '../../specimens/types';
-import { mapService } from '../services/mapService';
+import { mapService, debouncedMapService } from '../services/mapService';
 import { MapData, MapError } from '../types';
 
 /**
  * Хук, предоставляющий доступ ко всем методам API сервиса карты
+ * с поддержкой дебаунсинга и кеширования часто вызываемых методов
  */
 export const useMapService = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<MapError | null>(null);
 
-  // Получение карты по ID
+  // Получение карты по ID - используем дебаунсированный метод
   const getMapById = useCallback(async (id: number) => {
     try {
       setLoading(true);
-      const result = await mapService.getMapById(id);
+      const result = await debouncedMapService.getMapById(id);
       setError(null);
       return result;
     } catch (err: any) {
@@ -26,11 +28,11 @@ export const useMapService = () => {
     }
   }, []);
 
-  // Получение карты со всеми образцами растений
+  // Получение карты со всеми образцами растений - используем дебаунсированный метод
   const getMapWithSpecimens = useCallback(async (id: number) => {
     try {
       setLoading(true);
-      const result = await mapService.getMapWithSpecimens(id);
+      const result = await debouncedMapService.getMapWithSpecimens(id);
       setError(null);
       return result;
     } catch (err: any) {
@@ -42,11 +44,11 @@ export const useMapService = () => {
     }
   }, []);
 
-  // Получение списка всех карт
+  // Получение списка всех карт - используем дебаунсированный метод
   const getAllMaps = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await mapService.getAllMaps();
+      const result = await debouncedMapService.getAllMaps();
       setError(null);
       return result;
     } catch (err: any) {
@@ -58,11 +60,11 @@ export const useMapService = () => {
     }
   }, []);
 
-  // Получение активной карты
+  // Получение активной карты - используем дебаунсированный метод
   const getActiveMap = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await mapService.getActiveMap();
+      const result = await debouncedMapService.getActiveMap();
       setError(null);
       return result;
     } catch (err: any) {
@@ -78,7 +80,7 @@ export const useMapService = () => {
   const getSpecimensBySector = useCallback(async (sectorType: SectorType) => {
     try {
       setLoading(true);
-      const result = await mapService.getSpecimensBySector(sectorType);
+      const result = await specimenService.getSpecimensBySectorType(sectorType);
       setError(null);
       return result;
     } catch (err: any) {
@@ -94,7 +96,7 @@ export const useMapService = () => {
   const getAllSpecimens = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await mapService.getAllSpecimens();
+      const result = await specimenService.getAllSpecimens();
       setError(null);
       return result;
     } catch (err: any) {
@@ -142,7 +144,7 @@ export const useMapService = () => {
   const addSpecimen = useCallback(async (specimen: Omit<Specimen, 'id'>) => {
     try {
       setLoading(true);
-      const result = await mapService.addSpecimen(specimen);
+      const result = await specimenService.createSpecimen(specimen);
       setError(null);
       return result;
     } catch (err: any) {
@@ -158,7 +160,7 @@ export const useMapService = () => {
   const updateSpecimen = useCallback(async (id: number, specimen: Specimen) => {
     try {
       setLoading(true);
-      const result = await mapService.updateSpecimen(id, specimen);
+      const result = await specimenService.updateSpecimen(id, specimen);
       setError(null);
       return result;
     } catch (err: any) {
@@ -174,7 +176,7 @@ export const useMapService = () => {
   const deleteSpecimen = useCallback(async (id: number) => {
     try {
       setLoading(true);
-      const result = await mapService.deleteSpecimen(id);
+      const result = await specimenService.deleteSpecimen(id);
       setError(null);
       return result;
     } catch (err: any) {
