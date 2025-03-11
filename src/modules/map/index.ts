@@ -13,6 +13,10 @@ export { default as PlantEditForm } from './components/forms/PlantEditForm';
 export { default as PlantLayer } from './components/layers/PlantLayer';
 export { default as PlantMarker } from './components/markers/PlantMarker';
 
+// Страницы
+export { default as MapManagementPage } from './components/pages/MapManagementPage';
+export { default as MapPage } from './components/pages/MapPage';
+
 // Контексты
 export { MapProvider, useMapContext } from './contexts/MapContext';
 

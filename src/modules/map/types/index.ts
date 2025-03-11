@@ -45,6 +45,7 @@ export interface MapState {
   mode: MapMode;
   loading: boolean;
   error: string | null;
+  isSimpleImageMode: boolean; // Флаг режима простого изображения
 }
 
 // Типы действий для работы с контекстом карты
@@ -56,4 +57,5 @@ export type MapAction =
   | { type: 'SET_MODE'; payload: MapMode }
   | { type: 'SET_SELECTED_SECTOR'; payload: SectorType }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }; 
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_SIMPLE_IMAGE_MODE'; payload: boolean }; 

@@ -58,22 +58,42 @@ const Map: React.FC<MapProps> = ({
 
     // Создаем карту Leaflet
     try {
-      mapRef.current = L.map(mapContainerRef.current).setView(
-        [55.75, 37.61],
-        13
-      );
+      mapRef.current = L.map(mapContainerRef.current, {
+        zoomControl: false, // Отключаем стандартные элементы управления зумом
+        attributionControl: false, // Отключаем стандартные атрибуты
+      }).setView([55.75, 37.61], 13);
 
-      // Добавляем базовый слой OSM
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(mapRef.current);
+      // Добавляем улучшенный стиль карты вместо стандартного OSM
+      L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 20,
+        }
+      ).addTo(mapRef.current);
+
+      // Добавляем стандартный контроль зума, но с нашей стилизацией
+      L.control
+        .zoom({
+          position: 'bottomright',
+        })
+        .addTo(mapRef.current);
+
+      // Добавляем атрибуцию
+      L.control
+        .attribution({
+          position: 'bottomleft',
+          prefix: 'Botanical Garden App',
+        })
+        .addTo(mapRef.current);
 
       // Проверяем корректность инициализации карты
       if (mapRef.current && typeof mapRef.current.getContainer === 'function') {
         // Устанавливаем обработчик на событие загрузки карты
         mapRef.current.once('load', () => {
-          // Убираем лишний console.log
+          // Пустой обработчик для события загрузки
         });
 
         // Сохраняем экземпляр карты в контексте
@@ -105,8 +125,6 @@ const Map: React.FC<MapProps> = ({
     // Очистка при размонтировании
     return () => {
       if (mapRef.current) {
-        // Убираем лишний console.log
-
         // Сначала сбрасываем флаги
         initializedRef.current = false;
 
@@ -131,7 +149,13 @@ const Map: React.FC<MapProps> = ({
       <div
         ref={mapContainerRef}
         className='leaflet-container'
-        style={{ height: '600px', width: '100%', borderRadius: '8px' }}
+        style={{
+          height: '600px',
+          width: '100%',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+        }}
       />
 
       {state.mapReady && state.mapInstance && (

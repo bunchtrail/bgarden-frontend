@@ -13,6 +13,7 @@ const initialState: MapState = {
   mode: MapMode.VIEW,
   loading: false,
   error: null,
+  isSimpleImageMode: false, // Добавляем флаг режима простого изображения
 };
 
 // Редуктор для обработки действий
@@ -37,6 +38,8 @@ const mapReducer = (state: MapState, action: MapAction): MapState => {
         console.error('MapContext: Ошибка:', action.payload);
       }
       return { ...state, error: action.payload };
+    case 'SET_SIMPLE_IMAGE_MODE':
+      return { ...state, isSimpleImageMode: action.payload };
     default:
       return state;
   }
@@ -53,6 +56,7 @@ interface MapContextType {
   selectSector: (sectorType: SectorType) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setSimpleImageMode: (isSimpleMode: boolean) => void; // Добавляем метод установки режима
 }
 
 // Создание контекста
@@ -72,7 +76,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
       console.error('Ошибка при установке экземпляра карты:', error);
     }
   };
-  
+
   const setMapReady = (ready: boolean) => {
     try {
       dispatch({ type: 'SET_MAP_READY', payload: ready });
@@ -80,24 +84,27 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
       console.error('Ошибка при установке готовности карты:', error);
     }
   };
-  
-  const selectMap = (map: MapData) => 
+
+  const selectMap = (map: MapData) =>
     dispatch({ type: 'SET_SELECTED_MAP', payload: map });
-    
-  const selectSpecimen = (specimen: Specimen | null) => 
+
+  const selectSpecimen = (specimen: Specimen | null) =>
     dispatch({ type: 'SET_SELECTED_SPECIMEN', payload: specimen });
-    
-  const setMode = (mode: MapMode) => 
+
+  const setMode = (mode: MapMode) =>
     dispatch({ type: 'SET_MODE', payload: mode });
-    
-  const selectSector = (sectorType: SectorType) => 
+
+  const selectSector = (sectorType: SectorType) =>
     dispatch({ type: 'SET_SELECTED_SECTOR', payload: sectorType });
-    
-  const setLoading = (loading: boolean) => 
+
+  const setLoading = (loading: boolean) =>
     dispatch({ type: 'SET_LOADING', payload: loading });
-    
-  const setError = (error: string | null) => 
+
+  const setError = (error: string | null) =>
     dispatch({ type: 'SET_ERROR', payload: error });
+
+  const setSimpleImageMode = (isSimpleMode: boolean) =>
+    dispatch({ type: 'SET_SIMPLE_IMAGE_MODE', payload: isSimpleMode });
 
   const value = {
     state,
@@ -109,6 +116,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     selectSector,
     setLoading,
     setError,
+    setSimpleImageMode,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
