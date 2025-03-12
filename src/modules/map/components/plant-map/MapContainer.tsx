@@ -156,11 +156,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
   return (
     <div className={containerClasses.base}>
-      <div
-        className={`${styles.mapContainer} border border-[${
-          COLORS.SEPARATOR
-        }] rounded-lg ${getMapCursorClass()}`}
-      >
+      <div className={`${styles.enhancedMapContainer} ${getMapCursorClass()}`}>
         {loadingMap ? (
           <div
             className={`h-full w-full ${layoutClasses.flexCenter} bg-[${COLORS.BACKGROUND}]`}

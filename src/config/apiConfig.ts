@@ -10,8 +10,13 @@ export const API_URL = process.env.REACT_APP_API_URL || LOCAL_API_URL;
 
 // Функция для получения полного URL к API
 export const getApiUrl = (endpoint: string): string => {
-  // Убедимся, что endpoint начинается с '/'
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  // Убедимся, что endpoint начинается с '/api/'
+  if (endpoint.startsWith('/api/')) {
+    const path = endpoint;
+    return `${API_URL}${path}`;
+  }
+  // Если endpoint не содержит '/api/', добавляем его
+  const path = endpoint.startsWith('/') ? `/api${endpoint}` : `/api/${endpoint}`;
   return `${API_URL}${path}`;
 };
 
