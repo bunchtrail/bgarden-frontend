@@ -29,6 +29,8 @@ export interface GeographicInfoSectionProps extends BaseFormSectionProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  mapImageUrl?: string | null; // URL изображения карты
+  onPositionSelected?: (latitude: number, longitude: number) => void; // Обработчик выбора позиции на карте
 }
 
 // Пропсы для секции экспозиционной информации

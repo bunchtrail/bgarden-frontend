@@ -6,11 +6,13 @@ import { useMapContext } from '../../contexts';
 interface PlantAddFormProps {
   position?: [number, number]; // Опциональные координаты по умолчанию
   onClose: () => void;
+  onSubmit?: (name: string, description: string, position: [number, number]) => void;
 }
 
 const PlantAddForm: React.FC<PlantAddFormProps> = ({
   position = [0, 0],
   onClose,
+  onSubmit,
 }) => {
   const { addPlant } = useMapContext();
   const [name, setName] = useState('');
@@ -26,11 +28,17 @@ const PlantAddForm: React.FC<PlantAddFormProps> = ({
       return;
     }
 
-    addPlant({
-      name,
-      description,
-      position: plantPosition,
-    });
+    if (onSubmit) {
+      // Если передан колбэк onSubmit, используем его
+      onSubmit(name, description, plantPosition);
+    } else {
+      // Иначе используем контекст для добавления растения
+      addPlant({
+        name,
+        description,
+        position: plantPosition,
+      });
+    }
 
     onClose();
   };

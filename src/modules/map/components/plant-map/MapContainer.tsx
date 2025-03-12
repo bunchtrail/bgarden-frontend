@@ -1,11 +1,13 @@
 // Компонент-контейнер для карты
 
-import { CRS, LatLng, LatLngBounds } from 'leaflet';
+import L, { CRS, LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import {
   ImageOverlay,
   MapContainer as LeafletMapContainer,
+  Marker,
+  Polygon,
   ZoomControl,
   useMapEvents,
 } from 'react-leaflet';
@@ -16,125 +18,148 @@ import {
   textClasses,
 } from '../../../../styles/global-styles';
 import { useMapContext } from '../../contexts';
+import { MapMode } from '../../contexts/MapContext';
 import styles from '../../styles/map.module.css';
+import AreaForm from './AreaForm';
 import MapMarker from './MapMarker';
-import PlantAddForm from './PlantAddForm';
 
-// Компонент для отслеживания кликов по карте
-const MapClickHandler: React.FC<{
-  onMapClick: (position: [number, number]) => void;
-}> = ({ onMapClick }) => {
-  useMapEvents({
+// Компонент для отслеживания кликов и взаимодействия с картой
+const MapEventHandler: React.FC = () => {
+  const {
+    currentMode,
+    addPointToArea,
+    addPlant,
+    setSelectedPlantId,
+    isDrawingComplete,
+    savePosition,
+  } = useMapContext();
+
+  const map = useMapEvents({
     click: (e) => {
-      onMapClick([e.latlng.lat, e.latlng.lng]);
+      const position: [number, number] = [e.latlng.lat, e.latlng.lng];
+
+      // Обработка кликов в зависимости от режима
+      if (currentMode === MapMode.ADD) {
+        // В режиме добавления создаем новое растение
+        addPlant({
+          name: `Новое растение`,
+          position,
+          description: 'Кликните для редактирования',
+        });
+      } else if (currentMode === MapMode.AREA && !isDrawingComplete) {
+        // В режиме области добавляем точку к полигону, если рисование не завершено
+        addPointToArea(position);
+      } else if (currentMode === MapMode.VIEW) {
+        // В режиме просмотра сбрасываем выбор
+        setSelectedPlantId(null);
+      } else if (currentMode === MapMode.SELECT_LOCATION) {
+        // В режиме выбора геопозиции сохраняем координаты клика
+        savePosition(position);
+      }
     },
   });
+
   return null;
 };
 
+// Тип для свойств компонента карты
 interface MapContainerProps {
-  customImage?: string;
+  loadingMap: boolean;
+  imageUrl: string | null;
 }
 
+// Размеры карты по умолчанию
+const defaultImageDimensions = {
+  width: 1000,
+  height: 1000,
+};
+
 const MapContainer: React.FC<MapContainerProps> = ({
-  customImage: propCustomImage,
+  loadingMap,
+  imageUrl,
 }) => {
+  // Используем контекст карты
   const {
-    customImage: contextCustomImage,
-    setCustomImage,
     plants,
+    currentMode,
     selectedPlantId,
     setSelectedPlantId,
-    loadingMap,
-    loadMapError,
-    loadMapFromServer,
-    mapData,
+    currentAreaPoints,
+    areas,
+    isDrawingComplete,
+    selectedPosition,
   } = useMapContext();
 
-  // Используем изображение из пропсов или из контекста
-  const imageUrl = propCustomImage || contextCustomImage || '';
-
-  const [imageDimensions, setImageDimensions] = useState<{
-    width: number;
-    height: number;
-  }>({
-    width: 1000,
-    height: 800,
-  });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Состояние для добавления нового растения
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newPlantPosition, setNewPlantPosition] = useState<
-    [number, number] | null
-  >(null);
-
-  // Создаем границы изображения на основе его размеров
-  const bounds = new LatLngBounds(
-    new LatLng(0, 0), // Нижний левый угол
-    new LatLng(imageDimensions.height, imageDimensions.width) // Верхний правый угол
+  // Определяем размеры и границы изображения карты
+  const imageDimensions = defaultImageDimensions;
+  const bounds: LatLngBounds = new LatLngBounds(
+    [0, 0],
+    [imageDimensions.height, imageDimensions.width]
   );
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setCustomImage(result);
-
-        // Получаем размеры изображения
-        const img = new Image();
-        img.onload = () => {
-          setImageDimensions({ width: img.width, height: img.height });
-        };
-        img.src = result;
-      };
-      reader.readAsDataURL(file);
+  // Обработчик клика по растению
+  const handlePlantClick = (id: string) => {
+    if (currentMode === MapMode.VIEW || currentMode === MapMode.EDIT) {
+      setSelectedPlantId(id);
     }
   };
 
-  const handlePlantClick = (plantId: string) => {
-    setSelectedPlantId(plantId);
+  // Определяем класс для курсора в зависимости от режима
+  const getMapCursorClass = () => {
+    switch (currentMode) {
+      case MapMode.ADD:
+        return styles.cursorAdd;
+      case MapMode.EDIT:
+        return styles.cursorEdit;
+      case MapMode.AREA:
+        return isDrawingComplete ? '' : styles.cursorDraw;
+      case MapMode.SELECT_LOCATION:
+        return styles.cursorLocation;
+      default:
+        return '';
+    }
   };
 
-  const handleMapClick = (position: [number, number]) => {
-    setNewPlantPosition(position);
-    setShowAddForm(true);
+  // Создаем стиль для полигона области
+  const areaStyle = {
+    fillColor: '#3388ff',
+    color: '#3388ff',
+    weight: 2,
+    opacity: 0.7,
+    fillOpacity: 0.3,
   };
 
-  const handleCloseAddForm = () => {
-    setShowAddForm(false);
-    setNewPlantPosition(null);
+  // Создаем стиль для текущего полигона области
+  const currentAreaStyle = {
+    fillColor: '#ff3333',
+    color: '#ff3333',
+    weight: 2,
+    opacity: 0.7,
+    fillOpacity: 0.3,
   };
 
-  const handleLoadMapClick = () => {
-    loadMapFromServer();
-  };
+  // Иконка для точек области
+  const areaPointIcon = new L.Icon({
+    iconUrl:
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjgiIGZpbGw9IiNmZjMzMzMiIC8+PC9zdmc+',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+
+  // Иконка для маркера выбранной позиции
+  const selectedPositionIcon = new L.Icon({
+    iconUrl:
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTIiIGZpbGw9IiM0MmI3MmEiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIiAvPjwvc3ZnPg==',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
 
   return (
-    <div className={layoutClasses.flexCol}>
-      <div className={`${layoutClasses.flexWrap} gap-2 mb-4`}></div>
-
-      {mapData && (
-        <div className='mb-2'>
-          <p className={textClasses.body}>
-            Текущая карта: <strong>{mapData.name}</strong>
-            {mapData.description && ` - ${mapData.description}`}
-          </p>
-        </div>
-      )}
-
-      {loadMapError && (
-        <div
-          className={`mb-2 p-2 bg-[${COLORS.DANGER_LIGHT}] border border-[${COLORS.DANGER}] text-[${COLORS.DANGER_DARK}] rounded-lg`}
-        >
-          <p className={textClasses.body}>{loadMapError}</p>
-        </div>
-      )}
-
+    <div className={containerClasses.base}>
       <div
-        className={`${styles.mapContainer} border border-[${COLORS.SEPARATOR}] rounded-lg`}
+        className={`${styles.mapContainer} border border-[${
+          COLORS.SEPARATOR
+        }] rounded-lg ${getMapCursorClass()}`}
       >
         {loadingMap ? (
           <div
@@ -157,8 +182,8 @@ const MapContainer: React.FC<MapContainerProps> = ({
             <ZoomControl position='bottomright' />
             <ImageOverlay bounds={bounds} url={imageUrl} />
 
-            {/* Обработчик кликов по карте */}
-            <MapClickHandler onMapClick={handleMapClick} />
+            {/* Обработчик кликов и событий карты */}
+            <MapEventHandler />
 
             {/* Рендерим маркеры растений */}
             {plants.map((plant) => (
@@ -168,8 +193,48 @@ const MapContainer: React.FC<MapContainerProps> = ({
                 position={plant.position}
                 name={plant.name}
                 onClick={() => handlePlantClick(plant.id)}
+                draggable={currentMode === MapMode.EDIT}
               />
             ))}
+
+            {/* Рендерим сохраненные области */}
+            {areas.map((area) => (
+              <Polygon
+                key={area.id}
+                positions={area.points}
+                pathOptions={areaStyle}
+              />
+            ))}
+
+            {/* Рендерим текущую область в режиме рисования */}
+            {currentMode === MapMode.AREA && currentAreaPoints.length > 0 && (
+              <Polygon
+                positions={currentAreaPoints}
+                pathOptions={currentAreaStyle}
+              />
+            )}
+
+            {/* Отображаем маркеры точек текущей области */}
+            {currentMode === MapMode.AREA &&
+              !isDrawingComplete &&
+              currentAreaPoints.map((point, index) => (
+                <Marker
+                  key={`area-point-${index}`}
+                  position={point}
+                  icon={areaPointIcon}
+                />
+              ))}
+
+            {/* Отображаем маркер выбранной позиции */}
+            {selectedPosition && (
+              <Marker
+                position={[
+                  selectedPosition.latitude,
+                  selectedPosition.longitude,
+                ]}
+                icon={selectedPositionIcon}
+              ></Marker>
+            )}
           </LeafletMapContainer>
         ) : (
           <div
@@ -180,19 +245,10 @@ const MapContainer: React.FC<MapContainerProps> = ({
             </p>
           </div>
         )}
-
-        {/* Форма добавления растения */}
-        {showAddForm && newPlantPosition && (
-          <div
-            className={`absolute top-4 right-4 z-[1000] w-80 ${containerClasses.base}`}
-          >
-            <PlantAddForm
-              position={newPlantPosition}
-              onClose={handleCloseAddForm}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Форма создания области (отображается как модальное окно) */}
+      <AreaForm />
     </div>
   );
 };

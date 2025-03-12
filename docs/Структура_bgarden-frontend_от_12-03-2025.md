@@ -4,8 +4,9 @@
       - `changes.mdc` (1.4 KB)
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
+  - `.env.production.example` (499.0 B)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_12-03-2025.md` (12.2 KB)
+    - `Структура_bgarden-frontend_от_12-03-2025.md` (12.6 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -14,6 +15,8 @@
     - `favicon.ico` (3.8 KB)
     - **images** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images)`
       - `logo.jpg` (263.3 KB)
+      - **maps** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images\maps)`
+        - `README.md` (1.4 KB)
       - `placeholder-info.txt` (588.0 B)
     - `index.html` (1.7 KB)
     - `logo192.png` (5.2 KB)
@@ -38,6 +41,8 @@
         - `Header.tsx` (1.4 KB)
         - `index.ts` (350.0 B)
         - `Table.tsx` (2.7 KB)
+    - **config** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\config)`
+      - `apiConfig.ts` (1.3 KB)
     - `index.css` (1.3 KB)
     - `index.tsx` (707.0 B)
     - `logo.svg` (2.6 KB)
@@ -75,21 +80,23 @@
           - `index.ts` (579.0 B)
       - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components)`
-          - `ControlPanel.tsx` (4.1 KB)
-          - `index.ts` (318.0 B)
+          - `ControlPanel.tsx` (9.9 KB)
+          - `index.ts` (315.0 B)
           - `MapActions.tsx` (2.7 KB)
           - `MapLegend.tsx` (1.3 KB)
-          - `MapPage.tsx` (1.1 KB)
+          - `MapPage.tsx` (2.9 KB)
           - **plant-map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\plant-map)`
-            - `index.ts` (357.0 B)
-            - `MapContainer.tsx` (6.1 KB)
-            - `MapMarker.tsx` (1.3 KB)
-            - `PlantAddForm.tsx` (3.1 KB)
+            - `AreaForm.tsx` (2.7 KB)
+            - `index.ts` (531.0 B)
+            - `MapContainer.tsx` (8.4 KB)
+            - `MapMarker.tsx` (1.8 KB)
+            - `PlantAddForm.tsx` (3.5 KB)
             - `PlantDeleteModal.tsx` (1.4 KB)
             - `PlantEditForm.tsx` (3.1 KB)
+            - `SimpleMapView.tsx` (6.6 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\contexts)`
           - `index.ts` (204.0 B)
-          - `MapContext.tsx` (4.0 KB)
+          - `MapContext.tsx` (9.8 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\docs)`
           - `README.md` (5.1 KB)
           - `styles-guide.md` (4.8 KB)
@@ -103,11 +110,11 @@
           - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\map\styles)`
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\services)`
           - `index.ts` (173.0 B)
-          - `mapService.ts` (886.0 B)
+          - `mapService.ts` (1.3 KB)
           - `plantService.ts` (125.0 B)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\styles)`
           - `index.ts` (88.0 B)
-          - `map.module.css` (2.6 KB)
+          - `map.module.css` (5.9 KB)
           - `mapStyles.ts` (1.6 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\types)`
           - `index.ts` (100.0 B)
@@ -152,11 +159,11 @@
             - `BasicInfoSection.tsx` (5.6 KB)
             - `ExpositionInfoSection.tsx` (3.7 KB)
             - `FormFields.tsx` (14.6 KB)
-            - `GeographicInfoSection.tsx` (3.9 KB)
+            - `GeographicInfoSection.tsx` (8.8 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (23.9 KB)
+            - `SpecimenFormContainer.tsx` (24.9 KB)
             - `Tabs.tsx` (4.0 KB)
-            - `types.ts` (3.5 KB)
+            - `types.ts` (3.6 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`
             - `index.ts` (53.0 B)
             - `SpecimenGallery.tsx` (6.1 KB)

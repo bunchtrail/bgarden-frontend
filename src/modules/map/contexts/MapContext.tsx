@@ -9,12 +9,37 @@ import React, {
 } from 'react';
 import { MapData, getActiveMap } from '../services/mapService';
 
+// Перечисление режимов работы с картой
+export enum MapMode {
+  VIEW = 'view', // Просмотр
+  ADD = 'add', // Добавление маркера
+  EDIT = 'edit', // Редактирование маркеров
+  AREA = 'area', // Добавление области
+  FILTER = 'filter', // Фильтрация
+  SELECT_LOCATION = 'select_location', // Новый режим: выбор геопозиции
+}
+
 // Тип для растения на карте
 export interface Plant {
   id: string;
   name: string;
   position: [number, number]; // [x, y] координаты
   description?: string;
+}
+
+// Тип для области на карте
+export interface Area {
+  id: string;
+  name: string;
+  points: [number, number][]; // Массив точек, образующих полигон
+  description?: string;
+}
+
+// Интерфейс для геопозиции на карте
+export interface GeoPosition {
+  latitude: number;
+  longitude: number;
+  timestamp: number;
 }
 
 // Тип для контекста карты
@@ -31,6 +56,32 @@ interface MapContextType {
   deletePlant: (id: string) => void;
   selectedPlantId: string | null;
   setSelectedPlantId: (id: string | null) => void;
+  // Режимы
+  currentMode: MapMode;
+  setCurrentMode: (mode: MapMode) => void;
+  // Области
+  areas: Area[];
+  addArea: (area: Omit<Area, 'id'>) => void;
+  updateArea: (id: string, area: Partial<Omit<Area, 'id'>>) => void;
+  deleteArea: (id: string) => void;
+  selectedAreaId: string | null;
+  setSelectedAreaId: (id: string | null) => void;
+  // Для режима добавления области
+  currentAreaPoints: [number, number][];
+  addPointToArea: (point: [number, number]) => void;
+  clearAreaPoints: () => void;
+  removeLastPoint: () => void;
+  // Модальное окно
+  isAreaFormOpen: boolean;
+  openAreaForm: () => void;
+  closeAreaForm: () => void;
+  finishDrawing: () => void;
+  saveCurrentArea: (name: string, description?: string) => void;
+  isDrawingComplete: boolean;
+  // Геопозиция
+  selectedPosition: GeoPosition | null;
+  savePosition: (position: [number, number]) => void;
+  clearSelectedPosition: () => void;
 }
 
 // Создаем контекст
@@ -48,6 +99,23 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loadingMap, setLoadingMap] = useState<boolean>(false);
   const [loadMapError, setLoadMapError] = useState<string | null>(null);
+
+  // Состояния для режимов и областей
+  const [currentMode, setCurrentMode] = useState<MapMode>(MapMode.VIEW);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  const [currentAreaPoints, setCurrentAreaPoints] = useState<
+    [number, number][]
+  >([]);
+
+  // Состояния для управления формой области
+  const [isAreaFormOpen, setIsAreaFormOpen] = useState<boolean>(false);
+  const [isDrawingComplete, setIsDrawingComplete] = useState<boolean>(false);
+
+  // Состояние для хранения выбранной геопозиции
+  const [selectedPosition, setSelectedPosition] = useState<GeoPosition | null>(
+    null
+  );
 
   // Функция для загрузки карты с сервера
   const loadMapFromServer = async () => {
@@ -102,6 +170,97 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // Функции для работы с областями
+  const addArea = (areaData: Omit<Area, 'id'>) => {
+    const newArea: Area = {
+      ...areaData,
+      id: `area-${Date.now()}`,
+    };
+    setAreas((prevAreas) => [...prevAreas, newArea]);
+  };
+
+  const updateArea = (id: string, areaData: Partial<Omit<Area, 'id'>>) => {
+    setAreas((prevAreas) =>
+      prevAreas.map((area) =>
+        area.id === id ? { ...area, ...areaData } : area
+      )
+    );
+  };
+
+  const deleteArea = (id: string) => {
+    setAreas((prevAreas) => prevAreas.filter((area) => area.id !== id));
+    if (selectedAreaId === id) {
+      setSelectedAreaId(null);
+    }
+  };
+
+  // Функции для режима добавления области
+  const addPointToArea = (point: [number, number]) => {
+    setCurrentAreaPoints((prevPoints) => [...prevPoints, point]);
+  };
+
+  const clearAreaPoints = () => {
+    setCurrentAreaPoints([]);
+    setIsDrawingComplete(false);
+  };
+
+  const removeLastPoint = () => {
+    setCurrentAreaPoints((prevPoints) =>
+      prevPoints.length > 0
+        ? prevPoints.slice(0, prevPoints.length - 1)
+        : prevPoints
+    );
+  };
+
+  // Завершить рисование и открыть форму
+  const finishDrawing = () => {
+    if (currentAreaPoints.length >= 3) {
+      setIsDrawingComplete(true);
+      openAreaForm();
+    }
+  };
+
+  // Управление модальным окном
+  const openAreaForm = () => {
+    setIsAreaFormOpen(true);
+  };
+
+  const closeAreaForm = () => {
+    setIsAreaFormOpen(false);
+  };
+
+  // Сохранить текущую область
+  const saveCurrentArea = (name: string, description?: string) => {
+    if (currentAreaPoints.length >= 3) {
+      addArea({
+        name,
+        points: currentAreaPoints,
+        description:
+          description || `Область создана ${new Date().toLocaleString()}`,
+      });
+      clearAreaPoints();
+      closeAreaForm();
+      setIsDrawingComplete(false);
+    }
+  };
+
+  // Функция для сохранения геопозиции
+  const savePosition = (position: [number, number]) => {
+    setSelectedPosition({
+      latitude: position[0],
+      longitude: position[1],
+      timestamp: Date.now(),
+    });
+    console.log(
+      `Сохранена позиция: широта ${position[0]}, долгота ${position[1]}`
+    );
+  };
+
+  // Функция для очистки выбранной позиции
+  const clearSelectedPosition = () => {
+    setSelectedPosition(null);
+  };
+
   const value = {
     customImage,
     setCustomImage,
@@ -115,6 +274,32 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     deletePlant,
     selectedPlantId,
     setSelectedPlantId,
+    // Режимы
+    currentMode,
+    setCurrentMode,
+    // Области
+    areas,
+    addArea,
+    updateArea,
+    deleteArea,
+    selectedAreaId,
+    setSelectedAreaId,
+    // Для режима добавления области
+    currentAreaPoints,
+    addPointToArea,
+    clearAreaPoints,
+    removeLastPoint,
+    // Модальное окно
+    isAreaFormOpen,
+    openAreaForm,
+    closeAreaForm,
+    finishDrawing,
+    saveCurrentArea,
+    isDrawingComplete,
+    // Геопозиция
+    selectedPosition,
+    savePosition,
+    clearSelectedPosition,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;

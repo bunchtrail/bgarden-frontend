@@ -1,9 +1,8 @@
 .mapContainer {
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  height: 600px;
   width: 100%;
+  height: 80vh;
+  border-radius: 8px;
+  overflow: hidden;
   position: relative;
 }
 
@@ -99,11 +98,15 @@
 }
 
 .formPanel {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 300px;
   background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   padding: 1rem;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .formInput {
@@ -134,12 +137,14 @@
 }
 
 @media (max-width: 768px) {
-  .mapPageContainer {
-    padding: 1rem;
+  .mapContainer {
+    height: 60vh;
   }
   
-  .mapContainer {
-    height: 400px;
+  .formPanel {
+    width: 90%;
+    left: 5%;
+    right: 5%;
   }
 }
 
@@ -147,4 +152,140 @@
   .mapContainer {
     height: 300px;
   }
-} 
+}
+
+/* Стили курсоров для разных режимов */
+.cursorDefault {
+  cursor: default;
+}
+
+.cursorAdd {
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiMwMDgwMDAiIGZpbGwtb3BhY2l0eT0iMC41Ii8+PHBhdGggZD0iTTEyIDZWMThNNiAxMkgxOCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=') 12 12, pointer;
+}
+
+.cursorEdit {
+  cursor: move;
+}
+
+.cursorDraw {
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMgMjFWMTdINyIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjEgM0gxN1Y3IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0zIDNINlY2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0yMSAyMUgxOFYxOCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=') 12 12, crosshair;
+}
+
+.cursorLocation {
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0iIzQyYjcyYSIgZmlsbC1vcGFjaXR5PSIwLjUiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIzIiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+PC9zdmc+') 12 12, crosshair;
+}
+
+/* Анимация для маркеров при перетаскивании */
+.markerDragging {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* Стили для областей */
+.area {
+  stroke-dasharray: 5, 5;
+  animation: dashAnimation 20s linear infinite;
+}
+
+@keyframes dashAnimation {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+/* Стили для модального окна */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.modal {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.375rem;
+  resize: vertical;
+}
+
+.formInput:focus, .formTextarea:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Стили для упрощенной карты */
+.simpleMapContainer {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.simpleMapControls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mapButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #F3F4F6;
+  color: #1F2937;
+  border: 1px solid #D1D5DB;
+}
+
+.mapButton:hover {
+  background-color: #E5E7EB;
+}
+
+.mapButton.active {
+  background-color: #2563EB;
+  color: white;
+}
+
+.formOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.formContainer {
+  width: 90%;
+  max-width: 500px;
+}
+
+/* Остальные стили без изменений */ 

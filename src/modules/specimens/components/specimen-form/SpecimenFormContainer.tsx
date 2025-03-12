@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import {
+  getActiveMap,
+  getMapImageUrl,
+  MapData,
+} from '../../../map/services/mapService';
 import { Specimen, SpecimenFormData } from '../../types';
 import { MessagePanel, MessageType } from '../ErrorPanel';
 import { CancelIcon, SaveIcon } from '../icons';
@@ -92,6 +97,10 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
   // Состояние для отображения расширенных полей
   const [showExtendedFields, setShowExtendedFields] = useState(false);
 
+  // Состояние для хранения данных карты
+  const [mapData, setMapData] = useState<MapData | null>(null);
+  const [mapImageUrl, setMapImageUrl] = useState<string | null>(null);
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -101,6 +110,26 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       setIsEditMode(false);
     }
   }, [initialData]);
+
+  // Загрузка данных карты при монтировании компонента
+  useEffect(() => {
+    const fetchMapData = async () => {
+      try {
+        const maps = await getActiveMap();
+        if (maps && maps.length > 0) {
+          setMapData(maps[0]);
+          const imageUrl = getMapImageUrl(maps[0]);
+          setMapImageUrl(imageUrl);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке карты:', error);
+        // Используем запасной вариант, если не удалось загрузить карту
+        setMapImageUrl('/images/maps/garden-map.jpg');
+      }
+    };
+
+    fetchMapData();
+  }, []);
 
   const markFieldAsTouched = (name: string) => {
     setTouchedFields((prev) => ({ ...prev, [name]: true }));
@@ -211,6 +240,20 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   };
 
+  // Обработчик выбора позиции на карте
+  const handlePositionSelected = (latitude: number, longitude: number) => {
+    setFormData((prev) => ({ ...prev, latitude, longitude }));
+    // Отмечаем поля как измененные
+    markFieldAsTouched('latitude');
+    markFieldAsTouched('longitude');
+
+    // Валидация на лету
+    if (formSubmitted) {
+      validateField('latitude', latitude);
+      validateField('longitude', longitude);
+    }
+  };
+
   const validateField = (name: string, value: any): boolean => {
     let isValid = true;
     let errorMessage = '';
@@ -254,16 +297,10 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         }
         break;
       case 'latitude':
-        if (value < -90 || value > 90) {
-          isValid = false;
-          errorMessage = 'Широта должна быть в диапазоне от -90 до 90';
-        }
+        // Проверка диапазона удалена
         break;
       case 'longitude':
-        if (value < -180 || value > 180) {
-          isValid = false;
-          errorMessage = 'Долгота должна быть в диапазоне от -180 до 180';
-        }
+        // Проверка диапазона удалена
         break;
       case 'plantingYear':
         const currentYear = new Date().getFullYear();
@@ -325,15 +362,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
 
     // Координаты
-    if (formData.latitude < -90 || formData.latitude > 90) {
-      isValid = false;
-      newErrors.latitude = 'Широта должна быть в диапазоне от -90 до 90';
-    }
-
-    if (formData.longitude < -180 || formData.longitude > 180) {
-      isValid = false;
-      newErrors.longitude = 'Долгота должна быть в диапазоне от -180 до 180';
-    }
+    // Проверки диапазона для широты и долготы удалены
 
     // Год посадки
     const currentYear = new Date().getFullYear();
@@ -449,6 +478,8 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
                 handleChange={handleChange}
                 handleSelectChange={handleSelectChange}
                 handleNumberChange={handleNumberChange}
+                mapImageUrl={mapImageUrl}
+                onPositionSelected={handlePositionSelected}
               />
             </div>
           </div>
