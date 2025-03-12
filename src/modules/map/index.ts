@@ -9,7 +9,7 @@ export { default as MapUploadForm } from './components/forms/MapUploadForm';
 export { default as PlantAddForm } from './components/forms/PlantAddForm';
 export { default as PlantEditForm } from './components/forms/PlantEditForm';
 
-// Маркеры и слои
+// Маркеры
 export { default as PlantLayer } from './components/layers/PlantLayer';
 export { default as PlantMarker } from './components/markers/PlantMarker';
 
@@ -17,15 +17,18 @@ export { default as PlantMarker } from './components/markers/PlantMarker';
 export { default as MapManagementPage } from './components/pages/MapManagementPage';
 export { default as MapPage } from './components/pages/MapPage';
 
-// Контексты
-export { MapProvider, useMapContext } from './contexts/MapContext';
-
-// Сервисы
-export { mapService } from './services/mapService';
-
-// Хуки
-export * from './hooks';
+// Стили
+export * from './styles';
+export { default as mapStyles } from './styles';
 
 // Типы
 export * from './types';
+
+// Сервисы и хуки
+export * from './hooks';
+export { debouncedMapService, mapService } from './services/mapService';
+export { default as specimenService } from './services/specimenService';
+
+// Контексты
+export { MapProvider, useMapContext } from './contexts/MapContext';
 

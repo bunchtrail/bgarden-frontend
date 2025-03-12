@@ -1,9 +1,10 @@
 import L from 'leaflet';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { COLORS } from '../../../../styles/global-styles';
 import { Specimen } from '../../../specimens/types';
 import { useMapContext } from '../../contexts/MapContext';
 import { useMapService } from '../../hooks';
+import styles from '../../map.module.css';
+import { plantMarkerStyles } from '../../styles';
 import { MapMode } from '../../types';
 
 interface PlantMarkerProps {
@@ -12,43 +13,20 @@ interface PlantMarkerProps {
 
 // Функция для создания кастомной иконки маркера
 const createCustomIcon = (specimen: Specimen, isSelected: boolean = false) => {
-  // Выбор цвета в зависимости от типа растения или статуса
-  let color = COLORS.PRIMARY;
+  // Получаем цвет маркера в зависимости от типа сектора
+  const color = plantMarkerStyles.getIconColor(specimen.sectorType);
 
-  // По типу сектора
-  if (specimen.sectorType === 1) {
-    // Дендрологический
-    color = COLORS.SUCCESS;
-  } else if (specimen.sectorType === 2) {
-    // Флора
-    color = COLORS.PRIMARY;
-  } else if (specimen.sectorType === 3) {
-    // Цветущие
-    color = COLORS.WARNING;
-  }
+  // Получаем стиль маркера
+  const markerHtmlStyles = plantMarkerStyles.createMarkerStyle(
+    color,
+    isSelected
+  );
 
-  // Если растение выделено, делаем маркер крупнее
-  const size = isSelected ? 2.4 : 2;
-  const borderWidth = isSelected ? 2 : 1;
-
-  // Создаем SVG для иконки
-  const markerHtmlStyles = `
-    background-color: ${color};
-    width: ${size}rem;
-    height: ${size}rem;
-    display: block;
-    left: -${size / 2}rem;
-    top: -${size / 2}rem;
-    position: relative;
-    border-radius: ${size}rem ${size}rem 0;
-    transform: rotate(45deg);
-    border: ${borderWidth}px solid #FFFFFF;
-    box-shadow: 0px 0px 4px rgba(0,0,0,0.3);
-    ${isSelected ? 'z-index: 1000; animation: pulse 1.5s infinite;' : ''}
-  `;
-
+  // Создаем иконку с использованием HTML
   const icon = L.divIcon({
-    className: `custom-plant-marker ${isSelected ? 'selected-marker' : ''}`,
+    className: `${styles['custom-plant-marker']} ${
+      isSelected ? styles['selected-marker'] : ''
+    }`,
     iconAnchor: [0, 0],
     html: `<span style="${markerHtmlStyles}" />`,
   });

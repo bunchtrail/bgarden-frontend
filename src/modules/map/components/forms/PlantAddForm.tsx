@@ -7,7 +7,7 @@ import {
   RegionDto,
   regionService,
 } from '../../../specimens/services/regionService';
-import { specimenService } from '../../../specimens/services/specimenService';
+import { specimenService as mapSpecimenService } from '../../../specimens/services/specimenService';
 import { Specimen } from '../../../specimens/types';
 import { useMapContext } from '../../contexts/MapContext';
 import { MapMode } from '../../types';
@@ -113,7 +113,7 @@ const PlantAddForm: React.FC = () => {
 
         // Добавляем информацию о выбранном местоположении
         setSuccess('Местоположение растения выбрано успешно');
-        
+
         // Сбрасываем ошибки при изменении координат
         setErrors((prev) => ({ ...prev, locationError: undefined }));
       }
@@ -283,8 +283,14 @@ const PlantAddForm: React.FC = () => {
         longitude: location.longitude,
       };
 
-      // Используем сервис образцов вместо сервиса карты
-      await specimenService.createSpecimen(specimenData);
+      console.log(
+        'Отправка данных в API через модуль specimens/services/specimenService:',
+        JSON.stringify(specimenData, null, 2)
+      );
+
+      // Используем сервис образцов из модуля specimens (вместо specimenService из map)
+      const result = await mapSpecimenService.createSpecimen(specimenData);
+      console.log('Ответ API при создании образца:', result);
 
       // Показываем сообщение об успехе
       setSuccess('Растение успешно добавлено!');
@@ -305,12 +311,32 @@ const PlantAddForm: React.FC = () => {
         setLocation(null);
         setMode(MapMode.VIEW);
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Ошибка при добавлении растения:', error);
+
+      // Расширенное логирование ошибок
+      if (error.response) {
+        console.error('Детали ошибки от сервера:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        });
+      } else if (error.request) {
+        console.error(
+          'Запрос был отправлен, но ответ не получен:',
+          error.request
+        );
+      } else {
+        console.error('Ошибка запроса:', error.message);
+      }
+
       setErrors({
         ...errors,
-        submitError:
-          'Не удалось добавить растение. Проверьте введенные данные.',
+        submitError: `Не удалось добавить растение: ${
+          error.response?.data?.message ||
+          error.message ||
+          'Проверьте введенные данные'
+        }.`,
       });
     } finally {
       setSaving(false);

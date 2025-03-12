@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useMapContext } from '../contexts/MapContext';
+import styles from '../map.module.css';
+import mapStyles from '../styles';
 import { MapMode } from '../types';
 import PlantAddForm from './forms/PlantAddForm';
 import PlantEditForm from './forms/PlantEditForm';
@@ -37,11 +39,15 @@ const MapControls: React.FC<MapControlsProps> = ({
     switch (state.mode) {
       case MapMode.ADD_PLANT:
         return (
-          <div className='map-instructions p-4 bg-blue-50 rounded-lg mt-2 border border-blue-100'>
-            <div className='mb-2 font-medium text-blue-700 flex items-center'>
+          <div
+            className={`${mapStyles.controls.instructionsContainer.base} ${mapStyles.controls.instructionsContainer.add}`}
+          >
+            <div
+              className={`${mapStyles.controls.instructionsTitle.base} ${mapStyles.controls.instructionsTitle.add}`}
+            >
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                className='h-5 w-5 mr-2'
+                className={mapStyles.controls.icon}
                 viewBox='0 0 20 20'
                 fill='currentColor'
               >
@@ -53,7 +59,7 @@ const MapControls: React.FC<MapControlsProps> = ({
               </svg>
               Добавление нового растения
             </div>
-            <ol className='list-decimal pl-5 space-y-1 text-sm'>
+            <ol className={mapStyles.controls.instructionsList}>
               <li>
                 Кликните на карте, чтобы выбрать место для нового растения
               </li>
@@ -64,11 +70,15 @@ const MapControls: React.FC<MapControlsProps> = ({
         );
       case MapMode.EDIT_PLANT:
         return (
-          <div className='map-instructions p-4 bg-amber-50 rounded-lg mt-2 border border-amber-100'>
-            <div className='mb-2 font-medium text-amber-700 flex items-center'>
+          <div
+            className={`${mapStyles.controls.instructionsContainer.base} ${mapStyles.controls.instructionsContainer.edit}`}
+          >
+            <div
+              className={`${mapStyles.controls.instructionsTitle.base} ${mapStyles.controls.instructionsTitle.edit}`}
+            >
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                className='h-5 w-5 mr-2'
+                className={mapStyles.controls.icon}
                 viewBox='0 0 20 20'
                 fill='currentColor'
               >
@@ -80,7 +90,7 @@ const MapControls: React.FC<MapControlsProps> = ({
               </svg>
               Редактирование растения
             </div>
-            <ol className='list-decimal pl-5 space-y-1 text-sm'>
+            <ol className={mapStyles.controls.instructionsList}>
               <li>Выберите растение на карте для редактирования</li>
               <li>Измените необходимые данные в форме</li>
               <li>Нажмите кнопку "Сохранить изменения" для подтверждения</li>
@@ -95,11 +105,15 @@ const MapControls: React.FC<MapControlsProps> = ({
         );
       case MapMode.DELETE_PLANT:
         return (
-          <div className='map-instructions p-4 bg-red-50 rounded-lg mt-2 border border-red-100'>
-            <div className='mb-2 font-medium text-red-700 flex items-center'>
+          <div
+            className={`${mapStyles.controls.instructionsContainer.base} ${mapStyles.controls.instructionsContainer.delete}`}
+          >
+            <div
+              className={`${mapStyles.controls.instructionsTitle.base} ${mapStyles.controls.instructionsTitle.delete}`}
+            >
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                className='h-5 w-5 mr-2'
+                className={mapStyles.controls.icon}
                 viewBox='0 0 20 20'
                 fill='currentColor'
               >
@@ -111,7 +125,7 @@ const MapControls: React.FC<MapControlsProps> = ({
               </svg>
               Удаление растения
             </div>
-            <ol className='list-decimal pl-5 space-y-1 text-sm'>
+            <ol className={mapStyles.controls.instructionsList}>
               <li>Кликните на растение на карте, которое хотите удалить</li>
               <li>Подтвердите удаление в диалоговом окне</li>
             </ol>
@@ -132,13 +146,13 @@ const MapControls: React.FC<MapControlsProps> = ({
   }
 
   return (
-    <div className='map-controls mt-4'>
-      <div className='map-control-buttons flex flex-wrap gap-2 mb-4'>
+    <div className={mapStyles.controls.container}>
+      <div className={mapStyles.controls.buttonsContainer}>
         <button
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`${mapStyles.controls.button.base} ${
             state.mode === MapMode.VIEW
-              ? 'bg-green-600 text-white shadow-md'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+              ? mapStyles.controls.button.view
+              : mapStyles.controls.button.inactive
           }`}
           onClick={() => setMode(MapMode.VIEW)}
           title='Режим просмотра карты'
@@ -146,7 +160,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           <span className='flex items-center'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5 mr-1'
+              className={mapStyles.controls.icon}
               viewBox='0 0 20 20'
               fill='currentColor'
             >
@@ -161,10 +175,10 @@ const MapControls: React.FC<MapControlsProps> = ({
           </span>
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`${mapStyles.controls.button.base} ${
             state.mode === MapMode.ADD_PLANT
-              ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+              ? mapStyles.controls.button.add
+              : mapStyles.controls.button.inactive
           }`}
           onClick={() => setMode(MapMode.ADD_PLANT)}
           title='Добавить новое растение на карту'
@@ -172,7 +186,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           <span className='flex items-center'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5 mr-1'
+              className={mapStyles.controls.icon}
               viewBox='0 0 20 20'
               fill='currentColor'
             >
@@ -186,10 +200,10 @@ const MapControls: React.FC<MapControlsProps> = ({
           </span>
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`${mapStyles.controls.button.base} ${
             state.mode === MapMode.EDIT_PLANT
-              ? 'bg-amber-600 text-white shadow-md'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+              ? mapStyles.controls.button.edit
+              : mapStyles.controls.button.inactive
           }`}
           onClick={() => setMode(MapMode.EDIT_PLANT)}
           title='Редактировать существующее растение'
@@ -197,7 +211,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           <span className='flex items-center'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5 mr-1'
+              className={mapStyles.controls.icon}
               viewBox='0 0 20 20'
               fill='currentColor'
             >
@@ -207,10 +221,10 @@ const MapControls: React.FC<MapControlsProps> = ({
           </span>
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`${mapStyles.controls.button.base} ${
             state.mode === MapMode.DELETE_PLANT
-              ? 'bg-red-600 text-white shadow-md'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+              ? mapStyles.controls.button.delete
+              : mapStyles.controls.button.inactive
           }`}
           onClick={() => setMode(MapMode.DELETE_PLANT)}
           title='Удалить растение с карты'
@@ -218,7 +232,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           <span className='flex items-center'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5 mr-1'
+              className={mapStyles.controls.icon}
               viewBox='0 0 20 20'
               fill='currentColor'
             >
@@ -237,23 +251,24 @@ const MapControls: React.FC<MapControlsProps> = ({
       {state.mode !== MapMode.VIEW && renderModeHelp()}
 
       {/* Показываем соответствующую форму в зависимости от режима */}
-      <div className='map-forms mt-3'>
+      <div className={mapStyles.controls.formsContainer}>
         {state.mode === MapMode.ADD_PLANT && (
           <div
             className={
               standaloneMode || state.isSimpleImageMode
-                ? 'simple-mode-form'
+                ? styles['simple-mode-form']
                 : ''
             }
           >
             <PlantAddForm />
           </div>
         )}
+
         {state.mode === MapMode.EDIT_PLANT && state.selectedSpecimen && (
           <div
             className={
               standaloneMode || state.isSimpleImageMode
-                ? 'simple-mode-form'
+                ? styles['simple-mode-form']
                 : ''
             }
           >

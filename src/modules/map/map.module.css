@@ -1,0 +1,141 @@
+/* Стили для модуля карты Botanical Garden App */
+
+/* Стили для контейнера Leaflet */
+.leaflet-container {
+  @apply rounded-2xl shadow-md overflow-hidden border border-[#E5E5EA];
+  height: 600px;
+  width: 100%;
+}
+
+/* Улучшенные стили для элементов управления Leaflet */
+.leaflet-control-zoom {
+  @apply shadow-md rounded-xl overflow-hidden border border-[#E5E5EA] !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  @apply bg-white text-[#1D1D1F] hover:bg-[#F5F5F7] !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 18px !important;
+}
+
+/* Улучшенные стили для всплывающих подсказок */
+.leaflet-tooltip {
+  @apply rounded-xl shadow-md border border-[#E5E5EA] p-3 !important;
+  padding: 8px 12px !important;
+}
+
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  @apply border-[#E5E5EA] !important;
+}
+
+/* Стили для маркеров растений */
+.custom-plant-marker {
+  animation: marker-fade-in 0.6s ease-out;
+  transition: transform 0.3s ease-out;
+}
+
+.custom-plant-marker:hover {
+  z-index: 1000 !important;
+  transform: scale(1.1);
+}
+
+.selected-marker {
+  z-index: 1000 !important;
+}
+
+/* Уведомления на карте */
+.map-notification {
+  @apply bg-white rounded-xl shadow-md border border-[#E5E5EA] p-3 mt-2;
+  animation: slide-down 0.3s ease-out;
+  min-width: 200px;
+}
+
+/* Управление картой - простой режим */
+.simple-mode-container {
+  @apply relative overflow-hidden rounded-2xl;
+  background-color: #f5f5f7;
+  min-height: 200px;
+}
+
+.simple-mode-image {
+  @apply w-full h-full object-cover;
+}
+
+.simple-mode-overlay {
+  @apply absolute inset-0 bg-black/10 flex items-center justify-center;
+}
+
+.simple-mode-message {
+  @apply bg-white/90 backdrop-blur-sm rounded-xl p-4 text-center shadow-md;
+  max-width: 80%;
+}
+
+/* Форма в простом режиме */
+.simple-mode-form {
+  @apply bg-white rounded-xl p-4 shadow-md border border-[#E5E5EA] my-3;
+}
+
+/* Стили для выделения области на карте */
+.leaflet-draw-tooltip {
+  @apply bg-white rounded-lg shadow-md border border-[#E5E5EA] text-[#1D1D1F] !important;
+  padding: 6px 10px !important;
+}
+
+.leaflet-draw-actions {
+  @apply bg-white rounded-lg shadow-md overflow-hidden border border-[#E5E5EA] !important;
+}
+
+.leaflet-draw-actions a {
+  @apply text-[#0A84FF] hover:bg-[#F5F5F7] !important;
+  padding: 6px 12px !important;
+}
+
+/* Анимации */
+@keyframes marker-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стиль для кластеров маркеров */
+.marker-cluster {
+  @apply bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center border border-[#E5E5EA] !important;
+}
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  @apply bg-[#E1F0FF] !important;
+}
+
+.marker-cluster div {
+  @apply bg-[#0A84FF] text-white font-medium rounded-full !important;
+  width: 80% !important;
+  height: 80% !important;
+  margin: 10% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+} 

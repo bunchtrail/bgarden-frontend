@@ -45,16 +45,74 @@ class SpecimenService {
 
     // Создать новый образец
     async createSpecimen(specimen: Omit<Specimen, 'id'>): Promise<Specimen> {
-        // Подготавливаем данные согласно требуемому формату API
-        const specimenData = {
-            id: 0, // API ожидает id=0 для новых записей
-            ...specimen
-        };
-        
-        console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
-        
-        const response = await api.post<Specimen>('/Specimen', specimenData);
-        return response.data;
+        try {
+            // Подготавливаем данные согласно требуемому формату API
+            const specimenData = {
+                id: 0, // API ожидает id=0 для новых записей
+                ...specimen
+            };
+            
+            console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
+            console.log('URL запроса:', `${API_URL}/Specimen`);
+            console.log('Заголовки запроса:', {
+                'Content-Type': 'application/json',
+                'Accept': 'text/plain',
+                'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : 'Токен отсутствует'
+            });
+            
+            const response = await api.post<Specimen>('/Specimen', specimenData);
+            console.log('Ответ сервера:', response.status, response.statusText);
+            console.log('Данные ответа:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('Ошибка при создании образца растения:', error);
+            
+            // Расширенное логирование ошибок
+            if (error.response) {
+                console.error('Детали ошибки от сервера:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data
+                });
+            } else if (error.request) {
+                console.error('Запрос был отправлен, но ответ не получен:', error.request);
+            } else {
+                console.error('Ошибка запроса:', error.message);
+            }
+            
+            // Пробуем другой метод отправки данных через fetch API
+            try {
+                console.log('Пробуем отправить через fetch API');
+                const token = localStorage.getItem('token');
+                const fetchResponse = await fetch(`${API_URL}/Specimen`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/plain',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        id: 0,
+                        ...specimen
+                    })
+                });
+                
+                if (fetchResponse.ok) {
+                    const data = await fetchResponse.json();
+                    console.log('Успешный ответ через fetch:', data);
+                    return data;
+                } else {
+                    console.error('Fetch вернул ошибку:', fetchResponse.status, fetchResponse.statusText);
+                    const errorText = await fetchResponse.text();
+                    console.error('Текст ошибки:', errorText);
+                }
+            } catch (fetchError) {
+                console.error('Ошибка при использовании fetch:', fetchError);
+            }
+            
+            throw error;
+        }
     }
 
     // Обновить существующий образец

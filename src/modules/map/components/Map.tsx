@@ -3,6 +3,8 @@ import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useRef } from 'react';
 import { SectorType } from '../../specimens/types';
 import { useMapContext } from '../contexts/MapContext';
+import styles from '../map.module.css';
+import mapStyles, { MAP_CONSTANTS } from '../styles';
 import PlantLayer from './layers/PlantLayer';
 import MapControls from './MapControls';
 
@@ -24,11 +26,13 @@ L.Marker.prototype.options.icon = DefaultIcon;
 interface MapProps {
   mapId?: number;
   sectorType?: SectorType;
+  fullHeight?: boolean;
 }
 
 const Map: React.FC<MapProps> = ({
   mapId = 1,
   sectorType = SectorType.Dendrology,
+  fullHeight = false,
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -75,7 +79,7 @@ const Map: React.FC<MapProps> = ({
       mapRef.current = L.map(mapContainerRef.current, {
         zoomControl: false, // Отключаем стандартные элементы управления зумом
         attributionControl: false, // Отключаем стандартные атрибуты
-      }).setView([55.75, 37.61], 13);
+      }).setView(MAP_CONSTANTS.DEFAULT_CENTER, MAP_CONSTANTS.DEFAULT_ZOOM);
 
       console.log('Карта создана, добавляем слои и контролы...');
 
@@ -86,7 +90,8 @@ const Map: React.FC<MapProps> = ({
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
           subdomains: 'abcd',
-          maxZoom: 20,
+          maxZoom: MAP_CONSTANTS.MAX_ZOOM,
+          minZoom: MAP_CONSTANTS.MIN_ZOOM,
         }
       ).addTo(mapRef.current);
 
@@ -177,18 +182,14 @@ const Map: React.FC<MapProps> = ({
   }
 
   return (
-    <div className='map-container'>
-      <div
-        ref={mapContainerRef}
-        className='leaflet-container'
-        style={{
-          height: '600px',
-          width: '100%',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          overflow: 'hidden',
-        }}
-      />
+    <div
+      className={`${mapStyles.container.base} ${
+        fullHeight
+          ? mapStyles.container.fullHeight
+          : mapStyles.container.standardHeight
+      }`}
+    >
+      <div ref={mapContainerRef} className={styles['leaflet-container']} />
 
       {state.mapReady && state.mapInstance && (
         <>
