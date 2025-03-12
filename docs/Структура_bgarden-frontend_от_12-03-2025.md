@@ -82,7 +82,7 @@
           - `ControlPanel.tsx` (445.0 B)
           - `index.ts` (382.0 B)
           - `MapActions.tsx` (2.9 KB)
-          - `MapControlPanel.tsx` (21.9 KB)
+          - `MapControlPanel.tsx` (30.5 KB)
           - `MapLegend.tsx` (1.0 KB)
           - `MapPage.tsx` (2.3 KB)
           - **plant-map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\plant-map)`

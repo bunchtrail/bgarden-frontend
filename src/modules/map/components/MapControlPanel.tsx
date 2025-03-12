@@ -26,21 +26,135 @@ const MapControlPanel: React.FC = () => {
     selectedPlantId,
   } = useMapContext();
 
+  // Функция для загрузки сохраненных настроек панели
+  const getSavedPanelSettings = () => {
+    // Загрузка позиции
+    const getSavedPosition = () => {
+      const savedPosition = localStorage.getItem('mapControlPanelPosition');
+      if (savedPosition) {
+        try {
+          const position = JSON.parse(savedPosition);
+          // Проверяем, что позиция находится в пределах экрана (на случай изменения размеров окна)
+          const maxX = window.innerWidth - 240;
+          const maxY = window.innerHeight - 40;
+          return {
+            x: Math.max(0, Math.min(position.x, maxX)),
+            y: Math.max(MIN_Y_POSITION, Math.min(position.y, maxY)),
+          };
+        } catch (e) {
+          console.error('Ошибка при загрузке позиции панели:', e);
+          return { x: window.innerWidth - 240, y: 80 };
+        }
+      }
+      return { x: window.innerWidth - 240, y: 80 };
+    };
+
+    // Загрузка состояния свернутости
+    const getSavedCollapsedState = () => {
+      try {
+        const savedState = localStorage.getItem('mapControlPanelCollapsed');
+        return savedState === 'true';
+      } catch (e) {
+        console.error('Ошибка при загрузке состояния панели:', e);
+        return false;
+      }
+    };
+
+    // Проверка нужно ли показывать подсказку (только первые 3 раза)
+    const shouldShowHint = () => {
+      try {
+        const hintCount = localStorage.getItem('mapControlPanelHintCount');
+        const count = hintCount ? parseInt(hintCount, 10) : 0;
+        return count < 3;
+      } catch (e) {
+        console.error('Ошибка при проверке счетчика подсказок:', e);
+        return true;
+      }
+    };
+
+    // Проверка нужно ли показывать индикатор кнопки сворачивания (только первые 5 раз)
+    const shouldShowCollapseIndicator = () => {
+      try {
+        const indicatorCount = localStorage.getItem(
+          'mapControlPanelIndicatorCount'
+        );
+        const count = indicatorCount ? parseInt(indicatorCount, 10) : 0;
+        return count < 5;
+      } catch (e) {
+        console.error('Ошибка при проверке счетчика индикатора:', e);
+        return true;
+      }
+    };
+
+    return {
+      position: getSavedPosition(),
+      isCollapsed: getSavedCollapsedState(),
+      showHint: shouldShowHint(),
+      showCollapseIndicator: shouldShowCollapseIndicator(),
+    };
+  };
+
+  // Функция для сохранения позиции в localStorage
+  const savePosition = (pos: { x: number; y: number }) => {
+    try {
+      localStorage.setItem('mapControlPanelPosition', JSON.stringify(pos));
+    } catch (e) {
+      console.error('Ошибка при сохранении позиции панели:', e);
+    }
+  };
+
+  // Функция для сохранения состояния свернутости
+  const saveCollapsedState = (collapsed: boolean) => {
+    try {
+      localStorage.setItem('mapControlPanelCollapsed', String(collapsed));
+    } catch (e) {
+      console.error('Ошибка при сохранении состояния панели:', e);
+    }
+  };
+
+  // Функция для увеличения счетчика показов подсказки
+  const incrementHintCount = () => {
+    try {
+      const hintCount = localStorage.getItem('mapControlPanelHintCount');
+      const count = hintCount ? parseInt(hintCount, 10) : 0;
+      localStorage.setItem('mapControlPanelHintCount', String(count + 1));
+    } catch (e) {
+      console.error('Ошибка при обновлении счетчика подсказок:', e);
+    }
+  };
+
+  // Функция для увеличения счетчика показов индикатора
+  const incrementIndicatorCount = () => {
+    try {
+      const indicatorCount = localStorage.getItem(
+        'mapControlPanelIndicatorCount'
+      );
+      const count = indicatorCount ? parseInt(indicatorCount, 10) : 0;
+      localStorage.setItem('mapControlPanelIndicatorCount', String(count + 1));
+    } catch (e) {
+      console.error('Ошибка при обновлении счетчика индикатора:', e);
+    }
+  };
+
+  // Получаем сохраненные настройки
+  const savedSettings = getSavedPanelSettings();
+
   // Состояние для отображения формы добавления растения
   const [showAddPlantForm, setShowAddPlantForm] = useState(false);
   // Состояние для скрытия/показа панели управления
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(savedSettings.isCollapsed);
   // Состояние для отслеживания позиции панели
-  const [position, setPosition] = useState({
-    x: window.innerWidth - 240,
-    y: 80,
-  });
+  const [position, setPosition] = useState(savedSettings.position);
   // Состояние для отслеживания перемещения панели
   const [isDragging, setIsDragging] = useState(false);
   // Точка привязки для перемещения
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   // Показывать подсказку о перетаскивании
-  const [showDragHint, setShowDragHint] = useState(true);
+  const [showDragHint, setShowDragHint] = useState(savedSettings.showHint);
+  // Показывать индикатор кнопки сворачивания
+  const [showCollapseIndicator, setShowCollapseIndicator] = useState(
+    savedSettings.showCollapseIndicator
+  );
 
   // Ссылка на DOM-элемент панели
   const panelRef = useRef<HTMLDivElement>(null);
@@ -70,7 +184,58 @@ const MapControlPanel: React.FC = () => {
   const handleToggleCollapse = (e: React.MouseEvent<SVGSVGElement>) => {
     // Останавливаем всплытие события, чтобы предотвратить запуск handleHeaderClick
     e.stopPropagation();
-    setIsCollapsed(!isCollapsed);
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    saveCollapsedState(newCollapsedState);
+
+    // Скрываем индикатор после первого использования
+    if (showCollapseIndicator) {
+      setShowCollapseIndicator(false);
+      incrementIndicatorCount();
+    }
+  };
+
+  // Сохраняем позицию панели при изменении
+  useEffect(() => {
+    if (!isDragging) {
+      savePosition(position);
+    }
+  }, [position, isDragging]);
+
+  // Обработчик для корректировки позиции при изменении размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      // Убедимся, что панель не выходит за пределы экрана после ресайза
+      const maxX = window.innerWidth - (panelRef.current?.offsetWidth || 200);
+      const maxY = window.innerHeight - 40;
+
+      setPosition((prev) => {
+        const newPos = {
+          x: Math.max(0, Math.min(prev.x, maxX)),
+          y: Math.max(MIN_Y_POSITION, Math.min(prev.y, maxY)),
+        };
+
+        // Сохраняем обновленную позицию, если она изменилась
+        if (newPos.x !== prev.x || newPos.y !== prev.y) {
+          savePosition(newPos);
+        }
+
+        return newPos;
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Обработчик для сброса позиции панели к значению по умолчанию
+  const handleResetPosition = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const defaultPosition = { x: window.innerWidth - 240, y: 80 };
+    setPosition(defaultPosition);
+    savePosition(defaultPosition);
   };
 
   // Эффект для отслеживания движения мыши и отпускания кнопки
@@ -111,10 +276,17 @@ const MapControlPanel: React.FC = () => {
     };
   }, [isDragging, dragOffset]);
 
+  // Обработчик скрытия подсказки с увеличением счетчика
+  const handleHideHint = () => {
+    setShowDragHint(false);
+    incrementHintCount();
+  };
+
   // Скрыть подсказку о перетаскивании при первом перетаскивании
   useEffect(() => {
     if (isDragging && showDragHint) {
       setShowDragHint(false);
+      incrementHintCount();
     }
   }, [isDragging, showDragHint]);
 
@@ -185,6 +357,17 @@ const MapControlPanel: React.FC = () => {
     zIndex: 20,
     cursor: isDragging ? 'grabbing' : 'auto',
   };
+
+  // При первом рендере увеличиваем счетчик просмотров индикатора
+  useEffect(() => {
+    if (showCollapseIndicator) {
+      const timeout = setTimeout(() => {
+        incrementIndicatorCount();
+      }, 2000); // Считаем, что индикатор показан, если пользователь видел его хотя бы 2 секунды
+
+      return () => clearTimeout(timeout);
+    }
+  }, []);
 
   return (
     <div style={panelStyle} ref={panelRef}>
@@ -260,8 +443,29 @@ const MapControlPanel: React.FC = () => {
                   d='M19 9l-7 7-7-7'
                 />
               </svg>
-              <span className='absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#0A84FF] opacity-75 animate-pulse hidden group-hover:block'></span>
+              {showCollapseIndicator && (
+                <span className='absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#0A84FF] opacity-75 animate-pulse'></span>
+              )}
             </div>
+            <button
+              className='hidden md:flex ml-1 text-xs text-[#86868B] hover:text-[#0A84FF] transition-colors items-center'
+              onClick={handleResetPosition}
+              title='Сбросить позицию панели'
+            >
+              <svg
+                className='w-3.5 h-3.5'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -285,7 +489,26 @@ const MapControlPanel: React.FC = () => {
                     d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                   />
                 </svg>
-                Перетащите заголовок для перемещения панели
+                <span>Перетащите заголовок для перемещения панели</span>
+                <button
+                  className='ml-auto text-[#0A84FF] hover:text-[#0062CC]'
+                  onClick={handleHideHint}
+                  title='Скрыть подсказку'
+                >
+                  <svg
+                    className='w-3 h-3'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
               </div>
             )}
 
