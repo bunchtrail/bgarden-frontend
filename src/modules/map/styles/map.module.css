@@ -34,6 +34,13 @@
 
 .plantMarker {
   background-color: #16A34A;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.plantMarker:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .waterMarker {
@@ -135,10 +142,15 @@
 
 .mapActionPanel {
   background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1rem;
-  margin-bottom: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border: 1px solid #E2E8F0;
+  max-width: 360px;
 }
 
 .mapPageContainer {
@@ -170,19 +182,19 @@
 }
 
 .cursorAdd {
-  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiMwMDgwMDAiIGZpbGwtb3BhY2l0eT0iMC41Ii8+PHBhdGggZD0iTTEyIDZWMThNNiAxMkgxOCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=') 12 12, pointer;
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0iI2ZmMDAwMCIgZmlsbC1vcGFjaXR5PSIwLjUiLz48L3N2Zz4='), auto;
 }
 
 .cursorEdit {
-  cursor: move;
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMgMTcuMjVWMjFoMy43NUwxNy44MSA5Ljk0bC0zLjc1LTMuNzVMMyAxNy4yNXpNMjAuNzEgNy4wNGMuMzktLjM5LjM5LTEuMDIgMC0xLjQxbC0yLjM0LTIuMzRjLS4zOS0uMzktMS4wMi0uMzktMS40MSAwbC0xLjgzIDEuODMgMy43NSAzLjc1IDEuODMtMS44M3oiIGZpbGw9IiMwMDg4ZmYiLz48L3N2Zz4='), auto;
 }
 
 .cursorDraw {
-  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMgMjFWMTdINyIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjEgM0gxN1Y3IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0zIDNINlY2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0yMSAyMUgxOFYxOCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=') 12 12, crosshair;
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMi4wMSAxMi4wM2w5Ljk4IDkuOTcgOS45OS05Ljk3TDEyIDJ6TTEyIDIwbC04LThoMTZsLTggOHoiIGZpbGw9IiM5MDAiLz48L3N2Zz4='), auto;
 }
 
 .cursorLocation {
-  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0iIzQyYjcyYSIgZmlsbC1vcGFjaXR5PSIwLjUiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIzIiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+PC9zdmc+') 12 12, crosshair;
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDhjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00em04LjkgMWMtLjQ2LTQuMTctMy43Ny03LjQ4LTcuOTQtNy45NFYxaC0ydjIuMDZDNi44MyAzLjUyIDMuNTIgNi44MyAzLjA2IDExSDFWMTNoMi4wNmM0LjYgNC4xNyA3Ljc3IDcuNDggNy45NCAxMS45NFYyM2gySjIwLjk0Yy40Ni00LjE3IDMuNzctNy40OCA3Ljk0LTcuOTRWMTFIMjB6TTEyIDE5Yy0zLjg3IDAtNy0zLjEzLTctN3MzLjEzLTcgNy03IDcgMy4xMyA3IDctMy4xMyA3LTcgN3oiIGZpbGw9IiMwMDg4ZmYiLz48L3N2Zz4='), auto;
 }
 
 /* Анимация для маркеров при перетаскивании */
@@ -483,12 +495,10 @@
 /* Улучшение контейнера карты */
 .enhancedMapContainer {
   width: 100%;
-  height: 95vh;
+  height: 100%;
+  position: relative;
   border-radius: 8px;
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-  border: 1px solid #BFDBFE;
 }
 
 /* Улучшение изображения карты */
@@ -560,54 +570,281 @@
   letter-spacing: 0.02em;
 }
 
-/* Визуальное выделение выбранного маркера с помощью внешнего кольца */
+/* Улучшенная анимация для выделенного маркера */
 :global(.selected-marker svg circle:first-child) {
-  animation: pulse 1.5s infinite;
+  animation: pulse 2s infinite;
+  filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.6));
 }
 
 @keyframes pulse {
   0% { 
     stroke-opacity: 0.7;
     stroke-width: 2px;
+    r: calc(50% - 2px);
   }
   50% { 
     stroke-opacity: 1;
     stroke-width: 3px;
+    r: calc(50% - 0.5px);
   }
   100% { 
     stroke-opacity: 0.7;
     stroke-width: 2px;
+    r: calc(50% - 2px);
   }
 }
 
-/* Стили для кластеров маркеров */
+/* Улучшенные стили для кластеров маркеров */
 .markerCluster {
   background-clip: padding-box;
   border-radius: 20px;
   transform-origin: center center !important;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Стили при наведении на кластер */
+.markerCluster:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  z-index: 1000 !important;
+}
+
+/* Анимация для кластера при нажатии */
+.markerCluster:active {
+  transform: scale(0.92);
+  transition: transform 0.1s ease-in-out;
+}
+
+/* Улучшенные стили для всплывающего окна маркера */
+.markerPopup {
+  padding: 12px;
+  max-width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.markerPopup h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 17px;
+  font-weight: bold;
+  color: #059669;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 8px;
+}
+
+.specimenPopup {
+  margin-top: 8px;
+}
+
+.specimenTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #2d3748;
+}
+
+.specimenLatinName {
+  font-style: italic;
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #4a5568;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #E2E8F0;
+}
+
+.specimenDetails {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.specimenDetails p {
+  margin: 6px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.specimenDetails strong {
+  font-weight: 600;
+  color: #4a5568;
+  min-width: 90px;
+}
+
+/* Улучшенные стили для Leaflet попапов */
+:global(.leaflet-popup-content-wrapper) {
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:global(.leaflet-popup-content) {
+  margin: 10px 14px;
+  line-height: 1.5;
+}
+
+:global(.leaflet-popup-tip) {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+:global(.leaflet-popup-close-button) {
+  font-size: 18px;
+  width: 26px;
+  height: 26px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 8px;
+  right: 8px;
+  transition: background-color 0.2s ease;
+}
+
+:global(.leaflet-popup-close-button:hover) {
+  background-color: #f8f8f8;
+  color: #ef4444;
+}
+
+/* Улучшенные стили для кластеров по умолчанию */
+:global(.marker-cluster) {
+  background-color: transparent !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  will-change: transform;
+}
+
+:global(.marker-cluster-small),
+:global(.marker-cluster-medium),
+:global(.marker-cluster-large) {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+  border: 2px solid rgba(22, 163, 74, 0.6) !important;
+}
+
+:global(.marker-cluster-small div),
+:global(.marker-cluster-medium div),
+:global(.marker-cluster-large div) {
+  background-color: rgba(22, 163, 74, 0.7) !important;
+  color: white !important;
+  font-weight: bold !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+:global(.marker-cluster span) {
+  font-size: 14px !important;
+  line-height: 28px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Улучшенная видимость маркеров */
+:global(.leaflet-marker-pane > *) {
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease-out, filter 0.2s ease-out;
+}
+
+:global(.leaflet-marker-pane > *:hover) {
+  z-index: 1000 !important;
+  transform: scale(1.1);
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.25));
+}
+
+/* Стили для нормальных и выбранных маркеров */
+.normalMarker {
+  transition: transform 0.2s ease-out;
+}
+
+.normalMarker:hover {
+  transform: scale(1.1);
+  z-index: 1000 !important;
+}
+
+.selectedMarker {
+  z-index: 1000 !important;
+  filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.5));
+}
+
+/* Улучшенные стили для панели управления */
+.mapControlPanel {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  max-width: 380px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.3s ease;
+}
+
+.mapControlPanel:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mapControlHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.mapControlTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+
+/* Стили для кнопок в панели управления */
+.controlButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: #FFFFFF;
+  color: #4F46E5;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.controlButton:hover {
+  background-color: #F9FAFB;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.controlButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.controlButtonActive {
+  background-color: #4F46E5;
+  color: white;
+  border-color: #4F46E5;
+}
+
+.controlButtonActive:hover {
+  background-color: #4338CA;
 }
 
 /* Контейнер для иконки кластера с анимацией */
 .clusterIconContainer {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform-origin: center center !important;
-  animation: clusterAppear 0.3s ease-out forwards; /* Добавляем анимацию */
-}
-
-/* Анимация плавного появления для кластеров */
-@keyframes clusterAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  width: 100%;
+  height: 100%;
+  transition: all 0.2s ease-out;
 }
 
 .clusterIconContainer img {
@@ -616,72 +853,27 @@
   object-fit: contain;
 }
 
-/* Анимация при наведении на кластер */
-.markerCluster:hover {
-  transform: scale(1.1);
-  transition: transform 0.2s ease-in-out;
+/* Стили для панели выбранного растения */
+.selectedPlantPanel {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease-in-out;
+  border: 1px solid #E2E8F0;
+  margin-top: 8px;
+  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.95);
+  width: 100%;
 }
 
-/* Анимация для кластера при нажатии */
-.markerCluster:active {
-  transform: scale(0.95);
-  transition: transform 0.1s ease-in-out;
-}
-
-/* Делаем кластер красивее */
-:global(.marker-cluster) {
-  background-color: transparent !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transform-origin: center center !important;
-  will-change: transform; /* Оптимизация производительности */
-}
-
-:global(.marker-cluster div) {
-  background-color: transparent !important;
-  border: none !important;
-  transform-origin: center center !important;
-}
-
-/* Полностью отключаем анимации библиотеки leaflet.markercluster */
-:global(.marker-cluster-animated) {
-  animation: none !important;
-}
-
-/* Предотвращаем анимации встроенные в библиотеку */
-:global(.leaflet-cluster-anim .leaflet-marker-icon), 
-:global(.leaflet-cluster-anim .leaflet-marker-shadow) {
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Фиксируем позицию иконок маркеров и кластеров */
-:global(.leaflet-marker-icon),
-:global(.leaflet-marker-shadow) {
-  transition: none !important;
-  transform-origin: center center !important;
-  backface-visibility: hidden; /* Предотвращает мерцание */
-  -webkit-backface-visibility: hidden;
-  will-change: transform, opacity; /* Оптимизация производительности */
-  position: absolute !important;
-}
-
-:global(.marker-cluster-small), 
-:global(.marker-cluster-medium), 
-:global(.marker-cluster-large) {
-  background-color: transparent !important;
-}
-
-:global(.marker-cluster-small div), 
-:global(.marker-cluster-medium div), 
-:global(.marker-cluster-large div) {
-  background-color: transparent !important;
-}
-
-:global(.marker-cluster span) {
-  line-height: normal !important;
-}
-
-/* Предотвращаем неправильную анимацию при добавлении/удалении маркеров */
-:global(.leaflet-marker-pane > *) {
-  pointer-events: auto;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 } 

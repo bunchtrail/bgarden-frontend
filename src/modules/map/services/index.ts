@@ -1,7 +1,4 @@
-// Форма добавления растения 
+// Экспорт всех сервисов приложения
 
 export * from './mapService';
-export * from './plantService';
-
-export { }; // Экспорт сервисов 
-
+export * from './plantService'; 

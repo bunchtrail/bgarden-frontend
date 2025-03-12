@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { MapData, getActiveMap } from '../services/mapService';
+import { SpecimenData, convertSpecimensToPlants, getAllSpecimens } from '../services/plantService';
 
 // Перечисление режимов работы с картой
 export enum MapMode {
@@ -92,6 +93,11 @@ interface MapContextType {
   clusteringSettings: ClusteringSettings;
   updateClusteringSettings: (settings: Partial<ClusteringSettings>) => void;
   toggleClustering: () => void;
+  // Добавляем поля для работы с растениями с сервера
+  loadingPlants: boolean;
+  loadPlantsError: string | null;
+  loadPlantsFromServer: () => Promise<void>;
+  specimensData: SpecimenData[];
 }
 
 // Создаем контекст
@@ -109,6 +115,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loadingMap, setLoadingMap] = useState<boolean>(false);
   const [loadMapError, setLoadMapError] = useState<string | null>(null);
+
+  // Состояние для загрузки растений с сервера
+  const [loadingPlants, setLoadingPlants] = useState<boolean>(false);
+  const [loadPlantsError, setLoadPlantsError] = useState<string | null>(null);
+  const [specimensData, setSpecimensData] = useState<SpecimenData[]>([]);
 
   // Настройки кластеризации
   const [clusteringSettings, setClusteringSettings] = useState<ClusteringSettings>(() => {
@@ -188,9 +199,30 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  // Загружаем карту при монтировании компонента
+  // Функция для загрузки растений с сервера
+  const loadPlantsFromServer = async () => {
+    try {
+      setLoadingPlants(true);
+      setLoadPlantsError(null);
+      
+      const specimens = await getAllSpecimens();
+      setSpecimensData(specimens);
+      
+      // Преобразуем данные с сервера в формат для отображения на карте
+      const plantsData = convertSpecimensToPlants(specimens);
+      setPlants(plantsData);
+    } catch (error) {
+      console.error('Ошибка при загрузке растений:', error);
+      setLoadPlantsError('Ошибка при загрузке растений');
+    } finally {
+      setLoadingPlants(false);
+    }
+  };
+
+  // Загружаем карту и растения при монтировании компонента
   useEffect(() => {
     loadMapFromServer();
+    loadPlantsFromServer();
   }, []);
 
   // Добавить новое растение
@@ -353,6 +385,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     clusteringSettings,
     updateClusteringSettings,
     toggleClustering,
+    // Добавляем новые поля
+    loadingPlants,
+    loadPlantsError,
+    loadPlantsFromServer,
+    specimensData,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;

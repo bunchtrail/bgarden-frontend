@@ -1,15 +1,10 @@
-// Экспорт компонентов для карты растений
+// Индексный файл экспорта компонентов для работы с картой растений
 
-import MapContainer from './MapContainer';
-import MapMarker from './MapMarker';
-import PlantAddForm from './PlantAddForm';
-import SimpleMapView from './SimpleMapView';
-import AreaForm from './AreaForm';
-import ClusteredMarkers from './ClusteredMarkers';
-
-export { MapContainer, MapMarker, PlantAddForm, SimpleMapView, AreaForm, ClusteredMarkers };
-export * from './SimpleMapView';
-
-export { default as PlantEditForm } from './PlantEditForm';
+export { default as AreaForm } from './AreaForm';
+export { default as ClusteredMarkers } from './ClusteredMarkers';
+export { default as MapContainer } from './MapContainer';
+export { default as MapMarker } from './MapMarker';
+export { default as PlantAddForm } from './PlantAddForm';
 export { default as PlantDeleteModal } from './PlantDeleteModal';
-
+export { default as PlantEditForm } from './PlantEditForm';
+export { default as SimpleMapView } from './SimpleMapView';

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useMapContext } from '../contexts';
+import styles from '../styles/map.module.css';
 
 const MapActions: React.FC = () => {
   const { plants, deletePlant, selectedPlantId, setSelectedPlantId } =
@@ -30,22 +31,25 @@ const MapActions: React.FC = () => {
   }
 
   return (
-    <div className='border-t border-[#E5E5EA] p-2 space-y-2'>
-      <span className='text-xs font-medium text-[#86868B] block mb-1'>
-        Выбранное растение
-      </span>
-      <div className='mb-2'>
-        <h3 className='text-sm font-medium'>{selectedPlant.name}</h3>
+    <div className={`${styles.selectedPlantPanel} p-3 space-y-2`}>
+      <div className={styles.mapControlHeader}>
+        <span className={styles.mapControlTitle}>Выбранное растение</span>
+      </div>
+
+      <div className='mb-3'>
+        <h3 className={`${styles.specimenTitle} text-sm`}>
+          {selectedPlant.name}
+        </h3>
         {selectedPlant.description && (
-          <p className='text-xs text-[#86868B] truncate'>
+          <p className='text-xs text-[#4a5568] mt-1 leading-relaxed'>
             {selectedPlant.description}
           </p>
         )}
       </div>
 
-      <div className='grid grid-cols-3 gap-1'>
+      <div className='grid grid-cols-3 gap-2'>
         <button
-          className='px-2 py-1.5 text-xs rounded-md bg-[#0A84FF] text-white transition-colors'
+          className={`${styles.controlButton} ${styles.controlButtonActive} px-2 py-1.5 text-xs rounded-md shadow-sm`}
           onClick={() =>
             window.open(`/specimens/${selectedPlant.id}`, '_blank')
           }
@@ -53,13 +57,13 @@ const MapActions: React.FC = () => {
           Подробно
         </button>
         <button
-          className='px-2 py-1.5 text-xs rounded-md border border-[#E5E5EA] bg-[#F5F5F7] transition-colors'
+          className={`${styles.controlButton} px-2 py-1.5 text-xs rounded-md border transition-colors`}
           onClick={() => setSelectedPlantId(null)}
         >
           Закрыть
         </button>
         <button
-          className='px-2 py-1.5 text-xs rounded-md text-[#FF3B30] border border-[#FFE5E5] bg-[#FFF5F5] transition-colors'
+          className='px-2 py-1.5 text-xs rounded-md text-[#FF3B30] border border-[#FFE5E5] bg-[#FFF5F5] hover:bg-[#FFE0E0] active:bg-[#FFCBCB] transition-all duration-200 shadow-sm'
           onClick={handleDeleteClick}
         >
           Удалить
@@ -67,17 +71,19 @@ const MapActions: React.FC = () => {
       </div>
 
       {showConfirmDelete && (
-        <div className='mt-2 p-2 bg-[#FFF5F5] border border-[#FF3B30] rounded-md'>
-          <p className='text-xs text-[#FF3B30] mb-1'>Удалить растение?</p>
-          <div className='grid grid-cols-2 gap-1'>
+        <div className='mt-3 p-3 bg-[#FFF5F5] border border-[#FF3B30] rounded-md shadow-sm'>
+          <p className='text-xs text-[#FF3B30] mb-2 font-medium'>
+            Удалить растение?
+          </p>
+          <div className='grid grid-cols-2 gap-2'>
             <button
-              className='px-2 py-1 text-xs rounded-md bg-[#F5F5F7] border border-[#E5E5EA] transition-colors'
+              className='px-2 py-1.5 text-xs rounded-md bg-[#F5F5F7] border border-[#E5E5EA] hover:bg-[#E5E5EA] transition-all duration-200'
               onClick={handleCancelDelete}
             >
               Отмена
             </button>
             <button
-              className='px-2 py-1 text-xs rounded-md bg-[#FF3B30] text-white transition-colors'
+              className='px-2 py-1.5 text-xs rounded-md bg-[#FF3B30] text-white hover:bg-[#E73229] transition-all duration-200 shadow-sm'
               onClick={handleConfirmDelete}
             >
               Удалить

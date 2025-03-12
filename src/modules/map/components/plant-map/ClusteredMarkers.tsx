@@ -24,49 +24,76 @@ const ClusteredMarkers: React.FC<ClusteredMarkersProps> = ({
   isDraggable,
   clusteringSettings,
 }) => {
-  // Создаем настройки кластеризации с фиксированными значениями
+  // Создаем настройки кластеризации с улучшенным визуальным представлением
   const clusterOptions = useMemo(() => {
     return {
       showCoverageOnHover: false,
       spiderfyOnMaxZoom: true,
       disableClusteringAtZoom: 18,
-      maxClusterRadius: 40,
-      animate: false,
-      animateAddingMarkers: false,
-      spiderfyDistanceMultiplier: 1.5,
+      maxClusterRadius: 50, // Увеличено для лучшей группировки
+      animate: true, // Включаем анимацию
+      animateAddingMarkers: true, // Анимация при добавлении маркеров
+      spiderfyDistanceMultiplier: 1.8, // Увеличено для лучшего распределения при раскрытии кластера
       zoomToBoundsOnClick: true,
-      removeOutsideVisibleBounds: false,
+      removeOutsideVisibleBounds: true, // Улучшает производительность
       iconCreateFunction: (cluster: any) => {
         const count = cluster.getChildCount();
 
         // Создаем стиль кластера на основе количества маркеров
-        let size, fontSize;
+        let size, fontSize, bgOpacity, strokeWidth;
         if (count < 10) {
-          size = 36;
+          size = 38;
           fontSize = 14;
-        } else if (count < 100) {
-          size = 44;
+          bgOpacity = 0.85;
+          strokeWidth = 2.5;
+        } else if (count < 50) {
+          size = 46;
           fontSize = 16;
-        } else {
-          size = 52;
+          bgOpacity = 0.9;
+          strokeWidth = 3;
+        } else if (count < 100) {
+          size = 54;
           fontSize = 18;
+          bgOpacity = 0.92;
+          strokeWidth = 3.5;
+        } else {
+          size = 60;
+          fontSize = 20;
+          bgOpacity = 0.95;
+          strokeWidth = 4;
         }
 
-        // SVG для кластера с градиентом
+        // Улучшенный SVG для кластера с двойным градиентом и эффектом свечения
         const svg = `
           <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <radialGradient id="radialGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
                 <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-              </linearGradient>
+                <stop offset="100%" style="stop-color:#059669;stop-opacity:${bgOpacity}" />
+              </radialGradient>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
             </defs>
-            <circle cx="${size / 2}" cy="${size / 2}" r="${
-          size / 2 - 2
-        }" fill="url(#grad)" stroke="#059669" stroke-width="2" />
-            <text x="${size / 2}" y="${
-          size / 2 + fontSize / 3
-        }" font-size="${fontSize}px" font-weight="bold" text-anchor="middle" fill="white">${count}</text>
+            <circle 
+              cx="${size / 2}" 
+              cy="${size / 2}" 
+              r="${size / 2 - strokeWidth}" 
+              fill="url(#radialGrad)" 
+              stroke="#057857" 
+              stroke-width="${strokeWidth}" 
+              filter="url(#glow)"
+            />
+            <text 
+              x="${size / 2}" 
+              y="${size / 2 + fontSize / 3}" 
+              font-size="${fontSize}px" 
+              font-weight="bold" 
+              text-anchor="middle" 
+              fill="white" 
+              style="text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"
+            >${count}</text>
           </svg>
         `;
 
@@ -78,7 +105,6 @@ const ClusteredMarkers: React.FC<ClusteredMarkersProps> = ({
           className: `marker-cluster ${styles.markerCluster}`,
           iconSize: new L.Point(size, size),
           iconAnchor: new L.Point(size / 2, size / 2),
-          popupAnchor: new L.Point(0, -size / 2),
         });
       },
     };
@@ -106,6 +132,7 @@ const ClusteredMarkers: React.FC<ClusteredMarkersProps> = ({
     <MarkerClusterGroup 
       {...clusterOptions}
       key={`cluster-group-${plants.length}`}
+      chunkedLoading={true} // Загрузка частями для лучшей производительности
     >
       {plants.map((plant) => (
         <MapMarker

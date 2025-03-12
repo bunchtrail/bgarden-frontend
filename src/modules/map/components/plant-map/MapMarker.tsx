@@ -1,26 +1,35 @@
 // Компонент маркера растения на карте
 
 import L from 'leaflet';
-import React, { useEffect, useRef } from 'react';
-import { Marker, Tooltip } from 'react-leaflet';
+import React, { useCallback, useMemo } from 'react';
+import { Marker, useMap } from 'react-leaflet';
 import { useMapContext } from '../../contexts';
 import styles from '../../styles/map.module.css';
 
 // Улучшенные SVG иконки для маркеров
 const createMarkerIcon = (color: string, selected: boolean) => {
-  const svgSize = selected ? 36 : 32;
-  const dotSize = selected ? 16 : 14;
+  const svgSize = selected ? 38 : 32;
+  const dotSize = selected ? 18 : 14;
   const strokeWidth = selected ? 3 : 2;
+  const strokeColor = color;
+  const fillColor = selected ? color : 'white';
+  const dotFillColor = selected ? 'white' : color;
 
-  // SVG маркер с улучшенным дизайном
+  // SVG маркер с улучшенным дизайном и анимацией для выбранного состояния
   const svg = `
-  <svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}" fill="none" xmlns="http://www.w3.org/2000/svg" class="${
+    selected ? 'selected-marker' : ''
+  }">
     <circle cx="${svgSize / 2}" cy="${svgSize / 2}" r="${
     svgSize / 2 - 2
-  }" fill="white" stroke="${color}" stroke-width="${strokeWidth}" />
+  }" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${
+    selected ? 'filter="drop-shadow(0 0 3px rgba(22, 163, 74, 0.7))"' : ''
+  } />
     <circle cx="${svgSize / 2}" cy="${svgSize / 2}" r="${
     dotSize / 2
-  }" fill="${color}" />
+  }" fill="${dotFillColor}" ${
+    selected ? 'filter="drop-shadow(0 0 2px rgba(255, 255, 255, 0.9))"' : ''
+  } />
   </svg>`;
 
   // Создаем base64 кодированную строку из SVG
@@ -31,6 +40,7 @@ const createMarkerIcon = (color: string, selected: boolean) => {
     iconSize: [svgSize, svgSize],
     iconAnchor: [svgSize / 2, svgSize / 2],
     tooltipAnchor: [0, -svgSize / 2],
+    className: selected ? `${styles.selectedMarker}` : `${styles.normalMarker}`,
   });
 };
 
@@ -40,7 +50,7 @@ interface MapMarkerProps {
   position: [number, number];
   name: string;
   onClick: () => void;
-  draggable: boolean;
+  draggable?: boolean;
 }
 
 // Компонент маркера
@@ -49,66 +59,111 @@ const MapMarker: React.FC<MapMarkerProps> = ({
   position,
   name,
   onClick,
-  draggable,
+  draggable = false,
 }) => {
-  const { currentMode, selectedPlantId, updatePlant } = useMapContext();
-  const markerRef = useRef<L.Marker>(null);
+  const map = useMap();
+  const { updatePlant, specimensData, selectedPlantId } = useMapContext();
 
   // Определяем, выбран ли маркер
   const isSelected = selectedPlantId === id;
 
-  // Получаем цвет для маркера из mapColors
-  const defaultColor = '#10B981'; // Зеленый цвет по умолчанию
-  const selectedColor = '#059669'; // Более темный зеленый для выбранного
-
-  // Создаем иконку маркера
-  const icon = createMarkerIcon(
-    isSelected ? selectedColor : defaultColor,
-    isSelected
-  );
-
-  // Применяем класс пульсации к выбранному маркеру через DOM
-  useEffect(() => {
-    if (markerRef.current) {
-      const markerElement = markerRef.current.getElement();
-      if (markerElement) {
-        if (isSelected) {
-          markerElement.classList.add('selected-marker');
-        } else {
-          markerElement.classList.remove('selected-marker');
-        }
-      }
+  // Находим данные о растении в specimensData по id
+  const specimenData = useMemo(() => {
+    // Извлекаем id из формата "specimen-{id}"
+    if (id.startsWith('specimen-')) {
+      const specimenId = parseInt(id.split('-')[1]);
+      return specimensData.find((specimen) => specimen.id === specimenId);
     }
+    return null;
+  }, [id, specimensData]);
+
+  // Создаем кастомный значок для маркера с использованием улучшенной функции
+  const markerIcon = useMemo(() => {
+    // Используем зеленый цвет для растений
+    return createMarkerIcon('#059669', isSelected);
   }, [isSelected]);
 
-  // Обработчик события окончания перетаскивания
-  const handleDragEnd = (e: L.DragEndEvent) => {
-    const marker = e.target;
-    const position: [number, number] = [
-      marker.getLatLng().lat,
-      marker.getLatLng().lng,
-    ];
-    updatePlant(id, { position });
-  };
+  // Обработчик для окончания перетаскивания
+  const handleDragEnd = useCallback(
+    (e: L.DragEndEvent) => {
+      const marker = e.target;
+      const position: [number, number] = [
+        marker.getLatLng().lat,
+        marker.getLatLng().lng,
+      ];
+      updatePlant(id, { position });
+    },
+    [id, updatePlant]
+  );
 
-  // Создаем объект обработчиков событий
-  const eventHandlers = {
-    click: onClick,
-    dragend: handleDragEnd,
+  // Обработчик нажатия на маркер
+  const handleMarkerClick = useCallback(() => {
+    onClick();
+    // Убираем автоматический зум
+  }, [onClick]);
+
+  // Функция для отображения дополнительной информации о растении
+  const renderSpecimenDetails = () => {
+    if (!specimenData) return null;
+
+    return (
+      <div className={styles.specimenPopup}>
+        <h3 className={styles.specimenTitle}>
+          {specimenData.russianName || 'Растение'}
+        </h3>
+
+        {specimenData.latinName && (
+          <p className={styles.specimenLatinName}>{specimenData.latinName}</p>
+        )}
+
+        <div className={styles.specimenDetails}>
+          {specimenData.inventoryNumber && (
+            <p>
+              <strong>Инв. номер:</strong> {specimenData.inventoryNumber}
+            </p>
+          )}
+
+          {(specimenData.genus || specimenData.species) && (
+            <p>
+              <strong>Род / Вид:</strong> {specimenData.genus}{' '}
+              {specimenData.species}
+            </p>
+          )}
+
+          {specimenData.plantingYear && (
+            <p>
+              <strong>Год посадки:</strong> {specimenData.plantingYear}
+            </p>
+          )}
+
+          {specimenData.conservationStatus && (
+            <p>
+              <strong>Статус:</strong> {specimenData.conservationStatus}
+            </p>
+          )}
+
+          {specimenData.notes && (
+            <p>
+              <strong>Примечания:</strong> {specimenData.notes}
+            </p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <Marker
-      ref={markerRef}
       position={position}
-      icon={icon}
+      icon={markerIcon}
+      eventHandlers={{
+        click: handleMarkerClick,
+        dragend: handleDragEnd,
+      }}
       draggable={draggable}
-      eventHandlers={eventHandlers}
+      zIndexOffset={isSelected ? 1000 : 0}
     >
-      {/* Всплывающая подсказка при наведении */}
-      <Tooltip direction='top' offset={[0, -10]} opacity={0.9}>
-        {name}
-      </Tooltip>
+      {/* Удаляем Popup, чтобы не отображать всплывающее окно */}
     </Marker>
   );
 };
