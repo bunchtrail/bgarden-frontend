@@ -89,8 +89,8 @@
           - `index.ts` (50.0 B)
           - `MapContext.tsx` (100.0 B)
         - **docs**
-          - `README.md` (53.0 B)
-          - `styles-guide.md` (49.0 B)
+          - `README.md` (4.0 KB)
+          - `styles-guide.md` (4.8 KB)
         - **hooks**
           - `index.ts` (31.0 B)
           - `useMap.ts` (58.0 B)
