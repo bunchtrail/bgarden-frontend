@@ -8,7 +8,7 @@ import {
 } from '../types';
 
 // Обновляем URL API для бэкенда ботанического сада
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
+const API_URL =  'http://localhost:7254/api';
 
 // Создаем экземпляр axios с базовыми настройками
 const api: AxiosInstance = axios.create({

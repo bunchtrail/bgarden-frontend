@@ -1,13 +1,6 @@
 // Панель действий на карте (добавить, редактировать, удалить)
 
 import React, { useState } from 'react';
-import {
-  buttonClasses,
-  COLORS,
-  containerClasses,
-  layoutClasses,
-  textClasses,
-} from '../../../styles/global-styles';
 import { useMapContext } from '../contexts';
 
 const MapActions: React.FC = () => {
@@ -37,39 +30,36 @@ const MapActions: React.FC = () => {
   }
 
   return (
-    <div className={`p-3 bg-[#F2F7FF] border border-[${COLORS.PRIMARY}] rounded-lg`}>
-      <div className="mb-3 border-b border-[#E5E5EA] pb-2">
-        <span className={`${textClasses.body} block mb-2 font-medium`}>
-          Выбранное растение
-        </span>
-        <h3 className={textClasses.subheading}>{selectedPlant.name}</h3>
+    <div className='border-t border-[#E5E5EA] p-2 space-y-2'>
+      <span className='text-xs font-medium text-[#86868B] block mb-1'>
+        Выбранное растение
+      </span>
+      <div className='mb-2'>
+        <h3 className='text-sm font-medium'>{selectedPlant.name}</h3>
         {selectedPlant.description && (
-          <p className={`${textClasses.body} ${textClasses.secondary}`}>
+          <p className='text-xs text-[#86868B] truncate'>
             {selectedPlant.description}
           </p>
         )}
       </div>
 
-      <div className="mb-2">
-        <span className={`${textClasses.body} text-xs font-medium text-[${COLORS.TEXT_SECONDARY}]`}>
-          Действия с растением
-        </span>
-      </div>
-      <div className={`${layoutClasses.flex} flex-wrap gap-2`}>
+      <div className='grid grid-cols-3 gap-1'>
         <button
-          className={`${buttonClasses.base} ${buttonClasses.primary}`}
-          onClick={() => window.open(`/specimens/${selectedPlant.id}`, '_blank')}
+          className='px-2 py-1.5 text-xs rounded-md bg-[#0A84FF] text-white transition-colors'
+          onClick={() =>
+            window.open(`/specimens/${selectedPlant.id}`, '_blank')
+          }
         >
-          Подробности
+          Подробно
         </button>
         <button
-          className={`${buttonClasses.base} ${buttonClasses.secondary}`}
+          className='px-2 py-1.5 text-xs rounded-md border border-[#E5E5EA] bg-[#F5F5F7] transition-colors'
           onClick={() => setSelectedPlantId(null)}
         >
           Закрыть
         </button>
         <button
-          className={`${buttonClasses.base} ${buttonClasses.danger}`}
+          className='px-2 py-1.5 text-xs rounded-md text-[#FF3B30] border border-[#FFE5E5] bg-[#FFF5F5] transition-colors'
           onClick={handleDeleteClick}
         >
           Удалить
@@ -77,26 +67,20 @@ const MapActions: React.FC = () => {
       </div>
 
       {showConfirmDelete && (
-        <div
-          className={`mt-4 p-3 bg-[${COLORS.DANGER_LIGHT}] border border-[${COLORS.DANGER}] rounded-lg`}
-        >
-          <p
-            className={`${textClasses.body} text-[${COLORS.DANGER_DARK}] mb-2`}
-          >
-            Вы уверены, что хотите удалить это растение?
-          </p>
-          <div className={layoutClasses.flex + ' gap-2'}>
+        <div className='mt-2 p-2 bg-[#FFF5F5] border border-[#FF3B30] rounded-md'>
+          <p className='text-xs text-[#FF3B30] mb-1'>Удалить растение?</p>
+          <div className='grid grid-cols-2 gap-1'>
             <button
-              className={`${buttonClasses.base} ${buttonClasses.secondary}`}
+              className='px-2 py-1 text-xs rounded-md bg-[#F5F5F7] border border-[#E5E5EA] transition-colors'
               onClick={handleCancelDelete}
             >
               Отмена
             </button>
             <button
-              className={`${buttonClasses.base} ${buttonClasses.danger}`}
+              className='px-2 py-1 text-xs rounded-md bg-[#FF3B30] text-white transition-colors'
               onClick={handleConfirmDelete}
             >
-              Да, удалить
+              Удалить
             </button>
           </div>
         </div>
