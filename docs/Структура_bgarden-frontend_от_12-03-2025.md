@@ -5,10 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs**
-    - **api_logs**
-      - `README.md` (3.6 KB)
-    - `отладка_добавления_растений.md` (4.9 KB)
-    - `Структура_bgarden-frontend_от_12-03-2025.md` (8.0 KB)
+    - `Структура_bgarden-frontend_от_12-03-2025.md` (6.9 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -26,7 +23,7 @@
   - `README.md` (5.6 KB)
   - **src**
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (4.1 KB)
+    - `App.tsx` (3.7 KB)
     - **components**
       - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
@@ -78,55 +75,34 @@
           - `index.ts` (579.0 B)
       - **map**
         - **components**
-          - **debug**
-          - **forms**
-            - `MapUploadForm.tsx` (5.0 KB)
-            - `PlantAddForm.tsx` (23.1 KB)
-            - `PlantEditForm.tsx` (15.2 KB)
-          - **layers**
-            - `PlantLayer.tsx` (11.3 KB)
-          - `Map.tsx` (7.6 KB)
-          - `MapContainer.tsx` (17.9 KB)
-          - `MapControls.tsx` (14.0 KB)
-          - `MapList.tsx` (5.8 KB)
-          - **markers**
-            - `PlantMarker.tsx` (14.3 KB)
-          - **modals**
-            - **plant**
-              - `index.ts` (74.0 B)
-              - `MapPlantDetailsModal.tsx` (3.7 KB)
-          - **pages**
-            - `MapManagementPage.tsx` (6.6 KB)
-            - `MapPage.tsx` (11.9 KB)
+          - `index.ts` (54.0 B)
+          - `MapActions.tsx` (114.0 B)
+          - `MapLegend.tsx` (61.0 B)
+          - **plant-map**
+            - `index.ts` (53.0 B)
+            - `MapContainer.tsx` (61.0 B)
+            - `MapMarker.tsx` (72.0 B)
+            - `PlantAddForm.tsx` (54.0 B)
+            - `PlantDeleteModal.tsx` (74.0 B)
+            - `PlantEditForm.tsx` (62.0 B)
         - **contexts**
-          - `MapContext.tsx` (4.8 KB)
+          - `index.ts` (50.0 B)
+          - `MapContext.tsx` (100.0 B)
         - **docs**
-          - `styles-guide.md` (4.7 KB)
-          - `Простой_режим_карты.md` (5.2 KB)
-          - `Работа_с_картой_в_простом_режиме.md` (5.1 KB)
-          - `Структура_map_от_12-03-2025.md` (1.6 KB)
-          - `Улучшения_структуры_модуля_карты.md` (4.4 KB)
-          - `Управление_растениями_на_карте.md` (9.5 KB)
+          - `README.md` (53.0 B)
+          - `styles-guide.md` (49.0 B)
         - **hooks**
-          - `index.ts` (189.0 B)
-          - `useErrorHandler.ts` (1.8 KB)
-          - `useMapControls.ts` (2.1 KB)
-          - `useMapService.ts` (11.9 KB)
-        - `index.ts` (1.3 KB)
-        - `map.module.css` (6.8 KB)
-        - `map.module.css.d.ts` (1.4 KB)
-        - `README.md` (7.6 KB)
+          - `index.ts` (31.0 B)
+          - `useMap.ts` (58.0 B)
+          - `usePlantOperations.ts` (65.0 B)
+        - `index.ts` (123.0 B)
         - **services**
-          - `mapService.ts` (14.7 KB)
-          - `specimenService.ts` (6.9 KB)
-        - `styles.ts` (10.9 KB)
+          - `index.ts` (37.0 B)
+          - `mapService.ts` (65.0 B)
+          - `plantService.ts` (56.0 B)
         - **types**
-          - `index.ts` (2.3 KB)
-        - **utils**
-          - **mapHelpers**
-            - `formatters.ts` (1.5 KB)
-            - `index.ts` (153.0 B)
-            - `validation.ts` (1.8 KB)
+          - `index.ts` (31.0 B)
+          - `mapTypes.ts` (58.0 B)
       - **navigation**
         - **components**
           - **configs**
@@ -225,7 +201,6 @@
       - `ExpositionDetailPage.tsx` (5.9 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
       - `HomePage.tsx` (13.6 KB)
-      - `MapPage.tsx` (191.0 B)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.4 KB)
     - `react-app-env.d.ts` (41.0 B)

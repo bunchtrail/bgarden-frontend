@@ -1,1 +1,0 @@
-export { default as MapPlantDetailsModal } from './MapPlantDetailsModal'; 
