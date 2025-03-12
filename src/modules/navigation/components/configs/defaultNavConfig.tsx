@@ -16,6 +16,13 @@ export const defaultNavConfig: NavConfig = {
       requiredAuth: false,
     },
     {
+      id: 'map',
+      label: 'Карта',
+      path: '/map',
+      requiredAuth: true,
+      roles: [UserRole.Administrator.toString(), UserRole.Employee.toString()],
+    },
+    {
       id: 'expositions',
       label: 'Экспозиции',
       path: '#',

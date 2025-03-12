@@ -1,0 +1,150 @@
+.mapContainer {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  height: 600px;
+  width: 100%;
+  position: relative;
+}
+
+.mapPlaceholder {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F3F4F6;
+  border: 2px dashed #D1D5DB;
+}
+
+.mapLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.legendMarker {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+}
+
+.plantMarker {
+  background-color: #16A34A;
+}
+
+.waterMarker {
+  background-color: #2563EB;
+}
+
+.pathMarker {
+  background-color: #6B7280;
+}
+
+.uploadButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #16A34A;
+  color: white;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.uploadButton:hover {
+  background-color: #15803D;
+}
+
+.uploadButtonIcon {
+  margin-right: 0.5rem;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.primaryButton {
+  background-color: #2563EB;
+  color: white;
+}
+
+.primaryButton:hover {
+  background-color: #1D4ED8;
+}
+
+.dangerButton {
+  background-color: #DC2626;
+  color: white;
+}
+
+.dangerButton:hover {
+  background-color: #B91C1C;
+}
+
+.secondaryButton {
+  background-color: #F3F4F6;
+  color: #1F2937;
+  border: 1px solid #D1D5DB;
+}
+
+.secondaryButton:hover {
+  background-color: #E5E7EB;
+}
+
+.formPanel {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  z-index: 10;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.mapActionPanel {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mapPageContainer {
+  padding: 1.5rem;
+  background-color: #F9FAFB;
+}
+
+@media (max-width: 768px) {
+  .mapPageContainer {
+    padding: 1rem;
+  }
+  
+  .mapContainer {
+    height: 400px;
+  }
+}
+
+@media (max-width: 640px) {
+  .mapContainer {
+    height: 300px;
+  }
+} 
