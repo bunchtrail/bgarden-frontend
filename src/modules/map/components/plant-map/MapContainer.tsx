@@ -172,7 +172,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
             minZoom={-1}
             maxZoom={3}
             crs={CRS.Simple}
-            style={{ height: '100%', width: '100%' }}
+            style={{ height: '100%', width: '100%', minHeight: '85vh' }}
             zoomControl={false}
           >
             <ZoomControl position='bottomright' />

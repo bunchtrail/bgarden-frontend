@@ -36,7 +36,7 @@ class RegionService {
     // Получить все регионы
     async getAllRegions(): Promise<RegionDto[]> {
         try {
-            const response = await api.get<RegionDto[]>('/api/Region');
+            const response = await api.get<RegionDto[]>('/Region');
             
             // Если API вернул пустой список или произошла ошибка, используем временные данные
             if (!response.data || response.data.length === 0) {
@@ -68,13 +68,13 @@ class RegionService {
 
     // Получить регион по ID
     async getRegionById(id: number): Promise<RegionDto> {
-        const response = await api.get<RegionDto>(`/api/Region/${id}`);
+        const response = await api.get<RegionDto>(`/Region/${id}`);
         return response.data;
     }
 
     // Получить список экземпляров растений в регионе
     async getSpecimensInRegion(regionId: number): Promise<Specimen[]> {
-        const response = await api.get<Specimen[]>(`/api/Region/${regionId}/specimens`);
+        const response = await api.get<Specimen[]>(`/Region/${regionId}/specimens`);
         return response.data;
     }
 
@@ -97,20 +97,20 @@ class RegionService {
 
     // Создать новый регион
     async createRegion(region: Omit<RegionDto, 'id'>): Promise<RegionDto> {
-        const response = await api.post<RegionDto>('/api/Region', region);
+        const response = await api.post<RegionDto>('/Region', region);
         return response.data;
     }
 
     // Обновить существующий регион
     async updateRegion(id: number, region: RegionDto): Promise<RegionDto> {
-        const response = await api.put<RegionDto>(`/api/Region/${id}`, region);
+        const response = await api.put<RegionDto>(`/Region/${id}`, region);
         return response.data;
     }
 
     // Удалить регион
     async deleteRegion(id: number): Promise<boolean> {
-        const response = await api.delete(`/api/Region/${id}`);
-        return response.status === 204;
+        const response = await api.delete(`/Region/${id}`);
+        return response.status === 200;
     }
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { cardClasses, layoutClasses } from '../../../styles/global-styles';
+import { cardClasses } from '../../../styles/global-styles';
 import { MapProvider } from '../contexts/MapContext';
 import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
 import MapControlPanel from './MapControlPanel';
@@ -45,24 +45,18 @@ const MapPage: React.FC = () => {
   const imageUrl = getMapImageUrl(mapData);
 
   return (
-    <div className='max-w-screen-2xl mx-auto h-[calc(100vh-6rem)]'>
+    <div className='max-w-screen-2xl mx-auto h-[calc(100vh-4rem)] pt-6'>
       <MapProvider>
-        <div
-          className={`${layoutClasses.flex} gap-4 flex-col lg:flex-row h-full`}
-        >
-          {/* Боковая панель управления */}
-          <div className='w-full lg:w-1/5 xl:w-1/6'>
-            <MapControlPanel />
-          </div>
-
-          {/* Карта */}
-          <div className='w-full lg:w-4/5 xl:w-5/6 h-[calc(100vh-8rem)]'>
-            <div className={`${cardClasses.base} p-0 overflow-hidden h-full`}>
-              {isLoading && <LoadingIndicator />}
-              <MapContainer loadingMap={isLoading} imageUrl={imageUrl} />
-            </div>
+        {/* Карта занимает всё пространство */}
+        <div className='h-full w-full'>
+          <div className={`${cardClasses.base} p-0 overflow-hidden h-full`}>
+            {isLoading && <LoadingIndicator />}
+            <MapContainer loadingMap={isLoading} imageUrl={imageUrl} />
           </div>
         </div>
+
+        {/* Панель управления теперь располагается поверх карты */}
+        <MapControlPanel />
       </MapProvider>
     </div>
   );

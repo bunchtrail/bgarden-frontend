@@ -27,19 +27,19 @@ api.interceptors.request.use((config) => {
 class SpecimenService {
     // Получить все образцы
     async getAllSpecimens(): Promise<Specimen[]> {
-        const response = await api.get<Specimen[]>('/api/Specimen');
+        const response = await api.get<Specimen[]>('/Specimen');
         return response.data;
     }
 
     // Получить образцы по типу сектора
     async getSpecimensBySectorType(sectorType: SectorType): Promise<Specimen[]> {
-        const response = await api.get<Specimen[]>(`/api/Specimen/sector/${sectorType}`);
+        const response = await api.get<Specimen[]>(`/Specimen/sector/${sectorType}`);
         return response.data;
     }
 
     // Получить образец по ID
     async getSpecimenById(id: number): Promise<Specimen> {
-        const response = await api.get<Specimen>(`/api/Specimen/${id}`);
+        const response = await api.get<Specimen>(`/Specimen/${id}`);
         return response.data;
     }
 
@@ -53,14 +53,14 @@ class SpecimenService {
             };
             
             console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
-            console.log('URL запроса:', `${API_URL}/api/Specimen`);
+            console.log('URL запроса:', `${API_URL}/Specimen`);
             console.log('Заголовки запроса:', {
                 'Content-Type': 'application/json',
                 'Accept': 'text/plain',
                 'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : 'Токен отсутствует'
             });
             
-            const response = await api.post<Specimen>('/api/Specimen', specimenData);
+            const response = await api.post<Specimen>('/Specimen', specimenData);
             console.log('Ответ сервера:', response.status, response.statusText);
             console.log('Данные ответа:', response.data);
             return response.data;
@@ -84,7 +84,7 @@ class SpecimenService {
             try {
                 console.log('Пробуем отправить через fetch API');
                 const token = localStorage.getItem('token');
-                const fetchResponse = await fetch(`${API_URL}/api/Specimen`, {
+                const fetchResponse = await fetch(`${API_URL}/Specimen`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -117,22 +117,14 @@ class SpecimenService {
 
     // Обновить существующий образец
     async updateSpecimen(id: number, specimen: Specimen): Promise<Specimen> {
-        // Проверяем, что ID в объекте соответствует ID в URL
-        const specimenData = {
-            ...specimen,
-            id: id // Убедимся, что ID правильный
-        };
-        
-        console.log('Обновляем данные в API:', JSON.stringify(specimenData, null, 2));
-        
-        const response = await api.put<Specimen>(`/api/Specimen/${id}`, specimenData);
+        const response = await api.put<Specimen>(`/Specimen/${id}`, specimen);
         return response.data;
     }
 
     // Удалить образец
     async deleteSpecimen(id: number): Promise<boolean> {
-        const response = await api.delete(`/api/Specimen/${id}`);
-        return response.status === 204;
+        const response = await api.delete(`/Specimen/${id}`);
+        return response.status === 200;
     }
 }
 
