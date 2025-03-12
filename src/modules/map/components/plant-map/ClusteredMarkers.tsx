@@ -103,7 +103,10 @@ const ClusteredMarkers: React.FC<ClusteredMarkersProps> = ({
   }
 
   return (
-    <MarkerClusterGroup {...clusterOptions}>
+    <MarkerClusterGroup 
+      {...clusterOptions}
+      key={`cluster-group-${plants.length}`}
+    >
       {plants.map((plant) => (
         <MapMarker
           key={plant.id}
