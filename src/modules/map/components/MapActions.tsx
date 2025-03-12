@@ -37,15 +37,31 @@ const MapActions: React.FC = () => {
   }
 
   return (
-    <div className={`${containerClasses.base} mb-4`}>
-      <h3 className={textClasses.subheading}>{selectedPlant.name}</h3>
-      {selectedPlant.description && (
-        <p className={`${textClasses.body} ${textClasses.secondary} mb-4`}>
-          {selectedPlant.description}
-        </p>
-      )}
+    <div className={`p-3 bg-[#F2F7FF] border border-[${COLORS.PRIMARY}] rounded-lg`}>
+      <div className="mb-3 border-b border-[#E5E5EA] pb-2">
+        <span className={`${textClasses.body} block mb-2 font-medium`}>
+          Выбранное растение
+        </span>
+        <h3 className={textClasses.subheading}>{selectedPlant.name}</h3>
+        {selectedPlant.description && (
+          <p className={`${textClasses.body} ${textClasses.secondary}`}>
+            {selectedPlant.description}
+          </p>
+        )}
+      </div>
 
-      <div className={layoutClasses.flex + ' gap-2'}>
+      <div className="mb-2">
+        <span className={`${textClasses.body} text-xs font-medium text-[${COLORS.TEXT_SECONDARY}]`}>
+          Действия с растением
+        </span>
+      </div>
+      <div className={`${layoutClasses.flex} flex-wrap gap-2`}>
+        <button
+          className={`${buttonClasses.base} ${buttonClasses.primary}`}
+          onClick={() => window.open(`/specimens/${selectedPlant.id}`, '_blank')}
+        >
+          Подробности
+        </button>
         <button
           className={`${buttonClasses.base} ${buttonClasses.secondary}`}
           onClick={() => setSelectedPlantId(null)}

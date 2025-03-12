@@ -9,8 +9,10 @@ import {
 
 const MapLegend: React.FC = () => {
   return (
-    <div className={`${containerClasses.base} p-4`}>
-      <h3 className={textClasses.subheading}>Условные обозначения</h3>
+    <div className={`p-3 bg-[${COLORS.BACKGROUND}] border border-[${COLORS.SEPARATOR}] rounded-lg`}>
+      <span className={`${textClasses.body} block mb-2 font-medium`}>
+        Условные обозначения
+      </span>
       <div className='space-y-3'>
         <div className={layoutClasses.flexCenter + ' gap-2'}>
           <div
