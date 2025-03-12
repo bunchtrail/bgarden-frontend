@@ -24,6 +24,23 @@ declare const styles: {
   'marker-cluster-small': string;
   'marker-cluster-medium': string;
   'marker-cluster-large': string;
+  'plant-card': string;
+  'plant-card-header': string;
+  'plant-card-title': string;
+  'plant-card-content': string;
+  'plant-card-footer': string;
+  'map-search-container': string;
+  'map-search-input': string;
+  'map-search-icon': string;
+  'map-search-results': string;
+  'map-search-result-item': string;
+  'map-legend': string;
+  'map-legend-title': string;
+  'map-legend-item': string;
+  'map-legend-color': string;
+  'map-legend-label': string;
+  'slide-up': string;
+  'fade-in': string;
 };
 
 export default styles; 

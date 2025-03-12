@@ -8,7 +8,7 @@
     - **api_logs**
       - `README.md` (3.6 KB)
     - `отладка_добавления_растений.md` (4.9 KB)
-    - `Структура_bgarden-frontend_от_12-03-2025.md` (7.9 KB)
+    - `Структура_bgarden-frontend_от_12-03-2025.md` (8.0 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -78,6 +78,7 @@
           - `index.ts` (579.0 B)
       - **map**
         - **components**
+          - **debug**
           - **forms**
             - `MapUploadForm.tsx` (5.0 KB)
             - `PlantAddForm.tsx` (23.1 KB)
@@ -96,14 +97,14 @@
               - `MapPlantDetailsModal.tsx` (3.7 KB)
           - **pages**
             - `MapManagementPage.tsx` (6.6 KB)
-            - `MapPage.tsx` (12.2 KB)
+            - `MapPage.tsx` (11.9 KB)
         - **contexts**
           - `MapContext.tsx` (4.8 KB)
         - **docs**
           - `styles-guide.md` (4.7 KB)
           - `Простой_режим_карты.md` (5.2 KB)
           - `Работа_с_картой_в_простом_режиме.md` (5.1 KB)
-          - `Структура_map_от_12-03-2025.md` (1.5 KB)
+          - `Структура_map_от_12-03-2025.md` (1.6 KB)
           - `Улучшения_структуры_модуля_карты.md` (4.4 KB)
           - `Управление_растениями_на_карте.md` (9.5 KB)
         - **hooks**
@@ -112,19 +113,19 @@
           - `useMapControls.ts` (2.1 KB)
           - `useMapService.ts` (11.9 KB)
         - `index.ts` (1.3 KB)
-        - `map.module.css` (3.6 KB)
-        - `map.module.css.d.ts` (891.0 B)
+        - `map.module.css` (6.8 KB)
+        - `map.module.css.d.ts` (1.4 KB)
         - `README.md` (7.6 KB)
         - **services**
           - `mapService.ts` (14.7 KB)
           - `specimenService.ts` (6.9 KB)
-        - `styles.ts` (5.5 KB)
+        - `styles.ts` (10.9 KB)
         - **types**
           - `index.ts` (2.3 KB)
         - **utils**
           - **mapHelpers**
             - `formatters.ts` (1.5 KB)
-            - `index.ts` (159.0 B)
+            - `index.ts` (153.0 B)
             - `validation.ts` (1.8 KB)
       - **navigation**
         - **components**

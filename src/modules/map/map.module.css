@@ -138,4 +138,158 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Улучшения для тёмного режима */
+@media (prefers-color-scheme: dark) {
+  .leaflet-container {
+    @apply border-[#3A3A3C];
+  }
+  
+  .leaflet-control-zoom,
+  .leaflet-tooltip,
+  .map-notification,
+  .simple-mode-form,
+  .leaflet-draw-tooltip,
+  .leaflet-draw-actions,
+  .marker-cluster {
+    @apply border-[#3A3A3C] !important;
+  }
+  
+  .leaflet-control-zoom-in,
+  .leaflet-control-zoom-out {
+    @apply bg-[#2C2C2E] text-white hover:bg-[#3A3A3C] !important;
+  }
+  
+  .leaflet-tooltip,
+  .map-notification,
+  .simple-mode-form {
+    @apply bg-[#2C2C2E] text-white !important;
+  }
+  
+  .simple-mode-container {
+    background-color: #1C1C1E;
+  }
+  
+  .simple-mode-message {
+    @apply bg-[#2C2C2E]/90 text-white !important;
+  }
+}
+
+/* Улучшенные стили для мобильных устройств */
+@media (max-width: 640px) {
+  .leaflet-container {
+    height: 400px;
+  }
+  
+  .map-notification {
+    max-width: calc(100% - 16px);
+  }
+  
+  .simple-mode-message {
+    max-width: 95%;
+    padding: 12px;
+  }
+  
+  .leaflet-control-zoom-in,
+  .leaflet-control-zoom-out {
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+  }
+}
+
+/* Стили для карточек растений на карте */
+.plant-card {
+  @apply bg-white rounded-xl p-4 shadow-md border border-[#E5E5EA] transition-all duration-300;
+  max-width: 300px;
+  animation: slide-up 0.3s ease-out;
+}
+
+.plant-card:hover {
+  @apply shadow-lg transform translate-y-[-2px];
+}
+
+.plant-card-header {
+  @apply flex items-center justify-between mb-2;
+}
+
+.plant-card-title {
+  @apply font-semibold text-[#1D1D1F];
+}
+
+.plant-card-content {
+  @apply text-sm text-[#1D1D1F];
+}
+
+.plant-card-footer {
+  @apply flex justify-end gap-2 mt-3 pt-2 border-t border-[#E5E5EA];
+}
+
+/* Улучшенные стили для поиска на карте */
+.map-search-container {
+  @apply absolute z-10 top-3 left-3 right-3 md:left-auto md:right-3 md:w-64;
+}
+
+.map-search-input {
+  @apply w-full bg-white rounded-full py-2 px-4 shadow-md border border-[#E5E5EA] pr-10;
+}
+
+.map-search-icon {
+  @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-[#86868B];
+}
+
+.map-search-results {
+  @apply absolute w-full mt-2 bg-white rounded-xl shadow-md border border-[#E5E5EA] max-h-60 overflow-y-auto;
+  animation: slide-down 0.3s ease-out;
+}
+
+.map-search-result-item {
+  @apply p-3 border-b border-[#E5E5EA] last:border-b-0 hover:bg-[#F5F5F7] cursor-pointer;
+}
+
+/* Новая анимация для плавного появления элементов */
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для легенды карты */
+.map-legend {
+  @apply absolute z-10 bottom-6 left-6 bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-md border border-[#E5E5EA];
+  max-width: 240px;
+  animation: fade-in 0.3s ease-out;
+}
+
+.map-legend-title {
+  @apply font-semibold mb-2 text-[#1D1D1F];
+}
+
+.map-legend-item {
+  @apply flex items-center mb-1.5 last:mb-0;
+}
+
+.map-legend-color {
+  @apply rounded-full mr-2 border border-white;
+  width: 16px;
+  height: 16px;
+}
+
+.map-legend-label {
+  @apply text-sm text-[#1D1D1F];
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 } 
