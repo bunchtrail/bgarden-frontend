@@ -101,18 +101,20 @@ const PlantAddForm: React.FC = () => {
     const handleImageMapClick = (e: Event) => {
       // Приводим к типу CustomEvent для доступа к detail
       const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { lat, lng } = customEvent.detail;
+      if (customEvent.detail && customEvent.detail.latlng) {
+        const { lat, lng } = customEvent.detail.latlng;
         console.log('Получены координаты от клика по изображению:', lat, lng);
 
-        // Устанавливаем координаты в состояние, так же как и при клике по интерактивной карте
+        // Устанавливаем координаты в состояние
         setLocation({
           latitude: lat,
           longitude: lng,
         });
 
-        // Сбрасываем сообщение об успехе и ошибки при изменении координат
-        setSuccess(null);
+        // Добавляем информацию о выбранном местоположении
+        setSuccess('Местоположение растения выбрано успешно');
+        
+        // Сбрасываем ошибки при изменении координат
         setErrors((prev) => ({ ...prev, locationError: undefined }));
       }
     };
@@ -140,13 +142,13 @@ const PlantAddForm: React.FC = () => {
       return;
     }
 
-    console.log('Добавление обработчика клика на карту');
+    console.log('Карта готова для добавления растений');
 
     // Если мы в режиме простого изображения, не устанавливаем обработчик
     // (он уже установлен на image элементе в MapContainer)
     if (state.isSimpleImageMode) {
       console.log(
-        'Простой режим изображения активен, обработчик клика установлен на image'
+        'Простой режим изображения активен, обработчик клика установлен на изображении'
       );
       return;
     }

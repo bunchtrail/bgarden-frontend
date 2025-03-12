@@ -229,7 +229,7 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
       // Создаем маркер на карте с проверкой валидности координат
       if (!markerRef.current) {
         console.log(
-          `Создаем маркер для образца ${specimen.id} (${
+          `🔍 Создаем маркер для образца ${specimen.id} (${
             specimen.russianName || specimen.latinName
           }), координаты: ${specimen.latitude}, ${specimen.longitude}`
         );
@@ -242,86 +242,137 @@ const PlantMarker: React.FC<PlantMarkerProps> = ({ specimen }) => {
           icon: customIcon,
         });
 
-        // Привязываем маркер к карте
-        markerRef.current.addTo(state.mapInstance);
-        console.log(
-          `Маркер для образца ${specimen.id} успешно добавлен на карту`
-        );
-
-        // Улучшенный стиль всплывающей подсказки
-        markerRef.current.bindTooltip(
-          `<div class="plant-tooltip">
-            <strong>${specimen.russianName || specimen.latinName}</strong>
-            ${
-              specimen.latinName && specimen.russianName
-                ? `<br><em>${specimen.latinName}</em>`
-                : ''
-            }
-            <br><span class="text-xs">Инв. №: ${specimen.inventoryNumber}</span>
-          </div>`,
-          {
-            className: 'custom-tooltip',
-            direction: 'top',
-            offset: [0, -10],
-          }
-        );
-
-        // Обработчик клика по маркеру
+        // Добавляем обработчик клика на маркер
         markerRef.current.on('click', handleMarkerClick);
 
-        // Визуальный эффект при наведении
-        markerRef.current.on('mouseover', function () {
-          if (markerRef.current && !isDeleting) {
-            const element = markerRef.current.getElement();
-            if (element) {
-              element.style.transition = 'transform 0.2s ease';
-              element.style.transform = 'scale(1.1)';
-              element.style.zIndex = '1000';
-            }
-          }
-        });
+        // Проверяем, поддерживает ли фиктивная карта добавление маркеров
+        if (!state.mapInstance.addLayer) {
+          console.warn(
+            '⚠️ У карты отсутствует метод addLayer! Это может вызвать проблемы.'
+          );
+        }
 
-        markerRef.current.on('mouseout', function () {
-          if (markerRef.current && !isDeleting) {
-            const element = markerRef.current.getElement();
-            if (element) {
-              element.style.transform = 'scale(1)';
-              element.style.zIndex = isSelected ? '1000' : '900';
-            }
-          }
-        });
-      }
-
-      // Очистка при размонтировании или удалении образца
-      return () => {
+        // Привязываем маркер к карте
         try {
-          if (markerRef.current && state.mapInstance) {
-            markerRef.current.removeFrom(state.mapInstance);
-            markerRef.current = null;
+          // Используем стандартный метод Leaflet
+          markerRef.current.addTo(state.mapInstance);
+          console.log(
+            `✅ Маркер для образца ${specimen.id} успешно добавлен на карту`
+          );
+
+          // Восстанавливаем улучшенный стиль всплывающей подсказки
+          try {
+            markerRef.current.bindTooltip(
+              `<div class="plant-tooltip">
+                <strong>${specimen.russianName || specimen.latinName}</strong>
+                ${
+                  specimen.latinName && specimen.russianName
+                    ? `<br><em>${specimen.latinName}</em>`
+                    : ''
+                }
+                <br><span class="text-xs">Инв. №: ${
+                  specimen.inventoryNumber
+                }</span>
+              </div>`,
+              {
+                className: 'custom-tooltip',
+                direction: 'top',
+                offset: [0, -10],
+              }
+            );
+
+            // Визуальный эффект при наведении
+            markerRef.current.on('mouseover', function () {
+              if (markerRef.current && !isDeleting) {
+                const element = markerRef.current.getElement();
+                if (element) {
+                  element.style.transition = 'transform 0.2s ease';
+                  element.style.transform = 'scale(1.1)';
+                  element.style.zIndex = '1000';
+                }
+              }
+            });
+
+            markerRef.current.on('mouseout', function () {
+              if (markerRef.current && !isDeleting) {
+                const element = markerRef.current.getElement();
+                if (element) {
+                  element.style.transform = 'scale(1)';
+                  element.style.zIndex = isSelected ? '1000' : '900';
+                }
+              }
+            });
+          } catch (tooltipError) {
+            console.warn(
+              '⚠️ Не удалось добавить всплывающую подсказку:',
+              tooltipError
+            );
           }
         } catch (error) {
-          console.error('Ошибка при удалении маркера:', error);
+          console.error(`❌ Ошибка при добавлении маркера на карту:`, error);
+          try {
+            // Альтернативный способ добавления маркера
+            console.log(
+              '🔄 Пробуем альтернативный способ добавления маркера через addLayer'
+            );
+            state.mapInstance.addLayer(markerRef.current);
+            console.log(`✅ Маркер добавлен альтернативным способом`);
+
+            // Пробуем добавить всплывающую подсказку и в этом случае тоже
+            try {
+              markerRef.current.bindTooltip(
+                `<div class="plant-tooltip">
+                  <strong>${specimen.russianName || specimen.latinName}</strong>
+                </div>`,
+                { className: 'custom-tooltip' }
+              );
+            } catch (tooltipError) {
+              console.warn(
+                '⚠️ Не удалось добавить всплывающую подсказку (alt):',
+                tooltipError
+              );
+            }
+          } catch (altError) {
+            console.error(
+              '❌ Альтернативный способ тоже не сработал:',
+              altError
+            );
+          }
         }
-      };
+      }
     } catch (error) {
-      console.error(
-        `Ошибка при создании маркера для образца ${specimen.id}:`,
-        error
-      );
-      return undefined;
+      console.error('❌ Общая ошибка при создании маркера:', error);
     }
+
+    // Очистка при размонтировании компонента
+    return () => {
+      try {
+        if (markerRef.current && state.mapInstance) {
+          console.log(`🗑️ Удаляем маркер для образца ${specimen.id}`);
+          markerRef.current.removeFrom(state.mapInstance);
+          markerRef.current = null;
+        }
+      } catch (error) {
+        console.error('❌ Ошибка при удалении маркера:', error);
+        // Пробуем альтернативный способ удаления
+        try {
+          if (markerRef.current && state.mapInstance) {
+            state.mapInstance.removeLayer(markerRef.current);
+          }
+        } catch (altError) {
+          console.error(
+            '❌ Альтернативный способ удаления тоже не сработал:',
+            altError
+          );
+        }
+      }
+    };
   }, [
     specimen,
-    specimen.id,
-    specimen.latitude,
-    specimen.longitude,
-    specimen.russianName,
-    specimen.latinName,
-    specimen.inventoryNumber,
-    state.mapReady,
     state.mapInstance,
-    handleMarkerClick,
+    state.mapReady,
     isSelected,
+    handleMarkerClick,
     isDeleting,
   ]);
 

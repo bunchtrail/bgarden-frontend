@@ -46,13 +46,23 @@ const Map: React.FC<MapProps> = ({
 
   // Инициализация карты при монтировании компонента
   useEffect(() => {
+    // Если активен режим простого изображения, пропускаем инициализацию глобальной карты
+    if (state.isSimpleImageMode) {
+      console.log(
+        'Map: Пропускаем инициализацию глобальной карты (активен режим простого изображения)'
+      );
+      return;
+    }
+
     // Если карта уже инициализирована или процесс инициализации уже запущен, пропускаем
     if (
       !mapContainerRef.current ||
       initializingRef.current ||
       initializedRef.current
     ) {
-      console.log('Пропускаем инициализацию карты (уже инициализирована или в процессе)');
+      console.log(
+        'Пропускаем инициализацию карты (уже инициализирована или в процессе)'
+      );
       return;
     }
 
@@ -68,7 +78,7 @@ const Map: React.FC<MapProps> = ({
       }).setView([55.75, 37.61], 13);
 
       console.log('Карта создана, добавляем слои и контролы...');
-      
+
       // Добавляем улучшенный стиль карты вместо стандартного OSM
       L.tileLayer(
         'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -112,7 +122,9 @@ const Map: React.FC<MapProps> = ({
             // Проверяем, что карта еще не отмечена как готовая,
             // чтобы избежать циклических обновлений
             if (!state.mapReady) {
-              console.log('Карта инициализирована, устанавливаем состояние готовности...');
+              console.log(
+                'Карта инициализирована, устанавливаем состояние готовности...'
+              );
               setMapReady(true);
             }
             // Запускаем обновление размера карты для корректного отображения
@@ -157,7 +169,12 @@ const Map: React.FC<MapProps> = ({
         setMap(null);
       }
     };
-  }, [setMap, setMapReady, setError, state.mapReady]);
+  }, [setMap, setMapReady, setError, state.mapReady, state.isSimpleImageMode]);
+
+  // Если активен режим простого изображения, не рендерим компонент карты
+  if (state.isSimpleImageMode) {
+    return null;
+  }
 
   return (
     <div className='map-container'>

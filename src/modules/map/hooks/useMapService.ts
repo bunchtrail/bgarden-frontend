@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { specimenService } from '../../specimens/services/specimenService';
 import { SectorType, Specimen } from '../../specimens/types';
-import { mapService, debouncedMapService } from '../services/mapService';
+import { debouncedMapService, mapService } from '../services/mapService';
+import { specimenService } from '../services/specimenService';
 import { MapData, MapError } from '../types';
 
 /**
@@ -96,17 +96,42 @@ export const useMapService = () => {
   const getAllSpecimens = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('useMapService: Запрашиваю все образцы растений...');
       const result = await specimenService.getAllSpecimens();
+      console.log(`useMapService: Получено ${result ? result.length : 0} образцов растений`);
       setError(null);
       return result;
     } catch (err: any) {
+      console.error('useMapService: Ошибка при получении всех образцов растений:', err);
       const errorMessage = err.message || 'Не удалось получить все образцы растений';
       setError({ message: errorMessage });
+
+      // Попробуем альтернативный метод, если основной не работает
+      try {
+        console.log('useMapService: Попытка получить образцы через альтернативный метод...');
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
+        const response = await fetch(`${API_URL}/Specimen/all`, {
+          headers: {
+            'Accept': 'text/plain'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`useMapService: Альтернативным методом получено ${data ? data.length : 0} образцов`);
+          return data;
+        } else {
+          console.error(`useMapService: Альтернативный метод тоже не сработал. Статус: ${response.status}`);
+        }
+      } catch (fetchErr) {
+        console.error('useMapService: Ошибка при альтернативном получении образцов:', fetchErr);
+      }
+      
       return [];
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setError, setLoading]);
 
   // Получение отфильтрованных образцов растений
   const getFilteredSpecimens = useCallback(async (name?: string, familyId?: number, regionId?: number) => {

@@ -104,8 +104,13 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     dispatch({ type: 'SET_ERROR', payload: error });
 
   const setSimpleImageMode = (isSimpleMode: boolean) => {
+    // Проверяем, отличается ли новое значение от текущего, чтобы предотвратить лишние обновления
     if (state.isSimpleImageMode !== isSimpleMode) {
-      dispatch({ type: 'SET_SIMPLE_IMAGE_MODE', payload: isSimpleMode });
+      try {
+        dispatch({ type: 'SET_SIMPLE_IMAGE_MODE', payload: isSimpleMode });
+      } catch (error) {
+        console.error('Ошибка при установке режима простого изображения:', error);
+      }
     }
   };
 

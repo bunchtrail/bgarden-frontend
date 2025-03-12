@@ -35,6 +35,18 @@ export interface PlantLocation {
   longitude: number;
 }
 
+// Интерфейс для относительных координат на изображении
+export interface ImageCoordinates {
+  x: number;
+  y: number;
+}
+
+// Интерфейс для события клика по изображению
+export interface MapImageClickEventDetail {
+  latlng: { lat: number; lng: number };
+  relativeCoords: ImageCoordinates;
+}
+
 // Состояние контекста карты
 export interface MapState {
   mapInstance: L.Map | null;

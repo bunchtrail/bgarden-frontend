@@ -182,7 +182,13 @@ class MapService {
   // Получение всех образцов растений
   async getAllSpecimens(): Promise<Specimen[]> {
     try {
-      const response = await api.get<Specimen[]>('/Specimen/all');
+      console.log(`MapService: Вызов GET ${API_URL}/Specimen/all с Accept: text/plain`);
+      const response = await api.get<Specimen[]>('/Specimen/all', {
+        headers: {
+          'Accept': 'text/plain'
+        }
+      });
+      console.log(`MapService: Получено ${response.data ? response.data.length : 0} образцов растений`);
       return response.data || [];
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
@@ -190,7 +196,10 @@ class MapService {
         return [];
       }
       console.error('Ошибка при получении всех образцов растений:', error);
-      throw error;
+      if (error.response) {
+        console.error(`Код ошибки: ${error.response.status}, сообщение: ${error.response.statusText}`);
+      }
+      return [];
     }
   }
   
