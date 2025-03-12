@@ -4,7 +4,6 @@
       - `changes.mdc` (1.4 KB)
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
-  - `.env.production.example` (499.0 B)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
     - `Структура_bgarden-frontend_от_12-03-2025.md` (12.6 KB)
   - `icons_backup.tsx` (10.2 KB)
