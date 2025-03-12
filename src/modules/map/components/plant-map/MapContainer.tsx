@@ -21,7 +21,7 @@ import { useMapContext } from '../../contexts';
 import { MapMode } from '../../contexts/MapContext';
 import styles from '../../styles/map.module.css';
 import AreaForm from './AreaForm';
-import MapMarker from './MapMarker';
+import ClusteredMarkers from './ClusteredMarkers';
 
 // Компонент для отслеживания кликов и взаимодействия с картой
 const MapEventHandler: React.FC = () => {
@@ -88,6 +88,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
     areas,
     isDrawingComplete,
     selectedPosition,
+    clusteringSettings,
   } = useMapContext();
 
   // Определяем размеры и границы изображения карты
@@ -181,17 +182,13 @@ const MapContainer: React.FC<MapContainerProps> = ({
             {/* Обработчик кликов и событий карты */}
             <MapEventHandler />
 
-            {/* Рендерим маркеры растений */}
-            {plants.map((plant) => (
-              <MapMarker
-                key={plant.id}
-                id={plant.id}
-                position={plant.position}
-                name={plant.name}
-                onClick={() => handlePlantClick(plant.id)}
-                draggable={currentMode === MapMode.EDIT}
-              />
-            ))}
+            {/* Используем кластеризованные маркеры для растений */}
+            <ClusteredMarkers 
+              plants={plants} 
+              onPlantClick={handlePlantClick} 
+              isDraggable={currentMode === MapMode.EDIT} 
+              clusteringSettings={clusteringSettings}
+            />
 
             {/* Рендерим сохраненные области */}
             {areas.map((area) => (

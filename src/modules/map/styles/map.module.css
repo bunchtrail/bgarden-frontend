@@ -578,4 +578,97 @@
     stroke-opacity: 0.7;
     stroke-width: 2px;
   }
+}
+
+/* Стили для кластеров маркеров */
+.markerCluster {
+  background-clip: padding-box;
+  border-radius: 20px;
+  transform-origin: center center !important;
+}
+
+/* Контейнер для иконки кластера */
+.clusterIconContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center !important;
+}
+
+.clusterIconContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Анимация при наведении на кластер */
+.markerCluster:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Анимация для кластера при нажатии */
+.markerCluster:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease-in-out;
+}
+
+/* Делаем кластер красивее */
+:global(.marker-cluster) {
+  background-color: transparent !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform-origin: center center !important;
+  will-change: transform; /* Оптимизация производительности */
+}
+
+:global(.marker-cluster div) {
+  background-color: transparent !important;
+  border: none !important;
+  transform-origin: center center !important;
+}
+
+/* Полностью отключаем анимации библиотеки leaflet.markercluster */
+:global(.marker-cluster-animated) {
+  animation: none !important;
+}
+
+/* Предотвращаем анимации встроенные в библиотеку */
+:global(.leaflet-cluster-anim .leaflet-marker-icon), 
+:global(.leaflet-cluster-anim .leaflet-marker-shadow) {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Фиксируем позицию иконок маркеров и кластеров */
+:global(.leaflet-marker-icon),
+:global(.leaflet-marker-shadow) {
+  transition: none !important;
+  transform-origin: center center !important;
+  backface-visibility: hidden; /* Предотвращает мерцание */
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity; /* Оптимизация производительности */
+  position: absolute !important;
+}
+
+:global(.marker-cluster-small), 
+:global(.marker-cluster-medium), 
+:global(.marker-cluster-large) {
+  background-color: transparent !important;
+}
+
+:global(.marker-cluster-small div), 
+:global(.marker-cluster-medium div), 
+:global(.marker-cluster-large div) {
+  background-color: transparent !important;
+}
+
+:global(.marker-cluster span) {
+  line-height: normal !important;
+}
+
+/* Предотвращаем неправильную анимацию при добавлении/удалении маркеров */
+:global(.leaflet-marker-pane > *) {
+  pointer-events: auto;
 } 

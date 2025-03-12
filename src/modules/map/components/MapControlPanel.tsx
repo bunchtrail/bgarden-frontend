@@ -24,6 +24,9 @@ const MapControlPanel: React.FC = () => {
     clearSelectedPosition,
     addPlant,
     selectedPlantId,
+    clusteringSettings,
+    updateClusteringSettings,
+    toggleClustering,
   } = useMapContext();
 
   // Функция для загрузки сохраненных настроек панели
@@ -725,6 +728,26 @@ const MapControlPanel: React.FC = () => {
                     Нажмите на карту для выбора позиции
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Настройки кластеризации маркеров */}
+            {!isCollapsed && currentMode !== MapMode.ADD && (
+              <div className='border-t border-[#E5E5EA] pt-2'>
+                <div className='flex justify-between items-center'>
+                  <span className='text-xs font-medium text-[#86868B] mb-1 block'>
+                    Кластеризация маркеров
+                  </span>
+                  <label className='relative inline-flex items-center cursor-pointer'>
+                    <input
+                      type='checkbox'
+                      checked={clusteringSettings.enabled}
+                      onChange={toggleClustering}
+                      className='sr-only peer'
+                    />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#10B981]"></div>
+                  </label>
+                </div>
               </div>
             )}
 

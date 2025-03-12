@@ -42,6 +42,12 @@ export interface GeoPosition {
   timestamp: number;
 }
 
+// Интерфейс для настроек кластеризации маркеров
+export interface ClusteringSettings {
+  enabled: boolean;
+  // Оставляем только флаг включения/выключения
+}
+
 // Тип для контекста карты
 interface MapContextType {
   customImage: string | null;
@@ -82,6 +88,10 @@ interface MapContextType {
   selectedPosition: GeoPosition | null;
   savePosition: (position: [number, number]) => void;
   clearSelectedPosition: () => void;
+  // Настройки кластеризации
+  clusteringSettings: ClusteringSettings;
+  updateClusteringSettings: (settings: Partial<ClusteringSettings>) => void;
+  toggleClustering: () => void;
 }
 
 // Создаем контекст
@@ -99,6 +109,45 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loadingMap, setLoadingMap] = useState<boolean>(false);
   const [loadMapError, setLoadMapError] = useState<string | null>(null);
+
+  // Настройки кластеризации
+  const [clusteringSettings, setClusteringSettings] = useState<ClusteringSettings>(() => {
+    // Загружаем настройки из localStorage или используем значения по умолчанию
+    const savedSettings = localStorage.getItem('mapClusteringSettings');
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        return { enabled: parsed.enabled };
+      } catch (e) {
+        console.error('Ошибка при загрузке настроек кластеризации:', e);
+      }
+    }
+    
+    // Значения по умолчанию
+    return {
+      enabled: true
+    };
+  });
+
+  // Сохраняем настройки в localStorage при их изменении
+  useEffect(() => {
+    localStorage.setItem('mapClusteringSettings', JSON.stringify(clusteringSettings));
+  }, [clusteringSettings]);
+
+  // Обновление настроек кластеризации (упрощено до включения/выключения)
+  const updateClusteringSettings = (settings: Partial<ClusteringSettings>) => {
+    setClusteringSettings(prev => ({
+      ...prev,
+      ...settings
+    }));
+  };
+
+  // Включение/выключение кластеризации
+  const toggleClustering = () => {
+    setClusteringSettings(prev => ({
+      enabled: !prev.enabled
+    }));
+  };
 
   // Состояния для режимов и областей
   const [currentMode, setCurrentMode] = useState<MapMode>(MapMode.VIEW);
@@ -300,6 +349,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     selectedPosition,
     savePosition,
     clearSelectedPosition,
+    // Настройки кластеризации
+    clusteringSettings,
+    updateClusteringSettings,
+    toggleClustering,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
