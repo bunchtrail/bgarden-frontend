@@ -37,37 +37,37 @@ api.interceptors.request.use((config) => {
 class BiometryService {
     // Получить все биометрические данные
     async getAllBiometryRecords(): Promise<BiometryDto[]> {
-        const response = await api.get<BiometryDto[]>('/Biometry');
+        const response = await api.get<BiometryDto[]>('/api/Biometry');
         return response.data;
     }
 
     // Получить биометрию по ID
     async getBiometryById(id: number): Promise<BiometryDto> {
-        const response = await api.get<BiometryDto>(`/Biometry/${id}`);
+        const response = await api.get<BiometryDto>(`/api/Biometry/${id}`);
         return response.data;
     }
 
     // Получить биометрические данные для образца
     async getBiometryForSpecimen(specimenId: number): Promise<BiometryDto[]> {
-        const response = await api.get<BiometryDto[]>(`/Biometry/specimen/${specimenId}`);
+        const response = await api.get<BiometryDto[]>(`/api/Biometry/specimen/${specimenId}`);
         return response.data;
     }
 
     // Создать новую биометрическую запись
     async createBiometry(biometry: Omit<BiometryDto, 'id'>): Promise<BiometryDto> {
-        const response = await api.post<BiometryDto>('/Biometry', biometry);
+        const response = await api.post<BiometryDto>('/api/Biometry', biometry);
         return response.data;
     }
 
     // Обновить биометрическую запись
     async updateBiometry(id: number, biometry: BiometryDto): Promise<BiometryDto> {
-        const response = await api.put<BiometryDto>(`/Biometry/${id}`, biometry);
+        const response = await api.put<BiometryDto>(`/api/Biometry/${id}`, biometry);
         return response.data;
     }
 
     // Удалить биометрическую запись
     async deleteBiometry(id: number): Promise<boolean> {
-        const response = await api.delete(`/Biometry/${id}`);
+        const response = await api.delete(`/api/Biometry/${id}`);
         return response.status === 200;
     }
 }

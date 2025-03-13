@@ -34,13 +34,13 @@ api.interceptors.request.use((config) => {
 class FamilyService {
     // Получить все семейства
     async getAllFamilies(): Promise<FamilyDto[]> {
-        const response = await api.get<FamilyDto[]>('/Family');
+        const response = await api.get<FamilyDto[]>('/api/Family');
         return response.data;
     }
 
     // Получить семейство по ID
     async getFamilyById(id: number): Promise<FamilyDto> {
-        const response = await api.get<FamilyDto>(`/Family/${id}`);
+        const response = await api.get<FamilyDto>(`/api/Family/${id}`);
         return response.data;
     }
 
@@ -52,19 +52,19 @@ class FamilyService {
 
     // Создать новое семейство
     async createFamily(family: Omit<FamilyDto, 'id'>): Promise<FamilyDto> {
-        const response = await api.post<FamilyDto>('/Family', family);
+        const response = await api.post<FamilyDto>('/api/Family', family);
         return response.data;
     }
 
     // Обновить существующее семейство
     async updateFamily(id: number, family: FamilyDto): Promise<FamilyDto> {
-        const response = await api.put<FamilyDto>(`/Family/${id}`, family);
+        const response = await api.put<FamilyDto>(`/api/Family/${id}`, family);
         return response.data;
     }
 
     // Удалить семейство
     async deleteFamily(id: number): Promise<boolean> {
-        const response = await api.delete(`/Family/${id}`);
+        const response = await api.delete(`/api/Family/${id}`);
         return response.status === 200;
     }
 }

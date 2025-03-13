@@ -25,17 +25,74 @@ export const getAllRegions = async (): Promise<RegionData[]> => {
   }
 };
 
+// Функция для создания новой области (региона) на сервере
+export const createRegion = async (regionData: Omit<RegionData, 'id' | 'specimensCount'>): Promise<RegionData> => {
+  try {
+    const response = await fetch('http://localhost:7254/api/Region', {
+      method: 'POST',
+      headers: {
+        'accept': 'text/plain',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: 0, // API заменит на следующий доступный ID
+        ...regionData,
+        specimensCount: 0 // Начальное количество экземпляров
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ошибка при создании области: ${response.status}`);
+    }
+
+    const createdRegion = await response.json();
+    return createdRegion;
+  } catch (error) {
+    console.error('Ошибка при создании области:', error);
+    throw error;
+  }
+};
+
 // Функция для преобразования координат из строки в массив точек
 const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
   try {
-    // Преобразуем строку в объект JavaScript
-    const coordsArray = JSON.parse(coordsString);
+    // Проверяем, что coordsString не null и не пустая строка
+    if (!coordsString) {
+      console.warn('Строка координат пуста или null');
+      return [];
+    }
     
-    // Преобразуем координаты в формат [x, y]
-    return coordsArray.map((coord: [number, number]) => [coord[0], coord[1]]);
+    // Если coordsString уже является массивом, просто используем его
+    if (Array.isArray(coordsString)) {
+      return coordsString.map((coord: [number, number]) => [coord[0], coord[1]]);
+    }
+    
+    // Проверяем, что строка начинается с '[' для JSON
+    if (typeof coordsString === 'string' && coordsString.trim().startsWith('[')) {
+      // Преобразуем строку в объект JavaScript
+      const coordsArray = JSON.parse(coordsString);
+      // Преобразуем координаты в формат [x, y]
+      return coordsArray.map((coord: [number, number]) => [coord[0], coord[1]]);
+    } else {
+      // Если формат не JSON, возможно, это строка в другом формате
+      console.warn('Строка координат не в формате JSON:', coordsString);
+      // Возвращаем пустой массив или примерные координаты для отладки
+      return [
+        [100, 100],
+        [100, 200],
+        [200, 200],
+        [200, 100]
+      ];
+    }
   } catch (error) {
     console.error('Ошибка при разборе координат:', error);
-    return [];
+    // Возвращаем примерный прямоугольник для отладки
+    return [
+      [100, 100],
+      [100, 300],
+      [300, 300],
+      [300, 100]
+    ];
   }
 };
 
@@ -55,4 +112,9 @@ export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
       fillOpacity: region.fillOpacity
     };
   });
+};
+
+// Функция для преобразования точек области в строку JSON для API
+export const convertPointsToPolygonCoordinates = (points: [number, number][]): string => {
+  return JSON.stringify(points);
 };

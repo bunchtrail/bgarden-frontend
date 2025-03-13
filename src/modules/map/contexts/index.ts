@@ -1,6 +1,6 @@
 // Форма добавления растения 
 
-import { Plant } from './MapContext';
+import { Plant, CreateAreaParams } from './MapContext';
 export { default as MapContext, MapProvider, useMapContext } from './MapContext';
-export type { Plant };
+export type { Plant, CreateAreaParams };
 

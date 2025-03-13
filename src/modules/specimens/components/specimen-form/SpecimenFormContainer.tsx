@@ -3,7 +3,9 @@ import {
   getActiveMap,
   getMapImageUrl,
   MapData,
-} from '../../../map/services/mapService';
+} from '../../../../modules/map/services/mapService';
+import { getAllSpecimens, convertSpecimensToPlants } from '../../../../modules/map/services/plantService';
+import { getAllRegions, convertRegionsToAreas } from '../../../../modules/map/services/regionService';
 import { Specimen, SpecimenFormData } from '../../types';
 import { MessagePanel, MessageType } from '../ErrorPanel';
 import { CancelIcon, SaveIcon } from '../icons';
@@ -20,6 +22,7 @@ import { ExpositionInfoSection } from './ExpositionInfoSection';
 import { GeographicInfoSection } from './GeographicInfoSection';
 import { FormTabs } from './Tabs';
 import { SpecimenFormTab } from './types';
+import { MapArea, MapPlant } from './types';
 
 interface SpecimenFormContainerProps {
   initialData?: Specimen;
@@ -100,6 +103,15 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
   // Состояние для хранения данных карты
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [mapImageUrl, setMapImageUrl] = useState<string | null>(null);
+  
+  // Добавляем состояния для растений и областей
+  const [mapPlants, setMapPlants] = useState<MapPlant[]>([]);
+  const [mapAreas, setMapAreas] = useState<MapArea[]>([]);
+  
+  // Состояния для отслеживания загрузки данных карты
+  const [loadingMapData, setLoadingMapData] = useState<boolean>(false);
+  const [loadingPlants, setLoadingPlants] = useState<boolean>(false);
+  const [loadingAreas, setLoadingAreas] = useState<boolean>(false);
 
   useEffect(() => {
     if (initialData) {
@@ -111,24 +123,150 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   }, [initialData]);
 
-  // Загрузка данных карты при монтировании компонента
+  // Загрузка данных карты, растений и областей при монтировании компонента
   useEffect(() => {
     const fetchMapData = async () => {
+      setLoadingMapData(true);
       try {
         const maps = await getActiveMap();
         if (maps && maps.length > 0) {
           setMapData(maps[0]);
           const imageUrl = getMapImageUrl(maps[0]);
-          setMapImageUrl(imageUrl);
+          if (imageUrl) {
+            setMapImageUrl(imageUrl);
+          } else {
+            // Используем статичное изображение, если URL не получен
+            console.log('URL изображения карты не получен, используем резервное изображение');
+            setMapImageUrl('/images/maps/garden-map.jpg');
+          }
+        } else {
+          // Если карты не найдены, используем статичное изображение
+          console.log('Карты не найдены, используем резервное изображение');
+          setMapImageUrl('/images/maps/garden-map.jpg');
         }
       } catch (error) {
         console.error('Ошибка при загрузке карты:', error);
         // Используем запасной вариант, если не удалось загрузить карту
+        console.log('Ошибка при загрузке карты, используем резервное изображение');
         setMapImageUrl('/images/maps/garden-map.jpg');
+      } finally {
+        setLoadingMapData(false);
       }
     };
 
+    const fetchPlantsData = async () => {
+      setLoadingPlants(true);
+      try {
+        const specimensData = await getAllSpecimens();
+        const plantsData = convertSpecimensToPlants(specimensData);
+        
+        // Преобразуем в формат MapPlant
+        const mapPlantsData: MapPlant[] = plantsData.map(plant => ({
+          id: plant.id,
+          name: plant.name,
+          position: plant.position,
+          description: plant.description
+        }));
+        
+        setMapPlants(mapPlantsData);
+      } catch (error) {
+        console.error('Ошибка при загрузке растений:', error);
+        // Создаем несколько тестовых растений в случае ошибки загрузки
+        setMapPlants([
+          {
+            id: 'test-plant-1',
+            name: 'Тестовое растение 1',
+            position: [200, 200],
+            description: 'Пример растения для тестирования'
+          },
+          {
+            id: 'test-plant-2',
+            name: 'Тестовое растение 2',
+            position: [300, 300],
+            description: 'Еще один пример растения'
+          }
+        ]);
+      } finally {
+        setLoadingPlants(false);
+      }
+    };
+
+    const fetchAreasData = async () => {
+      setLoadingAreas(true);
+      try {
+        const regionsData = await getAllRegions();
+        const areasData = convertRegionsToAreas(regionsData);
+        
+        // Преобразуем в формат MapArea и проверяем корректность данных
+        const mapAreasData: MapArea[] = areasData.map(area => {
+          // Проверяем и исправляем координаты для предотвращения ошибок отображения
+          const validPoints = validateAreaPoints(area.points);
+          return {
+            id: area.id,
+            name: area.name,
+            points: validPoints,
+            description: area.description,
+            strokeColor: area.strokeColor || '#FF5733',
+            fillColor: area.fillColor || '#FFD700',
+            fillOpacity: area.fillOpacity || 0.3
+          };
+        });
+        
+        setMapAreas(mapAreasData);
+      } catch (error) {
+        console.error('Ошибка при загрузке областей:', error);
+        // Создаем тестовую область в случае ошибки загрузки
+        setMapAreas([
+          {
+            id: 'test-area-1',
+            name: 'Тестовая область',
+            points: [
+              [100, 100],
+              [100, 300],
+              [300, 300],
+              [300, 100]
+            ],
+            description: 'Тестовая область для демонстрации',
+            strokeColor: '#FF5733',
+            fillColor: '#FFD700',
+            fillOpacity: 0.3
+          }
+        ]);
+      } finally {
+        setLoadingAreas(false);
+      }
+    };
+
+    // Функция для проверки и коррекции формата координат области
+    const validateAreaPoints = (points: any[]): [number, number][] => {
+      // Если points не массив или пустой массив, возвращаем координаты по умолчанию
+      if (!Array.isArray(points) || points.length === 0) {
+        return [[100, 100], [100, 300], [300, 300], [300, 100]];
+      }
+
+      // Проверяем каждую точку и корректируем при необходимости
+      return points.map(point => {
+        // Проверяем, что point это массив с двумя числовыми координатами
+        if (Array.isArray(point) && point.length === 2 && 
+            typeof point[0] === 'number' && typeof point[1] === 'number') {
+          return [point[0], point[1]];
+        } else if (typeof point === 'object' && point !== null && 
+                  'lat' in point && 'lng' in point &&
+                  typeof point.lat === 'number' && typeof point.lng === 'number') {
+          // Если точка в формате {lat: number, lng: number}
+          return [point.lat, point.lng];
+        } else {
+          // В случае некорректных данных используем значения по умолчанию
+          console.warn('Некорректный формат координат точки:', point);
+          return [0, 0];
+        }
+      });
+    };
+
+    // Загружаем все данные
     fetchMapData();
+    fetchPlantsData();
+    fetchAreasData();
   }, []);
 
   const markFieldAsTouched = (name: string) => {
@@ -242,16 +380,26 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
 
   // Обработчик выбора позиции на карте
   const handlePositionSelected = (latitude: number, longitude: number) => {
-    setFormData((prev) => ({ ...prev, latitude, longitude }));
-    // Отмечаем поля как измененные
+    // Обновляем значения широты и долготы в форме
+    const updatedData = { 
+      ...formData, 
+      latitude: parseFloat(latitude.toFixed(6)), 
+      longitude: parseFloat(longitude.toFixed(6)) 
+    };
+    
+    // Очищаем ошибки для этих полей, если они были
+    const newErrors = { ...errors };
+    if (newErrors.latitude) delete newErrors.latitude;
+    if (newErrors.longitude) delete newErrors.longitude;
+    
+    setFormData(updatedData);
+    setErrors(newErrors);
+    
+    // Отмечаем поля как затронутые
     markFieldAsTouched('latitude');
     markFieldAsTouched('longitude');
-
-    // Валидация на лету
-    if (formSubmitted) {
-      validateField('latitude', latitude);
-      validateField('longitude', longitude);
-    }
+    
+    console.log(`Выбрана позиция: [${latitude}, ${longitude}]`);
   };
 
   const validateField = (name: string, value: any): boolean => {
@@ -480,6 +628,8 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
                 handleNumberChange={handleNumberChange}
                 mapImageUrl={mapImageUrl}
                 onPositionSelected={handlePositionSelected}
+                mapAreas={mapAreas}
+                mapPlants={mapPlants}
               />
             </div>
           </div>

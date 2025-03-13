@@ -23,6 +23,25 @@ export interface BasicInfoSectionProps extends BaseFormSectionProps {
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
+// Интерфейс для растения на карте (для передачи в пропсах)
+export interface MapPlant {
+  id?: string;
+  name?: string;
+  position?: [number, number];
+  description?: string;
+}
+
+// Интерфейс для области на карте (для передачи в пропсах)
+export interface MapArea {
+  id: string;
+  name: string;
+  points: [number, number][];
+  description?: string;
+  strokeColor?: string;
+  fillColor?: string;
+  fillOpacity?: number;
+}
+
 // Пропсы для секции географической информации
 export interface GeographicInfoSectionProps extends BaseFormSectionProps {
   regionOptions: { id: number; name: string }[];
@@ -31,6 +50,8 @@ export interface GeographicInfoSectionProps extends BaseFormSectionProps {
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   mapImageUrl?: string | null; // URL изображения карты
   onPositionSelected?: (latitude: number, longitude: number) => void; // Обработчик выбора позиции на карте
+  mapAreas?: MapArea[]; // Области для отображения на карте
+  mapPlants?: MapPlant[]; // Растения для отображения на карте
 }
 
 // Пропсы для секции экспозиционной информации

@@ -262,7 +262,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           <select
             id={name.toString()}
             name={name.toString()}
-            value={formData[name] as number}
+            value={formData[name] !== null && formData[name] !== undefined ? formData[name] as number : ''}
             onChange={handleSelectChange}
             className={`${formClasses.select} ${
               showError

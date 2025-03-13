@@ -16,6 +16,8 @@ import {
 import {
   convertRegionsToAreas,
   getAllRegions,
+  createRegion,
+  convertPointsToPolygonCoordinates
 } from '../services/regionService';
 import { RegionData } from '../types/mapTypes';
 
@@ -61,6 +63,20 @@ export interface ClusteringSettings {
   // Оставляем только флаг включения/выключения
 }
 
+// Интерфейс для параметров создания области
+export interface CreateAreaParams {
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  radius: number;
+  strokeColor: string;
+  fillColor: string;
+  fillOpacity: number;
+  sectorType: number;
+  boundaryWkt: string;
+}
+
 // Тип для контекста карты
 interface MapContextType {
   customImage: string | null;
@@ -95,7 +111,7 @@ interface MapContextType {
   openAreaForm: () => void;
   closeAreaForm: () => void;
   finishDrawing: () => void;
-  saveCurrentArea: (name: string, description?: string) => void;
+  saveCurrentArea: (areaParams: CreateAreaParams) => void;
   isDrawingComplete: boolean;
   // Геопозиция
   selectedPosition: GeoPosition | null;
@@ -359,17 +375,42 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // Сохранить текущую область
-  const saveCurrentArea = (name: string, description?: string) => {
+  const saveCurrentArea = async (areaParams: CreateAreaParams) => {
     if (currentAreaPoints.length >= 3) {
-      addArea({
-        name,
-        points: currentAreaPoints,
-        description:
-          description || `Область создана ${new Date().toLocaleString()}`,
-      });
-      clearAreaPoints();
-      closeAreaForm();
-      setIsDrawingComplete(false);
+      try {
+        // Конвертируем точки в формат JSON
+        const polygonCoordinates = convertPointsToPolygonCoordinates(currentAreaPoints);
+        
+        // Создаем объект для API
+        const regionData = {
+          ...areaParams,
+          polygonCoordinates
+        };
+        
+        // Отправляем запрос на создание области
+        const createdRegion = await createRegion(regionData);
+        
+        // Добавляем созданную область в локальное состояние
+        addArea({
+          name: createdRegion.name,
+          points: currentAreaPoints,
+          description: createdRegion.description,
+          strokeColor: createdRegion.strokeColor,
+          fillColor: createdRegion.fillColor,
+          fillOpacity: createdRegion.fillOpacity
+        });
+        
+        // Перезагружаем области с сервера
+        await loadRegionsFromServer();
+        
+        // Очищаем точки и закрываем форму
+        clearAreaPoints();
+        closeAreaForm();
+        setIsDrawingComplete(false);
+      } catch (error) {
+        console.error('Ошибка при сохранении области:', error);
+        // Здесь можно добавить обработку ошибок, например, показать уведомление
+      }
     }
   };
 

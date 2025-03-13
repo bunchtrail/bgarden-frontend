@@ -35,37 +35,37 @@ api.interceptors.request.use((config) => {
 class ExpositionService {
     // Получить все экспозиции
     async getAllExpositions(): Promise<ExpositionDto[]> {
-        const response = await api.get<ExpositionDto[]>('/Exposition');
+        const response = await api.get<ExpositionDto[]>('/api/Exposition');
         return response.data;
     }
 
     // Получить экспозицию по ID
     async getExpositionById(id: number): Promise<ExpositionDto> {
-        const response = await api.get<ExpositionDto>(`/Exposition/${id}`);
+        const response = await api.get<ExpositionDto>(`/api/Exposition/${id}`);
         return response.data;
     }
 
     // Получить экспозицию по имени
     async getExpositionByName(name: string): Promise<ExpositionDto> {
-        const response = await api.get<ExpositionDto>(`/Exposition/name/${name}`);
+        const response = await api.get<ExpositionDto>(`/api/Exposition/name/${name}`);
         return response.data;
     }
 
     // Создать новую экспозицию
     async createExposition(exposition: Omit<ExpositionDto, 'id'>): Promise<ExpositionDto> {
-        const response = await api.post<ExpositionDto>('/Exposition', exposition);
+        const response = await api.post<ExpositionDto>('/api/Exposition', exposition);
         return response.data;
     }
 
     // Обновить существующую экспозицию
     async updateExposition(id: number, exposition: ExpositionDto): Promise<ExpositionDto> {
-        const response = await api.put<ExpositionDto>(`/Exposition/${id}`, exposition);
+        const response = await api.put<ExpositionDto>(`/api/Exposition/${id}`, exposition);
         return response.data;
     }
 
     // Удалить экспозицию
     async deleteExposition(id: number): Promise<boolean> {
-        const response = await api.delete(`/Exposition/${id}`);
+        const response = await api.delete(`/api/Exposition/${id}`);
         return response.status === 200;
     }
 }
