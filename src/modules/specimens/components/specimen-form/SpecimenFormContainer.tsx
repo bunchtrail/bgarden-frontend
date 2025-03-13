@@ -23,6 +23,7 @@ import { GeographicInfoSection } from './GeographicInfoSection';
 import { FormTabs } from './Tabs';
 import { SpecimenFormTab } from './types';
 import { MapArea, MapPlant } from './types';
+import { DraftSaveNotification } from '../../../../components/ui/DraftSaveNotification';
 
 interface SpecimenFormContainerProps {
   initialData?: Specimen;
@@ -298,13 +299,8 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     const draftTimer = setTimeout(() => {
       localStorage.setItem('specimenFormDraft', JSON.stringify(updatedData));
       setIsDraftSaved(true);
-      setFormMessage({
-        type: MessageType.SUCCESS,
-        text: 'Черновик автоматически сохранен',
-      });
       setTimeout(() => {
         setIsDraftSaved(false);
-        setFormMessage(null);
       }, 2000);
     }, 1000);
 
@@ -388,11 +384,17 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
 
   // Обработчик выбора позиции на карте
   const handlePositionSelected = (latitude: number, longitude: number) => {
+    // Всегда округляем значения до 6 знаков после запятой для единообразия
+    const roundedLatitude = parseFloat(latitude.toFixed(6));
+    const roundedLongitude = parseFloat(longitude.toFixed(6));
+    
+    console.log(`handlePositionSelected: позиция выбрана: [${roundedLatitude}, ${roundedLongitude}]`);
+    
     // Обновляем значения широты и долготы в форме
     const updatedData = { 
       ...formData, 
-      latitude: parseFloat(latitude.toFixed(6)), 
-      longitude: parseFloat(longitude.toFixed(6)) 
+      latitude: roundedLatitude, 
+      longitude: roundedLongitude 
     };
     
     // Очищаем ошибки для этих полей, если они были
@@ -406,8 +408,6 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     // Отмечаем поля как затронутые
     markFieldAsTouched('latitude');
     markFieldAsTouched('longitude');
-    
-    console.log(`Выбрана позиция: [${latitude}, ${longitude}]`);
   };
 
   // Добавляем обработчик выбора области (региона) на карте
@@ -901,11 +901,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         </div>
       </form>
 
-      {isDraftSaved && (
-        <div className='fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md shadow-md animate-fadeIn'>
-          Черновик автоматически сохранен
-        </div>
-      )}
+      <DraftSaveNotification isVisible={isDraftSaved} />
     </div>
   );
 };

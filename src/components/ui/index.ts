@@ -13,3 +13,5 @@ export { default as Chip } from './Chip';
 export { default as Header } from './Header';
 export { default as Footer } from './Footer';
 
+export * from './DraftSaveNotification';
+

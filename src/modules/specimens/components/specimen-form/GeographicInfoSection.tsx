@@ -60,6 +60,7 @@ interface SimpleMapProps {
   areas?: MapArea[];
   showOtherPlants?: boolean;
   currentPlantId?: string;
+  onManualPositionSet?: () => void; // Добавляем обработчик для установки флага
 }
 
 // Простая карта без зависимости от MapContext
@@ -72,6 +73,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   areas = [],
   showOtherPlants = false,
   currentPlantId,
+  onManualPositionSet,
 }) => {
   const [selectedPosition, setSelectedPosition] = useState<
     [number, number] | null
@@ -84,12 +86,12 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     ? (imageUrl.startsWith('http') ? imageUrl : getResourceUrl(imageUrl))
     : null;
   
-  // Фильтруем другие растения, если showOtherPlants = true
+  // Фильтруем растения - исключаем "текущее" растение, если есть выбранная позиция
   const filteredPlants = showOtherPlants 
-    ? plants 
-    : plants.filter(plant => plant.id === currentPlantId || plant.id === 'current');
+    ? plants.filter(plant => plant.id !== 'current') 
+    : plants.filter(plant => (plant.id === currentPlantId) && plant.id !== 'current');
 
-  // Создаем кастомную иконку для маркера
+  // Создаем кастомную иконку для существующих растений
   const plantIcon = new Icon({
     iconUrl:
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyLDJhMTAsMTAgMCAwLDAgMCwyMGExMCwxMCAwIDAsMCAwLC0yMHoiIGZpbGw9IiMwMDgwMDAiIC8+PC9zdmc+',
@@ -98,10 +100,10 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     popupAnchor: [0, -12],
   });
 
-  // Иконка для выбранной позиции
+  // Единая иконка для выбранной позиции - используем один стиль для всех случаев
   const selectedPositionIcon = new L.Icon({
     iconUrl:
-      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTIiIGZpbGw9IiNmZjVhODciIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIzIiAvPjwvc3ZnPg==',
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTIiIGZpbGw9IiMwNTk2NjkiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiAvPjwvc3ZnPg==',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
   });
@@ -111,18 +113,26 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     useMapEvents({
       click: (e) => {
         if (!readOnly) {
-          // Устанавливаем новую позицию маркера
-          const position: [number, number] = [e.latlng.lat, e.latlng.lng];
-          setSelectedPosition(position);
-          if (onPositionSelect) {
-            onPositionSelect(position);
-          }
-          
-          // Проверяем, не был ли клик на область
-          // isAreaClick устанавливается в handleAreaClick
-          if (onAreaSelect && !(e as any).isAreaClick) {
-            // Клик был не на область - сбрасываем информацию о регионе
-            onAreaSelect(null);
+          // Проверяем, был ли клик на области
+          // Это исправление предотвращает повторную обработку клика на область
+          if (!(e as any)._areaClick) {
+            // Устанавливаем новую позицию маркера
+            const position: [number, number] = [e.latlng.lat, e.latlng.lng];
+            setSelectedPosition(position);
+            if (onPositionSelect) {
+              onPositionSelect(position);
+            }
+            
+            // Вызываем обработчик установки флага ручной позиции
+            if (onManualPositionSet) {
+              onManualPositionSet();
+            }
+            
+            // Проверяем, не был ли клик на область
+            if (onAreaSelect) {
+              // Клик был не на область - сбрасываем информацию о регионе
+              onAreaSelect(null);
+            }
           }
         }
       },
@@ -152,9 +162,9 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
   // Обработчик клика на область
   const handleAreaClick = (area: MapArea, e: any) => {
     // Помечаем событие, что клик произошел на области
-    e.isAreaClick = true;
-    
-    console.log('handleAreaClick called with area:', area); // Добавляем логирование
+    // Используем новое свойство _areaClick вместо isAreaClick
+    e.originalEvent._areaClick = true;
+    e._areaClick = true;
     
     // Извлекаем ID региона из ID области (формат: "region-{regionId}")
     let regionId = undefined;
@@ -169,9 +179,6 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
       }
     }
     
-    console.log('Selected area:', area); // Добавляем для отладки
-    console.log('Extracted regionId:', regionId); // Добавляем для отладки
-    
     // Передаем выбранную область через коллбэк вместе с ID региона
     if (onAreaSelect) {
       const selectedArea = {
@@ -181,20 +188,25 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
         regionId // Добавляем ID региона
       };
       
-      console.log('Calling onAreaSelect with:', selectedArea); // Добавляем логирование
       onAreaSelect(selectedArea);
     }
     
     // Устанавливаем позицию маркера непосредственно здесь
     const position: [number, number] = [e.latlng.lat, e.latlng.lng];
     setSelectedPosition(position);
+    
+    // Вызываем обработчик установки флага ручной позиции
+    if (onManualPositionSet) {
+      onManualPositionSet();
+    }
+    
     if (onPositionSelect) {
       onPositionSelect(position);
     }
     
-    // Предотвращаем двойную обработку события
-    L.DomEvent.stopPropagation(e);
-    e.originalEvent.preventDefault();
+    // Предотвращаем всплытие события, чтобы избежать двойной обработки
+    e.originalEvent.stopPropagation();
+    L.DomEvent.stop(e); // Более надежный способ остановки события в Leaflet
   };
 
   React.useEffect(() => {
@@ -265,7 +277,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
                       color: strokeColor,
                       fillColor: fillColor,
                       fillOpacity: fillOpacity,
-                      bubblingMouseEvents: true, // Позволяет событиям "пузыриться" наверх к карте
+                      bubblingMouseEvents: false,
                       ...polygonStyle
                     }}
                     eventHandlers={{
@@ -291,7 +303,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
                 );
               })}
 
-              {/* Маркеры растений */}
+              {/* Маркеры растений (кроме текущего) */}
               {filteredPlants.length > 0 && filteredPlants.map((plant) => (
                 <Marker key={plant.id} position={plant.position} icon={plantIcon}>
                   <Popup>
@@ -303,25 +315,11 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
                 </Marker>
               ))}
 
-              {/* Маркер выбранной позиции */}
+              {/* Маркер выбранной позиции - основной маркер, который показывает текущую выбранную позицию */}
               {selectedPosition && (
                 <Marker 
                   position={selectedPosition} 
                   icon={selectedPositionIcon}
-                  eventHandlers={{
-                    add: (e) => {
-                      // Анимация появления маркера
-                      const marker = e.target;
-                      const domIcon = marker.getElement();
-                      if (domIcon) {
-                        domIcon.style.transition = 'transform 0.3s ease-out';
-                        domIcon.style.transform = 'scale(0)';
-                        setTimeout(() => {
-                          domIcon.style.transform = 'scale(1)';
-                        }, 10);
-                      }
-                    }
-                  }}
                 />
               )}
             </LeafletMapContainer>
@@ -365,6 +363,8 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showOtherPlants, setShowOtherPlants] = useState(false);
   const [selectedArea, setSelectedArea] = useState<SelectedArea | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
+  const [manualPositionSet, setManualPositionSet] = useState(false);
 
   // Функция для преобразования MapPlant в PlantMarker
   const mapPlantToPlantMarker = (plant: MapPlant): PlantMarker => {
@@ -400,7 +400,7 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
     }
   }, [formData.regionId, regionOptions, mapAreas]);
 
-  // Обновляем эффект для реагирования на изменения
+  // Обновляем эффект для реагирования на изменения, не сбрасывая ручные изменения координат
   useEffect(() => {
     // Проверяем, содержит ли formData значение regionId
     if (formData.regionId) {
@@ -414,40 +414,47 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
         const matchingArea = mapAreas.find(area => area.id === `region-${currentRegion.id}`);
         
         if (matchingArea && (!selectedArea || selectedArea.regionId !== currentRegion.id)) {
-          // Устанавливаем выбранную область
+          // Устанавливаем выбранную область, но сохраняем текущую позицию
           setSelectedArea({
             id: matchingArea.id,
             name: currentRegion.name,
             description: matchingArea.description,
             regionId: currentRegion.id
           });
+          
+          // Не обновляем координаты, если они были установлены вручную
+          // Это предотвращает сброс координат при обновлении региона
+          console.log('Manual position set:', manualPositionSet);
         }
       }
     }
-  }, [formData.regionId, regionOptions, mapAreas, selectedArea]);
+  }, [formData.regionId, regionOptions, mapAreas, selectedArea, manualPositionSet]);
 
   // Преобразуем данные о растениях в формат PlantMarker
   const allPlants: PlantMarker[] = mapPlants.map(mapPlantToPlantMarker);
 
-  // Если у текущего растения есть позиция, добавляем его в список
-  const currentPlant: PlantMarker[] = formData.latitude && formData.longitude
-    ? [{
-        id: 'current',
-        name: formData.russianName || 'Текущее растение',
-        position: [formData.latitude, formData.longitude],
-        description: formData.naturalRange,
-      }]
-    : [];
-
-  // Объединяем текущее растение и все остальные
-  const combinedPlants = [...currentPlant, ...allPlants];
+  // Объединяем все растения, кроме текущего, так как текущее будет отображаться через выбранную позицию
+  const combinedPlants = [...allPlants];
 
   // Обработчик выбора позиции на карте
   const handlePositionSelect = useCallback(
     (position: [number, number]) => {
+      // Округляем координаты до 6 десятичных знаков для более предсказуемого поведения
+      const roundedLat = parseFloat(position[0].toFixed(6));
+      const roundedLng = parseFloat(position[1].toFixed(6));
+      const roundedPosition: [number, number] = [roundedLat, roundedLng];
+      
+      // Устанавливаем точные координаты в state
+      setSelectedPosition(roundedPosition);
+      // Отмечаем, что позиция была установлена вручную
+      setManualPositionSet(true);
+      
       if (onPositionSelected) {
-        onPositionSelected(position[0], position[1]);
+        // Передаем округленные координаты в родительский компонент
+        onPositionSelected(roundedLat, roundedLng);
       }
+      
+      console.log(`Позиция обновлена: [${roundedLat}, ${roundedLng}]`);
     },
     [onPositionSelected]
   );
@@ -460,6 +467,9 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
     console.log('handleAreaSelect called with area:', area);
     
     if (area && area.regionId) {
+      // Запоминаем выбранную позицию, чтобы предотвратить её сброс
+      const currentPosition = selectedPosition;
+      
       // Находим соответствующий регион в опциях
       const selectedRegion = regionOptions.find(region => region.id === area.regionId);
       console.log('Found region:', selectedRegion);
@@ -475,6 +485,9 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
         } as unknown as React.ChangeEvent<HTMLSelectElement>;
         
         console.log('Calling handleSelectChange with:', syntheticEvent);
+        
+        // Устанавливаем флаг, чтобы предотвратить сброс позиции в useEffect
+        const positionUpdateGuard = true;
         
         // Вызываем обработчик изменения select
         handleSelectChange(syntheticEvent);
@@ -494,53 +507,48 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
         // Принудительно отмечаем поле как затронутое и валидируем
         markFieldAsTouched('regionId');
         validateField('regionId', selectedRegion.id);
-        
-        // Добавляем небольшую задержку перед обновлением формы
-        setTimeout(() => {
-          // Повторно вызываем handleSelectChange для гарантии обновления
-          handleSelectChange(syntheticEvent);
-        }, 50);
       }
     }
   };
 
   return (
-    <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 animate-slideInRight'>
-      <h3
-        className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}
-      >
-        <NoteIcon className='w-5 h-5 mr-2 text-green-600' />
-        Географическая информация
+    <div className='mb-8 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md'>
+      <h3 className={`${headingClasses.heading} flex items-center text-xl mb-6 pb-3 border-b border-gray-200`}>
+        <div className="p-2 rounded-lg bg-green-50 mr-3">
+          <NoteIcon className='w-6 h-6 text-green-600' />
+        </div>
+        <span className="text-gray-800 font-semibold">Географическая информация</span>
       </h3>
 
-      <div className='space-y-4'>
-        <div className='bg-green-50 p-3 rounded-md border border-green-100 mb-4'>
+      <div className='space-y-5'>
+        <div className='bg-gradient-to-r from-green-50 to-green-50/50 p-4 rounded-lg border border-green-100 mb-4 backdrop-blur-sm'>
           <div className='flex items-center text-green-800 text-sm mb-2'>
-            <span className='mr-2'>ⓘ</span>
-            <span>Информация о происхождении и географическом положении образца</span>
+            <span className='flex items-center justify-center w-6 h-6 rounded-full bg-green-100 mr-3'>ⓘ</span>
+            <span className="font-medium">Информация о происхождении и географическом положении образца</span>
           </div>
         </div>
         
         {/* Переключатель для отображения других растений */}
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-4 p-3 bg-white rounded-lg border border-gray-100 hover:border-green-200 transition-all duration-200">
           <input
             type="checkbox"
             id="showOtherPlants"
             checked={showOtherPlants}
             onChange={() => setShowOtherPlants(!showOtherPlants)}
-            className="mr-2"
+            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 transition-colors duration-200"
           />
-          <label htmlFor="showOtherPlants" className="text-sm font-medium">
+          <label htmlFor="showOtherPlants" className="ml-3 text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer select-none">
             Показать другие растения на карте
           </label>
         </div>
 
         {/* Компонент карты - в карточке */}
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
-          <h4 className='font-medium text-gray-700 mb-2'>
+        <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200 focus-within:border-green-300 focus-within:ring-1 focus-within:ring-green-200'>
+          <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+            <span className="mr-2">📍</span>
             Расположение на карте
           </h4>
-          <div className='h-96 border rounded-lg overflow-hidden'>
+          <div className='h-96 border rounded-xl overflow-hidden shadow-inner bg-gray-50'>
             <SimpleMap
               imageUrl={mapImageUrl || null}
               readOnly={false}
@@ -550,36 +558,39 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
               areas={mapAreas}
               showOtherPlants={showOtherPlants}
               currentPlantId="current"
+              onManualPositionSet={() => setManualPositionSet(true)}
             />
           </div>
         </div>
 
-        {/* Информация о выбранном регионе - теперь отображается в карточке */}
+        {/* Информация о выбранном регионе */}
         {selectedArea && (
-          <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
-            <h4 className='font-medium text-gray-700 mb-2'>
+          <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:shadow-md'>
+            <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+              <span className="mr-2">🎯</span>
               Выбранный регион
             </h4>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start bg-gradient-to-r from-green-50/50 to-transparent p-4 rounded-lg">
               <div>
                 <h3 className='font-bold text-lg text-green-800 mb-2'>{selectedArea.name}</h3>
                 {selectedArea.description && (
-                  <p className='text-gray-700 text-sm'>{selectedArea.description}</p>
+                  <p className='text-gray-600 text-sm'>{selectedArea.description}</p>
                 )}
               </div>
-              <span className='text-xs text-white bg-green-600 px-2 py-1 rounded-full'>
-                Регион №{selectedArea.id}
+              <span className='text-xs font-medium text-white bg-green-600 px-3 py-1.5 rounded-full shadow-sm'>
+                Регион №{selectedArea.regionId}
               </span>
             </div>
           </div>
         )}
 
-        {/* Основные поля */}
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
-          <h4 className='font-medium text-gray-700 mb-2'>
+        {/* Координаты */}
+        <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200'>
+          <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+            <span className="mr-2">📊</span>
             Координаты
           </h4>
-          <div className={gridContainerClasses.responsive}>
+          <div className={`${gridContainerClasses.responsive} gap-6`}>
             <NumberField
               label='Широта'
               name='latitude'
@@ -603,44 +614,48 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
           </div>
         </div>
 
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
-          <h4 className='font-medium text-gray-700 mb-2'>
+        {/* Место происхождения */}
+        <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200'>
+          <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+            <span className="mr-2">🌍</span>
             Место происхождения
           </h4>
-          <SelectField
-            label='Регион происхождения'
-            name='regionId'
-            formData={formData}
-            options={regionOptions}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            handleSelectChange={handleSelectChange}
-            required
-          />
+          <div className="space-y-4">
+            <SelectField
+              label='Регион происхождения'
+              name='regionId'
+              formData={formData}
+              options={regionOptions}
+              errors={errors}
+              touchedFields={touchedFields}
+              formSubmitted={formSubmitted}
+              markFieldAsTouched={markFieldAsTouched}
+              handleSelectChange={handleSelectChange}
+              required
+            />
 
-          <TextField
-            label='Страна происхождения'
-            name='country'
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            handleChange={handleChange}
-          />
+            <TextField
+              label='Страна происхождения'
+              name='country'
+              formData={formData}
+              errors={errors}
+              touchedFields={touchedFields}
+              formSubmitted={formSubmitted}
+              markFieldAsTouched={markFieldAsTouched}
+              handleChange={handleChange}
+            />
+          </div>
         </div>
 
         {/* Дополнительные поля */}
-        <div className='mt-4 border-t border-gray-200 pt-4'>
+        <div className='mt-6 border-t border-gray-100 pt-6'>
           <button
             type='button'
             onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            className='flex items-center text-blue-600 hover:text-blue-800 mb-4'
+            className='flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200'
           >
             <svg
-              className={`w-5 h-5 mr-1 transition-transform ${
+              className={`w-5 h-5 mr-2 transition-transform duration-200 ${
                 showAdvancedOptions ? 'rotate-90' : ''
               }`}
               fill='currentColor'
@@ -658,19 +673,21 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
           </button>
 
           {showAdvancedOptions && (
-            <div className='space-y-4 animate-fadeIn'>
-              <TextField
-                label='Естественный ареал'
-                name='naturalRange'
-                multiline
-                rows={3}
-                formData={formData}
-                errors={errors}
-                touchedFields={touchedFields}
-                formSubmitted={formSubmitted}
-                markFieldAsTouched={markFieldAsTouched}
-                handleChange={handleChange}
-              />
+            <div className='space-y-4 animate-fadeIn mt-4'>
+              <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200'>
+                <TextField
+                  label='Естественный ареал'
+                  name='naturalRange'
+                  multiline
+                  rows={3}
+                  formData={formData}
+                  errors={errors}
+                  touchedFields={touchedFields}
+                  formSubmitted={formSubmitted}
+                  markFieldAsTouched={markFieldAsTouched}
+                  handleChange={handleChange}
+                />
+              </div>
             </div>
           )}
         </div>
