@@ -390,56 +390,90 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     
     console.log(`handlePositionSelected: позиция выбрана: [${roundedLatitude}, ${roundedLongitude}]`);
     
-    // Обновляем значения широты и долготы в форме
-    const updatedData = { 
-      ...formData, 
-      latitude: roundedLatitude, 
-      longitude: roundedLongitude 
-    };
+    // Используем функциональное обновление для избежания race conditions
+    setFormData(prevData => {
+      // Проверяем, действительно ли координаты изменились, чтобы избежать лишних рендеров
+      if (prevData.latitude === roundedLatitude && prevData.longitude === roundedLongitude) {
+        console.log('Координаты не изменились, пропускаем обновление');
+        return prevData;
+      }
+      
+      console.log(`Обновляем координаты в форме: [${roundedLatitude}, ${roundedLongitude}]`);
+      
+      // Возвращаем обновленное состояние
+      return { 
+        ...prevData, 
+        latitude: roundedLatitude, 
+        longitude: roundedLongitude 
+      };
+    });
     
     // Очищаем ошибки для этих полей, если они были
-    const newErrors = { ...errors };
-    if (newErrors.latitude) delete newErrors.latitude;
-    if (newErrors.longitude) delete newErrors.longitude;
-    
-    setFormData(updatedData);
-    setErrors(newErrors);
+    setErrors(prevErrors => {
+      const newErrors = { ...prevErrors };
+      if (newErrors.latitude) delete newErrors.latitude;
+      if (newErrors.longitude) delete newErrors.longitude;
+      return newErrors;
+    });
     
     // Отмечаем поля как затронутые
     markFieldAsTouched('latitude');
     markFieldAsTouched('longitude');
+    
+    // Валидируем значения
+    validateField('latitude', roundedLatitude);
+    validateField('longitude', roundedLongitude);
   };
 
   // Добавляем обработчик выбора области (региона) на карте
-  const handleAreaSelected = (areaId: string, regionId: number) => {
-    console.log('handleAreaSelected called with:', { areaId, regionId });
+  const handleAreaSelected = (selectedArea: any) => {
+    console.log('handleAreaSelected called with:', selectedArea);
     
-    // Если есть ID региона, устанавливаем его в форме
-    if (regionId) {
-      // Находим объект региона по ID
-      const selectedRegion = regionOptions.find(r => r.id === regionId);
-      console.log('Found region:', selectedRegion);
-      
-      if (selectedRegion) {
-        // Обновляем данные формы с новым regionId
-        const updatedData = { 
-          ...formData, 
+    // Проверяем, что получены правильные данные
+    if (!selectedArea || !selectedArea.regionId) {
+      console.log('Нет данных о регионе, пропускаем обновление');
+      return;
+    }
+    
+    const regionId = Number(selectedArea.regionId);
+    
+    // Находим объект региона по ID, для точного сравнения преобразуем оба значения к числу
+    const selectedRegion = regionOptions.find(r => Number(r.id) === regionId);
+    console.log('Found region:', selectedRegion);
+    
+    if (selectedRegion) {
+      // Используем функциональное обновление для избежания race conditions
+      setFormData(prevData => {
+        // Проверяем, действительно ли изменился регион, чтобы избежать лишних рендеров
+        if (prevData.regionId === regionId) {
+          console.log(`Регион не изменился (${regionId}), пропускаем обновление`);
+          return prevData;
+        }
+        
+        console.log(`Обновляем regionId в форме: ${regionId} (${selectedRegion.name})`);
+        
+        // Возвращаем обновленное состояние
+        return { 
+          ...prevData, 
           regionId: regionId,
-          regionName: selectedRegion.name || formData.regionName
+          regionName: selectedRegion.name || prevData.regionName
         };
-        console.log('Updating form data:', updatedData);
-        
-        // Очищаем ошибки для regionId, если они были
-        const newErrors = { ...errors };
+      });
+      
+      // Очищаем ошибки для regionId, если они были
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors };
         if (newErrors.regionId) delete newErrors.regionId;
-        
-        setFormData(updatedData);
-        setErrors(newErrors);
-        
-        // Отмечаем поле как затронутое
-        markFieldAsTouched('regionId');
-        console.log('Form data updated and field marked as touched');
-      }
+        return newErrors;
+      });
+      
+      // Отмечаем поле как затронутое
+      markFieldAsTouched('regionId');
+      
+      // Валидируем значение
+      validateField('regionId', regionId);
+    } else {
+      console.error(`Регион с ID ${regionId} не найден в списке доступных регионов:`, regionOptions);
     }
   };
 

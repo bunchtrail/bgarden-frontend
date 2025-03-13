@@ -228,6 +228,9 @@ export const NumberField: React.FC<NumberFieldProps> = ({
   );
 };
 
+// Флаг для включения/отключения отладочных сообщений
+const ENABLE_SELECT_DEBUG = false;
+
 // Компонент списка выбора
 export const SelectField: React.FC<SelectFieldProps> = ({
   label,
@@ -246,12 +249,30 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   const showError = hasError && (isTouched || formSubmitted);
   const isValid = isTouched && !hasError && formData[name];
 
-  // Преобразуем значение в строку для select
-  const selectValue = formData[name] !== undefined && formData[name] !== null 
-    ? String(formData[name]) 
-    : '';
+  // Преобразуем значение в строку для select и обрабатываем null/undefined
+  let selectValue = '';
+  // Безопасно получаем значение из formData, гарантируя, что null и undefined превратятся в ''
+  if (formData && name in formData) {
+    const rawValue = formData[name];
+    if (rawValue !== null && rawValue !== undefined) {
+      selectValue = String(rawValue);
+    }
+  }
   
-  console.log(`SelectField ${name} value:`, formData[name], 'converted to:', selectValue);
+  // Для отладки - выводим только при включенном флаге
+  if (ENABLE_SELECT_DEBUG) {
+    console.log(`SelectField ${name} value:`, formData[name], 'converted to:', selectValue);
+  }
+
+  // Создаем безопасный обработчик изменений
+  const safeChangeHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // Проверка на null предотвращает проблемы с React контроллируемым компонентом
+    const currentValue = e.target.value;
+    if (currentValue === null) {
+      e.target.value = ''; // Принудительно меняем null на пустую строку
+    }
+    handleSelectChange(e);
+  };
 
   return (
     <div className={formClasses.fieldGroup}>
@@ -270,7 +291,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
             id={name.toString()}
             name={name.toString()}
             value={selectValue}
-            onChange={handleSelectChange}
+            onChange={safeChangeHandler}
             className={`${formClasses.select} ${
               showError
                 ? 'border-red-400 ring-1 ring-red-400 bg-red-50'

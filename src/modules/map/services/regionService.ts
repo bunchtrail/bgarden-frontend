@@ -59,7 +59,7 @@ const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
     // Проверяем, что coordsString не null и не пустая строка
     if (!coordsString) {
       console.warn('Строка координат пуста или null');
-      return [];
+      return getDefaultCoordinates();
     }
     
     // Если coordsString уже является массивом, просто используем его
@@ -67,33 +67,42 @@ const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
       return coordsString.map((coord: [number, number]) => [coord[0], coord[1]]);
     }
     
+    // Проверяем, что строка имеет значение 'string' (ошибка тестовых данных)
+    if (coordsString === 'string') {
+      console.warn('Получено буквальное значение "string" вместо координат');
+      return getDefaultCoordinates();
+    }
+    
     // Проверяем, что строка начинается с '[' для JSON
     if (typeof coordsString === 'string' && coordsString.trim().startsWith('[')) {
       // Преобразуем строку в объект JavaScript
       const coordsArray = JSON.parse(coordsString);
+      // Проверяем, что массив не пуст
+      if (!coordsArray || coordsArray.length < 3) {
+        console.warn('Массив координат пуст или содержит менее 3 точек');
+        return getDefaultCoordinates();
+      }
       // Преобразуем координаты в формат [x, y]
       return coordsArray.map((coord: [number, number]) => [coord[0], coord[1]]);
     } else {
       // Если формат не JSON, возможно, это строка в другом формате
       console.warn('Строка координат не в формате JSON:', coordsString);
-      // Возвращаем пустой массив или примерные координаты для отладки
-      return [
-        [100, 100],
-        [100, 200],
-        [200, 200],
-        [200, 100]
-      ];
+      return getDefaultCoordinates();
     }
   } catch (error) {
     console.error('Ошибка при разборе координат:', error);
-    // Возвращаем примерный прямоугольник для отладки
-    return [
-      [100, 100],
-      [100, 300],
-      [300, 300],
-      [300, 100]
-    ];
+    return getDefaultCoordinates();
   }
+};
+
+// Функция для получения координат по умолчанию (выделена для повторного использования)
+const getDefaultCoordinates = (): [number, number][] => {
+  return [
+    [100, 100],
+    [100, 300],
+    [300, 300],
+    [300, 100]
+  ];
 };
 
 // Функция для преобразования данных с сервера в формат Area

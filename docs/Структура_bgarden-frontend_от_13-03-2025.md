@@ -117,7 +117,7 @@
           - `index.ts` (198.0 B)
           - `mapService.ts` (1.3 KB)
           - `plantService.ts` (2.4 KB)
-          - `regionService.ts` (4.6 KB)
+          - `regionService.ts` (5.2 KB)
         - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src)`
           - **modules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src\modules)`
             - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src\modules\map)`
@@ -168,10 +168,10 @@
             - `AdditionalInfoSection.tsx` (6.1 KB)
             - `BasicInfoSection.tsx` (7.7 KB)
             - `ExpositionInfoSection.tsx` (3.7 KB)
-            - `FormFields.tsx` (14.5 KB)
-            - `GeographicInfoSection.tsx` (29.0 KB)
+            - `FormFields.tsx` (15.5 KB)
+            - `GeographicInfoSection.tsx` (36.3 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (33.4 KB)
+            - `SpecimenFormContainer.tsx` (35.2 KB)
             - `Tabs.tsx` (4.0 KB)
             - `types.ts` (4.4 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`

@@ -1,7 +1,7 @@
 import L, { Icon } from 'leaflet';
 import { getResourceUrl } from '../../../../config/apiConfig'; 
 import 'leaflet/dist/leaflet.css';
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import {
   ImageOverlay,
   MapContainer as LeafletMapContainer,
@@ -16,6 +16,16 @@ import { NumberField, SelectField, TextField } from './FormFields';
 import { GeographicInfoSectionProps, MapArea, MapPlant } from './types';
 import { headingClasses } from '../styles';
 import { NoteIcon } from '../icons';
+
+// В начале файла добавим константу для контроля логирования
+const ENABLE_DEBUG_LOGS = false;
+
+// Функция для логирования с контролем дебага
+const debugLog = (...args: any[]) => {
+  if (ENABLE_DEBUG_LOGS) {
+    console.log(...args);
+  }
+};
 
 // Добавляем стили для полигонов
 const polygonStyle = {
@@ -159,10 +169,9 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     setError(null);
   };
 
-  // Обработчик клика на область
+  // Обновим обработчик клика на область в SimpleMap компоненте
   const handleAreaClick = (area: MapArea, e: any) => {
     // Помечаем событие, что клик произошел на области
-    // Используем новое свойство _areaClick вместо isAreaClick
     e.originalEvent._areaClick = true;
     e._areaClick = true;
     
@@ -173,35 +182,47 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     if (area.id && typeof area.id === 'string') {
       if (area.id.startsWith('region-')) {
         regionId = parseInt(area.id.replace('region-', ''));
+        debugLog(`Извлечен ID региона из ${area.id}: ${regionId}`);
       } else if (!isNaN(parseInt(area.id))) {
         // Если id просто число, пробуем использовать его
         regionId = parseInt(area.id);
+        debugLog(`Используем ID области как ID региона: ${regionId}`);
       }
     }
     
-    // Передаем выбранную область через коллбэк вместе с ID региона
-    if (onAreaSelect) {
-      const selectedArea = {
-        id: area.id,
-        name: area.name,
-        description: area.description,
-        regionId // Добавляем ID региона
-      };
-      
-      onAreaSelect(selectedArea);
-    }
-    
-    // Устанавливаем позицию маркера непосредственно здесь
+    // Устанавливаем позицию маркера на месте клика
     const position: [number, number] = [e.latlng.lat, e.latlng.lng];
-    setSelectedPosition(position);
+    
+    // Округляем координаты для более предсказуемого поведения
+    const roundedLat = parseFloat(position[0].toFixed(6));
+    const roundedLng = parseFloat(position[1].toFixed(6));
+    const roundedPosition: [number, number] = [roundedLat, roundedLng];
+    
+    setSelectedPosition(roundedPosition);
     
     // Вызываем обработчик установки флага ручной позиции
     if (onManualPositionSet) {
       onManualPositionSet();
     }
     
+    debugLog(`Позиция установлена при клике на область: [${roundedLat}, ${roundedLng}]`);
+    
+    // Устанавливаем позицию через onPositionSelect
     if (onPositionSelect) {
-      onPositionSelect(position);
+      onPositionSelect(roundedPosition);
+    }
+    
+    // Передаем выбранную область через коллбэк вместе с ID региона
+    if (onAreaSelect && regionId !== undefined) {
+      const selectedArea = {
+        id: area.id,
+        name: area.name || `Регион ${regionId}`,
+        description: area.description,
+        regionId: Number(regionId) // Гарантируем числовой тип
+      };
+      
+      debugLog('Выбрана область с данными:', selectedArea);
+      onAreaSelect(selectedArea);
     }
     
     // Предотвращаем всплытие события, чтобы избежать двойной обработки
@@ -365,26 +386,90 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
   const [selectedArea, setSelectedArea] = useState<SelectedArea | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [manualPositionSet, setManualPositionSet] = useState(false);
+  // Добавляем ref для надежного хранения "реальных" координат
+  const realPositionRef = React.useRef<[number, number] | null>(null);
+  // Добавляем ref для предотвращения race conditions
+  const positionUpdateLockRef = React.useRef<boolean>(false);
 
-  // Функция для преобразования MapPlant в PlantMarker
-  const mapPlantToPlantMarker = (plant: MapPlant): PlantMarker => {
+  // Исключаем лишние обновления с помощью useCallback для обработчиков
+  const handleFieldTouch = useCallback((fieldName: string) => {
+    markFieldAsTouched(fieldName);
+  }, [markFieldAsTouched]);
+
+  const handleFieldValidation = useCallback((fieldName: string, value: any) => {
+    validateField(fieldName, value);
+  }, [validateField]);
+
+  // Создаем мемоизированную функцию для преобразования растений - уменьшает количество ненужных обработок
+  const mapPlantToPlantMarker = useCallback((plant: MapPlant): PlantMarker => {
     return {
       id: plant.id || `plant-${Math.random().toString(36).substr(2, 9)}`,
       name: plant.name || 'Неизвестное растение',
       position: plant.position || [0, 0],
       description: plant.description || '',
     };
-  };
+  }, []);
 
-  // Инициализация selectedArea на основе текущего regionId в formData
+  // Мемоизируем список растений для предотвращения повторных пересчетов
+  const allPlants: PlantMarker[] = useMemo(() => {
+    return mapPlants.map(mapPlantToPlantMarker);
+  }, [mapPlants, mapPlantToPlantMarker]);
+
+  // Объединяем все растения
+  const combinedPlants = useMemo(() => [...allPlants], [allPlants]);
+
+  // Оптимизируем вызов родительских обработчиков для предотвращения множественных перерисовок
+  const handlePositionSelectedStable = useCallback(
+    (lat: number, lng: number) => {
+      // Проверяем, отличаются ли координаты от текущих в форме и доступен ли обработчик
+      if (
+        formData.latitude === lat &&
+        formData.longitude === lng
+      ) {
+        // Если координаты такие же, не вызываем обработчик
+        return;
+      }
+      
+      // Проверяем наличие обработчика перед вызовом
+      if (onPositionSelected) {
+        onPositionSelected(lat, lng);
+      }
+    },
+    [formData.latitude, formData.longitude, onPositionSelected]
+  );
+
+  // Также оптимизируем обработчик выбора области
+  const handleAreaSelectedStable = useCallback(
+    (areaId: string, regionId: number) => {
+      // Проверяем, нужно ли обновлять
+      if (
+        formData.regionId === regionId
+      ) {
+        // Если регион уже выбран, пропускаем обновление
+        return;
+      }
+      
+      // Проверяем наличие обработчика перед вызовом
+      if (onAreaSelected) {
+        onAreaSelected(areaId, regionId);
+      }
+    },
+    [formData.regionId, onAreaSelected]
+  );
+
+  // Инициализация selectedArea на основе текущего regionId в formData - оптимизированная версия
   useEffect(() => {
     if (formData.regionId && !selectedArea) {
       // Находим соответствующий регион в опциях
-      const currentRegion = regionOptions.find(region => region.id === formData.regionId);
+      const currentRegion = regionOptions.find(
+        region => Number(region.id) === Number(formData.regionId)
+      );
       
       if (currentRegion) {
         // Находим соответствующую область на карте
-        const matchingArea = mapAreas.find(area => area.id === `region-${currentRegion.id}`);
+        const matchingArea = mapAreas.find(
+          area => area.id === `region-${currentRegion.id}`
+        );
         
         if (matchingArea) {
           // Устанавливаем выбранную область
@@ -394,122 +479,202 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
             description: matchingArea.description,
             regionId: currentRegion.id
           });
-          console.log('Initialized selectedArea from formData.regionId:', currentRegion.id);
         }
       }
     }
-  }, [formData.regionId, regionOptions, mapAreas]);
+  }, [formData.regionId, regionOptions, mapAreas, selectedArea]);
 
-  // Обновляем эффект для реагирования на изменения, не сбрасывая ручные изменения координат
+  // Инициализируем и обрабатываем изменения regionId в одном эффекте - оптимизированная версия
   useEffect(() => {
-    // Проверяем, содержит ли formData значение regionId
     if (formData.regionId) {
-      console.log('Updating selected area based on formData.regionId:', formData.regionId);
-      
       // Находим соответствующий регион
-      const currentRegion = regionOptions.find(region => Number(region.id) === Number(formData.regionId));
+      const currentRegion = regionOptions.find(
+        region => Number(region.id) === Number(formData.regionId)
+      );
       
       if (currentRegion) {
         // Находим область на карте
-        const matchingArea = mapAreas.find(area => area.id === `region-${currentRegion.id}`);
+        const matchingArea = mapAreas.find(
+          area => area.id === `region-${currentRegion.id}`
+        );
         
         if (matchingArea && (!selectedArea || selectedArea.regionId !== currentRegion.id)) {
-          // Устанавливаем выбранную область, но сохраняем текущую позицию
+          // Устанавливаем выбранную область
           setSelectedArea({
             id: matchingArea.id,
             name: currentRegion.name,
             description: matchingArea.description,
             regionId: currentRegion.id
           });
-          
-          // Не обновляем координаты, если они были установлены вручную
-          // Это предотвращает сброс координат при обновлении региона
-          console.log('Manual position set:', manualPositionSet);
         }
       }
     }
-  }, [formData.regionId, regionOptions, mapAreas, selectedArea, manualPositionSet]);
+  }, [formData.regionId, regionOptions, mapAreas, selectedArea]);
 
-  // Преобразуем данные о растениях в формат PlantMarker
-  const allPlants: PlantMarker[] = mapPlants.map(mapPlantToPlantMarker);
-
-  // Объединяем все растения, кроме текущего, так как текущее будет отображаться через выбранную позицию
-  const combinedPlants = [...allPlants];
+  // Сохраняем ручные координаты в ref для последующего использования
+  useEffect(() => {
+    if (manualPositionSet && selectedPosition) {
+      realPositionRef.current = selectedPosition;
+    }
+  }, [selectedPosition, manualPositionSet]);
 
   // Обработчик выбора позиции на карте
   const handlePositionSelect = useCallback(
     (position: [number, number]) => {
-      // Округляем координаты до 6 десятичных знаков для более предсказуемого поведения
-      const roundedLat = parseFloat(position[0].toFixed(6));
-      const roundedLng = parseFloat(position[1].toFixed(6));
-      const roundedPosition: [number, number] = [roundedLat, roundedLng];
-      
-      // Устанавливаем точные координаты в state
-      setSelectedPosition(roundedPosition);
-      // Отмечаем, что позиция была установлена вручную
-      setManualPositionSet(true);
-      
-      if (onPositionSelected) {
-        // Передаем округленные координаты в родительский компонент
-        onPositionSelected(roundedLat, roundedLng);
+      // Если система в процессе обновления позиции, блокируем обработку
+      if (positionUpdateLockRef.current) {
+        console.log("Обновление позиции заблокировано: уже в процессе");
+        return;
       }
+
+      // Блокируем другие обновления позиции
+      positionUpdateLockRef.current = true;
       
-      console.log(`Позиция обновлена: [${roundedLat}, ${roundedLng}]`);
+      try {
+        // Округляем координаты до 6 десятичных знаков для более предсказуемого поведения
+        const roundedLat = parseFloat(position[0].toFixed(6));
+        const roundedLng = parseFloat(position[1].toFixed(6));
+        const roundedPosition: [number, number] = [roundedLat, roundedLng];
+        
+        // Сохраняем "реальные" координаты в ref
+        realPositionRef.current = roundedPosition;
+        
+        // Устанавливаем точные координаты в state
+        setSelectedPosition(roundedPosition);
+        
+        // Отмечаем, что позиция была установлена вручную
+        setManualPositionSet(true);
+        
+        console.log(`Позиция обновлена: [${roundedLat}, ${roundedLng}]`);
+        
+        // Используем стабильный обработчик
+        handlePositionSelectedStable(roundedLat, roundedLng);
+      } finally {
+        // Снимаем блокировку через небольшую задержку
+        setTimeout(() => {
+          positionUpdateLockRef.current = false;
+        }, 300);
+      }
     },
-    [onPositionSelected]
+    [handlePositionSelectedStable]
   );
 
   // Обработчик выбора области на карте
-  const handleAreaSelect = (area: SelectedArea | null) => {
-    // Обновляем состояние выбранной области
-    setSelectedArea(area);
+  const handleAreaSelect = useCallback((area: SelectedArea | null) => {
+    // Если блокировка активна, пропускаем обработку полностью
+    if (positionUpdateLockRef.current) {
+      console.log("Пропускаем обработку выбора области: блокировка активна");
+      return;
+    }
     
-    console.log('handleAreaSelect called with area:', area);
+    // Блокируем обновления
+    positionUpdateLockRef.current = true;
     
-    if (area && area.regionId) {
-      // Запоминаем выбранную позицию, чтобы предотвратить её сброс
-      const currentPosition = selectedPosition;
+    try {
+      // Обновляем состояние выбранной области
+      setSelectedArea(area);
       
-      // Находим соответствующий регион в опциях
-      const selectedRegion = regionOptions.find(region => region.id === area.regionId);
-      console.log('Found region:', selectedRegion);
-      
-      if (selectedRegion) {
-        // Создаем синтетическое событие для select с числовым значением
+      if (area && area.regionId) {
+        // Находим соответствующий регион в опциях
+        const selectedRegion = regionOptions.find(
+          region => Number(region.id) === Number(area.regionId)
+        );
+        
+        if (selectedRegion) {
+          // Передаем выбранную область в родительский компонент с использованием стабильного обработчика
+          handleAreaSelectedStable(area.id, Number(area.regionId));
+
+          // Обновляем SelectField с помощью синтетического события
+          const syntheticEvent = {
+            target: {
+              name: 'regionId',
+              value: Number(selectedRegion.id),
+              type: 'number'
+            }
+          } as unknown as React.ChangeEvent<HTMLSelectElement>;
+          
+          // Вызываем обработчик изменения select
+          handleSelectChange(syntheticEvent);
+
+          // Обновляем regionName в форме
+          const regionNameEvent = {
+            target: {
+              name: 'regionName',
+              value: selectedRegion.name
+            }
+          } as React.ChangeEvent<HTMLInputElement>;
+          
+          handleChange(regionNameEvent);
+          
+          // Отмечаем поле как затронутое и валидируем
+          handleFieldTouch('regionId');
+          handleFieldValidation('regionId', selectedRegion.id);
+          
+          // Сохраняем текущие координаты, если они были установлены вручную
+          if (manualPositionSet && realPositionRef.current) {
+            // Подождем, пока завершатся все обновления региона
+            setTimeout(() => {
+              if (realPositionRef.current) {
+                handlePositionSelectedStable(realPositionRef.current[0], realPositionRef.current[1]);
+              }
+            }, 100);
+          }
+        } else {
+          console.error(`Регион с ID ${area.regionId} не найден в списке доступных регионов`);
+        }
+      } else if (area === null) {
+        // Используем стабильный обработчик - передаем '' вместо null для regionId
+        handleAreaSelectedStable('', 0);
+        
+        // Обновляем также состояние формы напрямую для избежания null значений
         const syntheticEvent = {
           target: {
             name: 'regionId',
-            value: selectedRegion.id,
-            type: 'number'
+            value: '', // Пустая строка вместо null
+            type: 'select'
           }
         } as unknown as React.ChangeEvent<HTMLSelectElement>;
         
-        console.log('Calling handleSelectChange with:', syntheticEvent);
-        
-        // Устанавливаем флаг, чтобы предотвратить сброс позиции в useEffect
-        const positionUpdateGuard = true;
-        
-        // Вызываем обработчик изменения select
         handleSelectChange(syntheticEvent);
-
-        // Обновляем regionName в форме
-        const regionNameEvent = {
-          target: {
-            name: 'regionName',
-            value: selectedRegion.name
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        console.log('Calling handleChange with:', regionNameEvent);
-        
-        handleChange(regionNameEvent);
-        
-        // Принудительно отмечаем поле как затронутое и валидируем
-        markFieldAsTouched('regionId');
-        validateField('regionId', selectedRegion.id);
       }
+    } finally {
+      // Снимаем блокировку
+      setTimeout(() => {
+        positionUpdateLockRef.current = false;
+      }, 300);
     }
-  };
+  }, [
+    regionOptions,
+    handleSelectChange,
+    handleChange,
+    handleFieldTouch,
+    handleFieldValidation,
+    manualPositionSet,
+    handleAreaSelectedStable,
+    handlePositionSelectedStable
+  ]);
+
+  // Восстановление координат после выбора региона - без избыточных сообщений в консоли
+  useEffect(() => {
+    if (manualPositionSet && realPositionRef.current && selectedArea && formData.regionId) {
+      // Устанавливаем таймер для восстановления координат после изменения региона
+      const timeoutId = setTimeout(() => {
+        if (realPositionRef.current) {
+          handlePositionSelectedStable(realPositionRef.current[0], realPositionRef.current[1]);
+        }
+      }, 150);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [formData.regionId, selectedArea, manualPositionSet, handlePositionSelectedStable]);
+
+  // Проверяем форматы ID регионов при рендеринге компонента
+  useEffect(() => {
+    // Оставляем только один вывод при инициализации компонента
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Географический компонент инициализирован");
+    }
+  }, []);
 
   return (
     <div className='mb-8 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md'>
@@ -598,7 +763,7 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
               errors={errors}
               touchedFields={touchedFields}
               formSubmitted={formSubmitted}
-              markFieldAsTouched={markFieldAsTouched}
+              markFieldAsTouched={handleFieldTouch}
               handleNumberChange={handleNumberChange}
             />
             <NumberField
@@ -608,7 +773,7 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
               errors={errors}
               touchedFields={touchedFields}
               formSubmitted={formSubmitted}
-              markFieldAsTouched={markFieldAsTouched}
+              markFieldAsTouched={handleFieldTouch}
               handleNumberChange={handleNumberChange}
             />
           </div>
@@ -624,12 +789,17 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
             <SelectField
               label='Регион происхождения'
               name='regionId'
-              formData={formData}
+              formData={{
+                ...formData,
+                // Преобразуем null в пустую строку для избежания ошибок React
+                // Используем явное приведение типа для совместимости с интерфейсом
+                regionId: formData.regionId === null ? '' : formData.regionId
+              } as any}
               options={regionOptions}
               errors={errors}
               touchedFields={touchedFields}
               formSubmitted={formSubmitted}
-              markFieldAsTouched={markFieldAsTouched}
+              markFieldAsTouched={handleFieldTouch}
               handleSelectChange={handleSelectChange}
               required
             />
@@ -641,7 +811,7 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
               errors={errors}
               touchedFields={touchedFields}
               formSubmitted={formSubmitted}
-              markFieldAsTouched={markFieldAsTouched}
+              markFieldAsTouched={handleFieldTouch}
               handleChange={handleChange}
             />
           </div>
@@ -684,7 +854,7 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
                   errors={errors}
                   touchedFields={touchedFields}
                   formSubmitted={formSubmitted}
-                  markFieldAsTouched={markFieldAsTouched}
+                  markFieldAsTouched={handleFieldTouch}
                   handleChange={handleChange}
                 />
               </div>
