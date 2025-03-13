@@ -16,8 +16,25 @@ export interface MapEvent {
   payload: any;
 }
 
+// Интерфейс для данных области с API
+export interface RegionData {
+  id: number;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  radius: number | null;
+  boundaryWkt: string;
+  polygonCoordinates: string;
+  strokeColor: string;
+  fillColor: string;
+  fillOpacity: number;
+  sectorType: number;
+  specimensCount: number;
+}
+
 // Экспортируем также тип SpecimenData для использования в других модулях
 export type { SpecimenData };
 
-export { }; // Типы данных карты и растений 
+    export { }; // Типы данных карты и растений 
 

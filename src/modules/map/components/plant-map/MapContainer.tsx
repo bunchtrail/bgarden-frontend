@@ -155,6 +155,31 @@ const MapContainer: React.FC<MapContainerProps> = ({
     iconAnchor: [16, 16],
   });
 
+  // Функция для отрисовки полигонов областей
+  const renderAreas = () => {
+    return areas.map((area) => {
+      // Позиции для полигона
+      const positions = area.points;
+      
+      // Используем стили из API или стандартные, если не указаны
+      const areaPathOptions = {
+        fillColor: area.fillColor || areaStyle.fillColor,
+        color: area.strokeColor || areaStyle.color,
+        weight: areaStyle.weight,
+        opacity: areaStyle.opacity,
+        fillOpacity: area.fillOpacity ?? areaStyle.fillOpacity,
+      };
+      
+      return (
+        <Polygon
+          key={area.id}
+          positions={positions}
+          pathOptions={areaPathOptions}
+        />
+      );
+    });
+  };
+
   return (
     <div className={containerClasses.base}>
       <div className={`${styles.enhancedMapContainer} ${getMapCursorClass()}`}>
@@ -181,7 +206,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
             {/* Обработчик кликов и событий карты */}
             <MapEventHandler />
-
+            
             {/* Используем кластеризованные маркеры для растений */}
             <ClusteredMarkers 
               plants={plants} 
@@ -191,13 +216,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
             />
 
             {/* Рендерим сохраненные области */}
-            {areas.map((area) => (
-              <Polygon
-                key={area.id}
-                positions={area.points}
-                pathOptions={areaStyle}
-              />
-            ))}
+            {renderAreas()}
 
             {/* Рендерим текущую область в режиме рисования */}
             {currentMode === MapMode.AREA && currentAreaPoints.length > 0 && (

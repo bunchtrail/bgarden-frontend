@@ -8,7 +8,16 @@ import React, {
   useState,
 } from 'react';
 import { MapData, getActiveMap } from '../services/mapService';
-import { SpecimenData, convertSpecimensToPlants, getAllSpecimens } from '../services/plantService';
+import {
+  SpecimenData,
+  convertSpecimensToPlants,
+  getAllSpecimens,
+} from '../services/plantService';
+import {
+  convertRegionsToAreas,
+  getAllRegions,
+} from '../services/regionService';
+import { RegionData } from '../types/mapTypes';
 
 // Перечисление режимов работы с картой
 export enum MapMode {
@@ -34,6 +43,9 @@ export interface Area {
   name: string;
   points: [number, number][]; // Массив точек, образующих полигон
   description?: string;
+  strokeColor?: string;
+  fillColor?: string;
+  fillOpacity?: number;
 }
 
 // Интерфейс для геопозиции на карте
@@ -98,6 +110,11 @@ interface MapContextType {
   loadPlantsError: string | null;
   loadPlantsFromServer: () => Promise<void>;
   specimensData: SpecimenData[];
+  // Добавляем поля для работы с областями (регионами) с сервера
+  loadingRegions: boolean;
+  loadRegionsError: string | null;
+  loadRegionsFromServer: () => Promise<void>;
+  regionsData: RegionData[];
 }
 
 // Создаем контекст
@@ -121,42 +138,51 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [loadPlantsError, setLoadPlantsError] = useState<string | null>(null);
   const [specimensData, setSpecimensData] = useState<SpecimenData[]>([]);
 
+  // Состояние для областей (регионов) с сервера
+  const [regionsData, setRegionsData] = useState<RegionData[]>([]);
+  const [loadingRegions, setLoadingRegions] = useState<boolean>(false);
+  const [loadRegionsError, setLoadRegionsError] = useState<string | null>(null);
+
   // Настройки кластеризации
-  const [clusteringSettings, setClusteringSettings] = useState<ClusteringSettings>(() => {
-    // Загружаем настройки из localStorage или используем значения по умолчанию
-    const savedSettings = localStorage.getItem('mapClusteringSettings');
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        return { enabled: parsed.enabled };
-      } catch (e) {
-        console.error('Ошибка при загрузке настроек кластеризации:', e);
+  const [clusteringSettings, setClusteringSettings] =
+    useState<ClusteringSettings>(() => {
+      // Загружаем настройки из localStorage или используем значения по умолчанию
+      const savedSettings = localStorage.getItem('mapClusteringSettings');
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings);
+          return { enabled: parsed.enabled };
+        } catch (e) {
+          console.error('Ошибка при загрузке настроек кластеризации:', e);
+        }
       }
-    }
-    
-    // Значения по умолчанию
-    return {
-      enabled: true
-    };
-  });
+
+      // Значения по умолчанию
+      return {
+        enabled: true,
+      };
+    });
 
   // Сохраняем настройки в localStorage при их изменении
   useEffect(() => {
-    localStorage.setItem('mapClusteringSettings', JSON.stringify(clusteringSettings));
+    localStorage.setItem(
+      'mapClusteringSettings',
+      JSON.stringify(clusteringSettings)
+    );
   }, [clusteringSettings]);
 
   // Обновление настроек кластеризации (упрощено до включения/выключения)
   const updateClusteringSettings = (settings: Partial<ClusteringSettings>) => {
-    setClusteringSettings(prev => ({
+    setClusteringSettings((prev) => ({
       ...prev,
-      ...settings
+      ...settings,
     }));
   };
 
   // Включение/выключение кластеризации
   const toggleClustering = () => {
-    setClusteringSettings(prev => ({
-      enabled: !prev.enabled
+    setClusteringSettings((prev) => ({
+      enabled: !prev.enabled,
     }));
   };
 
@@ -204,10 +230,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     try {
       setLoadingPlants(true);
       setLoadPlantsError(null);
-      
+
       const specimens = await getAllSpecimens();
       setSpecimensData(specimens);
-      
+
       // Преобразуем данные с сервера в формат для отображения на карте
       const plantsData = convertSpecimensToPlants(specimens);
       setPlants(plantsData);
@@ -219,10 +245,32 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // Функция для загрузки областей (регионов) с сервера
+  const loadRegionsFromServer = async () => {
+    setLoadingRegions(true);
+    setLoadRegionsError(null);
+    try {
+      const regions = await getAllRegions();
+      setRegionsData(regions);
+
+      // Преобразуем и добавляем области на карту
+      const convertedAreas = convertRegionsToAreas(regions);
+      setAreas(convertedAreas);
+    } catch (error) {
+      console.error('Ошибка при загрузке областей:', error);
+      setLoadRegionsError(
+        'Не удалось загрузить области. Пожалуйста, попробуйте позже.'
+      );
+    } finally {
+      setLoadingRegions(false);
+    }
+  };
+
   // Загружаем карту и растения при монтировании компонента
   useEffect(() => {
     loadMapFromServer();
     loadPlantsFromServer();
+    loadRegionsFromServer(); // Добавляем загрузку областей
   }, []);
 
   // Добавить новое растение
@@ -390,6 +438,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     loadPlantsError,
     loadPlantsFromServer,
     specimensData,
+    // Поля для работы с областями (регионами) с сервера
+    loadingRegions,
+    loadRegionsError,
+    loadRegionsFromServer,
+    regionsData,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
