@@ -33,13 +33,15 @@ export interface MapPlant {
 
 // Интерфейс для области на карте (для передачи в пропсах)
 export interface MapArea {
-  id: string;
+  id: string | number;
   name: string;
   points: [number, number][];
   description?: string;
   strokeColor?: string;
   fillColor?: string;
   fillOpacity?: number;
+  latitude?: number;  // Координата широты центра области
+  longitude?: number; // Координата долготы центра области
 }
 
 // Пропсы для секции географической информации
