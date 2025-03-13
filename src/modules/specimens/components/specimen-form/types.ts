@@ -52,6 +52,7 @@ export interface GeographicInfoSectionProps extends BaseFormSectionProps {
   onPositionSelected?: (latitude: number, longitude: number) => void; // Обработчик выбора позиции на карте
   mapAreas?: MapArea[]; // Области для отображения на карте
   mapPlants?: MapPlant[]; // Растения для отображения на карте
+  onAreaSelected?: (areaId: string, regionId: number) => void; // Обработчик выбора области
 }
 
 // Пропсы для секции экспозиционной информации

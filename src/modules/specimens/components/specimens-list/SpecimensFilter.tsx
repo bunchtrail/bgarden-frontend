@@ -224,7 +224,7 @@ export const SpecimensFilter: React.FC<SpecimensFilterProps> = ({
       {/* Кнопка поиска */}
       <div className='flex justify-end'>
         <button
-          className={`${buttonClasses.base} ${buttonClasses.primary} flex items-center transition-all duration-200 shadow hover:shadow-md`}
+          className={`${buttonClasses.base} ${buttonClasses.primary} flex items-center transition-all duration-200`}
           onClick={handleSearch}
         >
           <SearchIcon className='mr-2' /> Поиск

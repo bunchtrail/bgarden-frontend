@@ -21,7 +21,7 @@ export const SpecimenCard: React.FC<SpecimenCardProps> = ({
 }) => {
   return (
     <div
-      className={`${specimenContainerClasses.card} ${styles.specimenCard} ${styles.fadeIn} bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300`}
+      className={`${specimenContainerClasses.card} ${styles.specimenCard} ${styles.fadeIn} bg-white rounded-lg transition-all duration-300`}
       onClick={onClick}
     >
       <div className='p-5'>

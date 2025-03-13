@@ -165,14 +165,14 @@
             - `SpecimenCard.tsx` (8.6 KB)
           - **specimen-form** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form)`
             - `AdditionalInfoSection.tsx` (6.1 KB)
-            - `BasicInfoSection.tsx` (5.6 KB)
+            - `BasicInfoSection.tsx` (7.7 KB)
             - `ExpositionInfoSection.tsx` (3.7 KB)
-            - `FormFields.tsx` (14.7 KB)
-            - `GeographicInfoSection.tsx` (17.4 KB)
+            - `FormFields.tsx` (14.5 KB)
+            - `GeographicInfoSection.tsx` (26.3 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (31.7 KB)
+            - `SpecimenFormContainer.tsx` (33.4 KB)
             - `Tabs.tsx` (4.0 KB)
-            - `types.ts` (4.3 KB)
+            - `types.ts` (4.4 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`
             - `index.ts` (53.0 B)
             - `SpecimenGallery.tsx` (6.1 KB)
@@ -187,10 +187,10 @@
             - `SpecimensListContainer.tsx` (5.3 KB)
             - `SpecimensPagination.tsx` (5.4 KB)
             - `SpecimensTable.tsx` (10.9 KB)
-          - `specimens.module.css` (7.0 KB)
+          - `specimens.module.css` (6.7 KB)
           - `specimens.module.css.d.ts` (89.0 B)
           - `SpecimensList.ts` (366.0 B)
-          - `styles.ts` (11.7 KB)
+          - `styles.ts` (11.3 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\contexts)`
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\docs)`
           - `styles-guide.md` (15.2 KB)
@@ -228,14 +228,14 @@
       - `HomePage.tsx` (13.6 KB)
       - `MapPage.tsx` (190.0 B)
       - `NotFoundPage.tsx` (458.0 B)
-      - `SpecimensPage.tsx` (14.4 KB)
+      - `SpecimensPage.tsx` (14.3 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services)`
     - `setupTests.ts` (241.0 B)
     - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\styles)`
       - `animations.css` (1.3 KB)
-      - `global-styles.ts` (9.1 KB)
+      - `global-styles.ts` (9.0 KB)
       - `index.ts` (366.0 B)
     - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\types)`
     - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\utils)`

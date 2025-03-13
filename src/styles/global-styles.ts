@@ -39,7 +39,7 @@ export const COLORS = {
 // Tailwind классы для контейнеров - более тонкие тени и скругления в стиле Apple
 export const containerClasses = {
   base: 'rounded-2xl mb-4 p-5 sm:p-6 w-full max-w-full overflow-hidden bg-white shadow-sm',
-  withHover: 'transition-all duration-300 hover:-translate-y-0.5 hover:shadow',
+  withHover: 'transition-all duration-300 hover:shadow',
   withImage: 'relative',
 };
 
@@ -112,7 +112,7 @@ export const layoutClasses = {
 export const animationClasses = {
   fadeIn: 'animate-fadeIn',
   transition: 'transition-all duration-300',
-  hover: 'hover:-translate-y-0.5 hover:shadow',
+  hover: 'hover:shadow',
   springHover: 'transition-transform duration-300 ease-out hover:scale-[1.02]',
 };
 
@@ -144,14 +144,14 @@ export const footerClasses = {
 // Новые классы для карточек в стиле Apple
 export const cardClasses = {
   base: 'bg-white rounded-2xl shadow-sm overflow-hidden border border-[#E5E5EA]',
-  interactive: 'transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md',
+  interactive: 'transition-all duration-300 hover:shadow-md',
   header: 'p-4 border-b border-[#E5E5EA]',
   body: 'p-5',
   footer: 'p-4 bg-[#F5F5F7] border-t border-[#E5E5EA]',
   title: 'font-medium text-lg text-[#1D1D1F]',
   subtitle: 'text-[#86868B] text-sm mt-1',
   // Новые стили для карточек секторов
-  sectorCard: 'bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E5E5EA] h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-0.5',
+  sectorCard: 'bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E5E5EA] h-full flex flex-col transition-all duration-300 hover:shadow-md hover:shadow',
   sectorImage: 'h-40 overflow-hidden',
   sectorImageInner: 'w-full h-full object-cover transition-all duration-500 group-hover:scale-105',
   sectorContent: 'p-5 flex-1 flex flex-col',

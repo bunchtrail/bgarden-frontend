@@ -80,7 +80,7 @@ export const SpecimensPagination: React.FC<SpecimensPaginationProps> = ({
             </label>
             <select
               id='rowsPerPage'
-              className='border border-gray-300 rounded-md text-sm py-1 px-2 bg-white focus:border-blue-500 focus:ring-blue-500 shadow-sm'
+              className='border border-gray-300 rounded-md text-sm py-1 px-2 bg-white focus:border-blue-500 focus:ring-blue-500'
               value={rowsPerPage}
               onChange={handleRowsPerPageChange}
             >

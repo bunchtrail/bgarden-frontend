@@ -33,7 +33,7 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
           </div>
         </div>
 
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 hover:border-purple-300'>
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-purple-300'>
           <h4 className='font-medium text-gray-700 mb-2'>
             Таксономические сведения
           </h4>
@@ -60,7 +60,7 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
           />
         </div>
 
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 hover:border-purple-300'>
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-purple-300'>
           <h4 className='font-medium text-gray-700 mb-2'>
             Биологические сведения
           </h4>
@@ -113,7 +113,7 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
           />
         </div>
 
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 hover:border-purple-300'>
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-purple-300'>
           <h4 className='font-medium text-gray-700 mb-2'>
             Селекционные сведения
           </h4>
@@ -140,7 +140,7 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
           />
         </div>
 
-        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 hover:border-purple-300'>
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-purple-300'>
           <h4 className='font-medium text-gray-700 mb-2'>
             Служебная информация
           </h4>

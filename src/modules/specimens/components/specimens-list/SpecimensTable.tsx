@@ -253,14 +253,14 @@ export const SpecimensTable: React.FC<SpecimensTableProps> = ({
                 </td>
                 <td className={tableCellClasses('text-center')}>
                   <button
-                    className={`${buttonClasses.base} ${buttonClasses.secondary} mr-2 p-1 shadow-sm hover:shadow transition-all duration-200`}
+                    className={`${buttonClasses.base} ${buttonClasses.secondary} mr-2 p-1 transition-all duration-200`}
                     onClick={() => onViewSpecimen(specimen.id)}
                     title='Просмотр'
                   >
                     <VisibilityIcon />
                   </button>
                   <button
-                    className={`${buttonClasses.base} ${buttonClasses.secondary} p-1 shadow-sm hover:shadow transition-all duration-200`}
+                    className={`${buttonClasses.base} ${buttonClasses.secondary} p-1 transition-all duration-200`}
                     onClick={() => onEditSpecimen(specimen.id)}
                     title='Редактировать'
                   >

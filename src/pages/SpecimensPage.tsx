@@ -37,7 +37,7 @@ const TabPanel = (props: TabPanelProps) => {
       hidden={value !== index}
       id={`specimens-tabpanel-${index}`}
       aria-labelledby={`specimens-tab-${index}`}
-      className={`${styles.fadeIn} ${value === index ? 'block' : 'hidden'}`}
+      className={`${value === index ? 'block' : 'hidden'}`}
       {...other}
     >
       {value === index && <div className='p-0'>{children}</div>}
@@ -272,7 +272,7 @@ export const SpecimensPage: React.FC = () => {
   };
 
   return (
-    <div className={`${containerClasses.page} ${styles.fadeIn}`}>
+    <div className={`${containerClasses.page}`}>
       <h1 className={headingClasses.page}>{getSectionTitle()}</h1>
 
       {/* Панель ошибок */}
@@ -309,7 +309,7 @@ export const SpecimensPage: React.FC = () => {
         {/* Правая колонка с основным содержимым */}
         <div className='md:col-span-3'>
           <div
-            className={`${styles.paperContainer} rounded-lg shadow-md overflow-hidden bg-white`}
+            className={`${styles.paperContainer} rounded-lg overflow-hidden bg-white`}
           >
             <div className='border-b border-gray-200'>
               <div className={tabClasses.base}>
@@ -366,7 +366,7 @@ export const SpecimensPage: React.FC = () => {
                     </p>
                     <button
                       onClick={handleAddNew}
-                      className={`mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors ${styles.buttonHover}`}
+                      className={`mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors`}
                     >
                       Добавить новый образец
                     </button>

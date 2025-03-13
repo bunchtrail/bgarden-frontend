@@ -116,7 +116,7 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
     <div className={containerClasses.page}>
       <h2 className={headingClasses.page}>Список образцов растений</h2>
 
-      <div className={`${containerClasses.base} mb-6 animate-fadeIn`}>
+      <div className={`${containerClasses.base} mb-6`}>
         {/* Компонент фильтрации */}
         <SpecimensFilter
           filterParams={filterParams}
@@ -129,7 +129,7 @@ export const SpecimensListContainer: React.FC<SpecimensListContainerProps> = ({
         />
       </div>
 
-      <div className={`${containerClasses.base} animate-fadeIn`}>
+      <div className={`${containerClasses.base}`}>
         {/* Компонент таблицы */}
         <SpecimensTable
           specimens={specimens}

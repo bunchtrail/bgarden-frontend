@@ -31,7 +31,7 @@ export const animationClasses = {
   // Новые плавные анимации для переходов
   smoothTransition: 'transition-all duration-300 ease-in-out',
   smoothScale: 'transition-transform duration-300 hover:scale-[1.01] focus:scale-[1.01]',
-  elevate: 'transition-all duration-300 ease-in-out hover:shadow-md hover:-translate-y-0.5'
+  elevate: 'transition-all duration-300 ease-in-out hover:shadow-md'
 };
 
 // Улучшенные Tailwind классы с использованием глобальных стилей
@@ -41,8 +41,8 @@ export const specimenContainerClasses = {
   card: `${globalContainerClasses.base} ${globalContainerClasses.withHover} bg-white`,
   detail: `${globalContainerClasses.base} bg-white`,
   // Добавляем новые стили для карточек
-  modern: `${globalContainerClasses.base} border-none shadow-lg rounded-2xl overflow-hidden`,
-  glass: 'backdrop-blur-md bg-white/80 border border-white/20 rounded-2xl shadow-xl'
+  modern: `${globalContainerClasses.base} border-none rounded-2xl overflow-hidden`,
+  glass: 'backdrop-blur-md bg-white/80 border border-white/20 rounded-2xl'
 };
 
 export const headingClasses = {
@@ -102,17 +102,17 @@ export const formClasses = {
   ...globalFormClasses,
   control: 'mb-6 w-full flex flex-col sm:flex-row sm:items-start',
   label: 'font-medium text-gray-700 sm:py-2',
-  // Улучшаем стили ввода для более современного вида
-  input: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-blue-300',
-  select: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-blue-300',
-  textarea: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-blue-300',
-  checkbox: 'rounded h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 shadow-sm transition-colors duration-200',
+  // Обновленные стили ввода без эффекта наведения
+  input: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200',
+  select: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200',
+  textarea: 'rounded-lg w-full border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200',
+  checkbox: 'rounded h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200',
   error: 'text-red-600 text-sm mt-1',
-  section: 'bg-white p-5 rounded-lg border border-gray-200 shadow-sm mb-6 transition-all duration-300 hover:shadow-md',
+  section: 'bg-white p-5 rounded-lg border border-gray-200 mb-6 transition-all duration-300',
   sectionTitle: 'text-xl font-semibold mb-4 pb-2 border-b border-gray-200',
   form: 'w-full max-w-4xl mx-auto',
-  // Новые стили для формы
-  fieldGroup: 'mb-5 transition-all duration-300 hover:bg-gray-50/80 rounded-lg p-3',
+  // Обновленные стили для группы полей
+  fieldGroup: 'mb-5 transition-all duration-300 rounded-lg p-3 focus-within:bg-gray-50/80',
   hintText: 'text-sm text-gray-500 mt-1',
   requiredMark: 'text-red-500 ml-1 font-bold',
   validIcon: 'text-green-500 ml-2',
@@ -124,17 +124,17 @@ export const actionsContainerClasses = {
   base: `${layoutClasses.flexWrap} sm:flex-nowrap ${layoutClasses.flexBetween} gap-2 mt-4 w-full`,
   container: 'flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200',
   // Обновляем стили кнопок
-  primaryButton: 'px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 transition-all duration-300 flex items-center shadow-sm hover:shadow',
-  secondaryButton: 'px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 flex items-center shadow-sm',
+  primaryButton: 'px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 transition-all duration-300 flex items-center',
+  secondaryButton: 'px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 flex items-center',
   iconButton: 'p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200',
-  floatingActionButton: 'fixed bottom-5 right-5 p-4 rounded-full shadow-lg bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300'
+  floatingActionButton: 'fixed bottom-5 right-5 p-4 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300'
 };
 
 export const buttonClasses = {
   ...globalButtonClasses,
   outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-2 px-3 rounded-md flex items-center justify-center transition-colors duration-200',
   // Добавляем новые стили кнопок
-  modern: 'px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-full hover:from-blue-700 hover:to-indigo-600 transition-all duration-300 flex items-center shadow-sm hover:shadow',
+  modern: 'px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-full hover:from-blue-700 hover:to-indigo-600 transition-all duration-300 flex items-center',
   subtle: 'px-4 py-2 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-all duration-200',
   link: 'text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200',
   iconText: 'flex items-center gap-2 transition-all duration-200'
@@ -176,14 +176,14 @@ export const dividerClasses = {
 
 export const containerClasses = {
   base: 'w-full flex flex-col',
-  withHover: 'w-full flex flex-col transition-all duration-300 hover:shadow-md',
-  card: 'w-full p-4 rounded-lg shadow-sm bg-white',
-  detail: 'w-full p-4 bg-white rounded-lg shadow-sm',
+  withHover: 'w-full flex flex-col transition-all duration-300',
+  card: 'w-full p-4 rounded-lg bg-white',
+  detail: 'w-full p-4 bg-white rounded-lg',
   page: 'container mx-auto px-4 sm:px-6 mt-4 sm:mt-8 mb-8 max-w-7xl',
   // Новые стили для контейнеров
-  glassCard: 'backdrop-blur-sm bg-white/80 border border-white/20 rounded-xl shadow-lg',
-  neomorphic: 'bg-gray-100 rounded-xl shadow-[5px_5px_15px_#d1d1d1,-5px_-5px_15px_#ffffff]',
-  coloredBorder: 'border-l-4 border-blue-500 bg-white rounded-lg shadow-sm p-4'
+  glassCard: 'backdrop-blur-sm bg-white/80 border border-white/20 rounded-xl',
+  neomorphic: 'bg-gray-100 rounded-xl',
+  coloredBorder: 'border-l-4 border-blue-500 bg-white rounded-lg p-4'
 };
 
 export const buttonGroupClasses = {
@@ -208,7 +208,7 @@ export const specimenCardStyles = {
   latinName: `${textClasses.secondary} italic`,
   statusPill: `${globalChipClasses.base} ${globalChipClasses.warning} absolute top-2 right-2`,
   // Новые стили для карточек образцов
-  modernCard: 'bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1',
+  modernCard: 'bg-white rounded-xl overflow-hidden transition-all duration-300',
   cardBadge: 'absolute top-3 right-3 rounded-full px-2.5 py-0.5 text-xs font-semibold',
   cardOverlay: 'absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent',
   cardContent: 'relative z-10 p-4 text-white',
@@ -226,14 +226,14 @@ export const tabClasses = {
   active: 'text-blue-600 font-medium',
   inactive: 'text-gray-500 hover:text-gray-700 hover:border-gray-300',
   // Модернизированные вкладки
-  container: 'bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 mb-6',
+  container: 'bg-white rounded-lg overflow-hidden border border-gray-200 mb-6',
   modernTabs: 'flex border-b border-gray-200 bg-gray-50',
   modernTab: 'flex-1 py-3 px-4 text-center font-medium transition-colors duration-200 relative',
   modernActive: 'bg-white text-blue-600 border-t-2 border-blue-500 shadow-[0_2px_0_white]',
   modernInactive: 'text-gray-600 hover:bg-gray-100/50',
   pillContainer: 'flex p-1 mb-6 bg-gray-100 rounded-full',
   pillTab: 'flex-1 py-2 px-4 text-center rounded-full transition-colors duration-200',
-  pillActive: 'bg-white text-blue-600 shadow-sm font-medium',
+  pillActive: 'bg-white text-blue-600 font-medium',
   pillInactive: 'text-gray-600 hover:text-gray-800'
 };
 

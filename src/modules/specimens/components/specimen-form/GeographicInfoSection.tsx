@@ -1,7 +1,7 @@
 import L, { Icon } from 'leaflet';
 import { getResourceUrl } from '../../../../config/apiConfig'; 
 import 'leaflet/dist/leaflet.css';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ImageOverlay,
   MapContainer as LeafletMapContainer,
@@ -14,10 +14,24 @@ import {
 import { gridContainerClasses } from '../styles';
 import { NumberField, SelectField, TextField } from './FormFields';
 import { GeographicInfoSectionProps, MapArea, MapPlant } from './types';
+import { headingClasses } from '../styles';
+import { NoteIcon } from '../icons';
 
 // Добавляем стили для полигонов
 const polygonStyle = {
-  cursor: 'crosshair'
+  weight: 2,
+  opacity: 0.8,
+  dashArray: '3',
+};
+
+// Функция для проверки правильности цветов
+const validateColor = (color: any): string => {
+  // Проверяем, является ли цвет валидным
+  if (typeof color === 'string' && (color.startsWith('#') || color.startsWith('rgb'))) {
+    return color;
+  }
+  // Возвращаем цвет по умолчанию
+  return color === 'stroke' ? '#FF5733' : '#FFD700';
 };
 
 // Определяем интерфейс для растения на карте
@@ -33,6 +47,7 @@ interface SelectedArea {
   id: string;
   name: string;
   description?: string;
+  regionId?: number; // ID соответствующего региона
 }
 
 // Определяем интерфейс свойств компонента SimpleMap
@@ -139,13 +154,35 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     // Помечаем событие, что клик произошел на области
     e.isAreaClick = true;
     
-    // Передаем выбранную область через коллбэк
+    console.log('handleAreaClick called with area:', area); // Добавляем логирование
+    
+    // Извлекаем ID региона из ID области (формат: "region-{regionId}")
+    let regionId = undefined;
+    
+    // Проверяем формат id области
+    if (area.id && typeof area.id === 'string') {
+      if (area.id.startsWith('region-')) {
+        regionId = parseInt(area.id.replace('region-', ''));
+      } else if (!isNaN(parseInt(area.id))) {
+        // Если id просто число, пробуем использовать его
+        regionId = parseInt(area.id);
+      }
+    }
+    
+    console.log('Selected area:', area); // Добавляем для отладки
+    console.log('Extracted regionId:', regionId); // Добавляем для отладки
+    
+    // Передаем выбранную область через коллбэк вместе с ID региона
     if (onAreaSelect) {
-      onAreaSelect({
+      const selectedArea = {
         id: area.id,
         name: area.name,
-        description: area.description
-      });
+        description: area.description,
+        regionId // Добавляем ID региона
+      };
+      
+      console.log('Calling onAreaSelect with:', selectedArea); // Добавляем логирование
+      onAreaSelect(selectedArea);
     }
     
     // Устанавливаем позицию маркера непосредственно здесь
@@ -214,22 +251,45 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
               <MapEvents />
 
               {/* Отрисовка областей (полигонов) */}
-              {areas.length > 0 && areas.map((area) => (
-                <Polygon
-                  key={area.id}
-                  positions={area.points}
-                  pathOptions={{
-                    color: area.strokeColor || '#FF5733',
-                    fillColor: area.fillColor || '#FFD700',
-                    fillOpacity: area.fillOpacity || 0.3,
-                    bubblingMouseEvents: true, // Позволяет событиям "пузыриться" наверх к карте
-                    ...polygonStyle
-                  }}
-                  eventHandlers={{
-                    click: (e) => handleAreaClick(area, e)
-                  }}
-                />
-              ))}
+              {areas.length > 0 && areas.map((area) => {
+                // Проверяем и нормализуем цвета
+                const strokeColor = validateColor(area.strokeColor || '#FF5733');
+                const fillColor = validateColor(area.fillColor || '#FFD700');
+                const fillOpacity = typeof area.fillOpacity === 'number' ? area.fillOpacity : 0.3;
+                
+                return (
+                  <Polygon
+                    key={area.id}
+                    positions={area.points}
+                    pathOptions={{
+                      color: strokeColor,
+                      fillColor: fillColor,
+                      fillOpacity: fillOpacity,
+                      bubblingMouseEvents: true, // Позволяет событиям "пузыриться" наверх к карте
+                      ...polygonStyle
+                    }}
+                    eventHandlers={{
+                      click: (e) => handleAreaClick(area, e),
+                      mouseover: (e) => {
+                        const layer = e.target;
+                        layer.setStyle({
+                          weight: 3,
+                          opacity: 1,
+                          fillOpacity: fillOpacity + 0.2
+                        });
+                      },
+                      mouseout: (e) => {
+                        const layer = e.target;
+                        layer.setStyle({
+                          weight: polygonStyle.weight,
+                          opacity: polygonStyle.opacity,
+                          fillOpacity: fillOpacity
+                        });
+                      }
+                    }}
+                  />
+                );
+              })}
 
               {/* Маркеры растений */}
               {filteredPlants.length > 0 && filteredPlants.map((plant) => (
@@ -298,12 +358,73 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
   handleNumberChange,
   mapImageUrl,
   onPositionSelected,
-  mapAreas = [], // Области берутся из пропсов, а не из контекста
-  mapPlants = [], // Растения берутся из пропсов, а не из контекста
+  mapAreas = [],
+  mapPlants = [],
+  onAreaSelected,
 }) => {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showOtherPlants, setShowOtherPlants] = useState(false);
   const [selectedArea, setSelectedArea] = useState<SelectedArea | null>(null);
+
+  // Функция для преобразования MapPlant в PlantMarker
+  const mapPlantToPlantMarker = (plant: MapPlant): PlantMarker => {
+    return {
+      id: plant.id || `plant-${Math.random().toString(36).substr(2, 9)}`,
+      name: plant.name || 'Неизвестное растение',
+      position: plant.position || [0, 0],
+      description: plant.description || '',
+    };
+  };
+
+  // Инициализация selectedArea на основе текущего regionId в formData
+  useEffect(() => {
+    if (formData.regionId && !selectedArea) {
+      // Находим соответствующий регион в опциях
+      const currentRegion = regionOptions.find(region => region.id === formData.regionId);
+      
+      if (currentRegion) {
+        // Находим соответствующую область на карте
+        const matchingArea = mapAreas.find(area => area.id === `region-${currentRegion.id}`);
+        
+        if (matchingArea) {
+          // Устанавливаем выбранную область
+          setSelectedArea({
+            id: matchingArea.id,
+            name: currentRegion.name,
+            description: matchingArea.description,
+            regionId: currentRegion.id
+          });
+          console.log('Initialized selectedArea from formData.regionId:', currentRegion.id);
+        }
+      }
+    }
+  }, [formData.regionId, regionOptions, mapAreas]);
+
+  // Обновляем эффект для реагирования на изменения
+  useEffect(() => {
+    // Проверяем, содержит ли formData значение regionId
+    if (formData.regionId) {
+      console.log('Updating selected area based on formData.regionId:', formData.regionId);
+      
+      // Находим соответствующий регион
+      const currentRegion = regionOptions.find(region => Number(region.id) === Number(formData.regionId));
+      
+      if (currentRegion) {
+        // Находим область на карте
+        const matchingArea = mapAreas.find(area => area.id === `region-${currentRegion.id}`);
+        
+        if (matchingArea && (!selectedArea || selectedArea.regionId !== currentRegion.id)) {
+          // Устанавливаем выбранную область
+          setSelectedArea({
+            id: matchingArea.id,
+            name: currentRegion.name,
+            description: matchingArea.description,
+            regionId: currentRegion.id
+          });
+        }
+      }
+    }
+  }, [formData.regionId, regionOptions, mapAreas, selectedArea]);
 
   // Преобразуем данные о растениях в формат PlantMarker
   const allPlants: PlantMarker[] = mapPlants.map(mapPlantToPlantMarker);
@@ -331,148 +452,228 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = ({
     [onPositionSelected]
   );
 
-  // Обработчик выбора области
-  const handleAreaSelect = useCallback((area: SelectedArea | null) => {
+  // Обработчик выбора области на карте
+  const handleAreaSelect = (area: SelectedArea | null) => {
+    // Обновляем состояние выбранной области
     setSelectedArea(area);
-  }, []);
+    
+    console.log('handleAreaSelect called with area:', area);
+    
+    if (area && area.regionId) {
+      // Находим соответствующий регион в опциях
+      const selectedRegion = regionOptions.find(region => region.id === area.regionId);
+      console.log('Found region:', selectedRegion);
+      
+      if (selectedRegion) {
+        // Создаем синтетическое событие для select с числовым значением
+        const syntheticEvent = {
+          target: {
+            name: 'regionId',
+            value: selectedRegion.id,
+            type: 'number'
+          }
+        } as unknown as React.ChangeEvent<HTMLSelectElement>;
+        
+        console.log('Calling handleSelectChange with:', syntheticEvent);
+        
+        // Вызываем обработчик изменения select
+        handleSelectChange(syntheticEvent);
+
+        // Обновляем regionName в форме
+        const regionNameEvent = {
+          target: {
+            name: 'regionName',
+            value: selectedRegion.name
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        console.log('Calling handleChange with:', regionNameEvent);
+        
+        handleChange(regionNameEvent);
+        
+        // Принудительно отмечаем поле как затронутое и валидируем
+        markFieldAsTouched('regionId');
+        validateField('regionId', selectedRegion.id);
+        
+        // Добавляем небольшую задержку перед обновлением формы
+        setTimeout(() => {
+          // Повторно вызываем handleSelectChange для гарантии обновления
+          handleSelectChange(syntheticEvent);
+        }, 50);
+      }
+    }
+  };
 
   return (
-    <div className='space-y-6'>
-      {/* Переключатель для отображения других растений */}
-      <div className="flex items-center mb-2">
-        <input
-          type="checkbox"
-          id="showOtherPlants"
-          checked={showOtherPlants}
-          onChange={() => setShowOtherPlants(!showOtherPlants)}
-          className="mr-2"
-        />
-        <label htmlFor="showOtherPlants" className="text-sm font-medium">
-          Показать другие растения на карте
-        </label>
-      </div>
+    <div className='mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 animate-slideInRight'>
+      <h3
+        className={`${headingClasses.heading} flex items-center text-xl mb-4 pb-2 border-b border-gray-300`}
+      >
+        <NoteIcon className='w-5 h-5 mr-2 text-green-600' />
+        Географическая информация
+      </h3>
 
-      {/* Компонент карты - перемещен в верхнюю часть */}
-      <div className='mb-4 h-96 border rounded-lg overflow-hidden'>
-        <SimpleMap
-          imageUrl={mapImageUrl || null}
-          readOnly={false}
-          onPositionSelect={handlePositionSelect}
-          onAreaSelect={handleAreaSelect}
-          plants={combinedPlants}
-          areas={mapAreas}
-          showOtherPlants={showOtherPlants}
-          currentPlantId="current"
-        />
-      </div>
-
-      {/* Информация о выбранном регионе - теперь отображается под картой */}
-      {selectedArea && (
-        <div className='mb-6 bg-white p-4 rounded-lg shadow-sm border border-green-100 animate-fadeIn'>
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className='font-bold text-lg text-green-800 mb-2'>{selectedArea.name}</h3>
-              {selectedArea.description && (
-                <p className='text-gray-700 text-sm'>{selectedArea.description}</p>
-              )}
-            </div>
-            <span className='text-xs text-white bg-green-600 px-2 py-1 rounded-full'>
-              Регион №{selectedArea.id}
-            </span>
+      <div className='space-y-4'>
+        <div className='bg-green-50 p-3 rounded-md border border-green-100 mb-4'>
+          <div className='flex items-center text-green-800 text-sm mb-2'>
+            <span className='mr-2'>ⓘ</span>
+            <span>Информация о происхождении и географическом положении образца</span>
           </div>
         </div>
-      )}
-
-      {/* Основные поля */}
-      <div className='space-y-4'>
-        <div className={gridContainerClasses.responsive}>
-          <NumberField
-            label='Широта'
-            name='latitude'
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            handleNumberChange={handleNumberChange}
+        
+        {/* Переключатель для отображения других растений */}
+        <div className="flex items-center mb-2">
+          <input
+            type="checkbox"
+            id="showOtherPlants"
+            checked={showOtherPlants}
+            onChange={() => setShowOtherPlants(!showOtherPlants)}
+            className="mr-2"
           />
-          <NumberField
-            label='Долгота'
-            name='longitude'
-            formData={formData}
-            errors={errors}
-            touchedFields={touchedFields}
-            formSubmitted={formSubmitted}
-            markFieldAsTouched={markFieldAsTouched}
-            handleNumberChange={handleNumberChange}
-          />
+          <label htmlFor="showOtherPlants" className="text-sm font-medium">
+            Показать другие растения на карте
+          </label>
         </div>
 
-        <SelectField
-          label='Регион происхождения'
-          name='regionId'
-          options={regionOptions}
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          handleSelectChange={handleSelectChange}
-        />
-
-        <TextField
-          label='Страна происхождения'
-          name='country'
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={markFieldAsTouched}
-          handleChange={handleChange}
-        />
-      </div>
-
-      {/* Дополнительные поля */}
-      <div className='mt-4 border-t border-gray-200 pt-4'>
-        <button
-          type='button'
-          onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-          className='flex items-center text-blue-600 hover:text-blue-800 mb-4'
-        >
-          <svg
-            className={`w-5 h-5 mr-1 transition-transform ${
-              showAdvancedOptions ? 'rotate-90' : ''
-            }`}
-            fill='currentColor'
-            viewBox='0 0 20 20'
-          >
-            <path
-              fillRule='evenodd'
-              d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-              clipRule='evenodd'
+        {/* Компонент карты - в карточке */}
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
+          <h4 className='font-medium text-gray-700 mb-2'>
+            Расположение на карте
+          </h4>
+          <div className='h-96 border rounded-lg overflow-hidden'>
+            <SimpleMap
+              imageUrl={mapImageUrl || null}
+              readOnly={false}
+              onPositionSelect={handlePositionSelect}
+              onAreaSelect={handleAreaSelect}
+              plants={combinedPlants}
+              areas={mapAreas}
+              showOtherPlants={showOtherPlants}
+              currentPlantId="current"
             />
-          </svg>
-          {showAdvancedOptions
-            ? 'Скрыть дополнительные поля'
-            : 'Показать дополнительные поля'}
-        </button>
+          </div>
+        </div>
 
-        {showAdvancedOptions && (
-          <div className='space-y-4 animate-fadeIn'>
-            <TextField
-              label='Естественный ареал'
-              name='naturalRange'
-              multiline
-              rows={3}
+        {/* Информация о выбранном регионе - теперь отображается в карточке */}
+        {selectedArea && (
+          <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
+            <h4 className='font-medium text-gray-700 mb-2'>
+              Выбранный регион
+            </h4>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className='font-bold text-lg text-green-800 mb-2'>{selectedArea.name}</h3>
+                {selectedArea.description && (
+                  <p className='text-gray-700 text-sm'>{selectedArea.description}</p>
+                )}
+              </div>
+              <span className='text-xs text-white bg-green-600 px-2 py-1 rounded-full'>
+                Регион №{selectedArea.id}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Основные поля */}
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
+          <h4 className='font-medium text-gray-700 mb-2'>
+            Координаты
+          </h4>
+          <div className={gridContainerClasses.responsive}>
+            <NumberField
+              label='Широта'
+              name='latitude'
               formData={formData}
               errors={errors}
               touchedFields={touchedFields}
               formSubmitted={formSubmitted}
               markFieldAsTouched={markFieldAsTouched}
-              handleChange={handleChange}
+              handleNumberChange={handleNumberChange}
+            />
+            <NumberField
+              label='Долгота'
+              name='longitude'
+              formData={formData}
+              errors={errors}
+              touchedFields={touchedFields}
+              formSubmitted={formSubmitted}
+              markFieldAsTouched={markFieldAsTouched}
+              handleNumberChange={handleNumberChange}
             />
           </div>
-        )}
+        </div>
+
+        <div className='p-3 bg-white rounded-md border border-gray-200 transition-all duration-200 focus-within:border-green-200'>
+          <h4 className='font-medium text-gray-700 mb-2'>
+            Место происхождения
+          </h4>
+          <SelectField
+            label='Регион происхождения'
+            name='regionId'
+            formData={formData}
+            options={regionOptions}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            handleSelectChange={handleSelectChange}
+            required
+          />
+
+          <TextField
+            label='Страна происхождения'
+            name='country'
+            formData={formData}
+            errors={errors}
+            touchedFields={touchedFields}
+            formSubmitted={formSubmitted}
+            markFieldAsTouched={markFieldAsTouched}
+            handleChange={handleChange}
+          />
+        </div>
+
+        {/* Дополнительные поля */}
+        <div className='mt-4 border-t border-gray-200 pt-4'>
+          <button
+            type='button'
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className='flex items-center text-blue-600 hover:text-blue-800 mb-4'
+          >
+            <svg
+              className={`w-5 h-5 mr-1 transition-transform ${
+                showAdvancedOptions ? 'rotate-90' : ''
+              }`}
+              fill='currentColor'
+              viewBox='0 0 20 20'
+            >
+              <path
+                fillRule='evenodd'
+                d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+                clipRule='evenodd'
+              />
+            </svg>
+            {showAdvancedOptions
+              ? 'Скрыть дополнительные поля'
+              : 'Показать дополнительные поля'}
+          </button>
+
+          {showAdvancedOptions && (
+            <div className='space-y-4 animate-fadeIn'>
+              <TextField
+                label='Естественный ареал'
+                name='naturalRange'
+                multiline
+                rows={3}
+                formData={formData}
+                errors={errors}
+                touchedFields={touchedFields}
+                formSubmitted={formSubmitted}
+                markFieldAsTouched={markFieldAsTouched}
+                handleChange={handleChange}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -246,6 +246,13 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   const showError = hasError && (isTouched || formSubmitted);
   const isValid = isTouched && !hasError && formData[name];
 
+  // Преобразуем значение в строку для select
+  const selectValue = formData[name] !== undefined && formData[name] !== null 
+    ? String(formData[name]) 
+    : '';
+  
+  console.log(`SelectField ${name} value:`, formData[name], 'converted to:', selectValue);
+
   return (
     <div className={formClasses.fieldGroup}>
       <div className='flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0'>
@@ -262,7 +269,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           <select
             id={name.toString()}
             name={name.toString()}
-            value={formData[name] !== null && formData[name] !== undefined ? formData[name] as number : ''}
+            value={selectValue}
             onChange={handleSelectChange}
             className={`${formClasses.select} ${
               showError
@@ -278,7 +285,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           >
             <option value=''>Выберите {label.toLowerCase()}</option>
             {options.map((option) => (
-              <option key={option.id} value={option.id}>
+              <option key={option.id} value={option.id.toString()}>
                 {option.name}
               </option>
             ))}

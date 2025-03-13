@@ -313,12 +313,15 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
+    console.log('handleSelectChange called with:', { name, value, type: typeof value });
+    
     let updatedData = { ...formData };
     markFieldAsTouched(name);
 
     // Обработка связанных полей при выборе из списка
     if (name === 'familyId') {
       const selectedFamily = familyOptions.find((f) => f.id === Number(value));
+      console.log('Found family:', selectedFamily);
       updatedData = {
         ...updatedData,
         [name]: Number(value),
@@ -328,6 +331,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       const selectedExposition = expositionOptions.find(
         (e) => e.id === Number(value)
       );
+      console.log('Found exposition:', selectedExposition);
       updatedData = {
         ...updatedData,
         [name]: Number(value),
@@ -335,17 +339,21 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       };
     } else if (name === 'regionId') {
       const selectedRegion = regionOptions.find((r) => r.id === Number(value));
+      console.log('Found region:', selectedRegion);
       updatedData = {
         ...updatedData,
         [name]: Number(value),
         regionName: selectedRegion ? selectedRegion.name : '',
       };
+      console.log('Updated formData with regionId:', updatedData.regionId, 'type:', typeof updatedData.regionId);
     } else {
       updatedData = {
         ...updatedData,
         [name]: Number(value),
       };
     }
+
+    console.log('Updating form data:', updatedData);
 
     // Очищаем ошибки для данного поля
     if (errors[name]) {
@@ -400,6 +408,39 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     markFieldAsTouched('longitude');
     
     console.log(`Выбрана позиция: [${latitude}, ${longitude}]`);
+  };
+
+  // Добавляем обработчик выбора области (региона) на карте
+  const handleAreaSelected = (areaId: string, regionId: number) => {
+    console.log('handleAreaSelected called with:', { areaId, regionId });
+    
+    // Если есть ID региона, устанавливаем его в форме
+    if (regionId) {
+      // Находим объект региона по ID
+      const selectedRegion = regionOptions.find(r => r.id === regionId);
+      console.log('Found region:', selectedRegion);
+      
+      if (selectedRegion) {
+        // Обновляем данные формы с новым regionId
+        const updatedData = { 
+          ...formData, 
+          regionId: regionId,
+          regionName: selectedRegion.name || formData.regionName
+        };
+        console.log('Updating form data:', updatedData);
+        
+        // Очищаем ошибки для regionId, если они были
+        const newErrors = { ...errors };
+        if (newErrors.regionId) delete newErrors.regionId;
+        
+        setFormData(updatedData);
+        setErrors(newErrors);
+        
+        // Отмечаем поле как затронутое
+        markFieldAsTouched('regionId');
+        console.log('Form data updated and field marked as touched');
+      }
+    }
   };
 
   const validateField = (name: string, value: any): boolean => {
@@ -630,6 +671,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
                 onPositionSelected={handlePositionSelected}
                 mapAreas={mapAreas}
                 mapPlants={mapPlants}
+                onAreaSelected={handleAreaSelected}
               />
             </div>
           </div>
