@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_13-03-2025.md` (14.1 KB)
+    - `Структура_bgarden-frontend_от_13-03-2025.md` (14.4 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -84,6 +84,9 @@
           - `index.ts` (382.0 B)
           - `MapActions.tsx` (3.2 KB)
           - **MapControlPanel** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\MapControlPanel)`
+            - `DraggablePanel.tsx` (1.4 KB)
+            - `PanelBody.tsx` (622.0 B)
+            - `PanelHeader.tsx` (3.2 KB)
             - **PanelSections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\MapControlPanel\PanelSections)`
           - `MapControlPanel.tsx` (35.0 KB)
           - `MapLegend.tsx` (1.0 KB)
@@ -172,18 +175,20 @@
             - **geographic** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\geographic)`
               - `AdditionalFields.tsx` (2.4 KB)
               - `CoordinatesSection.tsx` (1.7 KB)
+              - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\geographic\hooks)`
               - `index.ts` (470.0 B)
               - `OriginSection.tsx` (2.3 KB)
-              - `PlantsToggle.tsx` (1012.0 B)
+              - `PlantsToggle.tsx` (982.0 B)
               - `README.md` (4.3 KB)
               - `RegionInfo.tsx` (1.1 KB)
               - `SimpleMap.tsx` (18.7 KB)
+              - `types.ts` (1.6 KB)
               - `utils.ts` (3.0 KB)
-            - `GeographicInfoSection.tsx` (17.7 KB)
+            - `GeographicInfoSection.tsx` (8.3 KB)
             - `index.ts` (729.0 B)
             - `SpecimenFormContainer.tsx` (35.2 KB)
             - `Tabs.tsx` (4.0 KB)
-            - `types.ts` (4.6 KB)
+            - `types.ts` (4.7 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`
             - `index.ts` (53.0 B)
             - `SpecimenGallery.tsx` (6.1 KB)

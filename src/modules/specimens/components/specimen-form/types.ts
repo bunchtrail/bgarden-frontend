@@ -80,35 +80,35 @@ export interface TabsProps {
 }
 
 // Пропсы для полей формы
-export interface FormFieldProps {
+export interface FormFieldProps<T = any> {
   label: string;
-  name: keyof SpecimenFormData;
+  name: keyof T;
   required?: boolean;
-  formData: SpecimenFormData;
+  formData: Partial<T>;
   errors: Record<string, string>;
   touchedFields: Record<string, boolean>;
   formSubmitted: boolean;
   markFieldAsTouched: (name: string) => void;
 }
 
-export interface TextFieldProps extends FormFieldProps {
+export interface TextFieldProps extends FormFieldProps<SpecimenFormData> {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   multiline?: boolean;
   rows?: number;
 }
 
-export interface NumberFieldProps extends FormFieldProps {
+export interface NumberFieldProps extends FormFieldProps<SpecimenFormData> {
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   min?: number;
   max?: number;
 }
 
-export interface SelectFieldProps extends FormFieldProps {
+export interface SelectFieldProps extends FormFieldProps<SpecimenFormData> {
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { id: number; name: string }[];
+  options: Array<{ id: number; name: string }>;
 }
 
-export interface CheckboxFieldProps extends FormFieldProps {
+export interface CheckboxFieldProps extends FormFieldProps<SpecimenFormData> {
   handleCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   hint?: string;
 } 
