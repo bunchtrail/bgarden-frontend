@@ -96,61 +96,13 @@ const MapMarker: React.FC<MapMarkerProps> = ({
     [id, updatePlant]
   );
 
-  // Обработчик нажатия на маркер
+  // Обработчик нажатия на маркер - просто вызываем переданный onClick
   const handleMarkerClick = useCallback(() => {
+    // Вызываем оригинальный обработчик для выбора маркера
     onClick();
-    // Убираем автоматический зум
+    
+    // Убираем открытие модального окна здесь, так как это делается в MapContainer
   }, [onClick]);
-
-  // Функция для отображения дополнительной информации о растении
-  const renderSpecimenDetails = () => {
-    if (!specimenData) return null;
-
-    return (
-      <div className={styles.specimenPopup}>
-        <h3 className={styles.specimenTitle}>
-          {specimenData.russianName || 'Растение'}
-        </h3>
-
-        {specimenData.latinName && (
-          <p className={styles.specimenLatinName}>{specimenData.latinName}</p>
-        )}
-
-        <div className={styles.specimenDetails}>
-          {specimenData.inventoryNumber && (
-            <p>
-              <strong>Инв. номер:</strong> {specimenData.inventoryNumber}
-            </p>
-          )}
-
-          {(specimenData.genus || specimenData.species) && (
-            <p>
-              <strong>Род / Вид:</strong> {specimenData.genus}{' '}
-              {specimenData.species}
-            </p>
-          )}
-
-          {specimenData.plantingYear && (
-            <p>
-              <strong>Год посадки:</strong> {specimenData.plantingYear}
-            </p>
-          )}
-
-          {specimenData.conservationStatus && (
-            <p>
-              <strong>Статус:</strong> {specimenData.conservationStatus}
-            </p>
-          )}
-
-          {specimenData.notes && (
-            <p>
-              <strong>Примечания:</strong> {specimenData.notes}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <Marker
@@ -162,9 +114,7 @@ const MapMarker: React.FC<MapMarkerProps> = ({
       }}
       draggable={draggable}
       zIndexOffset={isSelected ? 1000 : 0}
-    >
-      {/* Удаляем Popup, чтобы не отображать всплывающее окно */}
-    </Marker>
+    />
   );
 };
 

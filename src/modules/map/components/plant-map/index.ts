@@ -8,3 +8,4 @@ export { default as PlantAddForm } from './PlantAddForm';
 export { default as PlantDeleteModal } from './PlantDeleteModal';
 export { default as PlantEditForm } from './PlantEditForm';
 export { default as SimpleMapView } from './SimpleMapView';
+export { default as PlantDetailsModal } from './PlantDetailsModal';

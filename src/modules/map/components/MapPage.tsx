@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { cardClasses } from '../../../styles/global-styles';
 import { MapProvider } from '../contexts/MapContext';
+import { ModalProvider } from '../contexts/ModalContext';
 import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
 import MapControlPanel from './MapControlPanel';
-import { MapContainer } from './plant-map';
+import { MapContainer, PlantDetailsModal } from './plant-map';
 
 // Компонент индикатора загрузки
 const LoadingIndicator: React.FC = () => (
@@ -44,19 +45,31 @@ const MapPage: React.FC = () => {
   // Получаем URL изображения с помощью функции-помощника
   const imageUrl = getMapImageUrl(mapData);
 
+  // Функция для рендеринга модальных окон
+  const renderPlantModal = (modalId: string, plantId: string, onClose: () => void) => (
+    <PlantDetailsModal
+      key={modalId}
+      modalId={modalId}
+      plantId={plantId}
+      onClose={onClose}
+    />
+  );
+
   return (
     <div className='max-w-screen-2xl mx-auto h-[calc(100vh-4rem)] pt-6'>
       <MapProvider>
-        {/* Карта занимает всё пространство */}
-        <div className='h-full w-full'>
-          <div className={`${cardClasses.base} p-0 overflow-hidden h-full`}>
-            {isLoading && <LoadingIndicator />}
-            <MapContainer loadingMap={isLoading} imageUrl={imageUrl} />
+        <ModalProvider renderModal={renderPlantModal}>
+          {/* Карта занимает всё пространство */}
+          <div className='h-full w-full'>
+            <div className={`${cardClasses.base} p-0 overflow-hidden h-full`}>
+              {isLoading && <LoadingIndicator />}
+              <MapContainer loadingMap={isLoading} imageUrl={imageUrl} />
+            </div>
           </div>
-        </div>
 
-        {/* Панель управления теперь располагается поверх карты */}
-        <MapControlPanel />
+          {/* Панель управления теперь располагается поверх карты */}
+          <MapControlPanel />
+        </ModalProvider>
       </MapProvider>
     </div>
   );

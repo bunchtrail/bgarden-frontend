@@ -926,4 +926,502 @@
   box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.4);
   animation: pulse 2s infinite;
   z-index: -1;
+}
+
+/* Стили для модального окна с подробной информацией о растении */
+.plantDetailsModal {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 360px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+  opacity: 1;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: slideIn 0.25s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+}
+
+/* Стили для расширенного режима просмотра */
+.plantDetailsModal.expanded {
+  width: 420px;
+  max-height: 85vh;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.plantDetailsModal.minimalist {
+  width: 320px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.plantDetailsModal.minimalist:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.plantDetailsModal:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 3px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.plantDetailsModal.dragging {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.12);
+  opacity: 0.98;
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+}
+
+.plantDetailsModal.closing {
+  animation: slideOut 0.2s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+}
+
+.modalContent {
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  opacity: 1;
+  transform: translateY(0);
+  overflow: hidden;
+  background-color: white;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Улучшенные стили для вкладок */
+.tabsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #E5E5EA;
+  background-color: #F9F9F9;
+}
+
+.tabButton {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  color: #86868B;
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabButton:hover {
+  color: #1D1D1F;
+  background-color: #F2F2F7;
+}
+
+.tabButton.active {
+  color: #0A84FF;
+  font-weight: 600;
+}
+
+.tabButton.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 2px;
+  background-color: #0A84FF;
+  border-radius: 1px;
+}
+
+/* Улучшенные стили для содержимого вкладок */
+.tabContent {
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 320px;
+  transition: max-height 0.25s ease;
+}
+
+.tabContent.expanded {
+  max-height: 500px;
+}
+
+/* Стили для полей данных */
+.dataField {
+  margin-bottom: 8px;
+}
+
+.dataLabel {
+  font-size: 11px;
+  color: #86868B;
+  margin-bottom: 2px;
+}
+
+.dataValue {
+  font-size: 13px;
+  color: #1D1D1F;
+  line-height: 1.4;
+}
+
+.dataValue.empty {
+  color: #AEAEB2;
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Стили для кнопки расширения/сворачивания */
+.expandButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #007AFF;
+  background-color: #F5F5F7;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expandButton:hover {
+  background-color: #E5E5EA;
+  color: #0062CC;
+}
+
+.expandButton:active {
+  transform: scale(0.97);
+}
+
+.expandButton svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+}
+
+.expandButton.expanded svg {
+  transform: rotate(180deg);
+}
+
+/* Класс для предотвращения анимации при первом рендере */
+.noTransition {
+  transition: none !important;
+}
+
+/* Стили для минималистичного дизайна */
+.plantDetailsModal.minimalist {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+.plantDetailsModal.minimalist .plantDetailsHeader {
+  padding: 8px 12px;
+  background-color: #FAFAFA;
+}
+
+.plantDetailsModal.minimalist .plantDetailsCloseButton {
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  background-color: #E5E5EA;
+}
+
+.plantDetailsModal.minimalist:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.plantDetailsModal:hover {
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.15), 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.plantDetailsModal.dragging {
+  opacity: 0.92;
+  transform: scale(1.01);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.plantDetailsModal.minimized {
+  /* Удаляем изменение ширины для обеспечения целостности интерфейса */
+  width: 320px;
+  height: auto;
+  transition: max-height 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.plantDetailsModal.minimized .plantDetailsHeader {
+  border-bottom: none;
+}
+
+.plantDetailsModal.minimized .modalContent {
+  display: none;
+}
+
+/* Когда окно свернуто и минималистично */
+.plantDetailsModal.minimalist.minimized {
+  /* Удаляем изменяющиеся width свойства для сохранения целостности */
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Дополнительные классы для плавных переходов окна */
+.plantDetailsModal.minimizing {
+  animation: minimizeAnimation 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.plantDetailsModal.maximizing {
+  animation: maximizeAnimation 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.plantDetailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E5E5EA;
+  background-color: #F5F5F7;
+  cursor: grab;
+  position: relative;
+  height: 56px; /* Фиксированная высота для стабильности */
+  width: 100%;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.plantDetailsHeader::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Упрощаем указатель в минималистичном режиме */
+.plantDetailsModal.minimalist .plantDetailsHeader::before {
+  width: 36px;
+  height: 3px;
+  top: 6px;
+}
+
+.dragging {
+  cursor: grabbing !important;
+  background-color: #EBEBF0;
+}
+
+.plantDetailsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1D1D1F;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Уменьшаем размер шрифта в заголовке для минималистичного режима */
+.plantDetailsModal.minimalist .plantDetailsTitle {
+  font-size: 13px;
+}
+
+.plantDetailsCloseButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px; /* Увеличенный размер для лучшей доступности */
+  border-radius: 50%;
+  background-color: #E5E5EA;
+  color: #86868B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-left: 4px;
+}
+
+.plantDetailsCloseButton:hover {
+  background-color: #D1D1D6;
+  color: #1D1D1F;
+  transform: scale(1.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.plantDetailsCloseButton:active {
+  transform: scale(0.95);
+  background-color: #C7C7CC;
+}
+
+.plantDetailsModal {
+  animation: slideIn 0.25s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+  transform-origin: top center;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: opacity, transform, max-height;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.plantDetailsModal.minimized {
+  animation: minimizeAnimation 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.plantDetailsModal.closing {
+  animation: slideOut 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.plantDetailsModal:not(.minimized):not(.closing) {
+  animation: maximizeAnimation 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Анимация для смены вкладок */
+.tabFadeIn {
+  animation: tabFadeIn 0.3s ease forwards;
+}
+
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Улучшение анимации для содержимого вкладок */
+.modalTabContent {
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.modalTabContent.entering {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.modalTabContent.exiting {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+
+@keyframes minimizeAnimation {
+  from {
+    max-height: calc(100vh - 20px);
+    opacity: 1;
+  }
+  to {
+    max-height: 56px;
+    opacity: 0.98;
+  }
+}
+
+@keyframes maximizeAnimation {
+  from {
+    max-height: 56px;
+    opacity: 0.98;
+  }
+  to {
+    max-height: calc(100vh - 20px);
+    opacity: 1;
+  }
+}
+
+/* Стили для кнопки сворачивания */
+.plantDetailsMinimizeButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background-color: #F2F2F7;
+  color: #86868B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.plantDetailsMinimizeButton:hover {
+  background-color: #E5E5EA;
+  color: #1D1D1F;
+  transform: scale(1.05);
+}
+
+.plantDetailsMinimizeButton:active {
+  transform: scale(0.95);
+  background-color: #D1D1D6;
+}
+
+/* Улучшение анимации для контента при сворачивании/разворачивании */
+.modalContent {
+  transition: opacity 0.2s ease, max-height 0.25s ease;
+  opacity: 1;
+  max-height: 600px;
+  overflow: hidden;
+  transform-origin: top center;
+  will-change: opacity, max-height;
+}
+
+.minimizing .modalContent,
+.minimized .modalContent {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0.95);
+  transition: opacity 0.18s ease, max-height 0.18s ease, transform 0.18s ease;
+}
+
+.maximizing .modalContent {
+  animation: contentFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top center;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    max-height: 600px;
+    transform: scaleY(1);
+  }
 } 

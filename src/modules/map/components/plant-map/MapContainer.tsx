@@ -2,7 +2,7 @@
 
 import L, { CRS, LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   ImageOverlay,
   MapContainer as LeafletMapContainer,
@@ -22,6 +22,10 @@ import { MapMode } from '../../contexts/MapContext';
 import styles from '../../styles/map.module.css';
 import AreaForm from './AreaForm';
 import ClusteredMarkers from './ClusteredMarkers';
+import MapMarker from './MapMarker';
+import PlantAddForm from './PlantAddForm';
+import PlantEditForm from './PlantEditForm';
+import PlantDeleteModal from './PlantDeleteModal';
 
 // Компонент для отслеживания кликов и взаимодействия с картой
 const MapEventHandler: React.FC = () => {
@@ -102,6 +106,9 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const handlePlantClick = (id: string) => {
     if (currentMode === MapMode.VIEW || currentMode === MapMode.EDIT) {
       setSelectedPlantId(id);
+      
+      // Убираем автоматическое открытие модального окна при клике на маркер
+      // Теперь модальное окно будет открываться только при нажатии кнопки "Подробно"
     }
   };
 

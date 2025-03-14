@@ -95,5 +95,27 @@ export const deleteSpecimen = async (id: number): Promise<boolean> => {
   }
 };
 
+// Функция для получения подробной информации о растении по ID
+export const getSpecimenById = async (id: number): Promise<SpecimenData> => {
+  try {
+    const response = await fetch(`http://localhost:7254/api/Specimen/${id}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'text/plain'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ошибка при получении данных растения: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Ошибка при получении данных растения:', error);
+    throw error;
+  }
+};
+
 export { };
 
