@@ -7,8 +7,9 @@ import {
 import { getAllSpecimens, convertSpecimensToPlants } from '../../../../modules/map/services/plantService';
 import { getAllRegions, convertRegionsToAreas } from '../../../../modules/map/services/regionService';
 import { Specimen, SpecimenFormData } from '../../types';
-import { MessagePanel, MessageType } from '../ErrorPanel';
 import { CancelIcon, SaveIcon } from '../icons';
+import { useNotifications } from '../../../../modules/notifications';
+import { NotificationType } from '../../../../modules/notifications';
 import {
   actionsContainerClasses,
   animationClasses,
@@ -23,7 +24,6 @@ import { GeographicInfoSection } from './GeographicInfoSection';
 import { FormTabs } from './Tabs';
 import { SpecimenFormTab } from './types';
 import { MapArea, MapPlant } from './types';
-import { DraftSaveNotification } from '../../../../components/ui/DraftSaveNotification';
 
 interface SpecimenFormContainerProps {
   initialData?: Specimen;
@@ -94,7 +94,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
   const [isEditMode, setIsEditMode] = useState(!!initialData?.id);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [formMessage, setFormMessage] = useState<{
-    type: MessageType;
+    type: NotificationType;
     text: string;
   } | null>(null);
 
@@ -828,7 +828,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         onSave(formData);
         // Показываем сообщение об успешном сохранении
         setFormMessage({
-          type: MessageType.SUCCESS,
+          type: NotificationType.SUCCESS,
           text: 'Данные успешно сохранены',
         });
         // Очищаем форму если это не режим редактирования
@@ -840,13 +840,13 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         localStorage.removeItem('specimenFormDraft');
       } catch (error) {
         setFormMessage({
-          type: MessageType.ERROR,
+          type: NotificationType.ERROR,
           text: 'Ошибка при сохранении данных',
         });
       }
     } else {
       setFormMessage({
-        type: MessageType.ERROR,
+        type: NotificationType.ERROR,
         text: 'Форма содержит ошибки. Проверьте заполнение полей.',
       });
       // Автоматически переходим к вкладке с ошибками
@@ -1083,20 +1083,16 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
 
   // Проверка, есть ли сохраненный черновик
   useEffect(() => {
-    const savedDraft = localStorage.getItem('specimenFormDraft');
-    if (savedDraft && !initialData) {
+    // Попытка загрузить сохраненный черновик
+    if (!initialData) {
       try {
-        const parsedDraft = JSON.parse(savedDraft);
-        if (
-          window.confirm(
-            'Найден несохраненный черновик формы. Хотите восстановить данные?'
-          )
-        ) {
+        const savedDraft = localStorage.getItem('specimenFormDraft');
+        if (savedDraft) {
+          const parsedDraft = JSON.parse(savedDraft);
+          // Заполняем форму данными из черновика
           setFormData(parsedDraft);
-          setFormMessage({
-            type: MessageType.INFO,
-            text: 'Черновик восстановлен. Вы можете продолжить редактирование.',
-          });
+          // Показываем уведомление о наличии черновика
+          showInfo('Загружен последний сохраненный черновик');
         } else {
           localStorage.removeItem('specimenFormDraft');
         }
@@ -1106,18 +1102,20 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   }, [initialData]);
 
+  // Добавляем использование хука уведомлений
+  const { showSuccess, showError, showInfo, showDraftSaved } = useNotifications();
+
+  // Изменяем обработчик сохранения черновика
+  useEffect(() => {
+    if (isDraftSaved) {
+      showDraftSaved();
+      // Сбрасываем флаг после показа уведомления
+      setTimeout(() => setIsDraftSaved(false), 100);
+    }
+  }, [isDraftSaved, showDraftSaved]);
+
   return (
     <div className={`${containerClasses.glassCard} p-6 max-w-5xl mx-auto`}>
-      {formMessage && (
-        <div className='mb-4'>
-          <MessagePanel
-            message={formMessage.text}
-            type={formMessage.type}
-            onClose={() => setFormMessage(null)}
-          />
-        </div>
-      )}
-
       <h2 className={`${headingClasses.modern} mb-6 text-center`}>
         {isEditMode ? 'Редактирование образца' : 'Добавление нового образца'}
       </h2>
@@ -1190,8 +1188,6 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
           хранилище браузера
         </div>
       </form>
-
-      <DraftSaveNotification isVisible={isDraftSaved} />
     </div>
   );
 };

@@ -3,6 +3,11 @@ import { Footer, Header } from './components/ui';
 import { ProtectedRoute } from './modules/auth/components/ProtectedRoute';
 import { AuthProvider } from './modules/auth/contexts/AuthContext';
 import { UserRole } from './modules/auth/types';
+import { 
+  NotificationProvider, 
+  NotificationContainer, 
+  ConfirmationProvider 
+} from './modules/notifications';
 
 // Страницы
 import LoginPage from './pages/auth/LoginPage';
@@ -25,104 +30,110 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className='flex flex-col min-h-screen bg-gray-50'>
-          <Header />
-          <main className='flex-grow container mx-auto px-4'>
-            <Routes>
-              {/* Публичные маршруты - доступны всем */}
-              <Route path='/' element={<PageWithPadding component={<HomePage />} />} />
-              <Route path='/login' element={<LoginPage />} />
-              <Route path='/register' element={<RegisterPage />} />
+        <NotificationProvider>
+          <ConfirmationProvider>
+            <div className='flex flex-col min-h-screen bg-gray-50'>
+              <Header />
+              <main className='flex-grow container mx-auto px-4'>
+                <Routes>
+                  {/* Публичные маршруты - доступны всем */}
+                  <Route path='/' element={<PageWithPadding component={<HomePage />} />} />
+                  <Route path='/login' element={<LoginPage />} />
+                  <Route path='/register' element={<RegisterPage />} />
 
-              {/* Маршруты только для сотрудников и администраторов */}
-              <Route
-                path='/specimens'
-                element={
-                  <ProtectedRoute
-                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
-                  >
-                    <PageWithPadding component={<SpecimensPage />} />
-                  </ProtectedRoute>
-                }
-              />
+                  {/* Маршруты только для сотрудников и администраторов */}
+                  <Route
+                    path='/specimens'
+                    element={
+                      <ProtectedRoute
+                        requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                      >
+                        <PageWithPadding component={<SpecimensPage />} />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              <Route
-                path='/expositions'
-                element={
-                  <ProtectedRoute
-                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
-                  >
-                    <PageWithPadding component={<ExpositionsPage />} />
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path='/expositions/:id'
-                element={
-                  <ProtectedRoute
-                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
-                  >
-                    <PageWithPadding component={<ExpositionDetailPage />} />
-                  </ProtectedRoute>
-                }
-              />
+                  <Route
+                    path='/expositions'
+                    element={
+                      <ProtectedRoute
+                        requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                      >
+                        <PageWithPadding component={<ExpositionsPage />} />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  <Route
+                    path='/expositions/:id'
+                    element={
+                      <ProtectedRoute
+                        requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                      >
+                        <PageWithPadding component={<ExpositionDetailPage />} />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              {/* Маршрут для карты */}
-              <Route
-                path='/map'
-                element={
-                  <ProtectedRoute
-                    requiredRoles={[UserRole.Administrator, UserRole.Employee]}
-                  >
-                    <PageWithPadding component={<MapPage />} />
-                  </ProtectedRoute>
-                }
-              />
+                  {/* Маршрут для карты */}
+                  <Route
+                    path='/map'
+                    element={
+                      <ProtectedRoute
+                        requiredRoles={[UserRole.Administrator, UserRole.Employee]}
+                      >
+                        <PageWithPadding component={<MapPage />} />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              {/* Защищенные маршруты для всех авторизованных пользователей */}
-              <Route
-                path='/profile'
-                element={
-                  <ProtectedRoute>
-                    <PageWithPadding component={<ProfilePage />} />
-                  </ProtectedRoute>
-                }
-              />
+                  {/* Защищенные маршруты для всех авторизованных пользователей */}
+                  <Route
+                    path='/profile'
+                    element={
+                      <ProtectedRoute>
+                        <PageWithPadding component={<ProfilePage />} />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              {/* Маршруты для администратора */}
-              <Route
-                path='/admin'
-                element={
-                  <ProtectedRoute requiredRoles={UserRole.Administrator}>
-                    <PageWithPadding 
-                      component={
-                        <ErrorPage
-                          title='В разработке'
-                          message='Административная панель находится в разработке'
-                          code={503}
+                  {/* Маршруты для администратора */}
+                  <Route
+                    path='/admin'
+                    element={
+                      <ProtectedRoute requiredRoles={UserRole.Administrator}>
+                        <PageWithPadding 
+                          component={
+                            <ErrorPage
+                              title='В разработке'
+                              message='Административная панель находится в разработке'
+                              code={503}
+                            />
+                          } 
                         />
-                      } 
-                    />
-                  </ProtectedRoute>
-                }
-              />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              {/* Маршрут для ошибок */}
-              <Route 
-                path='/error' 
-                element={<PageWithPadding component={<ErrorPage />} />} 
-              />
+                  {/* Маршрут для ошибок */}
+                  <Route 
+                    path='/error' 
+                    element={<PageWithPadding component={<ErrorPage />} />} 
+                  />
 
-              {/* Страница 404 */}
-              <Route 
-                path='*' 
-                element={<PageWithPadding component={<NotFoundPage />} />} 
-              />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+                  {/* Страница 404 */}
+                  <Route 
+                    path='*' 
+                    element={<PageWithPadding component={<NotFoundPage />} />} 
+                  />
+                </Routes>
+              </main>
+              <Footer />
+              {/* Компонент для отображения уведомлений */}
+              <NotificationContainer />
+            </div>
+          </ConfirmationProvider>
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { expositionService } from '../services';
 import { ExpositionDto, ExpositionFormData } from '../types';
+import { useNotifications } from '../../../modules/notifications';
 
 interface ExpositionFormProps {
   expositionId?: number;
@@ -14,6 +15,7 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
   onCancel,
 }) => {
   const isEditMode = !!expositionId;
+  const { showSuccess, showError } = useNotifications();
 
   const [formData, setFormData] = useState<ExpositionFormData>({
     name: '',
@@ -23,7 +25,6 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExposition = async () => {
@@ -33,15 +34,13 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
           setFormData(data);
         } catch (error) {
           console.error('Ошибка при загрузке данных экспозиции:', error);
-          setApiError(
-            'Не удалось загрузить данные экспозиции. Пожалуйста, попробуйте позже.'
-          );
+          showError('Не удалось загрузить данные экспозиции. Пожалуйста, попробуйте позже.');
         }
       }
     };
 
     fetchExposition();
-  }, [expositionId]);
+  }, [expositionId, showError]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -76,7 +75,6 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
     }
 
     setIsSubmitting(true);
-    setApiError(null);
 
     try {
       let result: ExpositionDto;
@@ -86,16 +84,16 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
           ...formData,
           id: expositionId,
         } as ExpositionDto);
+        showSuccess('Экспозиция успешно обновлена');
       } else {
         result = await expositionService.createExposition(formData);
+        showSuccess('Новая экспозиция успешно создана');
       }
 
       onSuccess(result);
     } catch (error) {
       console.error('Ошибка при сохранении экспозиции:', error);
-      setApiError(
-        'Не удалось сохранить экспозицию. Пожалуйста, проверьте данные и попробуйте снова.'
-      );
+      showError('Не удалось сохранить экспозицию. Пожалуйста, проверьте данные и попробуйте снова.');
     } finally {
       setIsSubmitting(false);
     }
@@ -106,12 +104,6 @@ export const ExpositionForm: React.FC<ExpositionFormProps> = ({
       <h2 className='text-2xl font-bold text-gray-800 mb-6'>
         {isEditMode ? 'Редактирование экспозиции' : 'Создание новой экспозиции'}
       </h2>
-
-      {apiError && (
-        <div className='p-4 mb-4 bg-red-50 border border-red-200 rounded-md'>
-          <p className='text-red-700'>{apiError}</p>
-        </div>
-      )}
 
       <div>
         <label

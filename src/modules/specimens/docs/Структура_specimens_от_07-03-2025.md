@@ -47,6 +47,8 @@
     - `styles.ts` (5.8 KB)
   - **contexts**
   - **docs**
+    - `styles-guide.md` (15.2 KB)
+    - `план-оптимизации-рендеринга.md` (4.5 KB)
     - `Структура_specimens_от_07-03-2025.md` (2.2 KB)
   - **hooks**
     - `index.ts` (152.0 B)
@@ -55,7 +57,7 @@
     - `useSpecimenPagination.ts` (2.9 KB)
     - `useSpecimens.ts` (7.7 KB)
   - `index.ts` (654.0 B)
-  - `README.md` (2.8 KB)
+  - `README.md` (4.6 KB)
   - **services**
     - `biometryService.ts` (2.9 KB)
     - `expositionService.ts` (2.8 KB)

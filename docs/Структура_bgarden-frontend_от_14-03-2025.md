@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_14-03-2025.md` (14.4 KB)
+    - `Структура_bgarden-frontend_от_14-03-2025.md` (15.7 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -13,25 +13,28 @@
   - **public** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public)`
     - `favicon.ico` (3.8 KB)
     - **images** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images)`
+      - **backgrounds** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images\backgrounds)`
+      - **features** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images\features)`
       - `logo.jpg` (263.3 KB)
       - **maps** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images\maps)`
         - `README.md` (1.4 KB)
       - `placeholder-info.txt` (588.0 B)
+      - **sectors** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\public\images\sectors)`
+        - `dendrology.jpg` (1.8 MB)
+        - `flora.jpg` (306.4 KB)
+        - `flowering.jpg` (95.1 KB)
     - `index.html` (1.7 KB)
-    - `logo192.png` (5.2 KB)
-    - `logo512.png` (9.4 KB)
-    - `manifest.json` (492.0 B)
-    - `robots.txt` (67.0 B)
   - `README.md` (5.6 KB)
   - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src)`
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (4.8 KB)
+    - `App.tsx` (5.5 KB)
     - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components)`
+      - `AbstractPattern.tsx` (7.7 KB)
       - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
       - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\icons)`
       - `Navbar.tsx` (5.1 KB)
-      - `SectorCard.tsx` (1.7 KB)
+      - `SectorCard.tsx` (3.0 KB)
       - `SectorSelector.tsx` (2.2 KB)
       - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\ui)`
         - `Chip.tsx` (839.0 B)
@@ -51,7 +54,7 @@
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\components)`
           - `ProtectedRoute.tsx` (1.7 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\contexts)`
-          - `AuthContext.tsx` (6.9 KB)
+          - `AuthContext.tsx` (7.4 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\docs)`
           - `styles-guide.md` (8.5 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\hooks)`
@@ -60,14 +63,14 @@
         - `index.ts` (234.0 B)
         - `README.md` (2.9 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\services)`
-          - `authService.ts` (6.2 KB)
+          - `authService.ts` (6.7 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\auth\types)`
           - `index.ts` (1.7 KB)
       - **expositions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\expositions)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\expositions\components)`
           - `ExpositionCard.tsx` (2.0 KB)
           - `ExpositionForm.tsx` (5.7 KB)
-          - `ExpositionsList.tsx` (4.0 KB)
+          - `ExpositionsList.tsx` (4.4 KB)
           - `index.ts` (413.0 B)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\expositions\docs)`
           - `styles-guide.md` (3.9 KB)
@@ -97,10 +100,10 @@
             - `index.ts` (674.0 B)
             - `MapContainer.tsx` (9.6 KB)
             - `MapMarker.tsx` (4.1 KB)
-            - `PlantAddForm.tsx` (3.5 KB)
+            - `PlantAddForm.tsx` (3.7 KB)
             - `PlantDeleteModal.tsx` (1.4 KB)
             - `PlantDetailsModal.tsx` (33.8 KB)
-            - `PlantEditForm.tsx` (3.1 KB)
+            - `PlantEditForm.tsx` (3.3 KB)
             - `SimpleMapView.tsx` (7.0 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\contexts)`
           - `index.ts` (331.0 B)
@@ -153,6 +156,19 @@
         - `README.md` (3.1 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\navigation\types)`
           - `index.ts` (390.0 B)
+      - **notifications** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\notifications)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\notifications\components)`
+          - `ConfirmationModal.tsx` (5.3 KB)
+          - `Notification.tsx` (4.3 KB)
+          - `NotificationContainer.tsx` (1.3 KB)
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\notifications\contexts)`
+          - `ConfirmationContext.tsx` (2.5 KB)
+          - `NotificationContext.tsx` (2.8 KB)
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\notifications\hooks)`
+          - `useNotifications.ts` (2.0 KB)
+        - `index.ts` (580.0 B)
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\notifications\types)`
+          - `index.ts` (948.0 B)
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components)`
           - `ErrorPanel.tsx` (4.2 KB)
@@ -187,7 +203,7 @@
               - `utils.ts` (1.8 KB)
             - `GeographicInfoSection.tsx` (9.8 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (48.9 KB)
+            - `SpecimenFormContainer.tsx` (49.1 KB)
             - `Tabs.tsx` (4.0 KB)
             - `types.ts` (4.7 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`
@@ -211,8 +227,10 @@
           - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\ui)`
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\contexts)`
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\docs)`
+          - `index.md` (1.8 KB)
           - `styles-guide.md` (15.2 KB)
-          - `Структура_specimens_от_07-03-2025.md` (2.2 KB)
+          - `план-оптимизации-рендеринга.md` (5.8 KB)
+          - `Структура_specimens_от_07-03-2025.md` (2.3 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\hooks)`
           - `index.ts` (152.0 B)
           - `useReferenceLists.ts` (2.3 KB)
@@ -220,7 +238,7 @@
           - `useSpecimenPagination.ts` (2.9 KB)
           - `useSpecimens.ts` (7.7 KB)
         - `index.ts` (654.0 B)
-        - `README.md` (4.6 KB)
+        - `README.md` (6.1 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\services)`
           - `biometryService.ts` (2.8 KB)
           - `expositionService.ts` (2.7 KB)
@@ -238,15 +256,15 @@
     - **pages** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\pages)`
       - **auth** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\pages\auth)`
         - `LoginPage.tsx` (6.6 KB)
-        - `ProfilePage.tsx` (4.2 KB)
+        - `ProfilePage.tsx` (14.4 KB)
         - `RegisterPage.tsx` (12.0 KB)
       - `ErrorPage.tsx` (1.5 KB)
-      - `ExpositionDetailPage.tsx` (5.9 KB)
+      - `ExpositionDetailPage.tsx` (6.2 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (13.6 KB)
+      - `HomePage.tsx` (15.0 KB)
       - `MapPage.tsx` (190.0 B)
       - `NotFoundPage.tsx` (458.0 B)
-      - `SpecimensPage.tsx` (14.3 KB)
+      - `SpecimensPage.tsx` (14.9 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services)`

@@ -18,6 +18,8 @@ import {
   useSpecimens,
 } from '../modules/specimens/hooks';
 import { SectorType, Specimen } from '../modules/specimens/types';
+import { useNotifications } from '../modules/notifications/hooks/useNotifications';
+import { useConfirmation } from '../modules/notifications';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -61,16 +63,18 @@ const a11yProps = (index: number) => {
 export const SpecimensPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
+  
   // Определяем сектор по параметру URL
   const sectorParam = searchParams.get('sector');
   const sectorTypeParam = sectorParam
     ? (Number(sectorParam) as SectorType)
     : SectorType.Dendrology;
-
+  
   // Состояние интерфейса
   const [tabValue, setTabValue] = useState(0);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const { showSuccess, showError } = useNotifications();
+  const { confirm } = useConfirmation();
 
   // Хуки для работы с данными
   const {
@@ -79,8 +83,8 @@ export const SpecimensPage: React.FC = () => {
     setFilteredSpecimens,
     currentSpecimen,
     currentIndex,
-    isLoading: specimenLoading,
-    error: specimenError,
+    isLoading,
+    error,
     createSpecimen,
     updateSpecimen,
     deleteSpecimen,
@@ -89,10 +93,7 @@ export const SpecimensPage: React.FC = () => {
     navigateToPrev,
     navigateToNext,
     navigateToIndex,
-  } = useSpecimens({
-    sectorType: sectorTypeParam,
-    onError: (error) => console.error('Ошибка при работе с образцами:', error),
-  });
+  } = useSpecimens({ sectorType: sectorTypeParam });
 
   // Хук для работы со справочниками
   const {
@@ -117,8 +118,8 @@ export const SpecimensPage: React.FC = () => {
     });
 
   // Общее состояние загрузки и ошибок
-  const isLoading = specimenLoading || referencesLoading;
-  const error = specimenError || referencesError;
+  const isLoadingCombined = isLoading || referencesLoading;
+  const errorCombined = error || referencesError;
 
   // Функция для получения заголовка раздела в зависимости от типа сектора
   const getSectionTitle = () => {
@@ -135,12 +136,18 @@ export const SpecimensPage: React.FC = () => {
   };
 
   // Обработчики событий
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = async (event: React.SyntheticEvent, newValue: number) => {
     if (isAddingNew && newValue === 1) {
-      // Если пытаемся переключиться на список во время добавления, спрашиваем подтверждение
-      if (
-        window.confirm('Вы уверены, что хотите отменить добавление образца?')
-      ) {
+      // Заменяем window.confirm на модальное окно
+      const confirmed = await confirm({
+        title: 'Отмена добавления',
+        message: 'Вы уверены, что хотите отменить добавление образца?',
+        confirmText: 'Да, отменить',
+        cancelText: 'Нет, продолжить',
+        variant: 'warning'
+      });
+      
+      if (confirmed) {
         setIsAddingNew(false);
         setTabValue(newValue);
       }
@@ -202,7 +209,7 @@ export const SpecimensPage: React.FC = () => {
       setTabValue(1); // Переключаемся на список после сохранения
 
       // Показываем сообщение об успешном сохранении
-      alert('Образец успешно сохранен');
+      showSuccess('Образец успешно сохранен');
     } catch (error) {
       console.error('Ошибка при сохранении образца:', error);
     }
@@ -214,13 +221,22 @@ export const SpecimensPage: React.FC = () => {
   };
 
   const handleDeleteSpecimen = async (id: number) => {
-    if (!window.confirm('Вы уверены, что хотите удалить этот образец?')) return;
+    // Заменяем window.confirm на модальное окно
+    const confirmed = await confirm({
+      title: 'Удаление образца',
+      message: 'Вы уверены, что хотите удалить этот образец?',
+      confirmText: 'Да, удалить',
+      cancelText: 'Отмена',
+      variant: 'danger'
+    });
+    
+    if (!confirmed) return;
 
     try {
       const success = await deleteSpecimen(id);
 
       if (success) {
-        alert('Образец успешно удален');
+        showSuccess('Образец успешно удален');
       }
     } catch (error) {
       console.error('Ошибка удаления образца:', error);
@@ -276,7 +292,7 @@ export const SpecimensPage: React.FC = () => {
       <h1 className={headingClasses.page}>{getSectionTitle()}</h1>
 
       {/* Панель ошибок */}
-      <ErrorPanel message={error || ''}  className='mb-4' />
+      <ErrorPanel message={errorCombined || ''}  className='mb-4' />
 
       <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
         {/* Левая колонка с панелью действий */}
@@ -284,7 +300,7 @@ export const SpecimensPage: React.FC = () => {
           <SpecimenActions
             currentIndex={currentIndex}
             totalCount={filteredSpecimens.length}
-            isLoading={isLoading}
+            isLoading={isLoadingCombined}
             onNavigateFirst={navigateToFirst}
             onNavigateLast={navigateToLast}
             onNavigatePrev={navigateToPrev}
@@ -350,7 +366,7 @@ export const SpecimensPage: React.FC = () => {
                       setIsAddingNew(false);
                       setTabValue(1);
                     }}
-                    isLoading={isLoading}
+                    isLoading={isLoadingCombined}
                     familyOptions={familyOptions}
                     expositionOptions={expositionOptions}
                     regionOptions={regionOptions}
@@ -378,7 +394,7 @@ export const SpecimensPage: React.FC = () => {
             <TabPanel value={tabValue} index={1}>
               <SpecimensList
                 specimens={paginatedData}
-                isLoading={isLoading}
+                isLoading={isLoadingCombined}
                 onViewSpecimen={handleViewDetail}
                 onEditSpecimen={(id) => {
                   const specimen = filteredSpecimens.find((s) => s.id === id);

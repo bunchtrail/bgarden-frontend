@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useMapContext } from '../../contexts';
+import { useNotifications } from '../../../../modules/notifications';
 
 interface PlantAddFormProps {
   position?: [number, number]; // Опциональные координаты по умолчанию
@@ -15,6 +16,7 @@ const PlantAddForm: React.FC<PlantAddFormProps> = ({
   onSubmit,
 }) => {
   const { addPlant } = useMapContext();
+  const { showWarning, showSuccess } = useNotifications();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [plantPosition, setPlantPosition] =
@@ -24,7 +26,7 @@ const PlantAddForm: React.FC<PlantAddFormProps> = ({
     e.preventDefault();
 
     if (!name.trim()) {
-      alert('Введите название растения');
+      showWarning('Введите название растения');
       return;
     }
 
@@ -40,6 +42,7 @@ const PlantAddForm: React.FC<PlantAddFormProps> = ({
       });
     }
 
+    showSuccess('Растение успешно добавлено');
     onClose();
   };
 

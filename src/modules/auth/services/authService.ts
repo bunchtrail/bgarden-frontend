@@ -144,8 +144,20 @@ export const authService = {
         }
 
         try {
+            // Устанавливаем таймаут для запроса, чтобы не блокировать UI на долгое время
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
             // Используем эндпоинт User/me для получения данных пользователя
-            const userData = await api.get<UserDto>('/User/me');
+            const userData = await api.get<UserDto>('/User/me', {
+                signal: controller.signal,
+                // Добавляем кеширование запросов
+                headers: {
+                    'Cache-Control': 'max-age=60'
+                }
+            });
+            
+            clearTimeout(timeoutId);
             return userData.data;
         } catch (err) {
             console.error('Ошибка при проверке авторизации:', err);

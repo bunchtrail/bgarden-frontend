@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { expositionService } from '../services';
 import { ExpositionDto } from '../types';
 import { ExpositionCard } from './ExpositionCard';
+import { useNotifications } from '../../../modules/notifications';
+import { Link } from 'react-router-dom';
+import { useConfirmation } from '../../notifications';
 
 interface ExpositionsListProps {
   isAdmin?: boolean;
@@ -18,6 +21,8 @@ export const ExpositionsList: React.FC<ExpositionsListProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
+  const { showError } = useNotifications();
+  const { confirm } = useConfirmation();
 
   useEffect(() => {
     const fetchExpositions = async () => {
@@ -40,18 +45,26 @@ export const ExpositionsList: React.FC<ExpositionsListProps> = ({
   }, []);
 
   const handleDeleteExposition = async (id: number) => {
-    if (window.confirm('Вы уверены, что хотите удалить эту экспозицию?')) {
-      try {
-        const success = await expositionService.deleteExposition(id);
-        if (success) {
-          setExpositions((prev) =>
-            prev.filter((exposition) => exposition.id !== id)
-          );
-        }
-      } catch (err) {
-        console.error('Ошибка при удалении экспозиции:', err);
-        alert('Не удалось удалить экспозицию. Пожалуйста, попробуйте позже.');
+    const confirmed = await confirm({
+      title: 'Удаление экспозиции',
+      message: 'Вы уверены, что хотите удалить эту экспозицию?',
+      confirmText: 'Да, удалить',
+      cancelText: 'Отмена',
+      variant: 'danger'
+    });
+    
+    if (!confirmed) return;
+    
+    try {
+      const success = await expositionService.deleteExposition(id);
+      if (success) {
+        setExpositions((prev) =>
+          prev.filter((exposition) => exposition.id !== id)
+        );
       }
+    } catch (err) {
+      console.error('Ошибка при удалении экспозиции:', err);
+      showError('Не удалось удалить экспозицию. Пожалуйста, попробуйте позже.');
     }
   };
 

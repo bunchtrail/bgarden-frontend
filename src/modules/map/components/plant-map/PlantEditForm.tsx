@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useMapContext } from '../../contexts';
 import type { Plant } from '../../contexts';
+import { useNotifications } from '../../../../modules/notifications';
 
 interface PlantEditFormProps {
   plantId: string;
@@ -11,6 +12,7 @@ interface PlantEditFormProps {
 const PlantEditForm: React.FC<PlantEditFormProps> = ({ plantId, onClose }) => {
   const { plants, updatePlant } = useMapContext();
   const plant = plants.find(p => p.id === plantId);
+  const { showWarning, showSuccess } = useNotifications();
 
   const [name, setName] = useState(plant?.name || '');
   const [description, setDescription] = useState(plant?.description || '');
@@ -24,7 +26,7 @@ const PlantEditForm: React.FC<PlantEditFormProps> = ({ plantId, onClose }) => {
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Введите название растения');
+      showWarning('Введите название растения');
       return;
     }
     
@@ -34,6 +36,7 @@ const PlantEditForm: React.FC<PlantEditFormProps> = ({ plantId, onClose }) => {
       position,
     });
     
+    showSuccess('Растение успешно обновлено');
     onClose();
   };
 

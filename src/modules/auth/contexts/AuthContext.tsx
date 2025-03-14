@@ -30,25 +30,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Проверка авторизации при загрузке
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
       setLoading(true);
       try {
+        // Начинаем проверку авторизации немедленно
+        // Добавляем небольшую задержку перед проверкой, чтобы дать браузеру возможность полностью загрузить данные из localStorage
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
         const userData = await authService.checkAuth();
-        if (userData) {
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
+        
+        if (isMounted) {
+          if (userData) {
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+          }
+          setLoading(false);
         }
       } catch (err) {
-        setIsAuthenticated(false);
-        // Не делаем автоматического перенаправления при ошибке авторизации
-      } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setLoading(false);
+        }
       }
     };
 
     checkAuth();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []); // Выполняется только при монтировании компонента
 
   const clearError = () => setError(null);

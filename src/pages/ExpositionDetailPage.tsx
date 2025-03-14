@@ -3,12 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../modules/auth';
 import { ExpositionDto, expositionService } from '../modules/expositions';
 import { UserRole } from '../modules/specimens/types';
+import { useConfirmation } from '../modules/notifications';
 
 const ExpositionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user && user.role === UserRole.Administrator;
+  const { confirm } = useConfirmation();
 
   const [exposition, setExposition] = useState<ExpositionDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -42,14 +44,17 @@ const ExpositionDetailPage: React.FC = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (
-      !exposition ||
-      !window.confirm(
-        `Вы уверены, что хотите удалить экспозицию "${exposition.name}"?`
-      )
-    ) {
-      return;
-    }
+    if (!exposition) return;
+    
+    const confirmed = await confirm({
+      title: 'Удаление экспозиции',
+      message: `Вы уверены, что хотите удалить экспозицию "${exposition.name}"?`,
+      confirmText: 'Да, удалить',
+      cancelText: 'Отмена',
+      variant: 'danger'
+    });
+    
+    if (!confirmed) return;
 
     try {
       const success = await expositionService.deleteExposition(exposition.id);
