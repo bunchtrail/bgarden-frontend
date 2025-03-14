@@ -12,6 +12,7 @@ import {
   SpecimenData,
   convertSpecimensToPlants,
   getAllSpecimens,
+  deleteSpecimen
 } from '../services/plantService';
 import {
   convertRegionsToAreas,
@@ -37,6 +38,7 @@ export interface Plant {
   name: string;
   position: [number, number]; // [x, y] координаты
   description?: string;
+  latinName?: string; // Добавляем латинское название
 }
 
 // Тип для области на карте
@@ -88,7 +90,7 @@ interface MapContextType {
   plants: Plant[];
   addPlant: (plant: Omit<Plant, 'id'>) => void;
   updatePlant: (id: string, plant: Partial<Omit<Plant, 'id'>>) => void;
-  deletePlant: (id: string) => void;
+  deletePlant: (id: string) => Promise<boolean>;
   selectedPlantId: string | null;
   setSelectedPlantId: (id: string | null) => void;
   // Режимы
@@ -131,6 +133,9 @@ interface MapContextType {
   loadRegionsError: string | null;
   loadRegionsFromServer: () => Promise<void>;
   regionsData: RegionData[];
+  // Добавляем состояние для отслеживания процесса удаления
+  deletingPlant: boolean;
+  deletePlantError: string | null;
 }
 
 // Создаем контекст
@@ -218,6 +223,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedPosition, setSelectedPosition] = useState<GeoPosition | null>(
     null
   );
+
+  // Добавляем состояние для отслеживания процесса удаления
+  const [deletingPlant, setDeletingPlant] = useState<boolean>(false);
+  const [deletePlantError, setDeletePlantError] = useState<string | null>(null);
 
   // Функция для загрузки карты с сервера
   const loadMapFromServer = async () => {
@@ -307,11 +316,36 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
-  // Удалить растение
-  const deletePlant = (id: string) => {
-    setPlants((prevPlants) => prevPlants.filter((plant) => plant.id !== id));
-    if (selectedPlantId === id) {
-      setSelectedPlantId(null);
+  // Обновляем функцию удаления растения для работы с API
+  const deletePlant = async (id: string): Promise<boolean> => {
+    try {
+      setDeletingPlant(true);
+      setDeletePlantError(null);
+      
+      // Извлекаем числовой ID из строки формата "specimen-123"
+      const numericId = parseInt(id.replace('specimen-', ''));
+      
+      if (isNaN(numericId)) {
+        throw new Error('Неверный формат ID растения');
+      }
+      
+      // Отправляем запрос на удаление на сервер
+      await deleteSpecimen(numericId);
+      
+      // Удаляем растение из локального состояния
+      setPlants((prevPlants) => prevPlants.filter((plant) => plant.id !== id));
+      
+      if (selectedPlantId === id) {
+        setSelectedPlantId(null);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Ошибка при удалении растения:', error);
+      setDeletePlantError(error instanceof Error ? error.message : 'Неизвестная ошибка при удалении растения');
+      return false;
+    } finally {
+      setDeletingPlant(false);
     }
   };
 
@@ -484,6 +518,9 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
     loadRegionsError,
     loadRegionsFromServer,
     regionsData,
+    // Добавляем новые свойства в контекст
+    deletingPlant,
+    deletePlantError,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;

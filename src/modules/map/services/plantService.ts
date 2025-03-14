@@ -69,8 +69,30 @@ export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => 
     id: `specimen-${specimen.id}`,
     name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
     position: [specimen.latitude, specimen.longitude] as [number, number],
-    description: `${specimen.latinName || ''} ${specimen.genus || ''} ${specimen.species || ''}`
+    description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
+    latinName: specimen.latinName
   }));
+};
+
+// Функция для удаления растения с сервера по ID
+export const deleteSpecimen = async (id: number): Promise<boolean> => {
+  try {
+    const response = await fetch(`http://localhost:7254/api/Specimen/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'accept': '*/*'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ошибка при удалении растения: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Ошибка при удалении растения:', error);
+    throw error;
+  }
 };
 
 export { };
