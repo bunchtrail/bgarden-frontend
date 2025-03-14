@@ -36,9 +36,9 @@
       - **home** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\home)`
         - `AuthenticatedHomePage.tsx` (1.1 KB)
         - `index.ts` (431.0 B)
-        - `PublicHomePage.tsx` (2.8 KB)
+        - `PublicHomePage.tsx` (4.1 KB)
         - `SectorGrid.tsx` (2.0 KB)
-        - `TimeBasedGreeting.tsx` (8.9 KB)
+        - `TimeBasedGreeting.tsx` (10.7 KB)
         - `UserTools.tsx` (6.1 KB)
       - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\icons)`
       - `Navbar.tsx` (5.1 KB)

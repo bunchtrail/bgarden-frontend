@@ -30,16 +30,79 @@ const ICONS = {
   )
 };
 
+// Массивы с разными вариантами приветствий для каждого времени суток
+const MORNING_GREETINGS = [
+  'Цветущего утра',
+  'Плодотворного утра',
+  'Утро в саду начинается',
+  'Природа пробуждается',
+  'Утренняя роса встречает',
+  'Свежее утро в саду',
+  'Пора опылять идеи'
+];
+
+const DAY_GREETINGS = [
+  'Зелёного дня',
+  'Солнечного дня в саду',
+  'Время процветания',
+  'Полуденный сад ждёт',
+  'Время активного роста',
+  'День полный открытий',
+  'Расцветающего дня'
+];
+
+const EVENING_GREETINGS = [
+  'Время вечерних посадок',
+  'Сад затихает',
+  'Вечерняя прохлада зовёт',
+  'Вечер подводит итоги',
+  'Закатные краски сада',
+  'Время для редких цветов',
+  'Вечер богат на идеи'
+];
+
+const NIGHT_GREETINGS = [
+  'Ночь открывает секреты',
+  'Под лунными лучами',
+  'Время ночных растений',
+  'Ночная смена в саду',
+  'Царство ночных цветов',
+  'Тропический ноктюрн',
+  'Сад под звёздами'
+];
+
+// Функция для получения случайного элемента из массива
+const getRandomGreeting = (greetings: string[]): string => {
+  const randomIndex = Math.floor(Math.random() * greetings.length);
+  return greetings[randomIndex];
+};
+
 export const getTimeBasedGreeting = (): TimeInfo => {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) {
-    return { greeting: 'Доброе утро', textColor: 'text-[#E97451]', icon: ICONS.morning };
+    return { 
+      greeting: getRandomGreeting(MORNING_GREETINGS), 
+      textColor: 'text-[#E97451]', 
+      icon: ICONS.morning 
+    };
   } else if (hour >= 12 && hour < 17) {
-    return { greeting: 'Добрый день', textColor: 'text-[#3882F6]', icon: ICONS.day };
+    return { 
+      greeting: getRandomGreeting(DAY_GREETINGS), 
+      textColor: 'text-[#3882F6]', 
+      icon: ICONS.day 
+    };
   } else if (hour >= 17 && hour < 22) {
-    return { greeting: 'Добрый вечер', textColor: 'text-[#E97451]', icon: ICONS.evening };
+    return { 
+      greeting: getRandomGreeting(EVENING_GREETINGS), 
+      textColor: 'text-[#E97451]', 
+      icon: ICONS.evening 
+    };
   } else {
-    return { greeting: 'Доброй ночи', textColor: 'text-[#6366F1]', icon: ICONS.night };
+    return { 
+      greeting: getRandomGreeting(NIGHT_GREETINGS), 
+      textColor: 'text-[#6366F1]', 
+      icon: ICONS.night 
+    };
   }
 };
 
@@ -122,7 +185,7 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           {userName && (
             <>
               <span 
-                className={`inline-block mx-[0.15em] transition-all duration-500 ease-out transform
+                className={`inline-block mr-[0.15em] transition-all duration-500 ease-out transform
                   ${animationStage >= 2 ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 style={{ 
                   transitionDelay: `${300 + timeInfo.greeting.length * 30 + 50}ms`
