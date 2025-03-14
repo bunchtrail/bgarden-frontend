@@ -5,7 +5,7 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_13-03-2025.md` (14.4 KB)
+    - `Структура_bgarden-frontend_от_14-03-2025.md` (14.4 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -120,7 +120,7 @@
           - `index.ts` (198.0 B)
           - `mapService.ts` (1.3 KB)
           - `plantService.ts` (2.4 KB)
-          - `regionService.ts` (5.2 KB)
+          - `regionService.ts` (5.3 KB)
         - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src)`
           - **modules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src\modules)`
             - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\src\modules\map)`
@@ -177,16 +177,15 @@
               - `CoordinatesSection.tsx` (1.7 KB)
               - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\geographic\hooks)`
               - `index.ts` (470.0 B)
-              - `OriginSection.tsx` (2.3 KB)
+              - `OriginSection.tsx` (10.2 KB)
               - `PlantsToggle.tsx` (982.0 B)
-              - `README.md` (4.3 KB)
               - `RegionInfo.tsx` (1.1 KB)
-              - `SimpleMap.tsx` (18.7 KB)
-              - `types.ts` (1.6 KB)
-              - `utils.ts` (3.0 KB)
-            - `GeographicInfoSection.tsx` (8.3 KB)
+              - `SimpleMap.tsx` (17.6 KB)
+              - `types.ts` (1.8 KB)
+              - `utils.ts` (1.8 KB)
+            - `GeographicInfoSection.tsx` (9.6 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (35.2 KB)
+            - `SpecimenFormContainer.tsx` (39.6 KB)
             - `Tabs.tsx` (4.0 KB)
             - `types.ts` (4.7 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`

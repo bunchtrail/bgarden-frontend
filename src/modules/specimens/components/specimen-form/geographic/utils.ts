@@ -21,44 +21,23 @@ export const mapPlantToPlantMarker = (plant: MapPlant) => ({
 });
 
 // Утилитарная функция для обеспечения выбора региона
-export const ensureRegionSelected = (regionId: string | number) => {
-  // Создаем и хранимся несколько попыток с увеличивающимися задержками
-  const delays = [10, 50, 100, 200, 500];
-  
-  // Использование разных методов для максимальной надежности
-  delays.forEach(delay => {
-    setTimeout(() => {
-      try {
-        // 1. Прямая манипуляция с DOM
-        const selectElement = document.getElementById('regionId') as HTMLSelectElement;
-        if (selectElement) {
-          debugLog(`Попытка #${delay} установить regionId=${regionId}`);
-          
-          // Устанавливаем значение
-          selectElement.value = String(regionId);
-          
-          // Создаем и диспатчим событие change
-          const changeEvent = new Event('change', { bubbles: true });
-          selectElement.dispatchEvent(changeEvent);
-          
-          // Имитируем взаимодействие пользователя для надежности
-          if (delay > 100) { // Только для более поздних попыток
-            selectElement.focus();
-            setTimeout(() => selectElement.blur(), 10);
-          }
-          
-          // Проверка успешности
-          setTimeout(() => {
-            if (selectElement.value !== String(regionId)) {
-              debugLog(`Проверка неудачна, текущее значение: ${selectElement.value}, ожидалось: ${regionId}`);
-            } else {
-              debugLog(`Успешно установлен регион ${regionId} за ${delay}мс`);
-            }
-          }, 20);
-        }
-      } catch (error) {
-        console.error(`Ошибка при установке regionId=${regionId} на задержке ${delay}мс:`, error);
-      }
-    }, delay);
-  });
+export const ensureRegionSelected = (
+  regionId: string | number, 
+  onRegionSelect: (regionId: number) => void
+) => {
+  // Вместо манипуляции DOM просто вызываем переданный callback с regionId
+  try {
+    const numericRegionId = typeof regionId === 'string' ? 
+      parseInt(regionId as string, 10) : 
+      regionId as number;
+    
+    if (!isNaN(numericRegionId)) {
+      debugLog(`Обновление regionId через состояние React: ${numericRegionId}`);
+      onRegionSelect(numericRegionId);
+    } else {
+      debugLog(`Невозможно преобразовать regionId в число: ${regionId}`);
+    }
+  } catch (error) {
+    console.error(`Ошибка при обновлении regionId=${regionId}:`, error);
+  }
 }; 

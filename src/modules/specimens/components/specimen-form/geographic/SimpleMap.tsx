@@ -174,10 +174,7 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
 
   // Обновим обработчик клика на область в SimpleMap компоненте
   const handleAreaClick = (area: MapArea, e: any) => {
-    // Важно: устанавливаем флаг высокого приоритета обработки
-    const highPriorityAreaSelection = true;
-    
-    // Помечаем событие, что клик произошел на области
+    // Важно: пометить событие, что клик произошел на области для избежания повторной обработки
     e.originalEvent._areaClick = true;
     e._areaClick = true;
     
@@ -262,24 +259,8 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
       
       debugLog('Выбрана область с данными:', selectedArea);
       
-      // Сначала устанавливаем регион напрямую через DOM, если возможно
-      if (highPriorityAreaSelection) {
-        try {
-          const selectElement = document.getElementById('regionId') as HTMLSelectElement;
-          if (selectElement) {
-            debugLog('Приоритетная установка regionId:', regionId);
-            selectElement.value = String(regionId);
-            
-            // Создаем и диспатчим нативное событие изменения
-            const changeEvent = new Event('change', { bubbles: true });
-            selectElement.dispatchEvent(changeEvent);
-          }
-        } catch (error) {
-          console.error('Ошибка при приоритетной установке regionId:', error);
-        }
-      }
-      
-      // Затем вызываем обработчик
+      // УДАЛЯЕМ ПРЯМУЮ МАНИПУЛЯЦИЮ DOM И ПОЛАГАЕМСЯ ТОЛЬКО НА REACT-ОБРАБОТЧИК
+      // Вызываем обработчик, который должен обновить состояние React
       onAreaSelect(selectedArea);
     } else {
       debugLog('Не удалось определить regionId или onAreaSelect не предоставлен');
@@ -291,10 +272,6 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
     if (onPositionSelect) {
       onPositionSelect(roundedPosition);
     }
-    
-    // Предотвращаем всплытие события, чтобы избежать двойной обработки
-    e.originalEvent.stopPropagation();
-    L.DomEvent.stop(e); // Более надежный способ остановки события в Leaflet
   };
 
   // Предзагрузка изображения

@@ -24,15 +24,12 @@ export interface CoordinatesSectionProps {
 }
 
 export interface OriginSectionProps {
-  regionId: string | number;
-  country: string;
-  regionIdError?: string;
-  countryError?: string;
-  regionIdTouched?: boolean;
-  countryTouched?: boolean;
+  formData: SpecimenFormData;
+  errors: Record<string, string>;
+  touchedFields: Record<string, boolean>;
   formSubmitted: boolean;
   markFieldAsTouched: (name: string) => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   regionOptions: { id: number; name: string }[];
 }
@@ -45,11 +42,15 @@ export interface SelectedArea {
 }
 
 export interface MapArea {
-  id: string;
+  id: string | number;
   name: string;
+  points: [number, number][];
   description?: string;
-  regionId?: number;
-  coordinates: [number, number][];
+  strokeColor?: string;
+  fillColor?: string;
+  fillOpacity?: number;
+  latitude?: number;  // Координата широты центра области
+  longitude?: number; // Координата долготы центра области
 }
 
 export interface MapPlant {
@@ -58,4 +59,4 @@ export interface MapPlant {
   position: [number, number];
   type?: string;
   status?: string;
-} 
+}

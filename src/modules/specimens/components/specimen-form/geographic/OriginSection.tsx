@@ -1,18 +1,7 @@
-import React from 'react';
-import { SelectField, TextField } from '../FormFields';
+import React, { useCallback, useRef, useEffect } from 'react';
+import { OriginSectionProps } from './types';
 
-interface OriginSectionProps {
-  formData: any;
-  errors: any;
-  touchedFields: any;
-  formSubmitted: boolean;
-  markFieldAsTouched: (fieldName: string) => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  regionOptions: Array<{ id: number; name: string }>;
-}
-
-const OriginSection: React.FC<OriginSectionProps> = ({
+export const OriginSection: React.FC<OriginSectionProps> = ({
   formData,
   errors,
   touchedFields,
@@ -20,47 +9,200 @@ const OriginSection: React.FC<OriginSectionProps> = ({
   markFieldAsTouched,
   handleChange,
   handleSelectChange,
-  regionOptions
+  regionOptions,
 }) => {
-  const handleFieldTouch = (fieldName: string) => {
-    markFieldAsTouched(fieldName);
+  // Флаг для отслеживания первого монтирования
+  const isFirstMount = useRef(true);
+  
+  // Сохраняем ссылку на select элемент, чтобы иметь возможность программно устанавливать его значение
+  const regionSelectRef = useRef<HTMLSelectElement>(null);
+
+  // Используем useRef для отслеживания предыдущего состояния
+  const prevFormDataRef = useRef({
+    regionId: formData.regionId,
+    country: formData.country
+  });
+
+  // Добавляем функцию логирования
+  const logFormState = useCallback((action: string, data: any = null) => {
+    // Проверяем, действительно ли изменились данные
+    const hasChanges = 
+      prevFormDataRef.current.regionId !== formData.regionId ||
+      prevFormDataRef.current.country !== formData.country;
+
+    // Обновляем предыдущее состояние
+    prevFormDataRef.current = {
+      regionId: formData.regionId,
+      country: formData.country
+    };
+
+    // Логируем только если есть изменения или это первая инициализация
+    if (hasChanges || (action === 'Инициализация компонента' && isFirstMount.current) || data) {
+      console.group('🌍 Состояние формы места происхождения');
+      console.log('Действие:', action);
+      console.log('Текущие данные формы:', {
+        regionId: formData.regionId,
+        regionName: formData.regionName,
+        country: formData.country
+      });
+      // Добавляем информацию о выбранном в селекте элементе
+      if (regionSelectRef.current) {
+        console.log('Текущее значение в селекте:', regionSelectRef.current.value);
+        console.log('Опция в селекте:', regionSelectRef.current.options[regionSelectRef.current.selectedIndex]?.text);
+      }
+      if (data) {
+        console.log('Новые данные:', data);
+      }
+      console.log('Ошибки:', {
+        regionId: errors.regionId,
+        country: errors.country
+      });
+      console.log('Затронутые поля:', {
+        regionId: touchedFields.regionId,
+        country: touchedFields.country
+      });
+      console.log('Доступные регионы:', regionOptions.map(r => `${r.id}: ${r.name}`));
+      console.groupEnd();
+    }
+  }, [formData, errors, touchedFields, regionOptions]);
+
+  // Оборачиваем обработчики для добавления логирования
+  const handleRegionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedRegion = regionOptions.find(r => r.id === Number(e.target.value));
+    logFormState('Изменение региона', {
+      name: e.target.name,
+      value: e.target.value,
+      selectedRegion
+    });
+    handleSelectChange(e);
   };
 
+  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    logFormState('Изменение страны', {
+      name: e.target.name,
+      value: e.target.value
+    });
+    handleChange(e);
+  };
+
+  // Логируем только при первом монтировании
+  useEffect(() => {
+    if (isFirstMount.current) {
+      logFormState('Инициализация компонента');
+      isFirstMount.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Пустой массив зависимостей для вызова только при монтировании
+
+  // Отслеживаем изменения formData для логирования после клика на карту
+  useEffect(() => {
+    // Проверяем, что это не первый рендер и есть изменения
+    if (!isFirstMount.current) {
+      const hasChanges = 
+        prevFormDataRef.current.regionId !== formData.regionId ||
+        prevFormDataRef.current.country !== formData.country;
+
+      if (hasChanges) {
+        logFormState('Обновление после клика на карту');
+        
+        // Проверяем, соответствует ли текущее значение селекта значению regionId в formData
+        if (regionSelectRef.current && Number(regionSelectRef.current.value) !== formData.regionId) {
+          console.log('Обнаружено несоответствие значения селекта и formData.regionId');
+          console.log('Значение в formData:', formData.regionId);
+          console.log('Значение в селекте:', regionSelectRef.current.value);
+          
+          // Сбрасываем значение селекта, чтобы React мог его корректно обновить
+          // Это нужно только в случае, если значение селекта не обновилось автоматически
+          if (formData.regionId) {
+            console.log('Устанавливаем значение селекта равным formData.regionId:', formData.regionId);
+            // Поиск активного региона
+            const selectedRegion = regionOptions.find(r => Number(r.id) === Number(formData.regionId));
+            console.log('Найден регион:', selectedRegion);
+          }
+        }
+      }
+    }
+  }, [formData, logFormState, regionOptions]);
+
   return (
-    <div className='p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200'>
-      <h4 className='font-medium text-gray-700 mb-3 flex items-center'>
+    <div className="p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200">
+      <h4 className="font-medium text-gray-700 mb-3 flex items-center">
         <span className="mr-2">🌍</span>
         Место происхождения
       </h4>
       <div className="space-y-4">
-        <SelectField
-          label='Регион происхождения'
-          name='regionId'
-          formData={{
-            ...formData,
-            // Преобразуем null в пустую строку для избежания ошибок React
-            // Используем явное приведение типа для совместимости с интерфейсом
-            regionId: formData.regionId === null ? '' : formData.regionId
-          } as any}
-          options={regionOptions}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={handleFieldTouch}
-          handleSelectChange={handleSelectChange}
-          required
-        />
-
-        <TextField
-          label='Страна происхождения'
-          name='country'
-          formData={formData}
-          errors={errors}
-          touchedFields={touchedFields}
-          formSubmitted={formSubmitted}
-          markFieldAsTouched={handleFieldTouch}
-          handleChange={handleChange}
-        />
+        <div className="mb-5 transition-all duration-300 rounded-lg p-3 focus-within:bg-gray-50/80">
+          <div className="flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0">
+            <label
+              htmlFor="regionId"
+              className="block text-sm font-medium text-gray-700 sm:w-1/3 sm:py-2 transition-colors duration-200"
+            >
+              Регион происхождения
+              <span className="text-red-500 ml-1 font-bold">*</span>
+            </label>
+            <div className="mt-1 sm:mt-0 sm:w-2/3 relative">
+              <select
+                ref={regionSelectRef}
+                id="regionId"
+                name="regionId"
+                className={`rounded-lg w-full border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${
+                  errors.regionId && (touchedFields.regionId || formSubmitted)
+                    ? 'border-red-500 bg-red-50'
+                    : touchedFields.regionId
+                    ? 'border-green-400 ring-1 ring-green-200 bg-green-50'
+                    : 'border-gray-300 bg-white hover:border-blue-300'
+                } transition-all duration-300 ease-in-out pr-10 appearance-none`}
+                value={formData.regionId || ''}
+                onChange={handleRegionChange}
+                onBlur={() => markFieldAsTouched('regionId')}
+                required
+                aria-invalid={!!errors.regionId}
+              >
+                <option value="">Выберите регион происхождения</option>
+                {regionOptions.map((region) => (
+                  <option key={region.id} value={region.id}>
+                    {region.name} ({region.id})
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mb-5 transition-all duration-300 rounded-lg p-3 focus-within:bg-gray-50/80">
+          <div className="flex flex-col sm:flex-row sm:items-start space-y-1 sm:space-y-0">
+            <label
+              htmlFor="country"
+              className="block text-sm font-medium text-gray-700 sm:w-1/3 sm:py-2 transition-colors duration-200"
+            >
+              Страна происхождения
+            </label>
+            <div className="mt-1 sm:mt-0 sm:w-2/3 relative">
+              <input
+                id="country"
+                name="country"
+                type="text"
+                value={formData.country || ''}
+                onChange={handleCountryChange}
+                onBlur={() => markFieldAsTouched('country')}
+                className={`rounded-lg w-full border border-gray-300 px-4 py-2.5 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${
+                  errors.country && (touchedFields.country || formSubmitted)
+                    ? 'border-red-500 bg-red-50'
+                    : touchedFields.country
+                    ? 'border-green-400 ring-1 ring-green-200 bg-green-50'
+                    : 'border-gray-300 bg-white hover:border-blue-300'
+                } transition-all duration-300 ease-in-out transition-transform duration-300 hover:scale-[1.01] focus:scale-[1.01]`}
+                placeholder="Введите страна происхождения"
+                aria-invalid={!!errors.country}
+                
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

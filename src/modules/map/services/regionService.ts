@@ -56,9 +56,9 @@ export const createRegion = async (regionData: Omit<RegionData, 'id' | 'specimen
 // Функция для преобразования координат из строки в массив точек
 const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
   try {
-    // Проверяем, что coordsString не null и не пустая строка
+    // Добавляем проверку на null или undefined
     if (!coordsString) {
-      console.warn('Строка координат пуста или null');
+      console.warn(`Координаты отсутствуют (${coordsString}). Используем координаты по умолчанию.`);
       return getDefaultCoordinates();
     }
     
@@ -69,7 +69,7 @@ const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
     
     // Проверяем, что строка имеет значение 'string' (ошибка тестовых данных)
     if (coordsString === 'string') {
-      console.warn('Получено буквальное значение "string" вместо координат');
+      console.warn(`Получено буквальное значение "string" вместо координат. Используем координаты по умолчанию.`);
       return getDefaultCoordinates();
     }
     

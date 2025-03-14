@@ -53,13 +53,22 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = React
     setSelectedArea(area);
     
     if (area.regionId) {
+      // Находим соответствующий регион в списке доступных регионов
       const selectedRegion = regionOptions.find(
         region => Number(region.id) === Number(area.regionId)
       );
       
-      onAreaSelected?.(String(area.id), Number(area.regionId));
+      // Логируем для диагностики
+      console.log(`Выбрана область с regionId=${area.regionId}, найден регион:`, selectedRegion);
       
-      // Обновляем значения формы
+      // Передаем информацию родительскому компоненту через callback
+      onAreaSelected?.(area);
+      
+      // Вначале отмечаем поле как затронутое и валидируем
+      markFieldAsTouched('regionId');
+      validateField('regionId', area.regionId);
+      
+      // Создаем искусственное событие select для изменения значения regionId через React
       const selectEvent = {
         target: { 
           name: 'regionId', 
@@ -75,11 +84,18 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = React
         }
       } as unknown as ChangeEvent<HTMLInputElement>;
       
+      // Добавляем дополнительное логирование события
+      console.log('Создано событие выбора региона в селекте:', {
+        name: 'regionId', 
+        value: Number(area.regionId),
+        regionName: selectedRegion?.name
+      });
+      
+      // Вызываем обработчики для обновления состояния через React
       handleSelectChange(selectEvent);
       handleChange(inputEvent);
-      
-      markFieldAsTouched('regionId');
-      validateField('regionId', area.regionId);
+    } else {
+      console.log('В выбранной области отсутствует regionId:', area);
     }
   }, [
     selectedArea,

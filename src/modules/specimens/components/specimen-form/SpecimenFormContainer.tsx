@@ -334,14 +334,34 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         expositionName: selectedExposition ? selectedExposition.name : '',
       };
     } else if (name === 'regionId') {
-      const selectedRegion = regionOptions.find((r) => r.id === Number(value));
+      // Преобразуем value в число, если оно было передано как строка
+      const numericValue = typeof value === 'string' ? Number(value) : value;
+      
+      const selectedRegion = regionOptions.find((r) => Number(r.id) === numericValue);
       console.log('Found region:', selectedRegion);
+      
+      // Добавляем проверку, чтобы убедиться, что регион найден
+      if (!selectedRegion) {
+        console.warn(`Регион с ID ${numericValue} не найден. Доступные регионы:`, regionOptions.map(r => `${r.id}: ${r.name}`));
+      }
+      
       updatedData = {
         ...updatedData,
-        [name]: Number(value),
-        regionName: selectedRegion ? selectedRegion.name : '',
+        [name]: numericValue,
+        regionName: selectedRegion ? selectedRegion.name : `Регион ${numericValue}`,
       };
+      
       console.log('Updated formData with regionId:', updatedData.regionId, 'type:', typeof updatedData.regionId);
+      
+      // Добавляем event для форсированного обновления селекта, если необходимо
+      setTimeout(() => {
+        // Находим элемент select для regionId
+        const regionSelect = document.getElementById('regionId') as HTMLSelectElement;
+        if (regionSelect && regionSelect.value !== String(numericValue)) {
+          console.log('Обнаружено несоответствие значения select. Устанавливаем корректное значение:', numericValue);
+          regionSelect.value = String(numericValue);
+        }
+      }, 0);
     } else {
       updatedData = {
         ...updatedData,
@@ -430,40 +450,110 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     console.log('handleAreaSelected called with:', selectedArea);
     
     // Проверяем, что получены правильные данные
-    if (!selectedArea || !selectedArea.regionId) {
-      console.log('Нет данных о регионе, пропускаем обновление');
+    if (!selectedArea) {
+      console.log('Нет данных о выбранной области, пропускаем обновление');
       return;
     }
     
-    const regionId = Number(selectedArea.regionId);
+    // Нормализуем regionId, убедившись, что это число
+    let regionId: number | undefined; // Добавляем явный тип
     
-    // Находим объект региона по ID, для точного сравнения преобразуем оба значения к числу
-    const selectedRegion = regionOptions.find(r => Number(r.id) === regionId);
+    // Проверяем, является ли selectedArea строкой (id области)
+    if (typeof selectedArea === 'string') {
+      // Проверяем, если это строка вида 'region-X'
+      if (selectedArea.startsWith('region-')) {
+        const idMatch = selectedArea.match(/region-(\d+)/);
+        if (idMatch && idMatch[1]) {
+          const parsedId = Number(idMatch[1]);
+          if (!isNaN(parsedId)) {
+            regionId = parsedId;
+          }
+        }
+      } else {
+        // Пробуем преобразовать строку напрямую в число
+        const parsedId = Number(selectedArea);
+        if (!isNaN(parsedId)) {
+          regionId = parsedId;
+        }
+      }
+    } else if (typeof selectedArea === 'object' && selectedArea !== null) {
+      // Обрабатываем случай, когда selectedArea - объект
+      if (selectedArea.regionId !== undefined && selectedArea.regionId !== null) {
+        const parsedId = Number(selectedArea.regionId);
+        if (!isNaN(parsedId)) {
+          regionId = parsedId;
+        }
+      } else if (typeof selectedArea.id === 'string' && selectedArea.id.startsWith('region-')) {
+        // Попытка извлечь regionId из id области
+        const idMatch = selectedArea.id.match(/region-(\d+)/);
+        if (idMatch && idMatch[1]) {
+          const parsedId = Number(idMatch[1]);
+          if (!isNaN(parsedId)) {
+            regionId = parsedId;
+          }
+          console.log(`Извлечен ID региона из ${selectedArea.id}: ${regionId}`);
+        }
+      }
+    }
+    
+    // Проверяем, что regionId определен
+    if (regionId === undefined) {
+      console.error('Невозможно определить ID региона из выбранной области:', selectedArea);
+      return;
+    }
+    
+    // Теперь regionId гарантированно имеет тип number
+    const validRegionId: number = regionId;
+    
+    // Находим объект региона по ID
+    const selectedRegion = regionOptions.find(r => Number(r.id) === validRegionId);
     console.log('Found region:', selectedRegion);
     
     if (selectedRegion) {
       // Используем функциональное обновление для избежания race conditions
       setFormData(prevData => {
-        // Проверяем, действительно ли изменился регион, чтобы избежать лишних рендеров
-        if (prevData.regionId === regionId) {
-          console.log(`Регион не изменился (${regionId}), пропускаем обновление`);
+        // Проверяем, действительно ли изменился регион
+        if (prevData.regionId === validRegionId) {
+          console.log(`Регион не изменился (${validRegionId}), пропускаем обновление`);
           return prevData;
         }
         
-        console.log(`Обновляем regionId в форме: ${regionId} (${selectedRegion.name})`);
+        console.log(`Обновляем regionId в форме на ${validRegionId} (${selectedRegion.name})`);
         
-        // Возвращаем обновленное состояние
-        return { 
+        // Возвращаем обновленное состояние с проверкой на undefined
+        const updatedData = { 
           ...prevData, 
-          regionId: regionId,
+          regionId: validRegionId, // Теперь используем переменную с явным типом number
           regionName: selectedRegion.name || prevData.regionName
         };
+        
+        // Добавляем логирование состояния формы
+        console.log('🌍 Состояние формы места происхождения');
+        console.log('Действие: Выбор области на карте');
+        console.log('Текущие данные формы:', {
+          regionId: updatedData.regionId,
+          regionName: updatedData.regionName,
+          country: updatedData.country
+        });
+        console.log('Ошибки:', {
+          regionId: errors.regionId,
+          country: errors.country
+        });
+        console.log('Затронутые поля:', {
+          regionId: touchedFields.regionId,
+          country: touchedFields.country
+        });
+        
+        return updatedData;
       });
       
       // Очищаем ошибки для regionId, если они были
       setErrors(prevErrors => {
         const newErrors = { ...prevErrors };
-        if (newErrors.regionId) delete newErrors.regionId;
+        if (newErrors.regionId) {
+          console.log('Очищаем ошибку для regionId');
+          delete newErrors.regionId;
+        }
         return newErrors;
       });
       
@@ -471,9 +561,12 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       markFieldAsTouched('regionId');
       
       // Валидируем значение
-      validateField('regionId', regionId);
+      validateField('regionId', validRegionId);
     } else {
-      console.error(`Регион с ID ${regionId} не найден в списке доступных регионов:`, regionOptions);
+      console.error(`Регион с ID ${validRegionId} не найден в списке доступных регионов:`, regionOptions);
+      
+      // Выводим доступные регионы для диагностики
+      console.log('Доступные регионы:', regionOptions.map(r => `${r.id}: ${r.name}`));
     }
   };
 
