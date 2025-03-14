@@ -29,7 +29,7 @@ const navStyles = {
   logo: 'flex-shrink-0 flex items-center',
 
   // Сохраняем размер, но с улучшенным качеством отображения
-  logoImage: 'h-10 w-10 object-contain',
+  logoImage: 'h-10 w-10 object-contain rounded-full',
 
   // Шрифт в стиле Apple - легкий, но четкий
   logoText: 'ml-3 font-medium text-lg tracking-tight',

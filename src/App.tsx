@@ -17,15 +17,20 @@ import NotFoundPage from './pages/NotFoundPage';
 import { SpecimensPage } from './pages/SpecimensPage';
 
 function App() {
+  // Вспомогательная функция для добавления отступов обычным страницам
+  const PageWithPadding: React.FC<{ component: React.ReactNode }> = ({ component }) => {
+    return <div className="py-6">{component}</div>;
+  };
+  
   return (
     <Router>
       <AuthProvider>
         <div className='flex flex-col min-h-screen bg-gray-50'>
           <Header />
-          <main className='flex-grow container mx-auto px-4 py-6'>
+          <main className='flex-grow container mx-auto px-4'>
             <Routes>
               {/* Публичные маршруты - доступны всем */}
-              <Route path='/' element={<HomePage />} />
+              <Route path='/' element={<PageWithPadding component={<HomePage />} />} />
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
 
@@ -36,7 +41,7 @@ function App() {
                   <ProtectedRoute
                     requiredRoles={[UserRole.Administrator, UserRole.Employee]}
                   >
-                    <SpecimensPage />
+                    <PageWithPadding component={<SpecimensPage />} />
                   </ProtectedRoute>
                 }
               />
@@ -47,17 +52,18 @@ function App() {
                   <ProtectedRoute
                     requiredRoles={[UserRole.Administrator, UserRole.Employee]}
                   >
-                    <ExpositionsPage />
+                    <PageWithPadding component={<ExpositionsPage />} />
                   </ProtectedRoute>
                 }
               />
+              
               <Route
                 path='/expositions/:id'
                 element={
                   <ProtectedRoute
                     requiredRoles={[UserRole.Administrator, UserRole.Employee]}
                   >
-                    <ExpositionDetailPage />
+                    <PageWithPadding component={<ExpositionDetailPage />} />
                   </ProtectedRoute>
                 }
               />
@@ -69,7 +75,7 @@ function App() {
                   <ProtectedRoute
                     requiredRoles={[UserRole.Administrator, UserRole.Employee]}
                   >
-                    <MapPage />
+                    <PageWithPadding component={<MapPage />} />
                   </ProtectedRoute>
                 }
               />
@@ -79,7 +85,7 @@ function App() {
                 path='/profile'
                 element={
                   <ProtectedRoute>
-                    <ProfilePage />
+                    <PageWithPadding component={<ProfilePage />} />
                   </ProtectedRoute>
                 }
               />
@@ -89,20 +95,30 @@ function App() {
                 path='/admin'
                 element={
                   <ProtectedRoute requiredRoles={UserRole.Administrator}>
-                    <ErrorPage
-                      title='В разработке'
-                      message='Административная панель находится в разработке'
-                      code={503}
+                    <PageWithPadding 
+                      component={
+                        <ErrorPage
+                          title='В разработке'
+                          message='Административная панель находится в разработке'
+                          code={503}
+                        />
+                      } 
                     />
                   </ProtectedRoute>
                 }
               />
 
               {/* Маршрут для ошибок */}
-              <Route path='/error' element={<ErrorPage />} />
+              <Route 
+                path='/error' 
+                element={<PageWithPadding component={<ErrorPage />} />} 
+              />
 
               {/* Страница 404 */}
-              <Route path='*' element={<NotFoundPage />} />
+              <Route 
+                path='*' 
+                element={<PageWithPadding component={<NotFoundPage />} />} 
+              />
             </Routes>
           </main>
           <Footer />

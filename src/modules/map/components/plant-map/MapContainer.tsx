@@ -10,6 +10,7 @@ import {
   Polygon,
   ZoomControl,
   useMapEvents,
+  AttributionControl,
 } from 'react-leaflet';
 import {
   COLORS,
@@ -207,8 +208,13 @@ const MapContainer: React.FC<MapContainerProps> = ({
             crs={CRS.Simple}
             style={{ height: '100%', width: '100%', minHeight: '85vh' }}
             zoomControl={false}
+            attributionControl={false}
           >
             <ZoomControl position='bottomright' />
+            <AttributionControl 
+              position='bottomright'
+              prefix='<div class="leaflet-control-attribution-custom"><img src="/images/logo.jpg" alt="Ботанический сад" width="16" height="16" style="margin-right: 5px; vertical-align: middle; border-radius: 50%;" /> Ботанический сад</div>'
+            />
             <ImageOverlay bounds={bounds} url={imageUrl} />
 
             {/* Обработчик кликов и событий карты */}

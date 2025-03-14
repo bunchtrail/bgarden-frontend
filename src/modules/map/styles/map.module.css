@@ -405,6 +405,37 @@
   opacity: 0.8;
 }
 
+/* Стили для кастомной атрибуции */
+:global(.leaflet-control-attribution-custom) {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #065f46;
+}
+
+:global(.leaflet-control-attribution-custom img) {
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Позиционирование атрибуции относительно зума */
+:global(.leaflet-bottom.leaflet-right) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+:global(.leaflet-control-zoom) {
+  order: 1;
+  margin-bottom: 5px !important;
+}
+
+:global(.leaflet-control-attribution) {
+  order: 2;
+  margin-top: 0 !important;
+}
+
 /* Маркеры */
 :global(.leaflet-marker-icon) {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));

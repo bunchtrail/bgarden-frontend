@@ -94,7 +94,28 @@ export const OriginSection: React.FC<OriginSectionProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Пустой массив зависимостей для вызова только при монтировании
 
-  // Отслеживаем изменения formData для логирования после клика на карту
+  // Добавляем эффект для гарантированного обновления значения в селекте при каждом рендере
+  useEffect(() => {
+    // Проверяем, что regionId в formData определен и соответствует списку регионов
+    if (formData.regionId !== null && formData.regionId !== undefined && formData.regionId !== 0) {
+      const regionExists = regionOptions.some(r => Number(r.id) === Number(formData.regionId));
+      
+      if (regionExists && regionSelectRef.current) {
+        // Текущее значение в селекте
+        const selectValue = regionSelectRef.current.value === '' ? null : Number(regionSelectRef.current.value);
+        
+        // Если значения различаются, обновляем селект
+        if (selectValue !== formData.regionId) {
+          console.log(`[OriginSection] Принудительная синхронизация селекта с formData.regionId: ${formData.regionId}`);
+          regionSelectRef.current.value = String(formData.regionId);
+        }
+      } else if (!regionExists) {
+        console.warn(`[OriginSection] Регион с ID ${formData.regionId} не найден в списке доступных регионов`);
+      }
+    }
+  });
+  
+  // Обновляем отслеживание изменений formData для более надежного обновления значения селекта
   useEffect(() => {
     // Проверяем, что это не первый рендер и есть изменения
     if (!isFirstMount.current) {
@@ -106,27 +127,50 @@ export const OriginSection: React.FC<OriginSectionProps> = ({
         logFormState('Обновление после клика на карту');
         
         // Проверяем, соответствует ли текущее значение селекта значению regionId в formData
-        if (regionSelectRef.current && formData.regionId !== null && Number(regionSelectRef.current.value) !== formData.regionId) {
-          console.log('Обнаружено несоответствие значения селекта и formData.regionId');
-          console.log('Значение в formData:', formData.regionId);
-          console.log('Значение в селекте:', regionSelectRef.current.value);
+        if (regionSelectRef.current) {
+          const selectValue = regionSelectRef.current.value === '' ? null : Number(regionSelectRef.current.value);
+          const formValue = formData.regionId === null || formData.regionId === undefined || formData.regionId === 0 ? null : formData.regionId;
           
-          // Устанавливаем значение селекта равным formData.regionId
-          if (formData.regionId) {
-            console.log('Устанавливаем значение селекта равным formData.regionId:', formData.regionId);
-            // Поиск активного региона
-            const selectedRegion = regionOptions.find(r => Number(r.id) === Number(formData.regionId));
-            console.log('Найден регион:', selectedRegion);
+          // Проверяем, есть ли доступный регион с таким ID
+          const isValidRegion = formValue !== null && regionOptions.some(r => Number(r.id) === Number(formValue));
+          
+          // Выводим подробную диагностику
+          console.log('Текущие доступные регионы:', regionOptions.map(r => ({ id: r.id, name: r.name })));
+          console.log('Значение regionId существует в списке доступных регионов:', isValidRegion);
+          console.log('Текущее значение в formData.regionId:', formValue, 'тип:', typeof formValue);
+          console.log('Текущее значение в селекте:', selectValue, 'тип:', typeof selectValue);
+          
+          if (selectValue !== formValue && formValue !== null) {
+            console.log('Обнаружено несоответствие значения селекта и formData.regionId');
+            console.log('Значение в formData:', formValue);
+            console.log('Значение в селекте:', selectValue);
             
-            // Программно устанавливаем значение селекта
-            if (regionSelectRef.current) {
-              regionSelectRef.current.value = String(formData.regionId);
+            if (isValidRegion) {
+              // Устанавливаем значение селекта равным formData.regionId
+              console.log('Устанавливаем значение селекта равным formData.regionId:', formValue);
+              // Поиск активного региона
+              const selectedRegion = regionOptions.find(r => Number(r.id) === Number(formValue));
+              console.log('Найден регион:', selectedRegion);
+              
+              // Программно устанавливаем значение селекта с небольшой задержкой
+              setTimeout(() => {
+                if (regionSelectRef.current) {
+                  regionSelectRef.current.value = String(formValue);
+                  console.log('Селект обновлен на значение:', String(formValue));
+                  
+                  // Создаем и запускаем событие change для обновления связанного состояния
+                  const event = new Event('change', { bubbles: true });
+                  regionSelectRef.current.dispatchEvent(event);
+                }
+              }, 10);
+            } else {
+              console.warn(`Невозможно установить значение ${formValue} в селект - такого значения нет в списке`);
             }
           }
         }
         
         // Проверяем кейс, когда regionId сбросился до null, но regionName сохранился
-        if (formData.regionId === null && formData.regionName && regionOptions.length > 0) {
+        if ((formData.regionId === null || formData.regionId === 0) && formData.regionName && regionOptions.length > 0) {
           // Ищем регион по имени
           const regionByName = regionOptions.find(r => r.name === formData.regionName);
           

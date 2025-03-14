@@ -10,6 +10,7 @@ import {
   Marker,
   ZoomControl,
   useMapEvents,
+  AttributionControl,
 } from 'react-leaflet';
 import styles from '../../styles/map.module.css';
 import MapMarker from './MapMarker';
@@ -159,8 +160,13 @@ const SimpleMapView: React.FC<SimpleMapViewProps> = ({
             crs={CRS.Simple}
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
+            attributionControl={false}
           >
             <ZoomControl position='bottomright' />
+            <AttributionControl 
+              position='bottomright'
+              prefix='<div class="leaflet-control-attribution-custom"><img src="/images/logo.jpg" alt="Ботанический сад" width="16" height="16" style="margin-right: 5px; vertical-align: middle; border-radius: 50%;" /> Ботанический сад</div>'
+            />
             <ImageOverlay bounds={bounds} url={imageUrl} />
 
             {/* Обработчик событий карты */}

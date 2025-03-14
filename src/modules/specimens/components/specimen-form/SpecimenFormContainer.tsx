@@ -49,7 +49,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     sectorType: 0,
     latitude: 0,
     longitude: 0,
-    regionId: 1,
+    regionId: 0,
     regionName: '',
     familyId: 1,
     familyName: '',
@@ -198,6 +198,69 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       }
     }
   }, [formData.regionId, formData.regionName, regionOptions]);
+
+  // Добавляем эффект для инициализации regionId при первой загрузке формы
+  useEffect(() => {
+    // Выполняем только один раз при первой загрузке
+    if (!initialData && regionOptions.length > 0) {
+      // Устанавливаем первый доступный регион только если текущее значение не выбрано
+      const isRegionNotSelected = formData.regionId === 0 || formData.regionId === null || formData.regionId === undefined;
+      
+      if (isRegionNotSelected) {
+        console.log('Инициализация формы: установка первого доступного региона.');
+        
+        // Выбираем первый доступный регион
+        const firstRegion = regionOptions[0];
+        setFormData(prev => ({
+          ...prev,
+          regionId: Number(firstRegion.id),
+          regionName: firstRegion.name
+        }));
+        
+        console.log(`Установлен первый доступный регион при инициализации: ${firstRegion.name} (ID: ${firstRegion.id})`);
+      }
+    }
+  }, [initialData, regionOptions.length]); // Зависимость только от regionOptions.length, чтобы выполнить один раз при загрузке списка регионов
+
+  // Добавляем эффект для синхронизации значения в селекте при каждом изменении списка регионов
+  useEffect(() => {
+    // Синхронизация выполняется только если в форме уже есть выбранный регион
+    if (formData.regionId !== 0 && formData.regionId !== null && formData.regionId !== undefined) {
+      const regionExists = regionOptions.some(r => Number(r.id) === Number(formData.regionId));
+      
+      // Если выбранный регион существует в списке, убедимся, что селект отображает правильное значение
+      if (regionExists) {
+        setTimeout(() => {
+          const regionSelect = document.getElementById('regionId') as HTMLSelectElement;
+          if (regionSelect && regionSelect.value !== String(formData.regionId)) {
+            console.log(`[SpecimenFormContainer] Синхронизация селекта regionId со значением ${formData.regionId}`);
+            regionSelect.value = String(formData.regionId);
+            
+            // Создаем событие change для обновления связанного состояния
+            try {
+              const event = new Event('change', { bubbles: true });
+              regionSelect.dispatchEvent(event);
+            } catch (e) {
+              console.error('Ошибка при создании события change:', e);
+            }
+          }
+        }, 100);
+      }
+      // Если выбранного региона нет в списке, но список не пуст, установим первый доступный регион
+      else if (regionOptions.length > 0) {
+        console.log(`Выбранный регион с ID ${formData.regionId} отсутствует в списке доступных регионов. Устанавливаем первый доступный регион.`);
+        
+        const firstRegion = regionOptions[0];
+        setFormData(prev => ({
+          ...prev,
+          regionId: Number(firstRegion.id),
+          regionName: firstRegion.name
+        }));
+        
+        console.log(`Установлен первый доступный регион: ${firstRegion.name} (ID: ${firstRegion.id})`);
+      }
+    }
+  }, [regionOptions, formData.regionId]);
 
   // Загрузка данных карты, растений и областей при монтировании компонента
   useEffect(() => {
@@ -589,69 +652,37 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     
     // Находим объект региона по ID
     const selectedRegion = regionOptions.find(r => Number(r.id) === validRegionId);
-    console.log('Found region:', selectedRegion);
+    console.log('Found region for selected area:', selectedRegion);
     
-    // Используем функциональное обновление для избежания race conditions
-    setFormData(prevData => {
-      // Проверяем, действительно ли изменился регион
-      if (prevData.regionId === validRegionId) {
-        console.log(`Регион не изменился (${validRegionId}), пропускаем обновление`);
-        return prevData;
+    // Прямой вызов обработчика выбора элемента в селекте
+    // Это гарантирует, что выбор будет корректно обработан
+    const selectEvent = {
+      target: {
+        name: 'regionId',
+        value: String(validRegionId),
+        type: 'select'
       }
-      
-      // Если регион не найден в списке, но у нас есть id и имя - используем их напрямую
-      const updatedRegionName = selectedRegion?.name || regionName || prevData.regionName || `Регион ${validRegionId}`;
-      
-      console.log(`Обновляем regionId в форме на ${validRegionId} (${updatedRegionName})`);
-      
-      // Гарантируем, что regionId будет числом, а не null или undefined
-      const updatedData = { 
-        ...prevData, 
-        regionId: validRegionId, // Гарантированно число
-        regionName: updatedRegionName
-      };
-      
-      // Добавляем логирование состояния формы
-      console.log('🌍 Состояние формы места происхождения');
-      console.log('Действие: Выбор области на карте');
-      console.log('Текущие данные формы:', {
-        regionId: updatedData.regionId,
-        regionName: updatedData.regionName,
-        country: updatedData.country
-      });
-      console.log('Ошибки:', {
-        regionId: errors.regionId,
-        country: errors.country
-      });
-      console.log('Затронутые поля:', {
-        regionId: touchedFields.regionId,
-        country: touchedFields.country
-      });
-      
-      return updatedData;
-    });
-      
-    // Очищаем ошибки для regionId, если они были
-    setErrors(prevErrors => {
-      const newErrors = { ...prevErrors };
-      if (newErrors.regionId) {
-        console.log('Очищаем ошибку для regionId');
-        delete newErrors.regionId;
-      }
-      return newErrors;
-    });
-      
-    // Отмечаем поле как затронутое
-    markFieldAsTouched('regionId');
-      
-    // Валидируем значение
-    validateField('regionId', validRegionId);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>;
     
-    // Если список регионов пуст, сохраняем выбранный регион для будущего использования
-    if (regionOptions.length === 0 && regionName) {
-      console.log(`Список регионов пуст. Сохраняем выбранный регион (${validRegionId}: ${regionName}) для будущего использования`);
-      // Здесь можно реализовать кэширование выбранного региона
-    }
+    // Вызываем обработчик напрямую для гарантированного обновления значений
+    handleSelectChange(selectEvent);
+    
+    // Принудительно устанавливаем значение в селекте через DOM
+    setTimeout(() => {
+      const regionSelect = document.getElementById('regionId') as HTMLSelectElement;
+      if (regionSelect) {
+        regionSelect.value = String(validRegionId);
+        console.log(`Принудительно установлено значение в селекте: ${validRegionId}`);
+        
+        // Явно запускаем событие change для обновления привязанных обработчиков
+        try {
+          const event = new Event('change', { bubbles: true });
+          regionSelect.dispatchEvent(event);
+        } catch (e) {
+          console.error('Ошибка при создании события change:', e);
+        }
+      }
+    }, 100);
   };
 
   const validateField = (name: string, value: any): boolean => {
@@ -691,9 +722,18 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
         }
         break;
       case 'regionId':
-        if (!value || value <= 0) {
+        // Проверка регионов с учетом возможных типов значений
+        // null, undefined, 0, '' - все эти значения считаются "не выбрано"
+        const regionIdValue = value === '' ? 0 : Number(value);
+        if (regionIdValue === 0 || regionIdValue === null || regionIdValue === undefined) {
           isValid = false;
           errorMessage = 'Необходимо выбрать регион';
+        } else if (!regionOptions.some(r => Number(r.id) === regionIdValue)) {
+          // Проверяем, есть ли выбранный регион в списке доступных
+          isValid = false;
+          errorMessage = `Регион с ID ${regionIdValue} не найден в списке доступных`;
+          console.warn(`Регион с ID ${regionIdValue} не найден в списке доступных регионов:`, 
+            regionOptions.map(r => `${r.id}: ${r.name}`));
         }
         break;
       case 'latitude':

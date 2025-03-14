@@ -41,14 +41,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className='min-h-screen h-screen flex items-center justify-center'>
-      <div className='w-full max-w-md px-6 sm:px-8 lg:px-10 mx-auto'>
-        <div className='space-y-8 animate-fadeIn'>
-          <div className='text-center space-y-4'>
-            <h1 className='text-4xl font-bold text-[#1D1D1F] tracking-tight transition-all duration-300 hover:scale-105'>
+    <div className='flex items-center justify-center py-4 md:py-6'>
+      <div className='w-full max-w-md px-4 sm:px-6 lg:px-8 mx-auto'>
+        <div className='space-y-4 animate-fadeIn'>
+          <div className='text-center space-y-2'>
+            <h1 className='text-2xl sm:text-3xl font-bold text-[#1D1D1F] tracking-tight transition-all duration-300 hover:scale-105'>
               Вход в систему
             </h1>
-            <p className='text-center text-base text-[#86868B]'>
+            <p className='text-center text-xs sm:text-sm text-[#86868B]'>
               Или{' '}
               <Link
                 to='/register'
@@ -61,16 +61,16 @@ const LoginPage: React.FC = () => {
           </div>
 
           <form 
-            className='mt-12 space-y-8' 
+            className='mt-4 space-y-4' 
             onSubmit={handleSubmit}
             noValidate
           >
-            <div className='bg-white/80 backdrop-blur-lg rounded-3xl border border-[#E5E5EA]/80 p-8 shadow-lg transition-all duration-300 hover:shadow-xl space-y-6'>
-              <div className='space-y-6'>
+            <div className='bg-white/80 backdrop-blur-lg rounded-2xl border border-[#E5E5EA]/80 p-4 sm:p-5 shadow-lg transition-all duration-300 hover:shadow-xl space-y-4'>
+              <div className='space-y-3'>
                 <div className='group transition-all duration-200'>
                   <label 
                     htmlFor='username' 
-                    className='block text-sm font-medium text-gray-700 mb-2 group-hover:text-[#0A84FF] transition-colors duration-200'
+                    className='block text-xs font-medium text-gray-700 mb-1 group-hover:text-[#0A84FF] transition-colors duration-200'
                   >
                     Имя пользователя
                   </label>
@@ -80,11 +80,11 @@ const LoginPage: React.FC = () => {
                     type='text'
                     autoComplete='username'
                     required
-                    className='block w-full px-4 py-3 rounded-xl border border-[#E5E5EA] bg-white/50 
+                    className='block w-full px-3 py-2 rounded-lg border border-[#E5E5EA] bg-white/50 
                              placeholder-[#AEAEB2] transition-all duration-200
                              focus:ring-2 focus:ring-[#0A84FF] focus:border-transparent
                              hover:border-[#0A84FF] hover:shadow-sm
-                             group-hover:border-[#0A84FF]'
+                             group-hover:border-[#0A84FF] text-sm'
                     placeholder='Введите имя пользователя'
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -94,7 +94,7 @@ const LoginPage: React.FC = () => {
                 <div className='group transition-all duration-200'>
                   <label 
                     htmlFor='password' 
-                    className='block text-sm font-medium text-gray-700 mb-2 group-hover:text-[#0A84FF] transition-colors duration-200'
+                    className='block text-xs font-medium text-gray-700 mb-1 group-hover:text-[#0A84FF] transition-colors duration-200'
                   >
                     Пароль
                   </label>
@@ -104,11 +104,11 @@ const LoginPage: React.FC = () => {
                     type='password'
                     autoComplete='current-password'
                     required
-                    className='block w-full px-4 py-3 rounded-xl border border-[#E5E5EA] bg-white/50 
+                    className='block w-full px-3 py-2 rounded-lg border border-[#E5E5EA] bg-white/50 
                              placeholder-[#AEAEB2] transition-all duration-200
                              focus:ring-2 focus:ring-[#0A84FF] focus:border-transparent
                              hover:border-[#0A84FF] hover:shadow-sm
-                             group-hover:border-[#0A84FF]'
+                             group-hover:border-[#0A84FF] text-sm'
                     placeholder='Введите пароль'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -117,16 +117,16 @@ const LoginPage: React.FC = () => {
               </div>
 
               {(error || formError) && (
-                <div className='animate-shake text-[#FF3B30] text-sm mt-4 py-3 px-4 bg-[#FFE5E5]/50 rounded-xl border border-[#FF3B30]/20'>
+                <div className='animate-shake text-[#FF3B30] text-xs mt-3 py-2 px-3 bg-[#FFE5E5]/50 rounded-lg border border-[#FF3B30]/20'>
                   {formError || error}
                 </div>
               )}
 
-              <div className='pt-4'>
+              <div className='pt-2 md:pt-3'>
                 <button
                   type='submit'
                   disabled={loading}
-                  className='w-full py-3 px-4 rounded-xl text-white text-base font-medium
+                  className='w-full py-2 px-4 rounded-lg text-white text-sm sm:text-base font-medium
                            bg-gradient-to-r from-[#0A84FF] to-[#0071E3]
                            transition-all duration-300 transform
                            hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
@@ -134,7 +134,7 @@ const LoginPage: React.FC = () => {
                 >
                   {loading ? (
                     <span className='flex items-center justify-center'>
-                      <svg className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+                      <svg className='animate-spin -ml-1 mr-2 h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
                         <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
                         <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
                       </svg>

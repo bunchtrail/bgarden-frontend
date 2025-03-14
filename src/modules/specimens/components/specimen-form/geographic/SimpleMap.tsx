@@ -10,6 +10,7 @@ import {
   Polygon,
   useMapEvents,
   ZoomControl,
+  AttributionControl,
 } from 'react-leaflet';
 import { MapArea, MapPlant } from '../types';
 
@@ -328,10 +329,13 @@ const SimpleMap: React.FC<SimpleMapProps> = ({
               attributionControl={false}
             >
               <ZoomControl position='bottomright' />
+              <AttributionControl 
+                position='bottomright'
+                prefix='<div class="leaflet-control-attribution-custom"><img src="/images/logo.jpg" alt="Ботанический сад" width="16" height="16" style="margin-right: 5px; vertical-align: middle; border-radius: 50%;" /> Ботанический сад</div>'
+              />
               <ImageOverlay 
                 bounds={bounds} 
                 url={processedImageUrl}
-                attribution="Ботанический сад" 
               />
 
               <MapEvents 
