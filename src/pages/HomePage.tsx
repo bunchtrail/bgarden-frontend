@@ -14,10 +14,10 @@ const HomePage: React.FC = () => {
 
   // URL для заглушек изображений
   const placeholderImages = {
-    dendrology: '/images/logo.jpg',
-    flora: '/images/logo.jpg',
-    flowering: '/images/logo.jpg',
-    info: '/images/logo.jpg',
+    dendrology: '/images/sectors/dendrology.jpg',
+    flora: '/images/sectors/flora.jpg',
+    flowering: '/images/sectors/flowering.jpg',
+    info: '/images/sectors/info.jpg',
   };
 
   const sectorData = [
