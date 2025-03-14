@@ -3,6 +3,13 @@
  * Обновлены с учетом легкого минималистичного дизайна в стиле Apple
  */
 
+// Константы высот для фиксированных элементов
+export const HEIGHTS = {
+  NAVBAR: 64, // 16px * 4 (16 единиц или h-16) для навбара
+  FOOTER: 60, // уменьшенная высота футера
+  TOTAL_OFFSET: 124, // сумма высот навбара и футера
+};
+
 // Константы отступов - сделаны более консистентными и аккуратными
 export const SPACING = {
   XS: 2,
@@ -88,7 +95,7 @@ export const formClasses = {
 
 // Классы для таблиц - обновлены для большей воздушности и стиля Apple
 export const tableClasses = {
-  container: 'overflow-auto max-h-[calc(100vh-300px)] w-full scrollbar scrollbar-thumb-[#E5E5EA] scrollbar-track-[#F5F5F7] scrollbar-thin rounded-xl border border-[#E5E5EA]',
+  container: `overflow-auto max-h-[calc(100vh-${HEIGHTS.TOTAL_OFFSET}px)] w-full scrollbar scrollbar-thumb-[#E5E5EA] scrollbar-track-[#F5F5F7] scrollbar-thin rounded-xl border border-[#E5E5EA]`,
   table: 'w-full table-fixed',
   header: 'font-medium bg-[#F5F5F7] p-3 text-sm text-[#86868B] border-b border-[#E5E5EA]',
   cell: 'truncate overflow-hidden p-3 text-[#1D1D1F]',
@@ -98,6 +105,8 @@ export const tableClasses = {
 
 // Классы для сеток и компоновки - больше воздуха и стиль Apple
 export const layoutClasses = {
+  container: 'max-h-[calc(100vh-124px)] overflow-y-auto',
+  page: 'py-6 min-h-[calc(100vh-124px)] pb-6',
   grid: 'grid grid-cols-1 gap-6',
   gridSm2: 'grid grid-cols-1 sm:grid-cols-2 gap-6',
   gridSm3: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6',
@@ -136,7 +145,7 @@ export const headerClasses = {
 };
 
 export const footerClasses = {
-  footer: 'bg-white border-t border-[#E5E5EA] py-5 px-5 mt-auto',
+  footer: 'bg-white border-t border-[#E5E5EA] py-3 px-5 mt-auto',
   container: 'container mx-auto',
   content: 'text-center text-[#86868B] text-xs',
 };
@@ -185,4 +194,5 @@ export const appStyles = {
   tool: toolClasses,
   spacing: SPACING,
   colors: COLORS,
+  heights: HEIGHTS,
 };

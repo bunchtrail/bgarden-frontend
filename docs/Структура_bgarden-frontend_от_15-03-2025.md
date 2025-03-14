@@ -6,6 +6,7 @@
       - `styles.mdc` (1.9 KB)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
     - `Структура_bgarden-frontend_от_14-03-2025.md` (15.8 KB)
+    - `Структура_bgarden-frontend_от_15-03-2025.md` (16.2 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -27,11 +28,18 @@
   - `README.md` (5.6 KB)
   - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src)`
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (5.5 KB)
+    - `App.tsx` (5.6 KB)
     - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components)`
       - `AbstractPattern.tsx` (7.7 KB)
       - `Button.tsx` (1.5 KB)
       - `Card.tsx` (1.9 KB)
+      - **home** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\home)`
+        - `AuthenticatedHomePage.tsx` (1.1 KB)
+        - `index.ts` (431.0 B)
+        - `PublicHomePage.tsx` (2.8 KB)
+        - `SectorGrid.tsx` (2.0 KB)
+        - `TimeBasedGreeting.tsx` (8.9 KB)
+        - `UserTools.tsx` (6.1 KB)
       - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\icons)`
       - `Navbar.tsx` (5.1 KB)
       - `SectorCard.tsx` (3.0 KB)
@@ -39,7 +47,7 @@
       - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\ui)`
         - `Chip.tsx` (839.0 B)
         - `DraftSaveNotification.tsx` (938.0 B)
-        - `Footer.tsx` (1.2 KB)
+        - `Footer.tsx` (1.3 KB)
         - `Form.tsx` (2.7 KB)
         - `Header.tsx` (1.4 KB)
         - `index.ts` (394.0 B)
@@ -262,7 +270,7 @@
       - `ErrorPage.tsx` (1.5 KB)
       - `ExpositionDetailPage.tsx` (6.2 KB)
       - `ExpositionsPage.tsx` (2.1 KB)
-      - `HomePage.tsx` (15.0 KB)
+      - `HomePage.tsx` (1.9 KB)
       - `MapPage.tsx` (190.0 B)
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.9 KB)
@@ -272,7 +280,7 @@
     - `setupTests.ts` (241.0 B)
     - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\styles)`
       - `animations.css` (1.3 KB)
-      - `global-styles.ts` (9.0 KB)
+      - `global-styles.ts` (9.5 KB)
       - `index.ts` (366.0 B)
     - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\types)`
     - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\utils)`

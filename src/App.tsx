@@ -8,6 +8,7 @@ import {
   NotificationContainer, 
   ConfirmationProvider 
 } from './modules/notifications';
+import { layoutClasses } from './styles/global-styles';
 
 // Страницы
 import LoginPage from './pages/auth/LoginPage';
@@ -24,7 +25,7 @@ import { SpecimensPage } from './pages/SpecimensPage';
 function App() {
   // Вспомогательная функция для добавления отступов обычным страницам
   const PageWithPadding: React.FC<{ component: React.ReactNode }> = ({ component }) => {
-    return <div className="py-6">{component}</div>;
+    return <div className={layoutClasses.page}>{component}</div>;
   };
   
   return (
@@ -34,7 +35,7 @@ function App() {
           <ConfirmationProvider>
             <div className='flex flex-col min-h-screen bg-gray-50'>
               <Header />
-              <main className='flex-grow container mx-auto px-4'>
+              <main className='flex-grow container mx-auto px-4 overflow-x-hidden'>
                 <Routes>
                   {/* Публичные маршруты - доступны всем */}
                   <Route path='/' element={<PageWithPadding component={<HomePage />} />} />

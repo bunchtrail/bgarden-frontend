@@ -14,25 +14,27 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <footer className={footerClasses.footer}>
       <div className={footerClasses.container}>
-        <div className={footerClasses.content}>
-          © {year} {companyName}. Все права защищены.
-        </div>
-        <div className='flex justify-center mt-2 space-x-4'>
-          <Link to='/' className='text-gray-600 hover:text-blue-600 text-sm'>
-            Главная
-          </Link>
-          <Link
-            to='/about'
-            className='text-gray-600 hover:text-blue-600 text-sm'
-          >
-            О нас
-          </Link>
-          <Link
-            to='/contact'
-            className='text-gray-600 hover:text-blue-600 text-sm'
-          >
-            Контакты
-          </Link>
+        <div className="flex justify-between items-center">
+          <div className={footerClasses.content}>
+            © {year} {companyName}. Все права защищены.
+          </div>
+          <div className='flex space-x-3'>
+            <Link to='/' className='text-gray-600 hover:text-blue-600 text-xs'>
+              Главная
+            </Link>
+            <Link
+              to='/about'
+              className='text-gray-600 hover:text-blue-600 text-xs'
+            >
+              О нас
+            </Link>
+            <Link
+              to='/contact'
+              className='text-gray-600 hover:text-blue-600 text-xs'
+            >
+              Контакты
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
