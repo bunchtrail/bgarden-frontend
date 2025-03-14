@@ -177,15 +177,15 @@
               - `CoordinatesSection.tsx` (1.7 KB)
               - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\geographic\hooks)`
               - `index.ts` (470.0 B)
-              - `OriginSection.tsx` (10.2 KB)
+              - `OriginSection.tsx` (11.4 KB)
               - `PlantsToggle.tsx` (982.0 B)
               - `RegionInfo.tsx` (1.1 KB)
               - `SimpleMap.tsx` (17.6 KB)
               - `types.ts` (1.8 KB)
               - `utils.ts` (1.8 KB)
-            - `GeographicInfoSection.tsx` (9.6 KB)
+            - `GeographicInfoSection.tsx` (9.8 KB)
             - `index.ts` (729.0 B)
-            - `SpecimenFormContainer.tsx` (39.6 KB)
+            - `SpecimenFormContainer.tsx` (45.7 KB)
             - `Tabs.tsx` (4.0 KB)
             - `types.ts` (4.7 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-gallery)`

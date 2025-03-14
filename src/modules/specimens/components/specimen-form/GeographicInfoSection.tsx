@@ -72,23 +72,26 @@ export const GeographicInfoSection: React.FC<GeographicInfoSectionProps> = React
       const selectEvent = {
         target: { 
           name: 'regionId', 
-          value: Number(area.regionId), 
-          type: 'number' 
+          value: String(area.regionId),
+          type: 'select' 
         }
       } as unknown as ChangeEvent<HTMLSelectElement>;
+      
+      // Всегда сохраняем имя региона, даже если регион не найден в списке
+      const regionName = selectedRegion?.name || area.name || `Регион ${area.regionId}`;
       
       const inputEvent = {
         target: { 
           name: 'regionName', 
-          value: selectedRegion?.name || area.name || `Регион ${area.regionId}` 
+          value: regionName
         }
       } as unknown as ChangeEvent<HTMLInputElement>;
       
       // Добавляем дополнительное логирование события
       console.log('Создано событие выбора региона в селекте:', {
         name: 'regionId', 
-        value: Number(area.regionId),
-        regionName: selectedRegion?.name
+        value: area.regionId,
+        regionName: regionName
       });
       
       // Вызываем обработчики для обновления состояния через React

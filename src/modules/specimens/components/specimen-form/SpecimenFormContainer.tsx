@@ -124,6 +124,81 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   }, [initialData]);
 
+  // Добавляем сохранение regionId в localStorage для восстановления при необходимости
+  useEffect(() => {
+    // Сохраняем значение в localStorage только если это действительное значение
+    if (formData.regionId && formData.regionName) {
+      const regionData = {
+        id: formData.regionId,
+        name: formData.regionName
+      };
+      localStorage.setItem('selectedRegion', JSON.stringify(regionData));
+      console.log(`Сохранен регион в localStorage: ${formData.regionId} (${formData.regionName})`);
+    }
+  }, [formData.regionId, formData.regionName]);
+
+  // Восстановление regionId из localStorage при инициализации или сбросе
+  useEffect(() => {
+    // Проверяем, что regionId сброшен, но есть localStorage
+    if (formData.regionId === null || formData.regionId === 0) {
+      const savedRegion = localStorage.getItem('selectedRegion');
+      if (savedRegion) {
+        try {
+          const parsedRegion = JSON.parse(savedRegion);
+          if (parsedRegion.id && parsedRegion.name) {
+            console.log(`Восстановление regionId из localStorage: ${parsedRegion.id} (${parsedRegion.name})`);
+            
+            // Проверяем, нет ли такого региона уже в списке
+            const foundInOptions = regionOptions.find(r => Number(r.id) === Number(parsedRegion.id));
+            
+            if (foundInOptions || regionOptions.length === 0) {
+              // Обновляем formData с сохраненным значением
+              setFormData(prev => ({
+                ...prev,
+                regionId: Number(parsedRegion.id),
+                regionName: parsedRegion.name
+              }));
+            }
+          }
+        } catch (e) {
+          console.error('Ошибка при восстановлении regionId из localStorage:', e);
+          localStorage.removeItem('selectedRegion');
+        }
+      }
+    }
+  }, [formData.regionId, regionOptions]);
+
+  // Автоматическое обновление выбранной области при изменении formData.regionId
+  useEffect(() => {
+    // Сохраняем regionId от сброса при переключении вкладок
+    if (formData.regionId === null && formData.regionName) {
+      // Пытаемся найти регион по имени
+      const foundRegion = regionOptions.find(r => r.name === formData.regionName);
+      if (foundRegion) {
+        console.log(`Восстановление regionId по имени ${formData.regionName}: ${foundRegion.id}`);
+        setFormData(prev => ({
+          ...prev,
+          regionId: Number(foundRegion.id)
+        }));
+      }
+    }
+
+    // Проверяем, не произошел ли сброс regionId при сохранении regionName
+    if (formData.regionId === null && formData.regionName && regionOptions.length > 0) {
+      // Ищем регион по имени
+      const regionByName = regionOptions.find(r => r.name === formData.regionName);
+      
+      if (regionByName) {
+        console.log(`Восстанавливаем regionId по regionName ${formData.regionName}: ${regionByName.id}`);
+        // Обновляем formData с правильным regionId
+        setFormData(prev => ({
+          ...prev,
+          regionId: Number(regionByName.id)
+        }));
+      }
+    }
+  }, [formData.regionId, formData.regionName, regionOptions]);
+
   // Загрузка данных карты, растений и областей при монтировании компонента
   useEffect(() => {
     const fetchMapData = async () => {
@@ -335,20 +410,21 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       };
     } else if (name === 'regionId') {
       // Преобразуем value в число, если оно было передано как строка
-      const numericValue = typeof value === 'string' ? Number(value) : value;
+      const numericValue = value === '' || value === 'null' ? 0 : Number(value);
       
-      const selectedRegion = regionOptions.find((r) => Number(r.id) === numericValue);
+      // Ищем регион, только если значение не равно 0 (пустое значение)
+      const selectedRegion = numericValue !== 0 ? regionOptions.find((r) => Number(r.id) === numericValue) : null;
       console.log('Found region:', selectedRegion);
       
       // Добавляем проверку, чтобы убедиться, что регион найден
-      if (!selectedRegion) {
+      if (numericValue !== 0 && !selectedRegion) {
         console.warn(`Регион с ID ${numericValue} не найден. Доступные регионы:`, regionOptions.map(r => `${r.id}: ${r.name}`));
       }
       
       updatedData = {
         ...updatedData,
-        [name]: numericValue,
-        regionName: selectedRegion ? selectedRegion.name : `Регион ${numericValue}`,
+        [name]: numericValue, // Гарантированно число (0 для пустых значений)
+        regionName: selectedRegion ? selectedRegion.name : (numericValue !== 0 ? `Регион ${numericValue}` : ''),
       };
       
       console.log('Updated formData with regionId:', updatedData.regionId, 'type:', typeof updatedData.regionId);
@@ -457,6 +533,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     
     // Нормализуем regionId, убедившись, что это число
     let regionId: number | undefined; // Добавляем явный тип
+    let regionName: string | undefined;
     
     // Проверяем, является ли selectedArea строкой (id области)
     if (typeof selectedArea === 'string') {
@@ -494,6 +571,11 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
           console.log(`Извлечен ID региона из ${selectedArea.id}: ${regionId}`);
         }
       }
+      
+      // Извлекаем имя региона, если доступно
+      if (selectedArea.name) {
+        regionName = selectedArea.name;
+      }
     }
     
     // Проверяем, что regionId определен
@@ -509,64 +591,66 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     const selectedRegion = regionOptions.find(r => Number(r.id) === validRegionId);
     console.log('Found region:', selectedRegion);
     
-    if (selectedRegion) {
-      // Используем функциональное обновление для избежания race conditions
-      setFormData(prevData => {
-        // Проверяем, действительно ли изменился регион
-        if (prevData.regionId === validRegionId) {
-          console.log(`Регион не изменился (${validRegionId}), пропускаем обновление`);
-          return prevData;
-        }
-        
-        console.log(`Обновляем regionId в форме на ${validRegionId} (${selectedRegion.name})`);
-        
-        // Возвращаем обновленное состояние с проверкой на undefined
-        const updatedData = { 
-          ...prevData, 
-          regionId: validRegionId, // Теперь используем переменную с явным типом number
-          regionName: selectedRegion.name || prevData.regionName
-        };
-        
-        // Добавляем логирование состояния формы
-        console.log('🌍 Состояние формы места происхождения');
-        console.log('Действие: Выбор области на карте');
-        console.log('Текущие данные формы:', {
-          regionId: updatedData.regionId,
-          regionName: updatedData.regionName,
-          country: updatedData.country
-        });
-        console.log('Ошибки:', {
-          regionId: errors.regionId,
-          country: errors.country
-        });
-        console.log('Затронутые поля:', {
-          regionId: touchedFields.regionId,
-          country: touchedFields.country
-        });
-        
-        return updatedData;
+    // Используем функциональное обновление для избежания race conditions
+    setFormData(prevData => {
+      // Проверяем, действительно ли изменился регион
+      if (prevData.regionId === validRegionId) {
+        console.log(`Регион не изменился (${validRegionId}), пропускаем обновление`);
+        return prevData;
+      }
+      
+      // Если регион не найден в списке, но у нас есть id и имя - используем их напрямую
+      const updatedRegionName = selectedRegion?.name || regionName || prevData.regionName || `Регион ${validRegionId}`;
+      
+      console.log(`Обновляем regionId в форме на ${validRegionId} (${updatedRegionName})`);
+      
+      // Гарантируем, что regionId будет числом, а не null или undefined
+      const updatedData = { 
+        ...prevData, 
+        regionId: validRegionId, // Гарантированно число
+        regionName: updatedRegionName
+      };
+      
+      // Добавляем логирование состояния формы
+      console.log('🌍 Состояние формы места происхождения');
+      console.log('Действие: Выбор области на карте');
+      console.log('Текущие данные формы:', {
+        regionId: updatedData.regionId,
+        regionName: updatedData.regionName,
+        country: updatedData.country
+      });
+      console.log('Ошибки:', {
+        regionId: errors.regionId,
+        country: errors.country
+      });
+      console.log('Затронутые поля:', {
+        regionId: touchedFields.regionId,
+        country: touchedFields.country
       });
       
-      // Очищаем ошибки для regionId, если они были
-      setErrors(prevErrors => {
-        const newErrors = { ...prevErrors };
-        if (newErrors.regionId) {
-          console.log('Очищаем ошибку для regionId');
-          delete newErrors.regionId;
-        }
-        return newErrors;
-      });
+      return updatedData;
+    });
       
-      // Отмечаем поле как затронутое
-      markFieldAsTouched('regionId');
+    // Очищаем ошибки для regionId, если они были
+    setErrors(prevErrors => {
+      const newErrors = { ...prevErrors };
+      if (newErrors.regionId) {
+        console.log('Очищаем ошибку для regionId');
+        delete newErrors.regionId;
+      }
+      return newErrors;
+    });
       
-      // Валидируем значение
-      validateField('regionId', validRegionId);
-    } else {
-      console.error(`Регион с ID ${validRegionId} не найден в списке доступных регионов:`, regionOptions);
+    // Отмечаем поле как затронутое
+    markFieldAsTouched('regionId');
       
-      // Выводим доступные регионы для диагностики
-      console.log('Доступные регионы:', regionOptions.map(r => `${r.id}: ${r.name}`));
+    // Валидируем значение
+    validateField('regionId', validRegionId);
+    
+    // Если список регионов пуст, сохраняем выбранный регион для будущего использования
+    if (regionOptions.length === 0 && regionName) {
+      console.log(`Список регионов пуст. Сохраняем выбранный регион (${validRegionId}: ${regionName}) для будущего использования`);
+      // Здесь можно реализовать кэширование выбранного региона
     }
   };
 
@@ -750,7 +834,46 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
     }
   };
 
-  // Обновлённый рендер контента вкладок с объединением разделов
+  // Обновляем функцию переключения вкладок, чтобы сохранять важные данные
+  const handleTabChange = (newTab: SpecimenFormTab) => {
+    // Перед переключением вкладки, сохраняем текущее состояние важных полей в localStorage
+    const criticalData = {
+      regionId: formData.regionId,
+      regionName: formData.regionName,
+      latitude: formData.latitude,
+      longitude: formData.longitude
+    };
+    localStorage.setItem('specimenFormCriticalData', JSON.stringify(criticalData));
+    console.log('Сохранены критические данные перед переключением вкладки:', criticalData);
+    
+    // Устанавливаем новую вкладку
+    setActiveTab(newTab);
+  };
+
+  // Восстановление критических данных после переключения вкладки
+  useEffect(() => {
+    const savedCriticalData = localStorage.getItem('specimenFormCriticalData');
+    if (savedCriticalData) {
+      try {
+        const parsedData = JSON.parse(savedCriticalData);
+        // Проверяем, не потерялись ли данные при переключении вкладки
+        if (formData.regionId === null && parsedData.regionId !== null) {
+          console.log('Восстановление критических данных после переключения вкладки:', parsedData);
+          setFormData(prev => ({
+            ...prev,
+            regionId: parsedData.regionId,
+            regionName: parsedData.regionName,
+            latitude: parsedData.latitude,
+            longitude: parsedData.longitude
+          }));
+        }
+      } catch (e) {
+        console.error('Ошибка при восстановлении критических данных:', e);
+      }
+    }
+  }, [activeTab, formData.regionId]);
+
+  // Оригинальный рендер контента вкладок с объединением разделов
   const renderActiveTabContent = () => {
     switch (activeTab) {
       case SpecimenFormTab.MainInfo:
@@ -968,7 +1091,7 @@ export const SpecimenFormContainer: React.FC<SpecimenFormContainerProps> = ({
       <form onSubmit={handleSubmit} className={formClasses.form}>
         <FormTabs
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabChange}
           errors={errors}
         />
 

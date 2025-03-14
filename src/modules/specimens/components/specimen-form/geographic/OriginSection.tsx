@@ -106,23 +106,48 @@ export const OriginSection: React.FC<OriginSectionProps> = ({
         logFormState('Обновление после клика на карту');
         
         // Проверяем, соответствует ли текущее значение селекта значению regionId в formData
-        if (regionSelectRef.current && Number(regionSelectRef.current.value) !== formData.regionId) {
+        if (regionSelectRef.current && formData.regionId !== null && Number(regionSelectRef.current.value) !== formData.regionId) {
           console.log('Обнаружено несоответствие значения селекта и formData.regionId');
           console.log('Значение в formData:', formData.regionId);
           console.log('Значение в селекте:', regionSelectRef.current.value);
           
-          // Сбрасываем значение селекта, чтобы React мог его корректно обновить
-          // Это нужно только в случае, если значение селекта не обновилось автоматически
+          // Устанавливаем значение селекта равным formData.regionId
           if (formData.regionId) {
             console.log('Устанавливаем значение селекта равным formData.regionId:', formData.regionId);
             // Поиск активного региона
             const selectedRegion = regionOptions.find(r => Number(r.id) === Number(formData.regionId));
             console.log('Найден регион:', selectedRegion);
+            
+            // Программно устанавливаем значение селекта
+            if (regionSelectRef.current) {
+              regionSelectRef.current.value = String(formData.regionId);
+            }
+          }
+        }
+        
+        // Проверяем кейс, когда regionId сбросился до null, но regionName сохранился
+        if (formData.regionId === null && formData.regionName && regionOptions.length > 0) {
+          // Ищем регион по имени
+          const regionByName = regionOptions.find(r => r.name === formData.regionName);
+          
+          if (regionByName) {
+            console.log(`Обнаружен сброс regionId при сохранении regionName. Восстанавливаем значение по имени ${formData.regionName}: ${regionByName.id}`);
+            
+            // Создаем искусственное событие select для восстановления значения
+            const event = {
+              target: {
+                name: 'regionId',
+                value: String(regionByName.id)
+              }
+            } as React.ChangeEvent<HTMLSelectElement>;
+            
+            // Вызываем обработчик
+            handleSelectChange(event);
           }
         }
       }
     }
-  }, [formData, logFormState, regionOptions]);
+  }, [formData, logFormState, regionOptions, handleSelectChange]);
 
   return (
     <div className="p-4 bg-white rounded-xl border border-gray-200 transition-all duration-300 hover:border-green-200">
@@ -152,7 +177,7 @@ export const OriginSection: React.FC<OriginSectionProps> = ({
                     ? 'border-green-400 ring-1 ring-green-200 bg-green-50'
                     : 'border-gray-300 bg-white hover:border-blue-300'
                 } transition-all duration-300 ease-in-out pr-10 appearance-none`}
-                value={formData.regionId || ''}
+                value={formData.regionId !== null && formData.regionId !== undefined && formData.regionId !== 0 ? String(formData.regionId) : ''}
                 onChange={handleRegionChange}
                 onBlur={() => markFieldAsTouched('regionId')}
                 required
@@ -198,7 +223,6 @@ export const OriginSection: React.FC<OriginSectionProps> = ({
                 } transition-all duration-300 ease-in-out transition-transform duration-300 hover:scale-[1.01] focus:scale-[1.01]`}
                 placeholder="Введите страна происхождения"
                 aria-invalid={!!errors.country}
-                
               />
             </div>
           </div>
