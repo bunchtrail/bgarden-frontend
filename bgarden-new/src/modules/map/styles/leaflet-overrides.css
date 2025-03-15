@@ -1,0 +1,59 @@
+/* Переопределение стилей Leaflet для соответствия дизайну Apple */
+
+/* Стили для тултипов на карте */
+.leaflet-tooltip {
+  background-color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.75rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  min-width: 150px;
+  max-width: 300px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.leaflet-tooltip strong {
+  color: #1D1D1F;
+  font-weight: 600;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.leaflet-tooltip p {
+  color: #86868B;
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+}
+
+/* Стили для элементов управления картой */
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+  background-color: #FFFFFF !important;
+  color: #1D1D1F !important;
+  border: 1px solid #E5E5EA !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 18px !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #F5F5F7 !important;
+  color: #0A84FF !important;
+}
+
+/* Удаление теней и рамок для контейнера карты */
+.leaflet-container {
+  border-radius: 12px;
+  overflow: hidden;
+} 

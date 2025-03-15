@@ -108,7 +108,7 @@ async function request<T>(
   try {
     // Формирование URL с параметрами
     const queryParams = new URLSearchParams(params).toString();
-    const url = `${API_BASE_URL}/${endpoint}${queryParams ? `?${queryParams}` : ''}`;
+    const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}${queryParams ? `?${queryParams}` : ''}`;
 
     // Заголовки запроса
     const requestHeaders: Record<string, string> = {

@@ -55,13 +55,29 @@ export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
 
 // Функция для преобразования данных с сервера в формат Plant
 export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => {
-  return specimens.map(specimen => ({
-    id: `specimen-${specimen.id}`,
-    name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
-    position: [specimen.latitude, specimen.longitude] as [number, number],
-    description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
-    latinName: specimen.latinName
-  }));
+  // Создаем Set для отслеживания уже использованных ID, чтобы избежать дублирования
+  const usedIds = new Set<string>();
+  
+  return specimens.map(specimen => {
+    // Создаем базовый ID
+    let plantId = `specimen-${specimen.id}`;
+    
+    // Если ID уже используется, добавляем уникальный суффикс
+    if (usedIds.has(plantId)) {
+      plantId = `specimen-${specimen.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    }
+    
+    // Добавляем ID в набор использованных
+    usedIds.add(plantId);
+    
+    return {
+      id: plantId,
+      name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
+      position: [specimen.latitude, specimen.longitude] as [number, number],
+      description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
+      latinName: specimen.latinName
+    };
+  });
 };
 
 // Функция для удаления растения с сервера по ID

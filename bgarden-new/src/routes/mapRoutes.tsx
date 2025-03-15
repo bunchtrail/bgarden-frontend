@@ -2,9 +2,9 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
 import { MainLayout } from '../modules/layouts';
+import { MapPage, MapProvider } from '../modules/map';
 
-// Здесь нужно создать заглушки для страниц карты
-const MapPage = () => <div>Страница карты (скоро будет реализована)</div>;
+// Заглушка для страницы сектора карты (будет реализована позже)
 const MapSectorPage = () => <div>Страница сектора карты (скоро будет реализована)</div>;
 
 export const mapRoutes: RouteObject[] = [
@@ -13,7 +13,9 @@ export const mapRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <MainLayout>
-          <MapPage />
+          <MapProvider>
+            <MapPage />
+          </MapProvider>
         </MainLayout>
       </ProtectedRoute>
     ),
@@ -23,7 +25,9 @@ export const mapRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <MainLayout>
-          <MapSectorPage />
+          <MapProvider>
+            <MapSectorPage />
+          </MapProvider>
         </MainLayout>
       </ProtectedRoute>
     ),
