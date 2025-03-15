@@ -1,13 +1,31 @@
-// Экспорт компонентов и функциональности из модуля карты
+// Индексный файл модуля карты
 
-// Контексты
-export * from './contexts/MapContext';
-export * from './contexts/ModalContext';
+// Экспорт контекстов
+export { 
+  MapProvider, 
+  useMapContext, 
+  MapMode 
+} from './contexts/MapContext';
+export { ModalProvider, useModalContext } from './contexts/ModalContext';
 
-// Сервисы
-export * from './services/mapService';
-export * from './services/plantService';
-export * from './services/regionService';
+// Экспорт компонентов
+export { default as MapActions } from './components/MapActions';
+export { default as MapControlPanel } from './components/MapControlPanel';
+export { default as MapLegend } from './components/MapLegend';
 
-// Типы
-export * from './types/mapTypes'; 
+// Экспорт типов
+export type { 
+  Plant, 
+  Area, 
+  GeoPosition, 
+  ClusteringSettings, 
+  CreateAreaParams 
+} from './contexts/MapContext';
+export type { 
+  MapCoordinates, 
+  MapEvent, 
+  RegionData 
+} from './types/mapTypes';
+
+// Экспорт сервисов
+export { mapService, plantService, regionService } from './services'; 

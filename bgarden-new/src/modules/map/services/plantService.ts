@@ -3,6 +3,7 @@
 
 import { Plant } from '../contexts/MapContext';
 import httpClient from '../../../services/httpClient';
+import { logError } from '../../../utils/logger';
 
 // Тип данных растения, который приходит с сервера
 export interface SpecimenData {

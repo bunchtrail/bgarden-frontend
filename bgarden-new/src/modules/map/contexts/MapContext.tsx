@@ -22,7 +22,7 @@ import {
   convertPointsToPolygonCoordinates
 } from '../services/regionService';
 import { RegionData } from '../types/mapTypes';
-import { useNotification } from '../../../modules/notifications';
+import { useNotification } from '../../notifications';
 
 // Перечисление режимов работы с картой
 export enum MapMode {

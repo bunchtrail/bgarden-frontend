@@ -2,7 +2,7 @@
 
 import { SpecimenData } from '../services/plantService';
 
-// Типы для карты
+// Типы данных для модуля карты
 
 // Координаты на карте
 export interface MapCoordinates {
