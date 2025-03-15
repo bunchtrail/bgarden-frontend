@@ -5,7 +5,8 @@ export { default as MapBoundsHandler } from './MapBoundsHandler';
 export { default as MapImageLayer } from './MapImageLayer';
 export { default as MapReadyHandler } from './MapReadyHandler';
 export { default as MapRegionsLayer } from './MapRegionsLayer';
+export { default as BaseMapContainer } from './BaseMapContainer';
 
 // Импортируем из новой структуры
 export { default as MapControlPanel } from '../control-panel/MapControlPanel';
-export type { MapLayerConfig, ControlPanelSection } from '../control-panel'; 
+export type { ControlPanelSection } from '../control-panel'; 

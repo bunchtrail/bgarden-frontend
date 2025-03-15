@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { LatLngExpression, LatLngBoundsExpression, ControlPosition } from 'leaflet';
 
+// Доступные слои карты
+export const MAP_LAYERS = {
+  IMAGERY: 'imagery',
+  REGIONS: 'regions',
+  PLANTS: 'plants',
+  LABELS: 'labels'
+} as const;
+
 // Интерфейс конфигурации карты
 export interface MapConfig {
   center: LatLngExpression;
@@ -15,6 +23,11 @@ export interface MapConfig {
   visibleLayers: string[];
   showTooltips: boolean;
   showLabels: boolean;
+  zoomLevel: number;
+  availableLayers: string[];
+  showControls: boolean;
+  debug: boolean;
+  enableClustering: boolean; // Включить/выключить кластеризацию маркеров
 }
 
 // Настройки карты по умолчанию
@@ -28,9 +41,14 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   zoomControlPosition: 'bottomright' as ControlPosition,
   // Дополнительные настройки
   lightMode: false,
-  visibleLayers: ['regions', 'labels', 'imagery'],
+  visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showTooltips: true,
   showLabels: true,
+  zoomLevel: 1,
+  availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS, MAP_LAYERS.LABELS],
+  showControls: true,
+  debug: false,
+  enableClustering: true, // По умолчанию кластеризация включена
 };
 
 interface MapConfigContextProps {

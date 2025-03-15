@@ -46,7 +46,9 @@ export interface SpecimenData {
 // Функция для получения всех растений с сервера
 export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
   try {
-    return await httpClient.get<SpecimenData[]>('/Specimen/all');
+    // Используем httpClient вместо прямого fetch
+    const data = await httpClient.get<SpecimenData[]>('/Specimen/all');
+    return data;
   } catch (error) {
     logError('Ошибка при получении растений:', error);
     throw error;

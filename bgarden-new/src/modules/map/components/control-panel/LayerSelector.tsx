@@ -1,40 +1,49 @@
 import React from 'react';
+import { useMapConfig } from '../../contexts/MapConfigContext';
+import { ConfigCheckbox } from './index';
 
-// Интерфейс для слоя карты
-export interface MapLayerConfig {
-  id: string;
-  label: string;
-  isVisible?: boolean;
-  icon?: React.ReactNode;
+interface LayerSelectorProps {
+  className?: string;
 }
 
 /**
- * Компонент секции слоев карты
+ * Компонент выбора слоев карты
  */
-const LayerSelector: React.FC<{
-  layers: MapLayerConfig[];
-  visibleLayers: string[];
-  onLayerToggle: (layerId: string) => void;
-}> = ({ layers, visibleLayers, onLayerToggle }) => (
-  <div className="mb-3">
-    <p className="text-sm text-gray-700 mb-2">Видимые слои:</p>
-    <div className="space-y-2">
-      {layers.map(layer => (
-        <label key={layer.id} className="flex items-center">
-          <input 
-            type="checkbox" 
-            className="form-checkbox h-4 w-4 text-blue-600"
-            checked={visibleLayers.includes(layer.id)}
-            onChange={() => onLayerToggle(layer.id)}
-          />
-          <span className="ml-2 text-sm text-gray-700">
-            {layer.icon && <span className="mr-1">{layer.icon}</span>}
-            {layer.label}
-          </span>
-        </label>
-      ))}
+const LayerSelector: React.FC<LayerSelectorProps> = ({ className }) => {
+  const { mapConfig, toggleLayer } = useMapConfig();
+  
+  // Проверяем, видим ли указанный слой
+  const isLayerVisible = (layerId: string) => mapConfig.visibleLayers.includes(layerId);
+
+  return (
+    <div className={`flex flex-col gap-2 ${className || ''}`}>
+      <h3 className="font-medium text-gray-900 mb-1">Слои карты</h3>
+      
+      <ConfigCheckbox 
+        label="Изображение карты"
+        checked={isLayerVisible('imagery')}
+        onChange={() => toggleLayer('imagery')}
+      />
+      
+      <ConfigCheckbox 
+        label="Регионы"
+        checked={isLayerVisible('regions')}
+        onChange={() => toggleLayer('regions')}
+      />
+      
+      <ConfigCheckbox 
+        label="Растения"
+        checked={isLayerVisible('plants')}
+        onChange={() => toggleLayer('plants')}
+      />
+      
+      <ConfigCheckbox 
+        label="Метки"
+        checked={isLayerVisible('labels')}
+        onChange={() => toggleLayer('labels')}
+      />
     </div>
-  </div>
-);
+  );
+};
 
 export default LayerSelector; 

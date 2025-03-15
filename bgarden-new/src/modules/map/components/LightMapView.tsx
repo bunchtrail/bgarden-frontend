@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, ZoomControl } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getMapImageUrl, MapData } from '../services/mapService';
 import { RegionData } from '../types/mapTypes';
-import { MAP_STYLES } from '../styles';
 import { LoadingSpinner } from '@/modules/ui';
 import { 
-  MapRegionsLayer, 
-  MapImageLayer, 
   MapBoundsHandler,
-  LoadingView
+  BaseMapContainer
 } from './map-components';
+import { MapLayersManager } from './map-submodules';
 import { useMapConfig, MapConfigProvider, MapConfig } from '../contexts/MapConfigContext';
+import { MapProvider } from '../contexts/MapContext';
 
 // Конфигурация для облегченной версии карты
 const LIGHT_CONFIG: Partial<MapConfig> = {
@@ -49,11 +47,6 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
   const { mapConfig } = useMapConfig();
 
-  // Фильтруем регионы, если указаны конкретные ID
-  const filteredRegions = selectedRegionIds.length > 0 
-    ? regions.filter(region => selectedRegionIds.includes(String(region.id)))
-    : regions;
-
   // Получаем URL изображения карты
   const mapImageUrl = mapData ? getMapImageUrl(mapData) : null;
 
@@ -70,6 +63,23 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
     ${aspectRatioClass}
     ${className}
   `;
+
+  // Вычисляем размеры изображения перед рендерингом MapContainer
+  useEffect(() => {
+    if (mapImageUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const width = img.width;
+        const height = img.height;
+        const calculatedBounds: L.LatLngBoundsExpression = [
+          [0, 0],
+          [height, width]
+        ];
+        setImageBounds(calculatedBounds);
+      };
+      img.src = mapImageUrl;
+    }
+  }, [mapImageUrl]);
 
   if (loading) {
     return (
@@ -91,42 +101,24 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
 
   return (
     <div className={containerStyles}>
-      <MapImageLayer 
-        imageUrl={mapImageUrl} 
-        setImageBounds={setImageBounds} 
-      />
-      
-      <MapContainer
-        center={mapConfig.center}
-        zoom={mapConfig.zoom}
-        maxZoom={mapConfig.maxZoom}
-        minZoom={mapConfig.minZoom}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={showControls}
-        crs={L.CRS.Simple}
-        maxBounds={mapConfig.maxBounds}
-        maxBoundsViscosity={mapConfig.maxBoundsViscosity}
-        attributionControl={false}
-        className={mapConfig.lightMode ? MAP_STYLES.lightMode : ''}
-        scrollWheelZoom={showControls}
-        dragging={showControls}
+      <BaseMapContainer
+        mapConfig={mapConfig}
+        showControls={showControls}
       >
-        {showControls && <ZoomControl position={mapConfig.zoomControlPosition} />}
-        
-        <MapImageLayer 
-          imageUrl={mapImageUrl} 
-          bounds={imageBounds} 
-        />
-        
-        <MapRegionsLayer 
-          regions={filteredRegions} 
+        <MapLayersManager 
+          visibleLayers={mapConfig.visibleLayers}
+          mapImageUrl={mapImageUrl}
+          imageBounds={imageBounds}
+          regions={regions}
+          customLayers={[]}
+          mapConfig={mapConfig}
+          onRegionClick={onRegionClick}
+          selectedRegionIds={selectedRegionIds}
           highlightSelected={false}
-          showTooltips={mapConfig.showTooltips}
-          onClick={onRegionClick}
         />
         
         <MapBoundsHandler imageBounds={imageBounds} />
-      </MapContainer>
+      </BaseMapContainer>
     </div>
   );
 };
@@ -135,7 +127,9 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
 const LightMapView: React.FC<LightMapViewProps> = (props) => {
   return (
     <MapConfigProvider initialConfig={LIGHT_CONFIG}>
-      <LightMapViewContent {...props} />
+      <MapProvider>
+        <LightMapViewContent {...props} />
+      </MapProvider>
     </MapConfigProvider>
   );
 };

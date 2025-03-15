@@ -13,7 +13,8 @@ export {
   ErrorView,
   EmptyMapView,
   LoadingView,
-  MapReadyHandler
+  MapReadyHandler,
+  BaseMapContainer
 } from './components/map-components';
 
 // Контексты
@@ -45,4 +46,11 @@ export {
   ConfigCheckbox,
   PanelHeader
 } from './components/control-panel';
-export type { MapLayerConfig, ControlPanelSection } from './components/control-panel'; 
+export type { ControlPanelSection } from './components/control-panel';
+
+// Подмодули карты
+export {
+  MapLayersManager,
+  MapContentStateRenderer,
+  MapControlsRenderer
+} from './components/map-submodules'; 

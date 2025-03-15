@@ -5,8 +5,7 @@ import {
   ModeToggle, 
   ConfigCheckbox, 
   PanelHeader,
-  ControlPanelSection,
-  MapLayerConfig 
+  ControlPanelSection
 } from './index';
 
 interface MapControlPanelProps {
@@ -15,11 +14,10 @@ interface MapControlPanelProps {
   showModeToggle?: boolean;
   showTooltipToggle?: boolean;
   showLabelToggle?: boolean;
+  showClusteringToggle?: boolean;
   onClose?: () => void;
-  layers?: MapLayerConfig[];
   customSections?: ControlPanelSection[];
   children?: ReactNode;
-  onLayerToggle?: (layerId: string, isVisible: boolean) => void;
   onConfigChange?: (key: string, value: boolean | string | number) => void;
   header?: ReactNode;
   footer?: ReactNode;
@@ -35,30 +33,19 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   showModeToggle = true,
   showTooltipToggle = true,
   showLabelToggle = true,
+  showClusteringToggle = true,
   onClose,
-  layers,
   customSections = [],
   children,
-  onLayerToggle,
   onConfigChange,
   header,
   footer
 }) => {
   const { 
     mapConfig, 
-    toggleLayer, 
     toggleLightMode, 
     updateMapConfig 
   } = useMapConfig();
-
-  // Обработчик изменения слоя с поддержкой внешнего обработчика
-  const handleLayerToggle = (layerId: string) => {
-    toggleLayer(layerId);
-    if (onLayerToggle) {
-      const isVisible = !mapConfig.visibleLayers.includes(layerId);
-      onLayerToggle(layerId, isVisible);
-    }
-  };
 
   // Обработчик изменения конфигурации с поддержкой внешнего обработчика
   const handleConfigChange = (key: string, value: boolean | string | number) => {
@@ -67,16 +54,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
       onConfigChange(key, value);
     }
   };
-
-  // Слои по умолчанию, если не переданы извне
-  const defaultLayers: MapLayerConfig[] = [
-    { id: 'imagery', label: 'Изображение карты' },
-    { id: 'regions', label: 'Регионы' },
-    { id: 'labels', label: 'Метки' }
-  ];
-
-  // Используем переданные слои или слои по умолчанию
-  const mapLayers = layers || defaultLayers;
 
   const panelStyles = `
     bg-white bg-opacity-90 rounded-lg shadow-lg 
@@ -102,11 +79,7 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
       )}
 
       {showLayerSelector && (
-        <LayerSelector 
-          layers={mapLayers}
-          visibleLayers={mapConfig.visibleLayers}
-          onLayerToggle={handleLayerToggle}
-        />
+        <LayerSelector className="my-3" />
       )}
 
       {showTooltipToggle && (
@@ -122,6 +95,14 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
           label="Показывать названия"
           checked={mapConfig.showLabels}
           onChange={() => handleConfigChange('showLabels', !mapConfig.showLabels)}
+        />
+      )}
+
+      {showClusteringToggle && (
+        <ConfigCheckbox 
+          label="Группировать маркеры"
+          checked={mapConfig.enableClustering}
+          onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
         />
       )}
 

@@ -1,26 +1,36 @@
-import { useMemo, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { MapLayerProps } from '../components/MapPage';
+import { RegionData } from '../types/mapTypes';
+import { MapConfig } from '../contexts/MapConfigContext';
 
 interface UseMapLayersProps {
   visibleLayers: string[];
   customLayers?: MapLayerProps[];
-  mapImageUrl: string | null;
+  mapImageUrl?: string | null;
+  regions?: RegionData[];
+  config?: Partial<MapConfig>;
 }
 
 interface UseMapLayersReturn {
   isLayerVisible: (layerId: string) => boolean;
   sortedLayers: MapLayerProps[];
   hasMapImage: boolean;
+  filteredRegions: RegionData[];
+  shouldShowRegions: boolean;
+  shouldShowLabels: boolean;
 }
 
 /**
- * Хук для управления слоями карты
- * Предоставляет функциональность для проверки видимости слоев и их сортировки
+ * Расширенный хук для управления слоями карты
+ * Предоставляет функциональность для проверки видимости слоев,
+ * их сортировки и фильтрации регионов
  */
 export const useMapLayers = ({
   visibleLayers,
   customLayers = [],
-  mapImageUrl
+  mapImageUrl,
+  regions = [],
+  config
 }: UseMapLayersProps): UseMapLayersReturn => {
   // Проверка видимости слоя
   const isLayerVisible = useCallback((layerId: string) => {
@@ -34,11 +44,25 @@ export const useMapLayers = ({
 
   // Проверка наличия изображения карты
   const hasMapImage = !!mapImageUrl;
+  
+  // Фильтрация регионов (может быть расширена дополнительной логикой)
+  const filteredRegions = useMemo(() => {
+    return regions;
+  }, [regions]);
+  
+  // Определяем, нужно ли показывать регионы и метки
+  const shouldShowRegions = isLayerVisible('regions');
+  const shouldShowLabels = config?.showLabels !== undefined 
+    ? config.showLabels 
+    : isLayerVisible('labels');
 
   return {
     isLayerVisible,
     sortedLayers,
-    hasMapImage
+    hasMapImage,
+    filteredRegions,
+    shouldShowRegions,
+    shouldShowLabels
   };
 };
 

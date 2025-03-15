@@ -56,4 +56,53 @@
 .leaflet-container {
   border-radius: 12px;
   overflow: hidden;
+}
+
+/* Стилизация кастомных маркеров растений */
+.custom-plant-marker {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.custom-plant-marker div {
+  transition: all 0.2s ease;
+}
+
+.custom-plant-marker div:hover {
+  transform: scale(1.2);
+}
+
+/* Стили для кластеров маркеров */
+.plant-cluster-icon {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.plant-cluster-icon div {
+  transition: all 0.2s ease;
+}
+
+.plant-cluster-icon div:hover {
+  transform: scale(1.1);
+}
+
+/* Анимация для появления кластеров */
+@keyframes clusterPulse {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.plant-cluster-icon div {
+  animation: clusterPulse 0.3s ease-out;
+}
+
+/* Анимация для маркеров при добавлении на карту */
+@keyframes markerPulse {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.custom-plant-marker div {
+  animation: markerPulse 0.3s ease-out;
 } 

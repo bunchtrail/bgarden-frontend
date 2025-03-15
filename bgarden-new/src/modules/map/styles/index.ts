@@ -4,6 +4,10 @@ import { COLORS, layoutClasses } from '@/styles/global-styles';
 // Импорт переопределений стилей Leaflet
 import './leaflet-overrides.css';
 
+// Импорт стилей для маркер-кластеров
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
 // Экспорт готовых констант для часто используемых стилей
 export const MAP_STYLES = {
   // Tailwind классы для карты

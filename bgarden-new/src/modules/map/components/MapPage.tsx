@@ -1,16 +1,19 @@
-import React, { useState, useCallback, useMemo, memo, ReactNode } from 'react';
-import { MapContainer, ZoomControl } from 'react-leaflet';
+import React, { useState, useCallback, useMemo, memo, ReactNode, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapData } from '../services/mapService';
+import { useNavigate } from 'react-router-dom';
 import { useMapConfig, MapConfigProvider } from '../contexts/MapConfigContext';
+import { MapProvider } from '../contexts/MapContext';
+import { MapData, getMapImageUrl } from '../services/mapService';
 import { RegionData } from '../types/mapTypes';
 import { MAP_STYLES } from '../styles';
 import { Card, LoadingSpinner } from '@/modules/ui';
 import { 
-  MapImageLayer, 
   MapBoundsHandler,
-  MapReadyHandler
+  MapReadyHandler,
+  BaseMapContainer,
+  ErrorView,
+  LoadingView
 } from './map-components';
 import { 
   MapLayersManager,
@@ -84,6 +87,7 @@ const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map)
   // Состояние для хранения границ изображения
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
   const { mapConfig } = useMapConfig();
+  const [imageBoundsCalculated, setImageBoundsCalculated] = useState(false);
   
   // Обработчик обновления данных
   const handleRefresh = useCallback(() => {
@@ -102,21 +106,10 @@ const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map)
     if (!mapImageUrl) return null;
     
     return (
-      <MapContainer
-        center={mapConfig.center}
-        zoom={mapConfig.zoom}
-        maxZoom={mapConfig.maxZoom}
-        minZoom={mapConfig.minZoom}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={false}
-        crs={L.CRS.Simple}
-        maxBounds={mapConfig.maxBounds}
-        maxBoundsViscosity={mapConfig.maxBoundsViscosity}
-        attributionControl={false}
-        className={mapConfig.lightMode ? MAP_STYLES.lightMode : ''}
+      <BaseMapContainer
+        mapConfig={mapConfig}
+        showControls={true}
       >
-        <ZoomControl position={mapConfig.zoomControlPosition} />
-        
         {/* Обработчик события ready */}
         {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
         
@@ -129,6 +122,7 @@ const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map)
           customLayers={customLayers}
           mapConfig={mapConfig}
           onRegionClick={onRegionClick}
+          highlightSelected={!mapConfig.lightMode}
         />
         
         {/* Обработчик границ карты */}
@@ -136,7 +130,7 @@ const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map)
 
         {/* Плагины */}
         {plugins}
-      </MapContainer>
+      </BaseMapContainer>
     );
   }, [
     mapImageUrl, 
@@ -175,15 +169,14 @@ const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map)
             />
 
             {/* Расчет границ изображения вне MapContainer */}
-            {mapImageUrl && (
-              <div style={{ display: 'none' }}>
-                <MapImageLayer 
-                  imageUrl={mapImageUrl} 
-                  bounds={imageBounds}
-                  setImageBounds={setImageBounds} 
-                />
-              </div>
-            )}
+            <ImageBoundsCalculator 
+                mapImageUrl={mapImageUrl} 
+                onBoundsCalculated={bounds => {
+                    setImageBounds(bounds);
+                    setImageBoundsCalculated(true);
+                }}
+                isCalculated={imageBoundsCalculated}
+            />
             
             {/* Содержимое контейнера карты */}
             {mapContainerContent}
@@ -210,12 +203,50 @@ const MapPage: React.FC<MapPageProps> = ({
 }) => {
   return (
     <MapConfigProvider initialConfig={initialConfig}>
-      <MapPageContent
-        {...contentProps}
-        onMapReady={onMapReady}
-      />
+      <MapProvider>
+        <MapPageContent
+          {...contentProps}
+          onMapReady={onMapReady}
+        />
+      </MapProvider>
     </MapConfigProvider>
   );
+};
+
+// Компонент для расчета границ изображения
+interface ImageBoundsCalculatorProps {
+    mapImageUrl: string | null;
+    onBoundsCalculated: (bounds: L.LatLngBoundsExpression) => void;
+    isCalculated: boolean;
+}
+
+const ImageBoundsCalculator: React.FC<ImageBoundsCalculatorProps> = ({
+    mapImageUrl, 
+    onBoundsCalculated,
+    isCalculated
+}) => {
+    // Расчет границ через useEffect
+    useEffect(() => {
+        if (!mapImageUrl || isCalculated) return;
+        
+        const img = new Image();
+        img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            console.log(`Загружено изображение: ${width}x${height}`);
+            
+            const calculatedBounds: L.LatLngBoundsExpression = [
+                [0, 0],
+                [height, width]
+            ];
+            
+            onBoundsCalculated(calculatedBounds);
+        };
+        
+        img.src = mapImageUrl;
+    }, [mapImageUrl, isCalculated, onBoundsCalculated]);
+    
+    return null;
 };
 
 export default MapPage; 
