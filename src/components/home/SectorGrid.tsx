@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SectorCard from '../SectorCard';
 import { PatternType } from '../AbstractPattern';
 import { SectorType } from '../../modules/specimens/types';
@@ -8,24 +8,21 @@ export const sectorData = [
   {
     id: SectorType.Dendrology,
     title: 'Дендрология',
-    description:
-      'Раздел ботаники, изучающий древесные растения (деревья, кустарники, кустарнички, древесные лианы).',
+    description: '',
     patternType: 'dendrology' as PatternType,
     imageUrl: '/images/sectors/dendrology.jpg'
   },
   {
     id: SectorType.Flora,
     title: 'Флора',
-    description:
-      'Исторически сложившаяся совокупность всех видов растений на определённой территории.',
+    description: '',
     patternType: 'flora' as PatternType,
     imageUrl: '/images/sectors/flora.jpg'
   },
   {
     id: SectorType.Flowering,
     title: 'Цветоводство',
-    description:
-      'Искусство выращивания декоративно-цветущих растений как в открытом, так и в защищённом грунте.',
+    description: '',
     patternType: 'flowering' as PatternType,
     imageUrl: '/images/sectors/flowering.jpg'
   },
@@ -36,19 +33,34 @@ interface SectorGridProps {
 }
 
 const SectorGrid: React.FC<SectorGridProps> = ({ className = '' }) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 transform-gpu ${className}`}>
-      {sectorData.map((sector) => (
-        <div key={sector.id} className="transform-gpu transition-transform duration-300 hover:translate-y-[-4px] hover:shadow-lg will-change-transform">
-          <SectorCard
-            key={sector.id}
-            id={sector.id}
-            title={sector.title}
-            description={sector.description}
-            patternType={sector.patternType}
-          />
-        </div>
-      ))}
+    <div className="mb-12">
+      <div className={`grid grid-cols-1 md:grid-cols-3 gap-8 transform-gpu relative ${className}`}>
+        {sectorData.map((sector, index) => (
+          <div 
+            key={sector.id} 
+            className={`transform-gpu transition-all duration-500 will-change-transform
+                      ${hoveredIndex === index ? 'z-10 scale-[1.02]' : 
+                        hoveredIndex !== null ? 'scale-[0.99] opacity-85' : ''}`}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div className={`transition-all duration-500 shadow-md
+                          ${hoveredIndex === index ? 'shadow-lg' : ''}`}>
+              <SectorCard
+                id={sector.id}
+                title={sector.title}
+                description={sector.description}
+                patternType={sector.patternType}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      
     </div>
   );
 };

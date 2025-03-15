@@ -10,17 +10,17 @@ export interface TimeInfo {
 const ICONS = {
   morning: (
     <svg className="w-8 h-8 text-[#E97451]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-      <path fillRule="evenodd" d="M12 1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 1.5Zm5.05 3.2a.75.75 0 0 1 1.06 0 .75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06ZM18.75 12a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75ZM12 18a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 18Zm-8.25-6a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Zm5.05-6.76a.75.75 0 0 1 0 1.06L7.76 7.76a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Zm-1.06 12.46a.75.75 0 0 1 1.06 0l1.06-1.06a.75.75 0 0 1-1.06-1.06l-1.06 1.06a.75.75 0 0 1 0 1.06Zm8.46-10.34a.75.75 0 0 0-1.06-1.06L14.1 7.76a.75.75 0 0 0 1.06 1.06l1.06-1.06Zm-10.34 9.28a.75.75 0 0 0 0-1.06l-1.06-1.06a.75.75 0 0 0-1.06 1.06l1.06 1.06a.75.75 0 0 0 1.06 0Z" clipRule="evenodd" />
+      <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
     </svg>
   ),
   day: (
     <svg className="w-8 h-8 text-[#3882F6]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-      <path fillRule="evenodd" d="M12 1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 1.5Zm5.05 3.2a.75.75 0 0 1 1.06 0 .75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06ZM18.75 12a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75ZM12 18a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 18Zm-8.25-6a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Zm5.05-6.76a.75.75 0 0 1 0 1.06L7.76 7.76a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Zm-1.06 12.46a.75.75 0 0 1 1.06 0l1.06-1.06a.75.75 0 0 1-1.06-1.06l-1.06 1.06a.75.75 0 0 1 0 1.06Zm8.46-10.34a.75.75 0 0 0-1.06-1.06L14.1 7.76a.75.75 0 0 0 1.06 1.06l1.06-1.06Zm-10.34 9.28a.75.75 0 0 0 0-1.06l-1.06-1.06a.75.75 0 0 0-1.06 1.06l1.06 1.06a.75.75 0 0 0 1.06 0Z" clipRule="evenodd" />
+      <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
     </svg>
   ),
   evening: (
     <svg className="w-8 h-8 text-[#E97451]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.53 16.28a.75.75 0 0 1-1.06 0 7.5 7.5 0 0 1 0-10.6.75.75 0 0 1 1.06 1.06 6 6 0 0 0 0 8.48.75.75 0 0 1 0 1.06ZM15.72 13.1a.75.75 0 0 1-1.06 0 4.5 4.5 0 0 1 0-6.36.75.75 0 1 1 1.06 1.06 3 3 0 0 0 0 4.24.75.75 0 0 1 0 1.06ZM9.34 13.1a.75.75 0 0 1-1.06 0 4.5 4.5 0 0 1 0-6.36.75.75 0 0 1 1.06 1.06 3 3 0 0 0 0 4.24.75.75 0 0 1 0 1.06ZM6.15 16.28a.75.75 0 0 1-1.06 0 7.5 7.5 0 0 1 0-10.6.75.75 0 0 1 1.06 1.06 6 6 0 0 0 0 8.48.75.75 0 0 1 0 1.06ZM2.96 19.46a.75.75 0 0 1-1.06 0 10.5 10.5 0 0 1 0-14.84.75.75 0 1 1 1.06 1.06 9 9 0 0 0 0 12.72.75.75 0 0 1 0 1.06ZM18.9 19.46a.75.75 0 0 1-1.06 0 9 9 0 0 0 0-12.72.75.75 0 1 1 1.06-1.06 10.5 10.5 0 0 1 0 14.84.75.75 0 0 1-1.06 0Z" />
+      <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
     </svg>
   ),
   night: (
@@ -165,6 +165,15 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
     return '';
   }, [timeInfo.textColor]);
 
+  // Определяем класс анимации в зависимости от типа иконки
+  const iconAnimationClass = useMemo(() => {
+    if (timeInfo.icon === ICONS.morning) return 'morning-animation';
+    if (timeInfo.icon === ICONS.day) return 'day-animation';
+    if (timeInfo.icon === ICONS.evening) return 'evening-animation';
+    if (timeInfo.icon === ICONS.night) return 'night-animation';
+    return '';
+  }, [timeInfo.icon]);
+
   return (
     <div className="mb-8 pt-2">
       <div className="flex items-center overflow-hidden">
@@ -172,6 +181,7 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           className={`mr-3 transition-all duration-700 ease-out transform 
             ${animationStage >= 1 ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'} 
             ${glowColor}
+            ${animationStage >= 1 ? iconAnimationClass : ''}
             ${animationStage >= 4 ? 'pulse-effect' : ''}`}
         >
           {timeInfo.icon}
@@ -216,8 +226,79 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
         .glow-orange { filter: drop-shadow(0 0 3px rgba(233, 116, 81, 0.3)); }
         .glow-blue { filter: drop-shadow(0 0 3px rgba(56, 130, 246, 0.3)); }
         .glow-indigo { filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.3)); }
+        
+        /* Базовая пульсация */
         .pulse-effect { animation: pulse-animation 2s infinite ease-in-out; }
         @keyframes pulse-animation { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        /* Анимация для утренней иконки - восход с сиянием */
+        .morning-animation {
+          animation: morning-appear 1.5s ease-out forwards, morning-shine 4s ease-in-out 1.5s infinite;
+        }
+        @keyframes morning-appear {
+          0% { transform: translateY(10px) scale(0.5); opacity: 0; }
+          60% { transform: translateY(-5px) scale(1.1); opacity: 0.9; }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes morning-shine {
+          0% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.3)); }
+          50% { filter: drop-shadow(0 0 8px rgba(233, 116, 81, 0.6)); }
+          100% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.3)); }
+        }
+        
+        /* Анимация для дневной иконки - вращение и масштабирование */
+        .day-animation {
+          animation: day-appear 1.2s ease-out forwards, day-rotate 10s linear 1.2s infinite;
+          transform-origin: center;
+        }
+        @keyframes day-appear {
+          0% { transform: scale(0.1) rotate(180deg); opacity: 0; }
+          50% { transform: scale(1.2) rotate(-20deg); opacity: 0.5; }
+          100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        @keyframes day-rotate {
+          0% { transform: rotate(0); }
+          25% { transform: rotate(5deg) scale(1.02); }
+          50% { transform: rotate(0) scale(1); }
+          75% { transform: rotate(-5deg) scale(1.02); }
+          100% { transform: rotate(0) scale(1); }
+        }
+        
+        /* Анимация для вечерней иконки - волновой эффект */
+        .evening-animation {
+          animation: evening-appear 1.3s ease-out forwards, evening-wave 6s ease-in-out 1.3s infinite;
+        }
+        @keyframes evening-appear {
+          0% { transform: translateX(-15px) scale(0.8); opacity: 0; }
+          70% { transform: translateX(5px) scale(1); opacity: 0.8; }
+          100% { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @keyframes evening-wave {
+          0% { transform: translateX(0); }
+          25% { transform: translateX(-2px) rotate(-5deg); }
+          50% { transform: translateX(0) rotate(0); }
+          75% { transform: translateX(2px) rotate(5deg); }
+          100% { transform: translateX(0) rotate(0); }
+        }
+        
+        /* Анимация для ночной иконки - мерцание */
+        .night-animation {
+          animation: night-appear 1.8s ease-out forwards, night-twinkle 5s ease-in-out 1.8s infinite;
+        }
+        @keyframes night-appear {
+          0% { transform: scale(0.4) rotate(-30deg); opacity: 0; }
+          40% { transform: scale(1.1) rotate(10deg); opacity: 0.6; }
+          70% { transform: scale(0.9) rotate(-5deg); opacity: 0.9; }
+          100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        @keyframes night-twinkle {
+          0% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.3)); }
+          25% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5)); transform: scale(1.03); }
+          50% { filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.7)); transform: scale(1); }
+          75% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5)); transform: scale(0.98); }
+          100% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.3)); transform: scale(1); }
+        }
+        
         .hover-effect { transition: all 0.3s ease; position: relative; }
         .hover-effect:hover { transform: translateY(-2px); }
       `}</style>

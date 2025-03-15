@@ -17,8 +17,7 @@ export const employeeTools: Tool[] = [
   {
     id: 'specimens',
     title: 'Каталог растений',
-    description:
-      'Управление каталогом всех видов растений, представленных в ботаническом саду.',
+    description: '',
     link: '/specimens',
     color: 'text-[#3882F6]',
     icon: (
@@ -30,8 +29,7 @@ export const employeeTools: Tool[] = [
   {
     id: 'map',
     title: 'Карта сада',
-    description:
-      'Интерактивная карта ботанического сада с возможностью просмотра и управления расположением растений.',
+    description: '',
     link: '/map',
     color: 'text-[#E97451]',
     icon: (
@@ -43,8 +41,7 @@ export const employeeTools: Tool[] = [
   {
     id: 'expositions',
     title: 'Экспозиции',
-    description:
-      'Управление временными и постоянными экспозициями ботанического сада.',
+    description: '',
     link: '/expositions',
     color: 'text-[#6366F1]',
     icon: (
@@ -62,8 +59,7 @@ export const adminTools: Tool[] = [
   {
     id: 'admin',
     title: 'Административная панель',
-    description:
-      'Доступ к расширенным административным функциям и настройкам системы.',
+    description: '',
     link: '/admin',
     color: 'text-[#30D158]',
     icon: (
@@ -85,21 +81,15 @@ const UserTools: React.FC<UserToolsProps> = ({ userRole }) => {
       <div className="flex flex-wrap gap-4 justify-center">
         {employeeTools.map((tool) => (
           <Link key={tool.id} to={tool.link} 
-                className="flex items-center rounded-full px-4 py-2 border border-[#E5E5EA] shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#D1D1D6] group">
-            <span className={`${tool.color} p-1.5 rounded-full mr-2.5 transition-all duration-300 group-hover:scale-110`}>
-              {tool.icon}
-            </span>
-            <span className="text-sm font-medium text-[#1D1D1F]">{tool.title}</span>
+                className="flex items-center rounded-full px-5 py-2.5 border border-[#E5E5EA] shadow-sm transition-all duration-500 hover:shadow-md hover:border-[#D1D1D6] hover:bg-[#F9F9FB] group">
+            <span className={`text-sm font-medium text-[#1D1D1F] group-hover:${tool.color} transition-colors duration-300`}>{tool.title}</span>
           </Link>
         ))}
 
         {userRole === UserRole.Administrator && (
           <Link to='/admin' 
-                className="flex items-center rounded-full px-4 py-2 border border-[#E5E5EA] shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#D1D1D6] group">
-            <span className="text-[#30D158] p-1.5 rounded-full mr-2.5 transition-all duration-300 group-hover:scale-110">
-              {adminTools[0].icon}
-            </span>
-            <span className="text-sm font-medium text-[#1D1D1F]">Административная панель</span>
+                className="flex items-center rounded-full px-5 py-2.5 border border-[#E5E5EA] shadow-sm transition-all duration-500 hover:shadow-md hover:border-[#D1D1D6] hover:bg-[#F9F9FB] group">
+            <span className="text-sm font-medium text-[#1D1D1F] group-hover:text-[#30D158] transition-colors duration-300">Административная панель</span>
           </Link>
         )}
       </div>

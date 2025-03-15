@@ -5,7 +5,6 @@
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_14-03-2025.md` (15.8 KB)
     - `Структура_bgarden-frontend_от_15-03-2025.md` (16.2 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
@@ -36,13 +35,13 @@
       - **home** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\home)`
         - `AuthenticatedHomePage.tsx` (1.1 KB)
         - `index.ts` (431.0 B)
-        - `PublicHomePage.tsx` (4.1 KB)
-        - `SectorGrid.tsx` (2.0 KB)
-        - `TimeBasedGreeting.tsx` (10.7 KB)
-        - `UserTools.tsx` (6.1 KB)
+        - `PublicHomePage.tsx` (2.2 KB)
+        - `SectorGrid.tsx` (2.1 KB)
+        - `TimeBasedGreeting.tsx` (13.9 KB)
+        - `UserTools.tsx` (5.3 KB)
       - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\icons)`
       - `Navbar.tsx` (5.1 KB)
-      - `SectorCard.tsx` (3.0 KB)
+      - `SectorCard.tsx` (2.9 KB)
       - `SectorSelector.tsx` (2.2 KB)
       - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\ui)`
         - `Chip.tsx` (839.0 B)
