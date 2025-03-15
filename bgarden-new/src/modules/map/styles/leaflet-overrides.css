@@ -2,60 +2,76 @@
 
 /* Стили для тултипов на карте */
 .leaflet-tooltip {
-  background-color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   border: none !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  padding: 0.75rem !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.85rem !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  min-width: 150px;
+  min-width: 160px;
   max-width: 300px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  transform: translateY(0);
+  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+}
+
+.leaflet-tooltip-top {
+  margin-bottom: 8px !important;
 }
 
 .leaflet-tooltip strong {
   color: #1D1D1F;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .leaflet-tooltip p {
   color: #86868B;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   margin: 0.25rem 0;
+  line-height: 1.4;
 }
 
 /* Стили для элементов управления картой */
 .leaflet-control-zoom {
   border: none !important;
   border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
   overflow: hidden;
 }
 
 .leaflet-control-zoom a {
-  background-color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   color: #1D1D1F !important;
-  border: 1px solid #E5E5EA !important;
-  width: 34px !important;
-  height: 34px !important;
-  line-height: 34px !important;
+  border: 1px solid rgba(229, 229, 234, 0.8) !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
   font-size: 18px !important;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .leaflet-control-zoom a:hover {
   background-color: #F5F5F7 !important;
   color: #0A84FF !important;
+  transform: scale(1.05);
+}
+
+.leaflet-control-zoom a:active {
+  transform: scale(0.98);
 }
 
 /* Удаление теней и рамок для контейнера карты */
 .leaflet-container {
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.07);
+  background-color: #F5F5F7 !important;
 }
 
 /* Стилизация кастомных маркеров растений */
@@ -65,11 +81,17 @@
 }
 
 .custom-plant-marker div {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
 }
 
 .custom-plant-marker div:hover {
-  transform: scale(1.2);
+  transform: scale(1.2) translateY(-3px);
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+}
+
+.custom-plant-marker div:active {
+  transform: scale(1.1) translateY(-1px);
 }
 
 /* Стили для кластеров маркеров */
@@ -79,30 +101,75 @@
 }
 
 .plant-cluster-icon div {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
 }
 
 .plant-cluster-icon div:hover {
-  transform: scale(1.1);
+  transform: scale(1.15) translateY(-3px);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
 }
 
 /* Анимация для появления кластеров */
 @keyframes clusterPulse {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  50% { transform: scale(1.05); opacity: 0.9; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.8); opacity: 0.7; filter: blur(2px); }
+  50% { transform: scale(1.08); opacity: 0.9; filter: blur(0px); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0px); }
 }
 
 .plant-cluster-icon div {
-  animation: clusterPulse 0.3s ease-out;
+  animation: clusterPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Анимация для маркеров при добавлении на карту */
 @keyframes markerPulse {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.5) translateY(10px); opacity: 0; }
+  70% { transform: scale(1.1) translateY(-3px); opacity: 0.9; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .custom-plant-marker div {
-  animation: markerPulse 0.3s ease-out;
+  animation: markerPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Стили для светлого режима карты */
+.leaflet-light-mode {
+  filter: brightness(110%) saturate(65%) contrast(95%);
+  transition: filter 0.4s ease;
+}
+
+/* Анимация для масштабирования карты */
+@keyframes mapZoomAnimation {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.leaflet-zoom-animated {
+  animation: mapZoomAnimation 0.3s ease-out;
+}
+
+/* Улучшенные стили для попапов */
+.leaflet-popup-content-wrapper {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.leaflet-popup-tip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #86868B !important;
+  font-size: 20px !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #0A84FF !important;
+  transform: scale(1.1);
 } 

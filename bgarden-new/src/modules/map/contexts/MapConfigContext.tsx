@@ -23,6 +23,7 @@ export interface MapConfig {
   visibleLayers: string[];
   showTooltips: boolean;
   showLabels: boolean;
+  showMarkers: boolean; // Показывать/скрывать маркеры на карте
   zoomLevel: number;
   availableLayers: string[];
   showControls: boolean;
@@ -44,6 +45,7 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showTooltips: true,
   showLabels: true,
+  showMarkers: true, // По умолчанию маркеры отображаются
   zoomLevel: 1,
   availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS, MAP_LAYERS.LABELS],
   showControls: true,

@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 import { 
   LayerSelector, 
@@ -7,14 +7,21 @@ import {
   PanelHeader,
   ControlPanelSection
 } from './index';
+import { animationClasses } from '../../../../styles/global-styles';
+
+// Определяем типы режимов панели
+export type PanelMode = 'full' | 'light' | 'minimal' | 'custom';
 
 interface MapControlPanelProps {
   className?: string;
+  // Режим панели управления
+  panelMode?: PanelMode;
   showLayerSelector?: boolean;
   showModeToggle?: boolean;
   showTooltipToggle?: boolean;
   showLabelToggle?: boolean;
   showClusteringToggle?: boolean;
+  showMarkerToggle?: boolean;
   onClose?: () => void;
   customSections?: ControlPanelSection[];
   children?: ReactNode;
@@ -29,11 +36,13 @@ interface MapControlPanelProps {
  */
 const MapControlPanel: React.FC<MapControlPanelProps> = ({
   className = '',
+  panelMode = 'full',
   showLayerSelector = true,
   showModeToggle = true,
   showTooltipToggle = true,
   showLabelToggle = true,
   showClusteringToggle = true,
+  showMarkerToggle = false,
   onClose,
   customSections = [],
   children,
@@ -46,6 +55,55 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
     toggleLightMode, 
     updateMapConfig 
   } = useMapConfig();
+  
+  // Состояние для анимации
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Настройки видимости элементов в зависимости от режима
+  const getPanelConfig = () => {
+    switch (panelMode) {
+      case 'light':
+        return {
+          showLayerSelector: false,
+          showModeToggle: true,
+          showTooltipToggle: false,
+          showLabelToggle: true,
+          showClusteringToggle: true,
+          showMarkerToggle: true
+        };
+      case 'minimal':
+        return {
+          showLayerSelector: false,
+          showModeToggle: false,
+          showTooltipToggle: false,
+          showLabelToggle: false,
+          showClusteringToggle: true,
+          showMarkerToggle: true
+        };
+      case 'custom':
+        // Для режима custom используем значения, переданные в props
+        return {
+          showLayerSelector,
+          showModeToggle,
+          showTooltipToggle,
+          showLabelToggle,
+          showClusteringToggle,
+          showMarkerToggle
+        };
+      case 'full':
+      default:
+        return {
+          showLayerSelector: true,
+          showModeToggle: true,
+          showTooltipToggle: true,
+          showLabelToggle: true,
+          showClusteringToggle: true,
+          showMarkerToggle: false
+        };
+    }
+  };
+
+  const config = getPanelConfig();
 
   // Обработчик изменения конфигурации с поддержкой внешнего обработчика
   const handleConfigChange = (key: string, value: boolean | string | number) => {
@@ -55,70 +113,141 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
     }
   };
 
+  // Современная стилизация с использованием стекломорфизма
   const panelStyles = `
-    bg-white bg-opacity-90 rounded-lg shadow-lg 
-    p-4 absolute top-4 right-4 z-[1000] 
-    max-w-xs w-full border border-gray-200
+    backdrop-blur-md bg-white/75
+    border border-white/20 
+    shadow-lg
+    rounded-2xl
+    absolute top-4 right-4 z-[1000] 
+    max-w-xs w-full
+    overflow-hidden
+    transition-all duration-300 ease-in-out
+    ${isExpanded ? 'opacity-100' : 'opacity-90 hover:opacity-100'}
+    ${animationClasses.transition}
     ${className}
   `;
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div className={panelStyles}>
-      <PanelHeader customHeader={header} onClose={onClose} />
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/50">
+        <button 
+          onClick={toggleExpand}
+          className="mr-2 text-gray-500 hover:text-gray-700 transition-colors"
+          aria-label={isExpanded ? "Свернуть панель" : "Развернуть панель"}
+        >
+          {isExpanded ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+        <PanelHeader customHeader={header || <h3 className="text-gray-800 font-medium">Настройки карты</h3>} onClose={onClose} />
+      </div>
 
-      {showModeToggle && (
-        <ModeToggle 
-          lightMode={mapConfig.lightMode} 
-          onToggle={() => {
-            toggleLightMode();
-            if (onConfigChange) {
-              onConfigChange('lightMode', !mapConfig.lightMode);
-            }
-          }}
-        />
-      )}
+      {isExpanded && (
+        <div className="p-4">
+          {config.showModeToggle && (
+            <div className="mb-4">
+              <ModeToggle 
+                lightMode={mapConfig.lightMode} 
+                onToggle={() => {
+                  toggleLightMode();
+                  if (onConfigChange) {
+                    onConfigChange('lightMode', !mapConfig.lightMode);
+                  }
+                }}
+              />
+            </div>
+          )}
 
-      {showLayerSelector && (
-        <LayerSelector className="my-3" />
-      )}
+          {config.showLayerSelector && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Слои карты</h4>
+              <div className="bg-white/50 p-2 rounded-lg">
+                <LayerSelector />
+              </div>
+            </div>
+          )}
 
-      {showTooltipToggle && (
-        <ConfigCheckbox 
-          label="Показывать подсказки"
-          checked={mapConfig.showTooltips}
-          onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
-        />
-      )}
+          {(config.showTooltipToggle || config.showLabelToggle || config.showClusteringToggle || config.showMarkerToggle) && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Настройки отображения</h4>
+              <div className="bg-white/50 p-3 rounded-lg space-y-3">
+                {config.showTooltipToggle && (
+                  <ConfigCheckbox 
+                    label="Показывать подсказки"
+                    checked={mapConfig.showTooltips}
+                    onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
+                  />
+                )}
 
-      {showLabelToggle && (
-        <ConfigCheckbox 
-          label="Показывать названия"
-          checked={mapConfig.showLabels}
-          onChange={() => handleConfigChange('showLabels', !mapConfig.showLabels)}
-        />
-      )}
+                {config.showLabelToggle && (
+                  <ConfigCheckbox 
+                    label="Показывать названия"
+                    checked={mapConfig.showLabels}
+                    onChange={() => handleConfigChange('showLabels', !mapConfig.showLabels)}
+                  />
+                )}
 
-      {showClusteringToggle && (
-        <ConfigCheckbox 
-          label="Группировать маркеры"
-          checked={mapConfig.enableClustering}
-          onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
-        />
-      )}
+                {config.showClusteringToggle && (
+                  <ConfigCheckbox 
+                    label="Группировать маркеры"
+                    checked={mapConfig.enableClustering}
+                    onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
+                  />
+                )}
 
-      {/* Пользовательские секции */}
-      {customSections.map(section => (
-        <div key={section.id} className="mb-3">
-          {section.title && <p className="text-sm text-gray-700 mb-2">{section.title}</p>}
-          {section.content}
+                {config.showMarkerToggle && (
+                  <ConfigCheckbox 
+                    label="Показывать маркеры"
+                    checked={mapConfig.showMarkers}
+                    onChange={() => handleConfigChange('showMarkers', !mapConfig.showMarkers)}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Пользовательские секции */}
+          {customSections.length > 0 && (
+            <div className="space-y-4">
+              {customSections.map(section => (
+                <div key={section.id} className="mb-3">
+                  {section.title && (
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">{section.title}</h4>
+                  )}
+                  <div className="bg-white/50 p-3 rounded-lg">
+                    {section.content}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Дополнительное содержимое через children */}
+          {children && (
+            <div className="mt-4">
+              {children}
+            </div>
+          )}
+
+          {/* Нижний колонтитул панели */}
+          {footer && (
+            <div className="mt-4 pt-3 border-t border-gray-200/50 text-sm text-gray-500">
+              {footer}
+            </div>
+          )}
         </div>
-      ))}
-
-      {/* Дополнительное содержимое через children */}
-      {children}
-
-      {/* Нижний колонтитул панели */}
-      {footer && <div className="mt-3 pt-2 border-t border-gray-200">{footer}</div>}
+      )}
     </div>
   );
 };

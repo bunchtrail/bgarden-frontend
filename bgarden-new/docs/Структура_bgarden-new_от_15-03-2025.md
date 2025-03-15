@@ -75,10 +75,10 @@
       - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components)`
           - **control-panel** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\control-panel)`
-            - `ConfigCheckbox.tsx` (598.0 B)
+            - `ConfigCheckbox.tsx` (1.6 KB)
             - `index.ts` (420.0 B)
             - `LayerSelector.tsx` (1.4 KB)
-            - `MapControlPanel.tsx` (3.7 KB)
+            - `MapControlPanel.tsx` (8.9 KB)
             - `ModeToggle.tsx` (945.0 B)
             - `PanelHeader.tsx` (1011.0 B)
             - **sections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\control-panel\sections)`
@@ -107,7 +107,7 @@
             - `index.ts` (340.0 B)
           - `MapPage.tsx` (8.1 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\contexts)`
-          - `MapConfigContext.tsx` (3.9 KB)
+          - `MapConfigContext.tsx` (4.1 KB)
           - `MapContext.tsx` (1.8 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\docs)`
           - `README.md` (2.1 KB)
@@ -124,8 +124,8 @@
           - `plantService.ts` (3.7 KB)
           - `regionService.ts` (4.3 KB)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\styles)`
-          - `index.ts` (1.7 KB)
-          - `leaflet-overrides.css` (2.8 KB)
+          - `index.ts` (4.4 KB)
+          - `leaflet-overrides.css` (5.0 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\types)`
           - `mapTypes.ts` (962.0 B)
       - **navigation** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation)`
