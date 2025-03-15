@@ -2,8 +2,8 @@
 
 import { Area } from '../contexts/MapContext';
 import { RegionData } from '../types/mapTypes';
-import httpClient from '../../../services/httpClient';
-import { logError, logWarning } from '../../../utils/logger';
+import httpClient from '@/services/httpClient';
+import { logError, logWarning } from '@/utils/logger';
 
 // Функция для получения всех областей (регионов) с сервера
 export const getAllRegions = async (): Promise<RegionData[]> => {

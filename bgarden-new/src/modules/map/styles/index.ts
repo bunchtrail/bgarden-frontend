@@ -1,5 +1,5 @@
 // Экспорт стилей модуля карты
-import { COLORS, layoutClasses } from '../../../styles/global-styles';
+import { COLORS, layoutClasses } from '@/styles/global-styles';
 
 // Импорт переопределений стилей Leaflet
 import './leaflet-overrides.css';

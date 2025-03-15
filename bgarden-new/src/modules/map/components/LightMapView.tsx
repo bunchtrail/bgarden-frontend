@@ -5,14 +5,14 @@ import 'leaflet/dist/leaflet.css';
 import { getMapImageUrl, MapData } from '../services/mapService';
 import { RegionData } from '../types/mapTypes';
 import { MAP_STYLES } from '../styles';
-import { LoadingSpinner } from '../../ui';
+import { LoadingSpinner } from '@/modules/ui';
 import { 
   MapRegionsLayer, 
   MapImageLayer, 
   MapBoundsHandler,
   LoadingView
 } from './map-components';
-import { useMapConfig, MapConfigProvider, MapConfig } from '../context/MapConfigContext';
+import { useMapConfig, MapConfigProvider, MapConfig } from '../contexts/MapConfigContext';
 
 // Конфигурация для облегченной версии карты
 const LIGHT_CONFIG: Partial<MapConfig> = {

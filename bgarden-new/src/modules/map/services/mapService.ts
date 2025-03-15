@@ -1,8 +1,8 @@
 // Сервис взаимодействия с API карты 
 // Форма добавления растения 
 
-import httpClient from '../../../services/httpClient';
-import { logError } from '../../../utils/logger';
+import httpClient from '@/services/httpClient';
+import { logError } from '@/utils/logger';
 
 export interface MapData {
   id: number;

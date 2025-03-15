@@ -1,9 +1,10 @@
 - **bgarden-new** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new)`
   - `craco.config.js` (538.0 B)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\docs)`
+    - `refactoring-map-module.md` (6.2 KB)
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (8.9 KB)
-    - `Структура_bgarden-new_от_15-03-2025.md` (14.3 KB)
+    - `Структура_bgarden-new_от_15-03-2025.md` (15.7 KB)
   - `package-lock.json` (686.3 KB)
   - `package.json` (1.4 KB)
   - `postcss.config.js` (82.0 B)
@@ -72,27 +73,49 @@
         - `index.ts` (96.0 B)
       - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components)`
+          - **control-panel** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\control-panel)`
+            - `ConfigCheckbox.tsx` (598.0 B)
+            - `index.ts` (508.0 B)
+            - `LayerSelector.tsx` (1.2 KB)
+            - `MapControlPanel.tsx` (4.4 KB)
+            - `ModeToggle.tsx` (945.0 B)
+            - `PanelHeader.tsx` (1011.0 B)
+            - **sections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\control-panel\sections)`
+          - `index.ts` (318.0 B)
           - `LightMapView.tsx` (4.4 KB)
           - **map-components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-components)`
             - `EmptyMapView.tsx` (1.1 KB)
             - `ErrorView.tsx` (1.3 KB)
-            - `index.ts` (426.0 B)
+            - `index.ts` (648.0 B)
             - `LoadingView.tsx` (487.0 B)
             - `MapBoundsHandler.tsx` (706.0 B)
-            - `MapControlPanel.tsx` (5.2 KB)
             - `MapImageLayer.tsx` (1.9 KB)
+            - `MapReadyHandler.tsx` (754.0 B)
             - `MapRegionsLayer.tsx` (3.1 KB)
-          - `MapPage.tsx` (6.9 KB)
-        - **context** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\context)`
-          - `MapConfigContext.tsx` (3.2 KB)
+          - **map-content** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-content)`
+            - `index.ts` (80.0 B)
+            - `MapContentStateRenderer.tsx` (1.4 KB)
+          - **map-controls** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-controls)`
+            - `index.ts` (72.0 B)
+            - `MapControlsRenderer.tsx` (2.0 KB)
+          - **map-layers** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-layers)`
+            - `index.ts` (66.0 B)
+            - `MapLayersManager.tsx` (2.9 KB)
+          - **map-submodules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-submodules)`
+            - `index.ts` (340.0 B)
+          - `MapPage.tsx` (7.2 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\contexts)`
+          - `MapConfigContext.tsx` (3.2 KB)
           - `MapContext.tsx` (1.8 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\docs)`
           - `README.md` (2.1 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\hooks)`
-          - `index.ts` (82.0 B)
+          - `index.ts` (237.0 B)
+          - `useControlPanel.ts` (1.4 KB)
           - `useMap.ts` (333.0 B)
-        - `index.ts` (1.0 KB)
+          - `useMapData.ts` (4.1 KB)
+          - `useMapLayers.ts` (1.3 KB)
+        - `index.ts` (1.5 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\services)`
           - `index.ts` (294.0 B)
           - `mapService.ts` (1.6 KB)

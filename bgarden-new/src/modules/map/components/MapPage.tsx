@@ -1,164 +1,153 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback, useMemo, memo, ReactNode } from 'react';
 import { MapContainer, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
-import { getAllRegions, convertRegionsToAreas } from '../services/regionService';
-import { useMap as useMapHook } from '../hooks';
-import { useMapConfig, MapConfigProvider } from '../context/MapConfigContext';
+import { MapData } from '../services/mapService';
+import { useMapConfig, MapConfigProvider } from '../contexts/MapConfigContext';
 import { RegionData } from '../types/mapTypes';
 import { MAP_STYLES } from '../styles';
-import { Card, LoadingSpinner, Button } from '../../ui';
+import { Card, LoadingSpinner } from '@/modules/ui';
 import { 
-  MapRegionsLayer, 
   MapImageLayer, 
   MapBoundsHandler,
-  ErrorView,
-  EmptyMapView,
-  LoadingView,
-  MapControlPanel
+  MapReadyHandler
 } from './map-components';
+import { 
+  MapLayersManager,
+  MapControlsRenderer,
+  MapContentStateRenderer
+} from './map-submodules';
+import { useMapData, useControlPanel } from '../hooks';
 
-// Основной компонент карты с логикой
-const MapPageContent: React.FC = () => {
-  const [mapData, setMapData] = useState<MapData | null>(null);
-  const [regions, setRegions] = useState<RegionData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+// Интерфейс для пользовательских слоёв
+export interface CustomMapLayerProps {
+  isVisible: boolean;
+  config?: Record<string, any>;
+}
+
+export interface MapLayerProps extends CustomMapLayerProps {
+  layerId: string;
+  order: number;
+  component: React.ComponentType<CustomMapLayerProps>;
+}
+
+// Интерфейс для свойств основного компонента карты с поддержкой расширений
+interface MapPageContentProps {
+  extraControls?: ReactNode;
+  customLayers?: MapLayerProps[];
+  plugins?: ReactNode;
+  onRegionClick?: (regionId: string) => void;
+  controlPanelPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+  showControls?: boolean;
+  onDataLoaded?: (data: { mapData: MapData | null, regions: RegionData[] }) => void;
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Основной компонент содержимого карты 
+ * Инкапсулирует логику работы с картой и предоставляет возможности расширения
+ */
+const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map) => void }> = memo(({
+  extraControls,
+  customLayers = [],
+  plugins,
+  onRegionClick,
+  onMapReady,
+  controlPanelPosition = 'topRight',
+  showControls = true,
+  onDataLoaded,
+  onError
+}) => {
+  // Используем хук для загрузки данных карты
+  const {
+    mapData,
+    regions,
+    loading,
+    error,
+    mapImageUrl,
+    refreshMapData
+  } = useMapData({
+    autoLoad: true,
+    onDataLoaded,
+    onError
+  });
+
+  // Используем хук для панели управления
+  const {
+    showControlPanel,
+    toggleControlPanel,
+    controlPanelStyles
+  } = useControlPanel({
+    controlPanelPosition
+  });
+
+  // Состояние для хранения границ изображения
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
-  const [showControlPanel, setShowControlPanel] = useState<boolean>(false);
   const { mapConfig } = useMapConfig();
-  const { setAreas } = useMapHook();
   
-  useEffect(() => {
-    const fetchMapData = async () => {
-      try {
-        setLoading(true);
-        
-        // Получаем данные активной карты
-        const maps = await getActiveMap();
-        if (maps && maps.length > 0) {
-          setMapData(maps[0]);
-        }
-        
-        // Получаем регионы карты
-        const regionsData = await getAllRegions();
-        setRegions(regionsData);
-        
-        // Преобразуем данные регионов для MapContext
-        if (regionsData && regionsData.length > 0) {
-          const areasData = convertRegionsToAreas(regionsData);
-          setAreas(areasData);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Ошибка при загрузке данных карты:', err);
-        setError('Не удалось загрузить данные карты. Пожалуйста, попробуйте позже.');
-        setLoading(false);
-      }
-    };
+  // Обработчик обновления данных
+  const handleRefresh = useCallback(() => {
+    refreshMapData();
+  }, [refreshMapData]);
 
-    fetchMapData();
-  }, [setAreas]);
+  // Мемоизированный заголовок карты
+  const mapTitle = useMemo(() => {
+    return mapConfig.lightMode 
+      ? "Облегченная карта" 
+      : (mapData?.name || "Интерактивная карта ботанического сада");
+  }, [mapConfig.lightMode, mapData?.name]);
 
-  // Получаем URL изображения карты
-  const mapImageUrl = mapData ? getMapImageUrl(mapData) : null;
-
-  const handleRefresh = () => window.location.reload();
-
-  const toggleControlPanel = () => setShowControlPanel(prev => !prev);
-
-  // Проверяем, находится ли слой в видимых слоях
-  const isLayerVisible = (layerName: string) => {
-    return mapConfig.visibleLayers.includes(layerName);
-  };
-
-  // Рендер содержимого карты
-  const renderMapContent = () => {
-    if (loading) {
-      return <LoadingView message="Загрузка данных карты..." />;
-    }
-    
-    if (error) {
-      return <ErrorView error={error} onRefresh={handleRefresh} />;
-    }
-    
-    if (!mapImageUrl) {
-      return <EmptyMapView onRefresh={handleRefresh} />;
-    }
+  // Мемоизированный рендер содержимого карты Leaflet
+  const mapContainerContent = useMemo(() => {
+    if (!mapImageUrl) return null;
     
     return (
-      <div className={MAP_STYLES.mapContent}>
-        {/* Кнопка отображения панели настроек */}
-        <Button
-          variant="secondary"
-          size="small"
-          className="absolute top-4 right-4 z-[999]"
-          onClick={toggleControlPanel}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </Button>
-
-        {/* Панель управления картой */}
-        {showControlPanel && (
-          <MapControlPanel onClose={toggleControlPanel} />
-        )}
-
-        {/* Обработка изображения для расчета границ вне MapContainer */}
-        {isLayerVisible('imagery') && (
-          <MapImageLayer 
-            imageUrl={mapImageUrl} 
-            setImageBounds={setImageBounds} 
-          />
-        )}
+      <MapContainer
+        center={mapConfig.center}
+        zoom={mapConfig.zoom}
+        maxZoom={mapConfig.maxZoom}
+        minZoom={mapConfig.minZoom}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
+        crs={L.CRS.Simple}
+        maxBounds={mapConfig.maxBounds}
+        maxBoundsViscosity={mapConfig.maxBoundsViscosity}
+        attributionControl={false}
+        className={mapConfig.lightMode ? MAP_STYLES.lightMode : ''}
+      >
+        <ZoomControl position={mapConfig.zoomControlPosition} />
         
-        <MapContainer
-          center={mapConfig.center}
-          zoom={mapConfig.zoom}
-          maxZoom={mapConfig.maxZoom}
-          minZoom={mapConfig.minZoom}
-          style={{ height: '100%', width: '100%' }}
-          zoomControl={false}
-          crs={L.CRS.Simple}
-          maxBounds={mapConfig.maxBounds}
-          maxBoundsViscosity={mapConfig.maxBoundsViscosity}
-          attributionControl={false}
-          className={mapConfig.lightMode ? MAP_STYLES.lightMode : ''}
-        >
-          <ZoomControl position={mapConfig.zoomControlPosition} />
-          
-          {/* Слой изображения карты */}
-          {isLayerVisible('imagery') && (
-            <MapImageLayer 
-              imageUrl={mapImageUrl} 
-              bounds={imageBounds} 
-            />
-          )}
-          
-          {/* Слой регионов */}
-          {isLayerVisible('regions') && (
-            <MapRegionsLayer 
-              regions={regions} 
-              highlightSelected={!mapConfig.lightMode}
-              showTooltips={mapConfig.showTooltips}
-            />
-          )}
-          
-          {/* Обработчик границ карты */}
-          <MapBoundsHandler imageBounds={imageBounds} />
-        </MapContainer>
-      </div>
-    );
-  };
+        {/* Обработчик события ready */}
+        {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
+        
+        {/* Слои карты */}
+        <MapLayersManager 
+          visibleLayers={mapConfig.visibleLayers}
+          mapImageUrl={mapImageUrl}
+          imageBounds={imageBounds}
+          regions={regions}
+          customLayers={customLayers}
+          mapConfig={mapConfig}
+          onRegionClick={onRegionClick}
+        />
+        
+        {/* Обработчик границ карты */}
+        <MapBoundsHandler imageBounds={imageBounds} />
 
-  // Титул карты
-  const mapTitle = mapConfig.lightMode 
-    ? "Облегченная карта" 
-    : (mapData?.name || "Интерактивная карта ботанического сада");
+        {/* Плагины */}
+        {plugins}
+      </MapContainer>
+    );
+  }, [
+    mapImageUrl, 
+    mapConfig, 
+    onMapReady, 
+    regions, 
+    customLayers, 
+    onRegionClick, 
+    plugins, 
+    imageBounds
+  ]);
 
   return (
     <div className={MAP_STYLES.mapContainer}>
@@ -168,17 +157,63 @@ const MapPageContent: React.FC = () => {
         variant="elevated"
         contentClassName="p-0"
       >
-        {renderMapContent()}
+        <div className={MAP_STYLES.mapContent}>
+          {/* Компонент управления состоянием контента карты */}
+          <MapContentStateRenderer 
+            loading={loading} 
+            error={error} 
+            mapImageUrl={mapImageUrl} 
+            handleRefresh={handleRefresh}
+          >
+            {/* Элементы управления картой */}
+            <MapControlsRenderer 
+              showControls={showControls}
+              controlPanelStyles={controlPanelStyles}
+              toggleControlPanel={toggleControlPanel}
+              showControlPanel={showControlPanel}
+              extraControls={extraControls}
+            />
+
+            {/* Расчет границ изображения вне MapContainer */}
+            {mapImageUrl && (
+              <div style={{ display: 'none' }}>
+                <MapImageLayer 
+                  imageUrl={mapImageUrl} 
+                  bounds={imageBounds}
+                  setImageBounds={setImageBounds} 
+                />
+              </div>
+            )}
+            
+            {/* Содержимое контейнера карты */}
+            {mapContainerContent}
+          </MapContentStateRenderer>
+        </div>
       </Card>
     </div>
   );
-};
+});
 
-// Обертка с провайдером конфигурации
-const MapPage: React.FC = () => {
+// Интерфейс для публичного компонента карты
+export interface MapPageProps extends Omit<MapPageContentProps, 'onDataLoaded' | 'onError'> {
+  initialConfig?: Record<string, any>; // Начальная конфигурация для MapConfigProvider
+  onMapReady?: (map: any) => void; // Колбэк при готовности карты
+}
+
+/**
+ * Публичный компонент карты с провайдером конфигурации
+ */
+const MapPage: React.FC<MapPageProps> = ({
+  initialConfig,
+  onMapReady,
+  ...contentProps
+}) => {
   return (
-    <MapConfigProvider>
-      <MapPageContent />
+    <MapConfigProvider initialConfig={initialConfig}>
+      <MapPageContent
+        {...contentProps}
+        onMapReady={onMapReady}
+      />
     </MapConfigProvider>
   );
 };
