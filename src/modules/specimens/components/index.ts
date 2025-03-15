@@ -10,7 +10,6 @@ export { SpecimensListContainer as SpecimensList } from './specimens-list';
 export * from './SpecimenActions';
 export * from './SpecimenForm';
 export * from './SpecimensList';
-export * from './ErrorPanel';
 export * from './LoadingIndicator';
 
 // Стили

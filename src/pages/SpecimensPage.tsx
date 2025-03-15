@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  ErrorPanel,
   SpecimenActions,
   SpecimenForm,
   SpecimensList,
@@ -119,7 +118,6 @@ export const SpecimensPage: React.FC = () => {
 
   // Общее состояние загрузки и ошибок
   const isLoadingCombined = isLoading || referencesLoading;
-  const errorCombined = error || referencesError;
 
   // Функция для получения заголовка раздела в зависимости от типа сектора
   const getSectionTitle = () => {
@@ -290,9 +288,6 @@ export const SpecimensPage: React.FC = () => {
   return (
     <div className={`${containerClasses.page}`}>
       <h1 className={headingClasses.page}>{getSectionTitle()}</h1>
-
-      {/* Панель ошибок */}
-      <ErrorPanel message={errorCombined || ''}  className='mb-4' />
 
       <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
         {/* Левая колонка с панелью действий */}

@@ -10,7 +10,7 @@
 /bgarden-mobile/.pnp.js
 # testing
 /coverage
-
+/docs
 # production
 /build
 

@@ -4,8 +4,6 @@
       - `changes.mdc` (1.4 KB)
       - `specimens-styles.mdc` (3.3 KB)
       - `styles.mdc` (1.9 KB)
-  - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `Структура_bgarden-frontend_от_15-03-2025.md` (16.2 KB)
   - `icons_backup.tsx` (10.2 KB)
   - `package-lock.json` (674.1 KB)
   - `package.json` (1.5 KB)
@@ -178,10 +176,9 @@
           - `index.ts` (948.0 B)
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components)`
-          - `ErrorPanel.tsx` (4.2 KB)
           - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\icons)`
             - `index.tsx` (9.2 KB)
-          - `index.ts` (707.0 B)
+          - `index.ts` (677.0 B)
           - `LoadingIndicator.tsx` (4.2 KB)
           - **specimen-actions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-actions)`
             - `AdditionalActions.tsx` (3.5 KB)
@@ -272,7 +269,7 @@
       - `HomePage.tsx` (1.9 KB)
       - `MapPage.tsx` (190.0 B)
       - `NotFoundPage.tsx` (458.0 B)
-      - `SpecimensPage.tsx` (14.9 KB)
+      - `SpecimensPage.tsx` (14.7 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services)`
@@ -283,5 +280,6 @@
       - `index.ts` (366.0 B)
     - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\types)`
     - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\utils)`
+      - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\utils\hooks)`
   - `tailwind.config.js` (590.0 B)
   - `tsconfig.json` (561.0 B)
