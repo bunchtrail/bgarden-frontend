@@ -38,19 +38,28 @@
         - `TimeBasedGreeting.tsx` (13.9 KB)
         - `UserTools.tsx` (5.3 KB)
       - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\icons)`
+        - `index.tsx` (17.0 KB)
+        - `README.md` (4.6 KB)
       - `Navbar.tsx` (5.1 KB)
       - `SectorCard.tsx` (2.9 KB)
       - `SectorSelector.tsx` (2.2 KB)
       - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\components\ui)`
-        - `Chip.tsx` (839.0 B)
+        - `Chip.tsx` (1.2 KB)
         - `DraftSaveNotification.tsx` (938.0 B)
         - `Footer.tsx` (1.3 KB)
         - `Form.tsx` (2.7 KB)
+        - `FormExtended.tsx` (10.6 KB)
         - `Header.tsx` (1.4 KB)
-        - `index.ts` (394.0 B)
+        - `index.ts` (608.0 B)
+        - `LoadingIndicator.tsx` (4.3 KB)
         - `Table.tsx` (2.7 KB)
     - **config** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\config)`
       - `apiConfig.ts` (1.5 KB)
+    - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\docs)`
+      - `form-system-guide.md` (7.5 KB)
+    - **examples** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\examples)`
+      - `IconsExample.tsx` (5.6 KB)
+      - `UnifiedFormExample.tsx` (7.6 KB)
     - `index.css` (1.3 KB)
     - `index.tsx` (707.0 B)
     - `logo.svg` (2.6 KB)
@@ -84,6 +93,7 @@
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\expositions\services)`
           - `expositionService.ts` (2.5 KB)
           - `index.ts` (57.0 B)
+        - `styles.ts` (2.6 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\expositions\types)`
           - `index.ts` (579.0 B)
       - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map)`
@@ -139,6 +149,7 @@
           - `index.ts` (88.0 B)
           - `map.module.css` (32.9 KB)
           - `mapStyles.ts` (6.9 KB)
+        - `styles.ts` (4.1 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\types)`
           - `index.ts` (70.0 B)
           - `mapTypes.ts` (1009.0 B)
@@ -177,9 +188,9 @@
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components)`
           - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\icons)`
-            - `index.tsx` (9.2 KB)
+            - `index.tsx` (238.0 B)
           - `index.ts` (677.0 B)
-          - `LoadingIndicator.tsx` (4.2 KB)
+          - `LoadingIndicator.tsx` (343.0 B)
           - **specimen-actions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-actions)`
             - `AdditionalActions.tsx` (3.5 KB)
             - `ExportActions.tsx` (2.3 KB)
@@ -252,6 +263,7 @@
           - `phenologyService.ts` (2.9 KB)
           - `regionService.ts` (5.4 KB)
           - `specimenService.ts` (5.8 KB)
+        - `styles.ts` (3.7 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\types)`
           - `index.ts` (2.7 KB)
       - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\utils)`
@@ -271,12 +283,16 @@
       - `NotFoundPage.tsx` (458.0 B)
       - `SpecimensPage.tsx` (14.7 KB)
     - `react-app-env.d.ts` (41.0 B)
+    - **refactoring** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\refactoring)`
+      - `migration-guide.md` (7.6 KB)
+      - `README.md` (5.3 KB)
+      - `styles-guide.md` (10.2 KB)
     - `reportWebVitals.ts` (425.0 B)
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services)`
     - `setupTests.ts` (241.0 B)
     - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\styles)`
       - `animations.css` (1.3 KB)
-      - `global-styles.ts` (9.5 KB)
+      - `global-styles.ts` (13.4 KB)
       - `index.ts` (366.0 B)
     - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\types)`
     - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\utils)`

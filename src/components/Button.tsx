@@ -1,5 +1,5 @@
 import React from 'react';
-import { appStyles } from '../styles/global-styles';
+import { buttonClasses } from '../styles/global-styles';
 
 interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'warning' | 'danger' | 'success';
@@ -25,10 +25,10 @@ const Button: React.FC<ButtonProps> = ({
   icon,
 }) => {
   const getButtonClasses = () => {
-    let classes = `${appStyles.button.base} ${appStyles.button[variant]}`;
+    let classes = `${buttonClasses.base} ${buttonClasses[variant]}`;
 
     if (disabled) {
-      classes += ` ${appStyles.button.disabled}`;
+      classes += ` ${buttonClasses.disabled}`;
     }
 
     if (!fullWidth) {

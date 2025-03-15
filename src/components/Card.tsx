@@ -1,5 +1,5 @@
 import React from 'react';
-import { appStyles } from '../styles/global-styles';
+import { cardClasses, textClasses, chipClasses, buttonClasses } from '../styles/global-styles';
 
 interface CardProps {
   title: string;
@@ -22,12 +22,12 @@ const Card: React.FC<CardProps> = ({
   buttonText,
   onClick,
 }) => {
-  const cardClasses = withHover
-    ? `${appStyles.card.base} ${appStyles.card.interactive} ${className}`
-    : `${appStyles.card.base} ${className}`;
+  const classes = withHover
+    ? `${cardClasses.base} ${cardClasses.interactive} ${className}`
+    : `${cardClasses.base} ${className}`;
 
   return (
-    <div className={cardClasses}>
+    <div className={classes}>
       {imageUrl && (
         <div className='h-48 overflow-hidden rounded-t-2xl'>
           <img
@@ -37,9 +37,9 @@ const Card: React.FC<CardProps> = ({
           />
         </div>
       )}
-      <div className={appStyles.card.body}>
-        <h2 className={appStyles.card.title}>{title}</h2>
-        <p className={`${appStyles.text.body} ${appStyles.text.secondary} mt-2`}>
+      <div className={cardClasses.body}>
+        <h2 className={cardClasses.title}>{title}</h2>
+        <p className={`${textClasses.body} ${textClasses.secondary} mt-2`}>
           {description}
         </p>
         
@@ -48,7 +48,7 @@ const Card: React.FC<CardProps> = ({
             {tags.map((tag, index) => (
               <span
                 key={index}
-                className={`${appStyles.chip.base} ${appStyles.chip.neutral}`}
+                className={`${chipClasses.base} ${chipClasses.neutral}`}
               >
                 {tag}
               </span>
@@ -60,7 +60,7 @@ const Card: React.FC<CardProps> = ({
           <div className='mt-4'>
             <button 
               onClick={onClick}
-              className={`${appStyles.button.base} ${appStyles.button.primary}`}
+              className={`${buttonClasses.base} ${buttonClasses.primary}`}
             >
               {buttonText}
             </button>

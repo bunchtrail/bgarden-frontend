@@ -3,20 +3,31 @@ import { chipClasses } from '../../styles/global-styles';
 
 interface ChipProps {
   label: string;
-  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+  variant?: 'success' | 'warning' | 'danger' | 'neutral';
   onDelete?: () => void;
   className?: string;
 }
 
 const Chip: React.FC<ChipProps> = ({
   label,
-  variant = 'primary',
+  variant = 'neutral',
   onDelete,
   className = '',
 }) => {
+  // Получаем класс варианта напрямую, так как primary отсутствует в chipClasses
+  const getVariantClass = () => {
+    switch(variant) {
+      case 'success': return chipClasses.success;
+      case 'warning': return chipClasses.warning;
+      case 'danger': return chipClasses.danger;
+      case 'neutral': 
+      default: return chipClasses.neutral;
+    }
+  };
+
   return (
     <span
-      className={`${chipClasses.base} ${chipClasses[variant]} ${className}`}
+      className={`${chipClasses.base} ${getVariantClass()} ${className}`}
     >
       {label}
       {onDelete && (

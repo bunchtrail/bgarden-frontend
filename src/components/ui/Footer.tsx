@@ -12,7 +12,7 @@ const Footer: React.FC<FooterProps> = ({
   companyName = 'Ботанический сад',
 }) => {
   return (
-    <footer className={footerClasses.footer}>
+    <footer className={footerClasses.base}>
       <div className={footerClasses.container}>
         <div className="flex justify-between items-center">
           <div className={footerClasses.content}>

@@ -10,7 +10,7 @@ interface PublicHomePageProps {
 
 const PublicHomePage: React.FC<PublicHomePageProps> = ({ timeInfo }) => {
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col ${layoutClasses.container}`}>
+    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col ${layoutClasses.page}`}>
       <div className="flex-grow">
         {/* Приветствие */}
         <TimeBasedGreeting timeInfo={timeInfo} />
