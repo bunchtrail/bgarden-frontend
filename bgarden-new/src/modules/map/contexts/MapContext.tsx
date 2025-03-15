@@ -6,6 +6,7 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useCallback,
 } from 'react';
 import { MapData, getActiveMap } from '../services/mapService';
 import {
@@ -21,6 +22,7 @@ import {
   convertPointsToPolygonCoordinates
 } from '../services/regionService';
 import { RegionData } from '../types/mapTypes';
+import { useNotification } from '../../../modules/notifications';
 
 // Перечисление режимов работы с картой
 export enum MapMode {
@@ -228,6 +230,8 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [deletingPlant, setDeletingPlant] = useState<boolean>(false);
   const [deletePlantError, setDeletePlantError] = useState<string | null>(null);
 
+  const notification = useNotification();
+
   // Функция для загрузки карты с сервера
   const loadMapFromServer = async () => {
     try {
@@ -244,6 +248,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
       }
     } catch (error) {
       console.error('Ошибка при загрузке карты:', error);
+      notification.error('Не удалось загрузить карту');
       setLoadMapError('Ошибка при загрузке карты');
     } finally {
       setLoadingMap(false);
@@ -264,6 +269,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
       setPlants(plantsData);
     } catch (error) {
       console.error('Ошибка при загрузке растений:', error);
+      notification.error('Не удалось загрузить данные о растениях');
       setLoadPlantsError('Ошибка при загрузке растений');
     } finally {
       setLoadingPlants(false);
@@ -283,6 +289,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
       setAreas(convertedAreas);
     } catch (error) {
       console.error('Ошибка при загрузке областей:', error);
+      notification.error('Не удалось загрузить данные о регионах');
       setLoadRegionsError(
         'Не удалось загрузить области. Пожалуйста, попробуйте позже.'
       );
@@ -339,9 +346,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
         setSelectedPlantId(null);
       }
       
+      notification.success('Растение успешно удалено');
       return true;
     } catch (error) {
       console.error('Ошибка при удалении растения:', error);
+      notification.error('Не удалось удалить растение');
       setDeletePlantError(error instanceof Error ? error.message : 'Неизвестная ошибка при удалении растения');
       return false;
     } finally {
@@ -441,8 +450,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
         clearAreaPoints();
         closeAreaForm();
         setIsDrawingComplete(false);
+        notification.success('Область успешно сохранена');
       } catch (error) {
         console.error('Ошибка при сохранении области:', error);
+        notification.error('Не удалось сохранить область');
         // Здесь можно добавить обработку ошибок, например, показать уведомление
       }
     }

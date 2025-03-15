@@ -1,4 +1,25 @@
 import { TokenDto } from '../modules/auth/types';
+import { Notification, NotificationType } from '../modules/notifications';
+
+// Функция для отображения уведомлений об ошибках
+type NotificationFunction = (notification: Omit<Notification, 'id'>) => void;
+let addNotification: NotificationFunction | null = null;
+
+// Функция для установки функции добавления уведомлений
+export const setNotificationHandler = (handler: NotificationFunction) => {
+  addNotification = handler;
+};
+
+// Функция для отображения уведомлений об ошибках
+const showErrorNotification = (message: string) => {
+  if (addNotification) {
+    addNotification({
+      type: 'error',
+      message,
+      duration: 5000,
+    });
+  }
+};
 
 // Базовый URL API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
@@ -143,19 +164,21 @@ async function request<T>(
 
     return data as T;
   } catch (error) {
-    // Если это уже ApiError, пробрасываем дальше
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    // Проверка на ошибку AbortError (таймаут или отмена)
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new ApiError(408, 'Запрос был отменен или превышено время ожидания', error);
-    }
-
-    // Иначе оборачиваем в ApiError
     console.error('Request failed:', error);
-    throw new ApiError(500, (error as Error).message || 'Ошибка сети');
+    
+    // Если есть функция для уведомлений, показываем сообщение
+    if (error instanceof ApiError) {
+      showErrorNotification(`Ошибка запроса: ${error.message}`);
+      throw error;
+    } else if (error instanceof DOMException && error.name === 'AbortError') {
+      const apiError = new ApiError(408, 'Запрос был отменен или превышено время ожидания', error);
+      showErrorNotification(`Ошибка таймаута: ${apiError.message}`);
+      throw apiError;
+    } else {
+      const apiError = new ApiError(500, (error as Error).message || 'Ошибка сети');
+      showErrorNotification(`Ошибка сети: ${apiError.message}`);
+      throw apiError;
+    }
   } finally {
     // Очищаем таймаут, если он был установлен
     if (abortData?.timeoutId) {

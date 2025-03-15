@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/contexts/AuthContext';
+import { useNotification } from '../../modules/notifications';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ const LoginPage: React.FC = () => {
   const [formError, setFormError] = useState('');
   const { login, error, loading, clearError } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +19,7 @@ const LoginPage: React.FC = () => {
     // Валидация формы
     if (!username || !password) {
       setFormError('Пожалуйста, заполните все поля');
+      notification.warning('Пожалуйста, заполните все поля');
       return;
     }
 
@@ -31,11 +34,12 @@ const LoginPage: React.FC = () => {
 
       if (success) {
         // Перенаправление на главную страницу
+        notification.success('Вы успешно вошли в систему');
         navigate('/');
       }
     } catch (err) {
       // Ошибки уже обрабатываются в контексте auth
-      console.error('Ошибка входа:', err);
+      notification.error(error || 'Ошибка при входе в систему');
     }
   };
 

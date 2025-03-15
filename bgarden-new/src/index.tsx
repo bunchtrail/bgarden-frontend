@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { AuthProvider } from './modules/auth/contexts/AuthContext';
+import { AuthProviderWithNotifications } from './modules/auth';
 import { BrowserRouter } from 'react-router-dom';
-import { NotificationProvider } from './modules/notifications';
+import { NotificationProvider, useNotifications } from './modules/notifications';
+import { setNotificationHandler } from './services/httpClient';
+
+// Компонент для инициализации обработчика уведомлений
+const NotificationInitializer: React.FC = () => {
+  const { addNotification } = useNotifications();
+  
+  useEffect(() => {
+    // Устанавливаем обработчик уведомлений для HTTP клиента
+    setNotificationHandler(addNotification);
+  }, [addNotification]);
+  
+  return null;
+};
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,11 +26,12 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <NotificationProvider>
+      <NotificationProvider>
+        <NotificationInitializer />
+        <AuthProviderWithNotifications>
           <App />
-        </NotificationProvider>
-      </AuthProvider>
+        </AuthProviderWithNotifications>
+      </NotificationProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

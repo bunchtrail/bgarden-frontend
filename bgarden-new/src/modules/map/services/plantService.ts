@@ -47,7 +47,7 @@ export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
   try {
     return await httpClient.get<SpecimenData[]>('/Specimen/all');
   } catch (error) {
-    console.error('Ошибка при получении растений:', error);
+    logError('Ошибка при получении растений:', error);
     throw error;
   }
 };
@@ -69,7 +69,7 @@ export const deleteSpecimen = async (id: number): Promise<boolean> => {
     await httpClient.delete<void>(`/Specimen/${id}`);
     return true;
   } catch (error) {
-    console.error('Ошибка при удалении растения:', error);
+    logError('Ошибка при удалении растения:', error);
     throw error;
   }
 };
@@ -79,7 +79,7 @@ export const getSpecimenById = async (id: number): Promise<SpecimenData> => {
   try {
     return await httpClient.get<SpecimenData>(`/Specimen/${id}`);
   } catch (error) {
-    console.error('Ошибка при получении данных растения:', error);
+    logError('Ошибка при получении данных растения:', error);
     throw error;
   }
 };

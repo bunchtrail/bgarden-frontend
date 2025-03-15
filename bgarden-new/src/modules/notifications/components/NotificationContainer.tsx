@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import NotificationItem from './NotificationItem';
-
+import '../styles/notification.css';
 
 const NotificationContainer: React.FC = () => {
   const { notifications } = useNotifications();
@@ -11,7 +11,7 @@ const NotificationContainer: React.FC = () => {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md">
+    <div className="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-md notifications-container">
       {notifications.map((notification) => (
         <NotificationItem key={notification.id} notification={notification} />
       ))}

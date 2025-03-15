@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/contexts/AuthContext';
+import { useNotification } from '../../modules/notifications';
 
 
 const ProfilePage: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const handleLogout = async () => {
     await logout();
@@ -14,7 +16,12 @@ const ProfilePage: React.FC = () => {
 
   const handleEditProfile = () => {
     // Заглушка для редактирования профиля
-    alert('Функция будет доступна в ближайшем обновлении');
+    notification.info('Функция будет доступна в ближайшем обновлении');
+  };
+
+  const handleProfileUpdate = () => {
+    // alert('Функция будет доступна в ближайшем обновлении');
+    notification.info('Функция будет доступна в ближайшем обновлении');
   };
 
   if (loading) {

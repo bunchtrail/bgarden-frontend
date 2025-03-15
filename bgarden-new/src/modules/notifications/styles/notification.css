@@ -26,4 +26,8 @@
 
 .animate-slideOut {
   animation: slideOut 0.3s ease-in forwards;
+}
+
+.notifications-container {
+  transition: height 0.3s ease-in-out;
 } 

@@ -2,6 +2,7 @@
 // Форма добавления растения 
 
 import httpClient from '../../../services/httpClient';
+import { logError } from '../../../utils/logger';
 
 export interface MapData {
   id: number;
@@ -21,7 +22,7 @@ export const getActiveMap = async (): Promise<MapData[]> => {
   try {
     return await httpClient.get<MapData[]>('/Map/active');
   } catch (error) {
-    console.error('Ошибка при получении активной карты:', error);
+    logError('Ошибка при получении активной карты:', error);
     throw error;
   }
 };

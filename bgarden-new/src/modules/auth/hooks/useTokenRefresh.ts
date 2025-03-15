@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { tokenService } from '../../../services/httpClient';
 import { TokenDto } from '../types';
+import { logError } from '../../../utils/logger';
 
 // Интервал проверки токена (в миллисекундах)
 const TOKEN_CHECK_INTERVAL = 60000; // 1 минута
@@ -34,7 +35,7 @@ export const useTokenRefresh = (
           await refreshCallback();
         }
       } catch (error) {
-        console.error('Ошибка при обновлении токена:', error);
+        logError('Ошибка при обновлении токена:', error);
       }
     };
 
@@ -81,7 +82,7 @@ function isTokenExpiringSoon(token: string): boolean {
     
     return timeUntilExpiration <= fiveMinutesInMs;
   } catch (error) {
-    console.error('Ошибка при проверке токена:', error);
+    logError('Ошибка при проверке токена:', error);
     return false;
   }
 }

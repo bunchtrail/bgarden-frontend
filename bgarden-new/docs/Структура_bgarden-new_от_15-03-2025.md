@@ -3,7 +3,7 @@
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\docs)`
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (8.9 KB)
-    - `Структура_bgarden-new_от_15-03-2025.md` (13.7 KB)
+    - `Структура_bgarden-new_от_15-03-2025.md` (13.8 KB)
   - `package-lock.json` (686.3 KB)
   - `package.json` (1.4 KB)
   - `postcss.config.js` (82.0 B)
@@ -23,26 +23,27 @@
   - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src)`
     - `App.css` (564.0 B)
     - `App.test.tsx` (273.0 B)
-    - `App.tsx` (423.0 B)
+    - `App.tsx` (593.0 B)
     - **config** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\config)`
     - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\docs)`
     - **examples** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\examples)`
     - `index.css` (426.0 B)
-    - `index.tsx` (889.0 B)
+    - `index.tsx` (1.5 KB)
     - `logo.svg` (2.6 KB)
     - **modules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules)`
       - **auth** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\components)`
+          - `AuthProviderWithNotifications.tsx` (988.0 B)
           - `ProtectedRoute.tsx` (1.8 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\contexts)`
-          - `AuthContext.tsx` (7.7 KB)
+          - `AuthContext.tsx` (9.3 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\docs)`
           - `styles-guide.md` (8.5 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\hooks)`
           - `index.ts` (91.0 B)
           - `useAuth.ts` (51.0 B)
           - `useTokenRefresh.ts` (3.6 KB)
-        - `index.ts` (234.0 B)
+        - `index.ts` (338.0 B)
         - `README.md` (2.9 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\services)`
           - `authService.ts` (5.0 KB)
@@ -75,16 +76,16 @@
             - **PanelSections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\MapControlPanel\PanelSections)`
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\contexts)`
           - `index.ts` (331.0 B)
-          - `MapContext.tsx` (18.5 KB)
+          - `MapContext.tsx` (19.2 KB)
           - `ModalContext.tsx` (2.7 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\docs)`
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\hooks)`
         - `index.ts` (409.0 B)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\services)`
           - `index.ts` (198.0 B)
-          - `mapService.ts` (1.3 KB)
+          - `mapService.ts` (1.4 KB)
           - `plantService.ts` (3.0 KB)
-          - `regionService.ts` (4.8 KB)
+          - `regionService.ts` (4.3 KB)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\styles)`
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\types)`
           - `index.ts` (70.0 B)
@@ -110,7 +111,7 @@
           - `index.ts` (428.0 B)
       - **notifications** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\components)`
-          - `NotificationContainer.tsx` (603.0 B)
+          - `NotificationContainer.tsx` (664.0 B)
           - `NotificationItem.tsx` (3.7 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\contexts)`
           - `NotificationContext.tsx` (2.3 KB)
@@ -120,7 +121,7 @@
         - `index.ts` (335.0 B)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\services)`
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\styles)`
-          - `notification.css` (449.0 B)
+          - `notification.css` (522.0 B)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\types)`
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components)`
@@ -164,9 +165,9 @@
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\types)`
     - **pages** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages)`
       - **auth** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\auth)`
-        - `LoginPage.tsx` (6.5 KB)
-        - `ProfilePage.tsx` (8.6 KB)
-        - `RegisterPage.tsx` (12.0 KB)
+        - `LoginPage.tsx` (6.8 KB)
+        - `ProfilePage.tsx` (8.9 KB)
+        - `RegisterPage.tsx` (12.2 KB)
       - `Home.tsx` (1.4 KB)
       - `NotFound.tsx` (261.0 B)
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\specimens)`
@@ -179,7 +180,7 @@
       - `mapRoutes.tsx` (943.0 B)
       - `specimenRoutes.tsx` (965.0 B)
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\services)`
-      - `httpClient.ts` (6.2 KB)
+      - `httpClient.ts` (7.2 KB)
     - `setupTests.ts` (241.0 B)
     - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\styles)`
       - `animations.css` (1.3 KB)
@@ -187,5 +188,6 @@
       - `index.ts` (470.0 B)
     - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\types)`
     - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\utils)`
+      - `logger.ts` (1.1 KB)
   - `tailwind.config.js` (211.0 B)
   - `tsconfig.json` (896.0 B)

@@ -5,6 +5,14 @@ import { ApiError } from '../../../services/httpClient';
 import { LoginDto, RegisterDto, TokenDto, UserDto } from '../types';
 import useTokenRefresh from '../hooks/useTokenRefresh';
 
+// Определяем тип для функций уведомлений
+export interface NotificationFunctions {
+  success: (message: string) => void;
+  error: (message: string) => void;
+  warning: (message: string) => void;
+  info: (message: string) => void;
+}
+
 interface AuthContextType {
   user: UserDto | null;
   loading: boolean;
@@ -21,8 +29,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+// Добавляем интерфейс для пропсов
+interface AuthProviderProps {
+  children: React.ReactNode;
+  // Опциональный параметр для функций уведомлений (можно передать извне)
+  notificationFunctions?: NotificationFunctions;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
+  notificationFunctions
 }) => {
   const [user, setUser] = useState<UserDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -153,6 +169,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await authService.logout();
     } catch (error) {
       console.error("Ошибка при выходе из системы:", error);
+      // Показываем уведомление об ошибке, если передан соответствующий обработчик
+      if (notificationFunctions) {
+        notificationFunctions.error("Произошла ошибка при выходе из системы");
+      }
     } finally {
       setUser(null);
       setIsAuthenticated(false);
@@ -161,7 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         navigate('/login');
       }
     }
-  }, [navigate]);
+  }, [navigate, notificationFunctions]);
 
   const handleAuthError = useCallback((err: any) => {
     // Проверяем, является ли ошибка ошибкой авторизации
@@ -175,12 +195,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const unlockUser = useCallback(async (username: string) => {
     try {
-      return await authService.unlockUser(username);
+      const result = await authService.unlockUser(username);
+      // Показываем уведомление об успехе, если передан соответствующий обработчик
+      if (notificationFunctions) {
+        notificationFunctions.success(`Пользователь ${username} успешно разблокирован`);
+      }
+      return result;
     } catch (error) {
       console.error('Ошибка при разблокировке пользователя:', error);
+      // Показываем уведомление об ошибке, если передан соответствующий обработчик
+      if (notificationFunctions) {
+        notificationFunctions.error(`Не удалось разблокировать пользователя ${username}`);
+      }
       return false;
     }
-  }, []);
+  }, [notificationFunctions]);
 
   // Функция для обновления токена
   const refreshToken = useCallback(async () => {
