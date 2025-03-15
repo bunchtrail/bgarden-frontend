@@ -38,9 +38,21 @@ export const COLORS = {
 
 // Стили для карточек
 export const cardClasses = {
-  base: 'bg-white/80 backdrop-blur-lg rounded-2xl border border-[#E5E5EA]/80 shadow-lg',
+  base: 'rounded-xl overflow-hidden',
+  
+  elevated: 'bg-white/80 backdrop-blur-lg border border-[#E5E5EA]/80 shadow-md',
+  outlined: 'bg-white border border-[#E5E5EA]',
+  filled: 'bg-[#F5F5F7]',
+  
   interactive: 'transition-all duration-300 hover:shadow-xl cursor-pointer',
-  flat: 'bg-white rounded-xl border border-[#E5E5EA] shadow-sm',
+  flat: 'bg-white border border-[#E5E5EA] shadow-sm',
+  
+  header: 'flex items-center justify-between px-5 pt-4 pb-2',
+  content: 'px-5 py-4',
+  footer: 'px-5 py-3 border-t border-[#E5E5EA]',
+  
+  title: 'text-lg font-medium text-[#1D1D1F]',
+  subtitle: 'text-sm text-[#86868B]',
 };
 
 // Стили для текста
@@ -61,6 +73,9 @@ export const buttonClasses = {
   secondary: 'bg-white text-[#0A84FF] border border-[#0A84FF] hover:bg-[#F2F7FF]',
   danger: 'bg-gradient-to-r from-[#FF3B30] to-[#FF453A] text-white hover:shadow-lg',
   neutral: 'bg-[#F5F5F7] text-[#86868B] border border-[#E5E5EA] hover:bg-white',
+  warning: 'bg-gradient-to-r from-[#FF9F0A] to-[#FF8A00] text-white hover:shadow-lg',
+  success: 'bg-gradient-to-r from-[#30D158] to-[#28BD4C] text-white hover:shadow-lg',
+  disabled: 'opacity-60 cursor-not-allowed bg-gray-200 text-gray-500 hover:shadow-none',
 };
 
 // Стили для чипов/тегов

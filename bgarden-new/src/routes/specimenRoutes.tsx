@@ -1,11 +1,11 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
+import { ProtectedRoute } from '@modules/auth/components/ProtectedRoute';
 
 // Здесь будут импорты страниц для образцов растений
-// import SpecimensListPage from '../pages/specimens/SpecimensListPage';
-// import SpecimenDetailsPage from '../pages/specimens/SpecimenDetailsPage';
-// import SpecimenEditPage from '../pages/specimens/SpecimenEditPage';
+// import SpecimensListPage from '@pages/specimens/SpecimensListPage';
+// import SpecimenDetailsPage from '@pages/specimens/SpecimenDetailsPage';
+// import SpecimenEditPage from '@pages/specimens/SpecimenEditPage';
 
 export const specimenRoutes: RouteObject[] = [
   // Пока страницы не созданы, оставляем как заготовку
