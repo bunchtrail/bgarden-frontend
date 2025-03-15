@@ -1,0 +1,117 @@
+- **bgarden-new** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new)`
+  - **.cursor** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\.cursor)`
+    - **rules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\.cursor\rules)`
+  - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\docs)`
+    - `Структура_bgarden-new_от_15-03-2025.md` (11.0 KB)
+  - `package-lock.json` (676.2 KB)
+  - `package.json` (1.4 KB)
+  - `postcss.config.js` (82.0 B)
+  - **public** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public)`
+    - `favicon.ico` (3.8 KB)
+    - **images** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public\images)`
+      - **backgrounds** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public\images\backgrounds)`
+      - **features** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public\images\features)`
+      - **maps** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public\images\maps)`
+      - **sectors** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\public\images\sectors)`
+    - `index.html` (1.7 KB)
+    - `logo192.png` (5.2 KB)
+    - `logo512.png` (9.4 KB)
+    - `manifest.json` (492.0 B)
+    - `robots.txt` (67.0 B)
+  - `README.md` (2.1 KB)
+  - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src)`
+    - `App.css` (564.0 B)
+    - `App.test.tsx` (273.0 B)
+    - `App.tsx` (1.9 KB)
+    - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\components)`
+      - **home** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\components\home)`
+      - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\components\icons)`
+      - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\components\ui)`
+    - **config** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\config)`
+    - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\docs)`
+    - **examples** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\examples)`
+    - `index.css` (426.0 B)
+    - `index.tsx` (554.0 B)
+    - `logo.svg` (2.6 KB)
+    - **modules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules)`
+      - **auth** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\components)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\auth\types)`
+      - **expositions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\components)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\expositions\types)`
+      - **map** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components)`
+          - **MapControlPanel** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\MapControlPanel)`
+            - **PanelSections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\MapControlPanel\PanelSections)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\types)`
+      - **navigation** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\components)`
+          - **configs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\components\configs)`
+          - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\components\icons)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\navigation\types)`
+      - **notifications** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\components)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\types)`
+      - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components)`
+          - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\icons)`
+          - **specimen-actions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-actions)`
+          - **specimen-card** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-card)`
+          - **specimen-form** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form)`
+            - **geographic** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\geographic)`
+          - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-gallery)`
+          - **specimen-taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-taxonomy)`
+          - **specimens-list** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimens-list)`
+          - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\ui)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\hooks)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\types)`
+      - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils)`
+        - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\components)`
+        - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\contexts)`
+        - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\docs)`
+        - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\hooks)`
+        - **mapHelpers** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\mapHelpers)`
+        - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\services)`
+        - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\styles)`
+        - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\utils\types)`
+    - **pages** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages)`
+      - **auth** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\auth)`
+    - `react-app-env.d.ts` (41.0 B)
+    - `reportWebVitals.ts` (425.0 B)
+    - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\services)`
+    - `setupTests.ts` (241.0 B)
+    - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\styles)`
+    - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\types)`
+    - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\utils)`
+  - `tailwind.config.js` (211.0 B)
+  - `tsconfig.json` (561.0 B)
