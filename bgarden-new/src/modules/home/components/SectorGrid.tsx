@@ -49,14 +49,7 @@ const SectorGrid: React.FC<SectorGridProps> = ({ className = '' }) => {
       ))}
       
       {/* Примеры использования других UI компонентов */}
-      <Card 
-        title="Дополнительная информация" 
-        subtitle="Используйте эту карточку для просмотра деталей"
-        variant="outlined"
-        footer={<div className="text-center text-sm text-gray-500">© Ботанический сад</div>}
-      >
-        <p className="mb-3">Здесь может быть размещена дополнительная информация о секторах и экспозициях ботанического сада.</p>
-      </Card>
+      
     </div>
   );
 };

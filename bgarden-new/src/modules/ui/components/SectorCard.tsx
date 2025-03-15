@@ -38,20 +38,8 @@ const SectorCard: React.FC<SectorCardProps> = ({
   return (
     <Wrapper>
       <div className="relative overflow-hidden rounded-2xl h-full border border-[#E5E5EA]/80 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300">
-        {/* Фоновая картинка или паттерн */}
-        {imageUrl ? (
-          <div className="absolute inset-0 opacity-50">
-            <img 
-              src={imageUrl} 
-              alt={title} 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#00000040]"></div>
-          </div>
-        ) : (
-          <AbstractPattern type={patternType} />
-        )}
-        
+        {/* Абстрактный паттерн всегда присутствует в качестве фона */}
+        <AbstractPattern type={patternType} />    
         <div className="relative z-10 p-6 h-full flex flex-col">
           <h3 className="text-xl font-semibold mb-2 text-[#1D1D1F]">{title}</h3>
           {description && (

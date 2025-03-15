@@ -146,14 +146,14 @@ interface TimeBasedGreetingProps {
 }
 
 const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userName }) => {
-  const [animationStage, setAnimationStage] = useState(0);
-
+  const [animationStage, setAnimationStage] = useState<number>(0);
+  
   useEffect(() => {
     const timers = [
       setTimeout(() => setAnimationStage(1), 100),   // Анимация иконки
       setTimeout(() => setAnimationStage(2), 300),   // Анимация приветствия
       setTimeout(() => setAnimationStage(3), 600),   // Анимация подтекста
-      setTimeout(() => setAnimationStage(4), 2000)   // Финальный эффект
+      setTimeout(() => setAnimationStage(4), 1500)   // Финальный эффект - сокращено с 2000 до 1500
     ];
     return () => timers.forEach(timer => clearTimeout(timer));
   }, []);
@@ -175,10 +175,10 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
   }, [timeInfo.icon]);
 
   return (
-    <div className="mb-8 pt-2">
-      <div className="flex items-center overflow-hidden">
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex items-center justify-center mb-3 bg-white/70 backdrop-blur-sm px-5 py-3 rounded-xl shadow-sm border border-gray-100">
         <span 
-          className={`mr-3 transition-all duration-700 ease-out transform 
+          className={`mr-3 transition-all duration-500 ease-out transform 
             ${animationStage >= 1 ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'} 
             ${glowColor}
             ${animationStage >= 1 ? iconAnimationClass : ''}
@@ -186,69 +186,57 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
         >
           {timeInfo.icon}
         </span>
-        <h1 
-          className={`text-3xl sm:text-4xl font-normal text-[#1D1D1F] transition-all duration-700 ease-out
-            ${animationStage >= 2 ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-10 opacity-0 scale-95'}
-            ${glowColor}`}
+        <h1 className={`${textClasses.heading} text-black text-2xl font-medium transition-all duration-500 ease-out
+          ${animationStage >= 2 ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-10 opacity-0 scale-95'}
+          ${glowColor}`}
         >
-          <AnimatedText text={timeInfo.greeting} baseDelay={300} animationStage={animationStage} />
+          <AnimatedText text={timeInfo.greeting} baseDelay={250} animationStage={animationStage} />
           {userName && (
             <>
               <span 
-                className={`inline-block mr-[0.15em] transition-all duration-500 ease-out transform
+                className={`inline-block mr-[0.15em] transition-all duration-300 ease-out transform
                   ${animationStage >= 2 ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 style={{ 
-                  transitionDelay: `${300 + timeInfo.greeting.length * 30 + 50}ms`
+                  transitionDelay: `${300 + timeInfo.greeting.length * 15}ms` // Задержка зависит от длины приветствия, но с меньшим коэффициентом
                 }}
               >,</span>
-              <AnimatedText text={userName} baseDelay={500} isName animationStage={animationStage} />
+              <AnimatedText text={userName} baseDelay={350} isName={true} animationStage={animationStage} />
             </>
           )}
         </h1>
       </div>
-      {!userName && (
-        <p 
-          className={`${textClasses.body} text-base ml-11 mt-1 text-[#86868B] transition-all duration-1000 ease-out
-            ${animationStage >= 3 ? 'translate-x-0 opacity-100 translate-y-0' : 'translate-x-5 opacity-0 translate-y-3'}`}
-        >
-          <span className="inline-block overflow-hidden">
-            {animationStage >= 3 && (
-              <AnimatedText 
-                text="Добро пожаловать в Ботанический сад" 
-                baseDelay={700} 
-                animationStage={animationStage}
-              />
-            )}
-          </span>
-        </p>
-      )}
+      
       <style>{`
         .glow-orange { filter: drop-shadow(0 0 3px rgba(233, 116, 81, 0.3)); }
         .glow-blue { filter: drop-shadow(0 0 3px rgba(56, 130, 246, 0.3)); }
         .glow-indigo { filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.3)); }
         
         /* Базовая пульсация */
-        .pulse-effect { animation: pulse-animation 2s infinite ease-in-out; }
-        @keyframes pulse-animation { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .pulse-effect { animation: pulse-animation 3s infinite ease-in-out; }
+        @keyframes pulse-animation { 
+          0% { transform: scale(1); filter: brightness(1); } 
+          50% { transform: scale(1.05); filter: brightness(1.1); } 
+          100% { transform: scale(1); filter: brightness(1); } 
+        }
         
         /* Анимация для утренней иконки - восход с сиянием */
         .morning-animation {
-          animation: morning-appear 1.5s ease-out forwards, morning-shine 4s ease-in-out 1.5s infinite;
+          animation: morning-appear 1s ease-out forwards, morning-shine 4s ease-in-out 1s infinite;
         }
         @keyframes morning-appear {
           0% { transform: translateY(10px) scale(0.5); opacity: 0; }
-          60% { transform: translateY(-5px) scale(1.1); opacity: 0.9; }
+          60% { transform: translateY(-3px) scale(1.1); opacity: 0.9; }
           100% { transform: translateY(0) scale(1); opacity: 1; }
         }
         @keyframes morning-shine {
-          0% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.3)); }
-          50% { filter: drop-shadow(0 0 8px rgba(233, 116, 81, 0.6)); }
-          100% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.3)); }
+          0% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.4)); }
+          50% { filter: drop-shadow(0 0 6px rgba(233, 116, 81, 0.7)); }
+          100% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.4)); }
         }
         
         /* Анимация для дневной иконки - вращение и масштабирование */
         .day-animation {
-          animation: day-appear 1.2s ease-out forwards, day-rotate 10s linear 1.2s infinite;
+          animation: day-appear 0.8s ease-out forwards, day-rotate 8s ease-in-out 0.8s infinite;
           transform-origin: center;
         }
         @keyframes day-appear {
@@ -257,33 +245,33 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           100% { transform: scale(1) rotate(0); opacity: 1; }
         }
         @keyframes day-rotate {
-          0% { transform: rotate(0); }
-          25% { transform: rotate(5deg) scale(1.02); }
-          50% { transform: rotate(0) scale(1); }
-          75% { transform: rotate(-5deg) scale(1.02); }
-          100% { transform: rotate(0) scale(1); }
+          0% { transform: rotate(0); filter: brightness(1); }
+          25% { transform: rotate(5deg) scale(1.02); filter: brightness(1.1); }
+          50% { transform: rotate(0) scale(1); filter: brightness(1); }
+          75% { transform: rotate(-5deg) scale(1.02); filter: brightness(1.1); }
+          100% { transform: rotate(0) scale(1); filter: brightness(1); }
         }
         
         /* Анимация для вечерней иконки - волновой эффект */
         .evening-animation {
-          animation: evening-appear 1.3s ease-out forwards, evening-wave 6s ease-in-out 1.3s infinite;
+          animation: evening-appear 0.9s ease-out forwards, evening-wave 5s ease-in-out 0.9s infinite;
         }
         @keyframes evening-appear {
           0% { transform: translateX(-15px) scale(0.8); opacity: 0; }
-          70% { transform: translateX(5px) scale(1); opacity: 0.8; }
+          70% { transform: translateX(3px) scale(1); opacity: 0.8; }
           100% { transform: translateX(0) scale(1); opacity: 1; }
         }
         @keyframes evening-wave {
-          0% { transform: translateX(0); }
-          25% { transform: translateX(-2px) rotate(-5deg); }
-          50% { transform: translateX(0) rotate(0); }
-          75% { transform: translateX(2px) rotate(5deg); }
-          100% { transform: translateX(0) rotate(0); }
+          0% { transform: translateX(0); filter: saturate(1); }
+          25% { transform: translateX(-2px) rotate(-3deg); filter: saturate(1.2); }
+          50% { transform: translateX(0) rotate(0); filter: saturate(1); }
+          75% { transform: translateX(2px) rotate(3deg); filter: saturate(1.2); }
+          100% { transform: translateX(0) rotate(0); filter: saturate(1); }
         }
         
         /* Анимация для ночной иконки - мерцание */
         .night-animation {
-          animation: night-appear 1.8s ease-out forwards, night-twinkle 5s ease-in-out 1.8s infinite;
+          animation: night-appear 1.2s ease-out forwards, night-twinkle 4s ease-in-out 1.2s infinite;
         }
         @keyframes night-appear {
           0% { transform: scale(0.4) rotate(-30deg); opacity: 0; }
@@ -292,15 +280,21 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           100% { transform: scale(1) rotate(0); opacity: 1; }
         }
         @keyframes night-twinkle {
-          0% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.3)); }
-          25% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5)); transform: scale(1.03); }
-          50% { filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.7)); transform: scale(1); }
-          75% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5)); transform: scale(0.98); }
-          100% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.3)); transform: scale(1); }
+          0% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.4)); }
+          25% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)); transform: scale(1.02); }
+          50% { filter: drop-shadow(0 0 7px rgba(99, 102, 241, 0.8)); transform: scale(1); }
+          75% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)); transform: scale(0.99); }
+          100% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.4)); transform: scale(1); }
         }
         
-        .hover-effect { transition: all 0.3s ease; position: relative; }
-        .hover-effect:hover { transform: translateY(-2px); }
+        .hover-effect { 
+          transition: all 0.2s ease; 
+          position: relative; 
+        }
+        .hover-effect:hover { 
+          transform: translateY(-2px); 
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
       `}</style>
     </div>
   );
