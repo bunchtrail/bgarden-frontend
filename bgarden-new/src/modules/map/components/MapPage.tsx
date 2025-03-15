@@ -1,122 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, ImageOverlay, ZoomControl, useMap, Polygon, Tooltip } from 'react-leaflet';
+import { MapContainer, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
-import { getAllRegions, parseCoordinates, convertRegionsToAreas } from '../services/regionService';
+import { getAllRegions, convertRegionsToAreas } from '../services/regionService';
 import { useMap as useMapHook } from '../hooks';
+import { useMapConfig, MapConfigProvider } from '../context/MapConfigContext';
 import { RegionData } from '../types/mapTypes';
 import { MAP_STYLES } from '../styles';
-import { Card, Button, LoadingSpinner } from '../../ui';
-import { COLORS, layoutClasses, textClasses } from '../../../styles/global-styles';
+import { Card, LoadingSpinner, Button } from '../../ui';
+import { 
+  MapRegionsLayer, 
+  MapImageLayer, 
+  MapBoundsHandler,
+  ErrorView,
+  EmptyMapView,
+  LoadingView,
+  MapControlPanel
+} from './map-components';
 
-// Компонент для корректной установки границ изображения
-const SetBoundsRectangle = ({ imageBounds }: { imageBounds: L.LatLngBoundsExpression }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (imageBounds) {
-      map.fitBounds(imageBounds);
-    }
-  }, [map, imageBounds]);
-  
-  return null;
-};
-
-// Компонент для отображения регионов на карте
-const MapRegions = ({ regions }: { regions: RegionData[] }) => {
-  const { setSelectedAreaId, selectedAreaId } = useMapHook();
-  
-  return (
-    <>
-      {regions.map((region) => {
-        const coordinates = parseCoordinates(region.polygonCoordinates);
-        if (coordinates.length < 3) return null; // Полигон должен иметь как минимум 3 точки
-        
-        const isSelected = selectedAreaId === `region-${region.id}`;
-        
-        return (
-          <Polygon
-            key={`region-${region.id}`}
-            positions={coordinates}
-            pathOptions={{
-              fillColor: isSelected ? COLORS.primary.main : (region.fillColor || COLORS.text.secondary),
-              color: isSelected ? COLORS.primary.dark : (region.strokeColor || COLORS.text.primary),
-              fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-              weight: isSelected ? 3 : 2,
-              opacity: 0.8
-            }}
-            eventHandlers={{
-              click: () => {
-                console.log('Выбран регион:', region.name);
-                setSelectedAreaId(`region-${region.id}`);
-              },
-              mouseover: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: 0.5,
-                  weight: isSelected ? 3 : 2.5,
-                });
-              },
-              mouseout: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-                  weight: isSelected ? 3 : 2,
-                });
-              }
-            }}
-          >
-            <Tooltip sticky>
-              <div className={MAP_STYLES.regionTooltip}>
-                <strong className={textClasses.subheading}>{region.name}</strong>
-                {region.description && <p className={textClasses.secondary}>{region.description}</p>}
-                <p className={`${textClasses.body} ${MAP_STYLES.regionInfo}`}>
-                  Экземпляров: <span className={MAP_STYLES.regionCount} style={{color: COLORS.primary.main}}>{region.specimensCount}</span>
-                </p>
-              </div>
-            </Tooltip>
-          </Polygon>
-        );
-      })}
-    </>
-  );
-};
-
-// Компонент для обработки размеров изображения и настройки ограничений карты
-const ImageSizeHandler = ({ src, setImageBounds }: { src: string, setImageBounds: (bounds: L.LatLngBoundsExpression) => void }) => {
-  useEffect(() => {
-    if (!src) return;
-    
-    // Создаем новый объект изображения для получения размеров
-    const img = new Image();
-    img.onload = () => {
-      const width = img.width;
-      const height = img.height;
-      console.log(`Загружено изображение: ${width}x${height}`);
-      
-      // Создаем ограничения карты на основе размеров изображения
-      // Используем систему координат, где [0,0] - верхний левый угол
-      const bounds: L.LatLngBoundsExpression = [
-        [0, 0],    // верхний левый угол
-        [height, width]  // нижний правый угол
-      ];
-      
-      setImageBounds(bounds);
-    };
-    
-    img.src = src;
-  }, [src, setImageBounds]);
-  
-  return null;
-};
-
-const MapPage: React.FC = () => {
+// Основной компонент карты с логикой
+const MapPageContent: React.FC = () => {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
+  const [showControlPanel, setShowControlPanel] = useState<boolean>(false);
+  const { mapConfig } = useMapConfig();
   const { setAreas } = useMapHook();
   
   useEffect(() => {
@@ -154,86 +65,121 @@ const MapPage: React.FC = () => {
   // Получаем URL изображения карты
   const mapImageUrl = mapData ? getMapImageUrl(mapData) : null;
 
+  const handleRefresh = () => window.location.reload();
+
+  const toggleControlPanel = () => setShowControlPanel(prev => !prev);
+
+  // Проверяем, находится ли слой в видимых слоях
+  const isLayerVisible = (layerName: string) => {
+    return mapConfig.visibleLayers.includes(layerName);
+  };
+
+  // Рендер содержимого карты
+  const renderMapContent = () => {
+    if (loading) {
+      return <LoadingView message="Загрузка данных карты..." />;
+    }
+    
+    if (error) {
+      return <ErrorView error={error} onRefresh={handleRefresh} />;
+    }
+    
+    if (!mapImageUrl) {
+      return <EmptyMapView onRefresh={handleRefresh} />;
+    }
+    
+    return (
+      <div className={MAP_STYLES.mapContent}>
+        {/* Кнопка отображения панели настроек */}
+        <Button
+          variant="secondary"
+          size="small"
+          className="absolute top-4 right-4 z-[999]"
+          onClick={toggleControlPanel}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </Button>
+
+        {/* Панель управления картой */}
+        {showControlPanel && (
+          <MapControlPanel onClose={toggleControlPanel} />
+        )}
+
+        {/* Обработка изображения для расчета границ вне MapContainer */}
+        {isLayerVisible('imagery') && (
+          <MapImageLayer 
+            imageUrl={mapImageUrl} 
+            setImageBounds={setImageBounds} 
+          />
+        )}
+        
+        <MapContainer
+          center={mapConfig.center}
+          zoom={mapConfig.zoom}
+          maxZoom={mapConfig.maxZoom}
+          minZoom={mapConfig.minZoom}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          crs={L.CRS.Simple}
+          maxBounds={mapConfig.maxBounds}
+          maxBoundsViscosity={mapConfig.maxBoundsViscosity}
+          attributionControl={false}
+          className={mapConfig.lightMode ? MAP_STYLES.lightMode : ''}
+        >
+          <ZoomControl position={mapConfig.zoomControlPosition} />
+          
+          {/* Слой изображения карты */}
+          {isLayerVisible('imagery') && (
+            <MapImageLayer 
+              imageUrl={mapImageUrl} 
+              bounds={imageBounds} 
+            />
+          )}
+          
+          {/* Слой регионов */}
+          {isLayerVisible('regions') && (
+            <MapRegionsLayer 
+              regions={regions} 
+              highlightSelected={!mapConfig.lightMode}
+              showTooltips={mapConfig.showTooltips}
+            />
+          )}
+          
+          {/* Обработчик границ карты */}
+          <MapBoundsHandler imageBounds={imageBounds} />
+        </MapContainer>
+      </div>
+    );
+  };
+
+  // Титул карты
+  const mapTitle = mapConfig.lightMode 
+    ? "Облегченная карта" 
+    : (mapData?.name || "Интерактивная карта ботанического сада");
+
   return (
     <div className={MAP_STYLES.mapContainer}>
       <Card 
-        title={mapData?.name || "Интерактивная карта ботанического сада"}
+        title={mapTitle}
         headerAction={loading && <LoadingSpinner size="small" message="" />}
         variant="elevated"
         contentClassName="p-0"
       >
-        {loading && (
-          <div className={layoutClasses.flexCenter + " py-16"}>
-            <LoadingSpinner message="Загрузка данных карты..." />
-          </div>
-        )}
-        
-        {error && (
-          <div className="p-8 text-center">
-            <div className="inline-block p-4 mb-4 rounded-xl bg-red-50 text-red-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <p className="text-center">{error}</p>
-            </div>
-            <Button 
-              variant="primary" 
-              onClick={() => window.location.reload()}
-            >
-              Обновить страницу
-            </Button>
-          </div>
-        )}
-        
-        {!loading && !error && mapImageUrl && (
-          <div className={MAP_STYLES.mapContent}>
-            {mapImageUrl && <ImageSizeHandler src={mapImageUrl} setImageBounds={setImageBounds} />}
-            
-            <MapContainer
-              center={[500, 500]}
-              zoom={0}
-              maxZoom={4}
-              minZoom={-2}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={false}
-              crs={L.CRS.Simple}
-              maxBounds={[[-1000, -1000], [2000, 2000]]} // Ограничиваем перемещение карты
-              maxBoundsViscosity={1.0} // Непреодолимое ограничение
-              attributionControl={false}
-            >
-              <ZoomControl position="bottomright" />
-              {mapImageUrl && (
-                <ImageOverlay
-                  url={mapImageUrl}
-                  bounds={imageBounds}
-                  opacity={1}
-                  zIndex={10}
-                />
-              )}
-              <MapRegions regions={regions} />
-              <SetBoundsRectangle imageBounds={imageBounds} />
-            </MapContainer>
-          </div>
-        )}
-        
-        {!loading && !error && !mapImageUrl && (
-          <div className="p-8 text-center">
-            <div className="inline-block p-4 mb-4 rounded-xl bg-yellow-50 text-yellow-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <p className="text-center">Карта не найдена. Убедитесь, что на сервере есть активная карта.</p>
-            </div>
-            <Button 
-              variant="secondary" 
-              onClick={() => window.location.reload()}
-            >
-              Проверить еще раз
-            </Button>
-          </div>
-        )}
+        {renderMapContent()}
       </Card>
     </div>
+  );
+};
+
+// Обертка с провайдером конфигурации
+const MapPage: React.FC = () => {
+  return (
+    <MapConfigProvider>
+      <MapPageContent />
+    </MapConfigProvider>
   );
 };
 

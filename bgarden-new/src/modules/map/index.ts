@@ -1,7 +1,8 @@
 // Главный экспортный файл для модуля карты
 
-// Компоненты
+// Компоненты карты
 export { default as MapPage } from './components/MapPage';
+export { default as LightMapView } from './components/LightMapView';
 
 // Контексты
 export { MapProvider, useMapContext } from './contexts/MapContext';
@@ -11,10 +12,17 @@ export type { Area, Plant } from './contexts/MapContext';
 export * from './hooks';
 
 // Сервисы
-export * from './services';
+export { getMapImageUrl, getActiveMap } from './services/mapService';
+export { getAllRegions, convertRegionsToAreas, parseCoordinates } from './services/regionService';
 
 // Типы
-export * from './types/mapTypes';
+export type { MapData } from './services/mapService';
+export type { RegionData } from './types/mapTypes';
 
 // Стили
-export * from './styles'; 
+export { MAP_STYLES } from './styles';
+
+// Контекст и хуки
+export { useMapConfig, MapConfigProvider } from './context/MapConfigContext';
+export type { MapConfig } from './context/MapConfigContext';
+export { useMap } from './hooks'; 

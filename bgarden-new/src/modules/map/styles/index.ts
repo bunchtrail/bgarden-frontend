@@ -7,18 +7,19 @@ import './leaflet-overrides.css';
 // Экспорт готовых констант для часто используемых стилей
 export const MAP_STYLES = {
   // Tailwind классы для карты
-  mapContainer: layoutClasses.container,
-  mapContent: 'w-full h-[80vh]',
+  mapContainer: 'w-full h-full flex flex-col',
+  mapContent: 'w-full h-[600px] relative rounded-b-lg overflow-hidden',
   
   // Классы для элементов регионов
-  regionTooltip: 'tooltip-content',
+  regionTooltip: 'min-w-[180px] max-w-[250px] p-1',
   
   // Инфографика для регионов
-  regionInfo: 'inline-flex items-center gap-2',
-  regionCount: 'font-semibold',
+  regionInfo: 'mt-1 text-sm',
+  regionCount: 'font-medium',
   
   // Стили карты Leaflet (переопределение стилей библиотеки)
-  leafletTooltip: 'leaflet-tooltip',
+  leafletTooltip: 'bg-white shadow-lg rounded-md',
+  lightMode: 'leaflet-light-mode filter brightness-110 saturate-50',
 };
 
 // Для обеспечения обратной совместимости - перенаправление на глобальные цвета
