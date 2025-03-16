@@ -1,5 +1,120 @@
+export interface Specimen {
+  id: number;
+  inventoryNumber: string;
+  sectorType: number;
+  latitude: number;
+  longitude: number;
+  regionId: number;
+  regionName: string;
+  familyId: number;
+  familyName: string;
+  russianName: string;
+  latinName: string;
+  genus: string;
+  species: string;
+  cultivar: string;
+  form: string;
+  synonyms: string;
+  determinedBy: string;
+  plantingYear: number;
+  sampleOrigin: string;
+  naturalRange: string;
+  ecologyAndBiology: string;
+  economicUse: string;
+  conservationStatus: string;
+  expositionId: number;
+  expositionName: string;
+  hasHerbarium: boolean;
+  duplicatesInfo: string;
+  originalBreeder: string;
+  originalYear: number;
+  country: string;
+  illustration: string;
+  notes: string;
+  filledBy: string;
+}
+
 export enum SectorType {
-    Dendrology = 'dendrology',
-    Flora = 'flora',
-    Flowering = 'flowering'
+  Dendrology = 0,
+  Flora = 1,
+  Flowering = 2
+}
+
+export enum UserRole {
+  /**
+   * Администратор системы (полный доступ)
+   */
+  Administrator = 1,
+  
+  /**
+   * Работник ботанического сада (расширенный доступ)
+   */
+  Employee = 2,
+  
+  /**
+   * Клиент (ограниченный доступ, только для просмотра)
+   */
+  Client = 3
+}
+
+export interface SpecimenFormData extends Omit<Specimen, 'id'> {
+  id?: number;
+}
+
+export interface SpecimenFilterParams {
+  searchField?: keyof Specimen;
+  searchValue?: string;
+  familyId?: number;
+  sectorType?: SectorType;
+  regionId?: number;
+  expositionId?: number;
+}
+
+// Интерфейс для данных биометрии растений
+export interface Biometry {
+  id: number;
+  specimenId: number;
+  specimenInfo?: string;
+  measurementDate: Date;
+  height?: number;
+  flowerDiameter?: number;
+  notes?: string;
+}
+
+// Интерфейс для формы биометрии
+export interface BiometryFormData extends Omit<Biometry, 'id'> {
+  id?: number;
+}
+
+// Интерфейс для данных фенологии растений
+export interface Phenology {
+  id: number;
+  specimenId: number;
+  specimenInfo?: string;
+  year: number;
+  floweringStart?: Date;
+  floweringEnd?: Date;
+  fruitingDate?: Date;
+  notes?: string;
+}
+
+// Интерфейс для формы фенологии
+export interface PhenologyFormData extends Omit<Phenology, 'id'> {
+  id?: number;
+}
+
+// Интерфейс для данных семейства растений
+export interface Family {
+  id: number;
+  name: string;
+  description?: string;
+  specimensCount?: number;
+}
+
+// Интерфейс для данных региона
+export interface Region {
+  id: number;
+  name: string;
+  description?: string;
+  climate?: string;
 } 

@@ -4,7 +4,7 @@
     - `refactoring-map-module.md` (6.2 KB)
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (8.9 KB)
-    - `Структура_bgarden-new_от_16-03-2025.md` (15.7 KB)
+    - `Структура_bgarden-new_от_16-03-2025.md` (16.0 KB)
   - `package-lock.json` (687.4 KB)
   - `package.json` (1.5 KB)
   - `postcss.config.js` (82.0 B)
@@ -99,7 +99,7 @@
             - `MapContentStateRenderer.tsx` (1.4 KB)
           - **map-controls** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-controls)`
             - `index.ts` (72.0 B)
-            - `MapControlsRenderer.tsx` (5.1 KB)
+            - `MapControlsRenderer.tsx` (1.9 KB)
           - **map-layers** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\map\components\map-layers)`
             - `index.ts` (66.0 B)
             - `MapLayersManager.tsx` (10.0 KB)
@@ -177,9 +177,16 @@
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\docs)`
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\hooks)`
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\services)`
+          - `biometryService.ts` (1.8 KB)
+          - `expositionService.ts` (1.7 KB)
+          - `familyService.ts` (1.6 KB)
+          - `index.ts` (352.0 B)
+          - `phenologyService.ts` (1.9 KB)
+          - `regionService.ts` (4.7 KB)
+          - `specimenService.ts` (2.7 KB)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\styles)`
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\types)`
-          - `index.ts` (111.0 B)
+          - `index.ts` (2.7 KB)
       - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\ui)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\ui\components)`
           - `AbstractPattern.tsx` (892.0 B)

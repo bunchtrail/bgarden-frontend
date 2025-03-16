@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import AbstractPattern, { PatternType } from './AbstractPattern';
 
 export interface SectorCardProps {
-  id?: string;
+  id?: string | number;
   title: string;
   description?: string;
   patternType: PatternType;
@@ -21,7 +21,7 @@ const SectorCard: React.FC<SectorCardProps> = ({
 }) => {
   // Создаем компонент-обертку (либо Link, либо div, в зависимости от наличия id)
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    if (id) {
+    if (id !== undefined && id !== null) {
       return <Link to={`/sectors/${id}`} className="block h-full">{children}</Link>;
     }
     
