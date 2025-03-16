@@ -1,10 +1,5 @@
 - **bgarden-new** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new)`
   - `craco.config.js` (538.0 B)
-  - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\docs)`
-    - `refactoring-map-module.md` (6.2 KB)
-    - `refactoring.md` (15.4 KB)
-    - `styles-guide.md` (8.9 KB)
-    - `Структура_bgarden-new_от_16-03-2025.md` (16.8 KB)
   - `package-lock.json` (687.4 KB)
   - `package.json` (1.5 KB)
   - `postcss.config.js` (82.0 B)
@@ -173,13 +168,15 @@
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-gallery)`
           - **specimen-taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-taxonomy)`
           - **specimens-list** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimens-list)`
-          - **ui** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\ui)`
-            - `index.ts` (802.0 B)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\contexts)`
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\docs)`
-          - `README.md` (5.0 KB)
+          - `api-integration.md` (8.6 KB)
+          - `component-library.md` (12.9 KB)
+          - `development-guide.md` (7.4 KB)
+          - `README.md` (6.4 KB)
+          - `styles-guide.md` (5.1 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\hooks)`
-        - `index.ts` (804.0 B)
+        - `index.ts` (1.2 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\services)`
           - `biometryService.ts` (1.8 KB)
           - `expositionService.ts` (1.7 KB)
