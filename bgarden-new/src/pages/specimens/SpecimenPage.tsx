@@ -4,6 +4,7 @@ import { specimenService } from '../../modules/specimens/services/specimenServic
 import { Specimen, SpecimenFormData } from '../../modules/specimens/types';
 import LoadingSpinner from '../../modules/ui/components/LoadingSpinner';
 import Button from '../../modules/ui/components/Button';
+import Card from '../../modules/ui/components/Card';
 import SpecimenForm from '../../modules/specimens/components/specimen-form';
 
 /**
@@ -82,7 +83,7 @@ const SpecimenPage: React.FC = () => {
   // Рендеринг в зависимости от состояния
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-10">
+      <div className="flex justify-center items-center p-10 mt-16">
         <LoadingSpinner />
       </div>
     );
@@ -90,7 +91,7 @@ const SpecimenPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 text-red-700 p-4 rounded-md">
+      <div className="bg-red-100 text-red-700 p-4 rounded-md mt-16">
         <h2 className="text-lg font-bold">Ошибка</h2>
         <p>{error}</p>
         <Button 
@@ -105,7 +106,7 @@ const SpecimenPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 mt-16">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">
           {id === 'new' 
@@ -133,15 +134,15 @@ const SpecimenPage: React.FC = () => {
       </div>
 
       {isEditing ? (
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <Card variant="outlined">
           <SpecimenForm
             specimen={specimen || undefined}
             onSubmit={handleSave}
             onCancel={handleCancel}
           />
-        </div>
+        </Card>
       ) : (
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <Card variant="outlined">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Основная информация</h2>
@@ -209,7 +210,7 @@ const SpecimenPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

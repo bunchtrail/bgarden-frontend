@@ -162,9 +162,31 @@
           - **specimen-actions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-actions)`
           - **specimen-card** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-card)`
           - **specimen-form** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form)`
+            - **form-progress** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\form-progress)`
+              - `FormProgress.tsx` (1.4 KB)
+            - **form-stepper** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\form-stepper)`
+              - `FormStepper.tsx` (2.9 KB)
             - **geographic** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\geographic)`
+            - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\hooks)`
+              - `useFormNavigation.tsx` (1.5 KB)
+              - `useFormValidation.tsx` (2.3 KB)
             - `index.ts` (101.0 B)
-            - `SpecimenForm.tsx` (11.5 KB)
+            - **sections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections)`
+              - **additional-info** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\additional-info)`
+                - `AdditionalInfoSection.tsx` (2.3 KB)
+                - `index.ts` (65.0 B)
+              - **basic-info** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\basic-info)`
+                - `BasicInfoSection.tsx` (6.9 KB)
+                - `index.ts` (55.0 B)
+              - **geography** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\geography)`
+                - `GeographySection.tsx` (2.7 KB)
+                - `index.ts` (55.0 B)
+              - **taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\taxonomy)`
+                - `index.ts` (53.0 B)
+                - `TaxonomySection.tsx` (2.0 KB)
+            - `SpecimenForm.tsx` (9.9 KB)
+            - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\utils)`
+              - `calculateFormProgress.ts` (1.9 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-gallery)`
           - **specimen-taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-taxonomy)`
           - **specimens-list** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimens-list)`
@@ -184,7 +206,7 @@
           - `index.ts` (508.0 B)
           - `phenologyService.ts` (1.9 KB)
           - `regionService.ts` (5.7 KB)
-          - `specimenService.ts` (4.9 KB)
+          - `specimenService.ts` (6.6 KB)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\styles)`
           - `index.ts` (2.8 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\types)`
@@ -227,7 +249,7 @@
       - **sector** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\sector)`
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\specimens)`
         - `SpecimenPage.tsx` (7.8 KB)
-        - `SpecimensListPage.tsx` (11.6 KB)
+        - `SpecimensListPage.tsx` (11.9 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **routes** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\routes)`

@@ -1,6 +1,19 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
-import { Button, TextField, Select, SelectOption, CheckboxField, Textarea } from '@/modules/ui';
+import { Button } from '@/modules/ui';
+import { BasicInfoSection } from './sections/basic-info';
+import { TaxonomySection } from './sections/taxonomy';
+import { GeographySection } from './sections/geography';
+import { AdditionalInfoSection } from './sections/additional-info';
+
+import { useFormNavigation } from './hooks/useFormNavigation';
+import { useFormValidation } from './hooks/useFormValidation';
+import { cardClasses, buttonClasses } from '@/styles/global-styles';
+
+// Импортируем недостающие компоненты и функции
+import FormStepper from './form-stepper/FormStepper';
+import FormProgress from './form-progress/FormProgress';
+import { calculateFormProgress } from './utils/calculateFormProgress';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -10,6 +23,7 @@ interface SpecimenFormProps {
 
 /**
  * Форма для добавления/редактирования образца растения
+ * Современная многошаговая форма с визуальным прогресс-индикатором
  * 
  * @param specimen - Существующий образец для редактирования (опционально)
  * @param onSubmit - Функция для отправки формы
@@ -51,6 +65,24 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     notes: '',
     filledBy: ''
   });
+  
+  // Подключаем custom hooks для управления формой
+  const { 
+    activeStep, 
+    slideDirection, 
+    goToNextStep: goToNextStepNav, 
+    goToPreviousStep, 
+    goToStep 
+  } = useFormNavigation();
+  
+  const {
+    errors,
+    touchedFields,
+    validateField,
+    validateCurrentStep,
+    setTouchedFields,
+    setErrors
+  } = useFormValidation(formData);
 
   // Обновление формы при получении данных образца
   useEffect(() => {
@@ -62,6 +94,12 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Обработчик изменения полей формы
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    // Помечаем поле как затронутое для валидации
+    setTouchedFields(prev => ({
+      ...prev,
+      [name]: true
+    }));
     
     // Для чекбоксов обрабатываем отдельно
     if (type === 'checkbox') {
@@ -87,274 +125,185 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       ...prev,
       [name]: value
     }));
+    
+    // Валидируем поле после изменения
+    validateField(name, type === 'number' ? (value === '' ? 0 : Number(value)) : value);
+  };
+
+  // Переход к следующему шагу с валидацией
+  const goToNextStep = () => {
+    if (validateCurrentStep(activeStep)) {
+      goToNextStepNav();
+    }
   };
 
   // Отправка формы
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Проверяем все поля перед отправкой
+    const allFields = [
+      'inventoryNumber', 'russianName', 'latinName', 'genus', 'species',
+      'familyId', 'familyName', 'latitude', 'longitude', 'regionId'
+    ];
+    
+    // Помечаем все обязательные поля как затронутые
+    const newTouchedFields = { ...touchedFields };
+    allFields.forEach(field => {
+      newTouchedFields[field] = true;
+    });
+    setTouchedFields(newTouchedFields);
+    
+    // Валидируем все поля
+    let isValid = true;
+    allFields.forEach(field => {
+      const fieldIsValid = validateField(field, formData[field as keyof SpecimenFormData]);
+      if (!fieldIsValid) isValid = false;
+    });
+    
+    if (isValid) {
+      onSubmit(formData);
+    } else {
+      // Переходим к первому шагу с ошибкой
+      const fieldsToValidate: Record<number, string[]> = {
+        1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
+        2: ['familyId', 'familyName'],
+        3: ['latitude', 'longitude', 'regionId'],
+        4: []
+      };
+      
+      const stepsWithErrors = [1, 2, 3, 4].filter(step => {
+        const stepFields = (fieldsToValidate[step] || []);
+        return stepFields.some(field => !!errors[field]);
+      });
+      
+      if (stepsWithErrors.length > 0) {
+        goToStep(stepsWithErrors[0]);
+      }
+    }
+  };
+
+  // Рендер активного шага формы
+  const renderActiveStep = () => {
+    switch (activeStep) {
+      case 1:
+        return (
+          <BasicInfoSection 
+            formData={formData} 
+            onChange={handleChange}
+            errors={errors}
+            touchedFields={touchedFields}
+          />
+        );
+      case 2:
+        return (
+          <TaxonomySection 
+            formData={formData} 
+            onChange={handleChange}
+          />
+        );
+      case 3:
+        return (
+          <GeographySection 
+            formData={formData} 
+            onChange={handleChange}
+          />
+        );
+      case 4:
+        return (
+          <AdditionalInfoSection 
+            formData={formData} 
+            onChange={handleChange}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Основная информация */}
-      <h3 className="text-lg font-semibold mb-2">Основная информация</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <TextField
-          id="inventoryNumber"
-          name="inventoryNumber"
-          label="Инвентарный номер"
-          value={formData.inventoryNumber}
-          onChange={handleChange}
-          fullWidth
-        />
-        
-        <Select
-          id="sectorType"
-          name="sectorType"
-          label="Тип сектора"
-          value={formData.sectorType}
-          onChange={handleChange}
-          options={[
-            { value: 0, label: 'Дендрологический' },
-            { value: 1, label: 'Флора' },
-            { value: 2, label: 'Цветущий' }
-          ]}
-          fullWidth
-        />
-        
-        <TextField
-          id="russianName"
-          name="russianName"
-          label="Название на русском"
-          value={formData.russianName ?? ''}
-          onChange={handleChange}
-          fullWidth
-        />
-        
-        <TextField
-          id="latinName"
-          name="latinName"
-          label="Латинское название"
-          value={formData.latinName ?? ''}
-          onChange={handleChange}
-          fullWidth
-        />
-        
-        <TextField
-          id="genus"
-          name="genus"
-          label="Род"
-          value={formData.genus ?? ''}
-          onChange={handleChange}
-          fullWidth
-        />
-      </div>
+    <div>
+      {/* Прогресс-индикатор */}
+      <FormStepper 
+        activeStep={activeStep} 
+        goToStep={goToStep} 
+      />
       
-      {/* Таксономическая информация */}
-      <fieldset className="p-4 border rounded-md">
-        <legend className="text-lg font-medium px-2">Таксономическая информация</legend>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="familyId">
-              Семейство *
-            </label>
-            <select
-              id="familyId"
-              name="familyId"
-              value={formData.familyId}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-              required
-            >
-              <option value={0}>Выберите семейство</option>
-              {/* Тут будет подгрузка семейств из API */}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="species">
-              Вид
-            </label>
-            <input
-              type="text"
-              id="species"
-              name="species"
-              value={formData.species}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="synonyms">
-              Синонимы
-            </label>
-            <input
-              type="text"
-              id="synonyms"
-              name="synonyms"
-              value={formData.synonyms ?? ''}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
+      <form onSubmit={handleSubmit} className={`${cardClasses.outlined} ${cardClasses.content} rounded-xl`}>
+        {/* Анимированный контейнер шагов */}
+        <div className="overflow-hidden min-h-[500px]">
+          <div 
+            className={`transition-transform duration-300 transform ${
+              slideDirection === 'right' 
+                ? 'translate-x-full' 
+                : '-translate-x-full'
+            }`}
+            style={{ 
+              transform: 'translateX(0)' 
+            }}
+          >
+            {/* Содержимое активного шага */}
+            {renderActiveStep()}
           </div>
         </div>
-      </fieldset>
-      
-      {/* Географическая информация */}
-      <fieldset className="p-4 border rounded-md">
-        <legend className="text-lg font-medium px-2">Географическая информация</legend>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Индикатор заполненности формы */}
+        <FormProgress 
+          progress={calculateFormProgress(formData)} 
+        />
+        
+        {/* Навигационные кнопки */}
+        <div className="flex justify-between pt-6 mt-4 border-t border-gray-200">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="regionId">
-              Регион *
-            </label>
-            <select
-              id="regionId"
-              name="regionId"
-              value={formData.regionId ?? 0}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-              required
-            >
-              <option value={0}>Выберите регион</option>
-              {/* Тут будет подгрузка регионов из API */}
-            </select>
+            {activeStep > 1 ? (
+              <Button 
+                variant="neutral"
+                onClick={goToPreviousStep}
+                className="flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Назад
+              </Button>
+            ) : (
+              <Button 
+                variant="neutral"
+                onClick={onCancel}
+              >
+                Отмена
+              </Button>
+            )}
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="expositionId">
-              Экспозиция *
-            </label>
-            <select
-              id="expositionId"
-              name="expositionId"
-              value={formData.expositionId}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-              required
-            >
-              <option value={0}>Выберите экспозицию</option>
-              {/* Тут будет подгрузка экспозиций из API */}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="latitude">
-              Широта
-            </label>
-            <input
-              type="number"
-              id="latitude"
-              name="latitude"
-              value={formData.latitude}
-              onChange={handleChange}
-              step="0.000001"
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="longitude">
-              Долгота
-            </label>
-            <input
-              type="number"
-              id="longitude"
-              name="longitude"
-              value={formData.longitude}
-              onChange={handleChange}
-              step="0.000001"
-              className="w-full px-3 py-2 border rounded-md"
-            />
+            {activeStep < 4 ? (
+              <Button 
+                variant="primary"
+                onClick={goToNextStep}
+                className="flex items-center"
+              >
+                Далее
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
+            ) : (
+              <Button 
+                variant="success" 
+                type="submit"
+                className="flex items-center"
+              >
+                Сохранить
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </Button>
+            )}
           </div>
         </div>
-      </fieldset>
-      
-      {/* Дополнительная информация */}
-      <fieldset className="p-4 border rounded-md">
-        <legend className="text-lg font-medium px-2">Дополнительная информация</legend>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="plantingYear">
-              Год посадки
-            </label>
-            <input
-              type="number"
-              id="plantingYear"
-              name="plantingYear"
-              value={formData.plantingYear}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
-          
-          <div>
-            <TextField
-              id="sampleOrigin"
-              name="sampleOrigin"
-              label="Происхождение образца"
-              value={formData.sampleOrigin ?? ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </div>
-          
-          <div>
-            <TextField
-              id="naturalRange"
-              name="naturalRange"
-              label="Естественный ареал"
-              value={formData.naturalRange ?? ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </div>
-          
-          <div>
-            <CheckboxField
-              id="hasHerbarium"
-              name="hasHerbarium"
-              label="Есть гербарий"
-              checked={formData.hasHerbarium}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <Textarea
-              id="notes"
-              name="notes"
-              label="Примечания"
-              value={formData.notes ?? ''}
-              onChange={handleChange}
-              rows={3}
-              fullWidth
-            />
-          </div>
-        </div>
-      </fieldset>
-      
-      {/* Кнопки формы */}
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button 
-          variant="neutral"
-          onClick={onCancel}
-        >
-          Отмена
-        </Button>
-        <Button 
-          variant="success" 
-          type="submit"
-        >
-          Сохранить
-        </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

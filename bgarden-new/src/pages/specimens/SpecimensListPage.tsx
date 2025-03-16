@@ -57,7 +57,12 @@ const SpecimensListPage: React.FC = () => {
           console.log(`Загрузка образцов для сектора типа: ${filters.sectorType}`);
           data = await specimenService.getSpecimensBySectorType(filters.sectorType);
           console.log('Получены образцы:', data);
-        } 
+        } else {
+          // Загружаем все образцы
+          console.log('Загрузка всех образцов');
+          data = await specimenService.getAllSpecimens();
+          console.log('Получены все образцы:', data);
+        }
         
         // Обеспечиваем, что data всегда массив
         if (!Array.isArray(data)) {
@@ -122,7 +127,7 @@ const SpecimensListPage: React.FC = () => {
   });
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto px-4 py-6 mt-16">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Образцы растений</h1>

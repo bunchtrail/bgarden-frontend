@@ -3,6 +3,49 @@ import { SectorType, Specimen } from '../types/index';
 
 // Интерфейс для работы с API образцов растений
 class SpecimenService {
+    // Получить все образцы
+    async getAllSpecimens(): Promise<Specimen[]> {
+        try {
+            console.log('Запрос всех образцов');
+            
+            const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
+            const url = `${API_BASE_URL}/Specimen/all`;
+            
+            // Получаем токен авторизации, если есть
+            const token = localStorage.getItem('token');
+            const headers: Record<string, string> = {
+                'Accept': 'text/plain'
+            };
+            
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers,
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Ошибка запроса: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            // Преобразуем единичный объект в массив, если API вернуло один объект
+            if (!Array.isArray(data)) {
+                console.log('API вернуло один объект, преобразуем в массив');
+                return [data as Specimen];
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Ошибка при получении всех образцов:', error);
+            return [];
+        }
+    }
+
     // Получить образцы по типу сектора
     async getSpecimensBySectorType(sectorType: SectorType): Promise<Specimen[]> {
         try {
