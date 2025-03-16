@@ -1,16 +1,61 @@
 import httpClient from '../../../services/httpClient';
-import { SectorType, Specimen } from '../types';
+import { SectorType, Specimen } from '../types/index';
 
 // Интерфейс для работы с API образцов растений
 class SpecimenService {
-    // Получить все образцы
-    async getAllSpecimens(): Promise<Specimen[]> {
-        return httpClient.get<Specimen[]>('Specimen');
-    }
-
     // Получить образцы по типу сектора
     async getSpecimensBySectorType(sectorType: SectorType): Promise<Specimen[]> {
-        return httpClient.get<Specimen[]>(`Specimen/sector/${sectorType}`);
+        try {
+            console.log(`Запрос образцов для сектора типа: ${sectorType}`);
+            
+            // Используем прямой fetch вместо httpClient для предотвращения логирования 404 ошибок
+            const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
+            const url = `${API_BASE_URL}/Specimen/sector/${sectorType}`;
+            
+            // Получаем токен авторизации, если есть
+            const token = localStorage.getItem('token');
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain'
+            };
+            
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+            
+            // Тихо обрабатываем ошибки, не логируя их в консоль
+            const response = await fetch(url, {
+                method: 'GET',
+                headers,
+                credentials: 'include'
+            });
+            
+            // Если получили 404, просто возвращаем пустой массив
+            if (response.status === 404) {
+                console.log(`В секторе типа ${sectorType} нет растений.`);
+                return [];
+            }
+            
+            // Для других ошибок
+            if (!response.ok) {
+                throw new Error(`Ошибка запроса: ${response.status} ${response.statusText}`);
+            }
+            
+            // Обработка успешного ответа
+            const data = await response.json();
+            
+            // Преобразуем единичный объект в массив, если API вернуло один объект
+            if (!Array.isArray(data)) {
+                console.log('API вернуло один объект, преобразуем в массив');
+                return [data as Specimen];
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Ошибка при получении образцов для сектора:', error);
+            // Скрываем ошибку от внешнего кода, чтобы не выводить ее на страницу
+            return [];
+        }
     }
 
     // Получить образец по ID

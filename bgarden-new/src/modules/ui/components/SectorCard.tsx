@@ -22,7 +22,8 @@ const SectorCard: React.FC<SectorCardProps> = ({
   // Создаем компонент-обертку (либо Link, либо div, в зависимости от наличия id)
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     if (id !== undefined && id !== null) {
-      return <Link to={`/sectors/${id}`} className="block h-full">{children}</Link>;
+      // Перенаправляем на страницу образцов с фильтрацией по типу сектора
+      return <Link to={`/specimens?sectorType=${id}`} className="block h-full">{children}</Link>;
     }
     
     return (
@@ -47,7 +48,7 @@ const SectorCard: React.FC<SectorCardProps> = ({
           )}
           <div className="mt-auto flex justify-end">
             <span className="text-sm font-medium text-[#3882F6] flex items-center">
-              {id ? 'Перейти' : 'Подробнее'}
+              Просмотреть образцы
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbstractPattern, PatternType, SectorCard, Card } from '@modules/ui';
-import { SectorType } from '@modules/specimens/types';
+import { SectorType } from '@/modules/specimens/types';
 
 // Данные о секторах
 export const sectorData = [

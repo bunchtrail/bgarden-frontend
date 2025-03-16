@@ -17,6 +17,7 @@ export interface BaseComponentProps {
 export type { PatternType } from './components/AbstractPattern';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './components/Button';
 export type { TextFieldProps } from './components/Form/TextField';
+export type { SelectProps, SelectOption } from './components/Form/Select';
 export type { CardProps } from './components/Card';
 
 /**
