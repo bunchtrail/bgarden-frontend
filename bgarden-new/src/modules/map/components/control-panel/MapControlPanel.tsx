@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 import { 
   LayerSelector, 
@@ -8,6 +8,7 @@ import {
   ControlPanelSection
 } from './index';
 import { animationClasses } from '../../../../styles/global-styles';
+import { MAP_LAYERS } from '../../contexts/MapConfigContext';
 
 // Определяем типы режимов панели
 export type PanelMode = 'full' | 'light' | 'minimal' | 'custom';
@@ -22,6 +23,7 @@ interface MapControlPanelProps {
   showLabelToggle?: boolean;
   showClusteringToggle?: boolean;
   showMarkerToggle?: boolean;
+  showPlantsToggle?: boolean;
   onClose?: () => void;
   customSections?: ControlPanelSection[];
   children?: ReactNode;
@@ -43,6 +45,7 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   showLabelToggle = true,
   showClusteringToggle = true,
   showMarkerToggle = false,
+  showPlantsToggle = false,
   onClose,
   customSections = [],
   children,
@@ -53,11 +56,22 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   const { 
     mapConfig, 
     toggleLightMode, 
-    updateMapConfig 
+    updateMapConfig,
+    resetMapConfig,
+    saveConfigToStorage,
+    toggleLayer
   } = useMapConfig();
   
   // Состояние для анимации
   const [isExpanded, setIsExpanded] = useState(true);
+  
+  // Состояние для отслеживания изменений, чтобы показывать кнопку сброса
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Эффект для обнаружения изменений в конфигурации
+  useEffect(() => {
+    setHasChanges(true);
+  }, [mapConfig]);
 
   // Настройки видимости элементов в зависимости от режима
   const getPanelConfig = () => {
@@ -69,7 +83,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
           showTooltipToggle: false,
           showLabelToggle: true,
           showClusteringToggle: true,
-          showMarkerToggle: true
+          showMarkerToggle: true,
+          showPlantsToggle: false
         };
       case 'minimal':
         return {
@@ -78,7 +93,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
           showTooltipToggle: false,
           showLabelToggle: false,
           showClusteringToggle: true,
-          showMarkerToggle: true
+          showMarkerToggle: true,
+          showPlantsToggle: false
         };
       case 'custom':
         // Для режима custom используем значения, переданные в props
@@ -88,7 +104,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
           showTooltipToggle,
           showLabelToggle,
           showClusteringToggle,
-          showMarkerToggle
+          showMarkerToggle,
+          showPlantsToggle
         };
       case 'full':
       default:
@@ -98,7 +115,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
           showTooltipToggle: true,
           showLabelToggle: true,
           showClusteringToggle: true,
-          showMarkerToggle: false
+          showMarkerToggle: false,
+          showPlantsToggle: true
         };
     }
   };
@@ -107,10 +125,46 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
 
   // Обработчик изменения конфигурации с поддержкой внешнего обработчика
   const handleConfigChange = (key: string, value: boolean | string | number) => {
+    // Для всех типов настроек просто обновляем значение
     updateMapConfig({ [key]: value });
+    
     if (onConfigChange) {
       onConfigChange(key, value);
     }
+    
+    // Отмечаем, что были внесены изменения
+    setHasChanges(true);
+  };
+
+  // Проверяем, видим ли указанный слой
+  const isLayerVisible = (layerId: string) => mapConfig.visibleLayers.includes(layerId);
+
+  // Безопасное переключение слоя с проверкой
+  const handleToggleLayer = (layerId: string) => {
+    // Если слой уже выключен - его можно включить без проверок
+    if (!isLayerVisible(layerId)) {
+      toggleLayer(layerId);
+      return;
+    }
+    
+    // Если слой включен, проверяем, можно ли его выключить
+    if (mapConfig.visibleLayers.length > 1) {
+      toggleLayer(layerId);
+    } else {
+      console.log('Невозможно отключить все слои карты. Хотя бы один слой должен быть активен.');
+    }
+  };
+
+  // Обработчик сброса настроек
+  const handleResetConfig = () => {
+    resetMapConfig();
+    setHasChanges(false);
+  };
+
+  // Обработчик сохранения настроек
+  const handleSaveConfig = () => {
+    saveConfigToStorage();
+    setHasChanges(false);
   };
 
   // Современная стилизация с использованием стекломорфизма
@@ -130,6 +184,36 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  // Настройки для облегченного режима
+  const renderLightModeSection = () => {
+    if (!mapConfig.lightMode) return null;
+    
+    return (
+      <div className="mt-4 mb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Настройки облегченной карты</h4>
+        <div className="bg-white/50 p-3 rounded-lg space-y-3">
+          <ConfigCheckbox 
+            label="Показывать растения"
+            checked={isLayerVisible(MAP_LAYERS.PLANTS)}
+            onChange={() => handleToggleLayer(MAP_LAYERS.PLANTS)}
+          />
+          
+          <ConfigCheckbox 
+            label="Группировать маркеры"
+            checked={mapConfig.enableClustering}
+            onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
+          />
+          
+          <ConfigCheckbox 
+            label="Показывать подсказки"
+            checked={mapConfig.showTooltips}
+            onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
+          />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -169,7 +253,11 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             </div>
           )}
 
-          {config.showLayerSelector && (
+          {/* Специальная секция для облегченного режима */}
+          {renderLightModeSection()}
+
+          {/* Показываем LayerSelector только в полном режиме */}
+          {config.showLayerSelector && !mapConfig.lightMode && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Слои карты</h4>
               <div className="bg-white/50 p-2 rounded-lg">
@@ -178,7 +266,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             </div>
           )}
 
-          {(config.showTooltipToggle || config.showLabelToggle || config.showClusteringToggle || config.showMarkerToggle) && (
+          {/* Показываем основные настройки только в полном режиме */}
+          {!mapConfig.lightMode && (config.showTooltipToggle || config.showLabelToggle || config.showClusteringToggle || config.showMarkerToggle) && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Настройки отображения</h4>
               <div className="bg-white/50 p-3 rounded-lg space-y-3">
@@ -239,6 +328,26 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
               {children}
             </div>
           )}
+
+          {/* Кнопки управления настройками */}
+          <div className="mt-4 pt-3 border-t border-gray-200/50 flex justify-between">
+            <button
+              onClick={handleResetConfig}
+              className="text-sm px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+              title="Сбросить все настройки к значениям по умолчанию"
+            >
+              Сбросить
+            </button>
+            
+            <button
+              onClick={handleSaveConfig}
+              className="text-sm px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+              disabled={!hasChanges}
+              title="Сохранить текущие настройки"
+            >
+              Сохранить
+            </button>
+          </div>
 
           {/* Нижний колонтитул панели */}
           {footer && (
