@@ -111,6 +111,16 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Проверка, вызван ли submit действительно через кнопку "Сохранить"
+    // Если мы просто переходим между шагами, не нужно отправлять форму
+    const submitEvent = e.nativeEvent as SubmitEvent;
+    const isRealSubmit = submitEvent.submitter?.getAttribute('type') === 'submit';
+    
+    // Если это не реальный submit, а просто переход к следующему шагу - выходим
+    if (!isRealSubmit && activeStep < formSteps.length) {
+      return;
+    }
+    
     // Проверяем все поля перед отправкой
     const allFields = [
       'inventoryNumber', 'russianName', 'latinName', 'genus', 'species',
@@ -236,7 +246,12 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         <NavigationButtons 
           activeStep={activeStep}
           totalSteps={formSteps.length}
-          onNext={goToNextStep}
+          onNext={() => {
+            // Проверяем текущий шаг и переходим к следующему
+            if (isCurrentStepValid) {
+              goToNextStep();
+            }
+          }}
           onPrevious={goToPreviousStep}
           onCancel={onCancel}
           onSubmit={handleSubmit}

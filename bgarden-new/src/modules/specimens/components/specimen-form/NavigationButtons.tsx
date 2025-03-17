@@ -53,9 +53,14 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         {activeStep < totalSteps ? (
           <Button 
             variant="primary"
-            onClick={onNext}
+            onClick={(e) => {
+              // Останавливаем стандартное событие отправки формы
+              e.preventDefault();
+              onNext();
+            }}
             className="flex items-center"
             disabled={isNextDisabled}
+            type="button" // Явно указываем тип кнопки как button, чтобы не отправлять форму
           >
             Далее
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
