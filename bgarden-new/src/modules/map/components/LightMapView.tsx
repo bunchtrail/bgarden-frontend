@@ -6,11 +6,13 @@ import { RegionData } from '../types/mapTypes';
 import { LoadingSpinner } from '@/modules/ui';
 import { 
   MapBoundsHandler,
-  BaseMapContainer
+  BaseMapContainer,
 } from './map-components';
-import { MapLayersManager } from './map-submodules';
+import MapLayersManager from './map-layers/MapLayersManager';
+import MapControlPanel, { PANEL_PRESETS } from './control-panel/MapControlPanel';
 import { useMapConfig, MapConfigProvider, MapConfig } from '../contexts/MapConfigContext';
 import { MapProvider } from '../contexts/MapContext';
+import { ControlPanelSection } from './control-panel';
 
 // Конфигурация для облегченной версии карты
 const LIGHT_CONFIG: Partial<MapConfig> = {
@@ -31,6 +33,9 @@ interface LightMapViewProps {
   loading?: boolean;
   showControls?: boolean;
   aspectRatio?: 'square' | 'landscape' | 'portrait';
+  controlPanelPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  customSections?: ControlPanelSection[];
+  controlPanelMode?: 'light' | 'minimal' | 'geography' | 'custom';
 }
 
 // Компонент облегченной карты
@@ -42,10 +47,12 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
   className = '',
   loading = false,
   showControls = false,
-  aspectRatio = 'landscape'
+  aspectRatio = 'landscape',
+  customSections = [],
+  controlPanelMode = 'light'
 }) => {
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
-  const { mapConfig } = useMapConfig();
+  const { mapConfig, updateMapConfig } = useMapConfig();
 
   // Получаем URL изображения карты
   const mapImageUrl = mapData ? getMapImageUrl(mapData) : null;
@@ -63,6 +70,11 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
     ${aspectRatioClass}
     ${className}
   `;
+
+  // Обработчик изменения конфигурации из панели управления
+  const handleConfigChange = (key: string, value: boolean | string | number) => {
+    updateMapConfig({ [key]: value });
+  };
 
   // Вычисляем размеры изображения перед рендерингом MapContainer
   useEffect(() => {
@@ -119,6 +131,15 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
         
         <MapBoundsHandler imageBounds={imageBounds} />
       </BaseMapContainer>
+      
+      {showControls && (
+        <MapControlPanel 
+          panelMode={controlPanelMode}
+          onConfigChange={handleConfigChange}
+          customSections={customSections}
+          className="max-h-[80%] overflow-y-auto"
+        />
+      )}
     </div>
   );
 };

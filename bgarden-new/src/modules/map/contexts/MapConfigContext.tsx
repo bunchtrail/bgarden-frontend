@@ -12,9 +12,6 @@ export const MAP_LAYERS = {
 // Имя ключа для хранения конфигурации в localStorage
 const STORAGE_KEY = 'bgarden_map_config';
 
-// Имя ключа для хранения конфигурации облегченного режима
-const LIGHT_MODE_STORAGE_KEY = 'bgarden_map_light_config';
-
 // Интерфейс конфигурации карты
 export interface MapConfig {
   center: LatLngExpression;
@@ -47,26 +44,16 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   maxBoundsViscosity: 1.0,
   zoomControlPosition: 'bottomright' as ControlPosition,
   // Дополнительные настройки
-  lightMode: false,
+  lightMode: true,
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
-  showTooltips: true,
-  showLabels: true,
-  showMarkers: true, // По умолчанию маркеры отображаются
+  showTooltips: false,
+  showLabels: false,
+  showMarkers: true,
   zoomLevel: 1,
   availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS, MAP_LAYERS.LABELS],
   showControls: true,
   debug: false,
-  enableClustering: true, // По умолчанию кластеризация включена
-};
-
-// Настройки по умолчанию для облегченной карты
-export const DEFAULT_LIGHT_MAP_CONFIG: Partial<MapConfig> = {
-  lightMode: true,
-  visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],
-  showTooltips: false,
-  showLabels: false, 
-  zoomLevel: 0,
-  enableClustering: false, // По умолчанию кластеризация выключена в облегченном режиме
+  enableClustering: true,
 };
 
 interface MapConfigContextProps {
@@ -74,7 +61,6 @@ interface MapConfigContextProps {
   setMapConfig: React.Dispatch<React.SetStateAction<MapConfig>>;
   updateMapConfig: (config: Partial<MapConfig>) => void;
   resetMapConfig: () => void;
-  toggleLightMode: () => void;
   toggleLayer: (layerName: string) => void;
   saveConfigToStorage: () => void;
   loadConfigFromStorage: () => void;
@@ -95,120 +81,60 @@ interface MapConfigProviderProps {
   initialConfig?: Partial<MapConfig>;
 }
 
-// Функция для загрузки конфигурации из localStorage
-const loadSavedConfig = (): Partial<MapConfig> => {
-  try {
-    const savedConfig = localStorage.getItem(STORAGE_KEY);
-    if (savedConfig) {
-      return JSON.parse(savedConfig);
-    }
-  } catch (error) {
-    console.error('Ошибка при загрузке конфигурации карты:', error);
-  }
-  return {};
-};
-
-// Функция для загрузки конфигурации облегченного режима
-const loadLightModeConfig = (): Partial<MapConfig> => {
-  try {
-    const savedConfig = localStorage.getItem(LIGHT_MODE_STORAGE_KEY);
-    if (savedConfig) {
-      return JSON.parse(savedConfig);
-    }
-  } catch (error) {
-    console.error('Ошибка при загрузке конфигурации облегченной карты:', error);
-  }
-  return DEFAULT_LIGHT_MAP_CONFIG;
-};
-
 export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ 
   children, 
   initialConfig 
 }) => {
-  // Загружаем конфигурацию при инициализации
-  const savedConfig = loadSavedConfig();
-  
   const [mapConfig, setMapConfig] = useState<MapConfig>({
     ...DEFAULT_MAP_CONFIG,
-    ...savedConfig, // Сначала применяем сохраненные настройки
-    ...initialConfig // Затем применяем переданные в компонент (они имеют приоритет)
+    ...initialConfig
   });
-
-  // Храним состояние последней обычной конфигурации перед переключением в облегченный режим
-  const [lastNormalConfig, setLastNormalConfig] = useState<Partial<MapConfig>>({});
   
-  // Храним состояние последней облегченной конфигурации
-  const [lastLightConfig, setLastLightConfig] = useState<Partial<MapConfig>>(loadLightModeConfig());
-
+  // Состояние для отслеживания изменений
+  const [hasChanges, setHasChanges] = useState(false);
+  
   // Синхронизация между параметром showLabels и слоем labels
   useEffect(() => {
-    const hasLabelsLayer = mapConfig.visibleLayers.includes(MAP_LAYERS.LABELS);
-    
-    // Если параметр showLabels включен, а слой labels отсутствует - добавляем его
-    if (mapConfig.showLabels && !hasLabelsLayer) {
-      setMapConfig(prev => ({
-        ...prev,
-        visibleLayers: [...prev.visibleLayers, MAP_LAYERS.LABELS]
-      }));
+    // Если включены метки, добавляем слой labels если его нет
+    if (mapConfig.showLabels && !mapConfig.visibleLayers.includes(MAP_LAYERS.LABELS)) {
+      updateMapConfig({
+        visibleLayers: [...mapConfig.visibleLayers, MAP_LAYERS.LABELS]
+      });
     } 
-    // Если параметр showLabels выключен, а слой labels присутствует - удаляем его
-    else if (!mapConfig.showLabels && hasLabelsLayer) {
-      setMapConfig(prev => ({
-        ...prev,
-        visibleLayers: prev.visibleLayers.filter(layer => layer !== MAP_LAYERS.LABELS)
-      }));
+    // Если выключены метки, убираем слой labels если он есть
+    else if (!mapConfig.showLabels && mapConfig.visibleLayers.includes(MAP_LAYERS.LABELS)) {
+      updateMapConfig({
+        visibleLayers: mapConfig.visibleLayers.filter(l => l !== MAP_LAYERS.LABELS)
+      });
     }
   }, [mapConfig.showLabels]);
 
-  // Функция для сохранения конфигурации в localStorage
   const saveConfigToStorage = () => {
     try {
-      if (mapConfig.lightMode) {
-        // Сохраняем конфигурацию облегченного режима
-        localStorage.setItem(LIGHT_MODE_STORAGE_KEY, JSON.stringify({
-          visibleLayers: mapConfig.visibleLayers,
-          showTooltips: mapConfig.showTooltips,
-          enableClustering: mapConfig.enableClustering
-        }));
-      } else {
-        // Сохраняем обычную конфигурацию
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
-      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
     } catch (error) {
       console.error('Ошибка при сохранении конфигурации карты:', error);
     }
   };
 
-  // Функция для загрузки конфигурации из localStorage
   const loadConfigFromStorage = () => {
-    const savedConfig = loadSavedConfig();
-    if (Object.keys(savedConfig).length > 0) {
-      setMapConfig(prev => ({
-        ...prev,
-        ...savedConfig
-      }));
+    try {
+      const savedConfig = localStorage.getItem(STORAGE_KEY);
+      if (savedConfig) {
+        setMapConfig(JSON.parse(savedConfig));
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке конфигурации карты:', error);
     }
   };
 
   const updateMapConfig = (config: Partial<MapConfig>) => {
     setMapConfig(prevConfig => {
-      const newConfig = {
-        ...prevConfig,
-        ...config
-      };
+      const newConfig = { ...prevConfig, ...config };
       
       // Автосохранение конфигурации при каждом обновлении
       try {
-        if (newConfig.lightMode) {
-          // В режиме облегченной карты сохраняем только специфичные настройки
-          localStorage.setItem(LIGHT_MODE_STORAGE_KEY, JSON.stringify({
-            visibleLayers: newConfig.visibleLayers,
-            showTooltips: newConfig.showTooltips,
-            enableClustering: newConfig.enableClustering
-          }));
-        } else {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
-        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
       } catch (error) {
         console.error('Ошибка при автосохранении конфигурации карты:', error);
       }
@@ -218,94 +144,28 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
   };
 
   const resetMapConfig = () => {
-    // Сбрасываем в зависимости от текущего режима
-    if (mapConfig.lightMode) {
-      setMapConfig(prev => ({
-        ...prev,
-        ...DEFAULT_LIGHT_MAP_CONFIG
-      }));
-      try {
-        localStorage.removeItem(LIGHT_MODE_STORAGE_KEY);
-      } catch (error) {
-        console.error('Ошибка при удалении сохраненной конфигурации облегченной карты:', error);
-      }
-    } else {
-      setMapConfig(DEFAULT_MAP_CONFIG);
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (error) {
-        console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
-      }
+    setMapConfig(DEFAULT_MAP_CONFIG);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
     }
-  };
-
-  const toggleLightMode = () => {
-    setMapConfig(prevConfig => {
-      // Если переключаемся в облегченный режим
-      if (!prevConfig.lightMode) {
-        // Сохраняем текущую конфигурацию обычного режима
-        setLastNormalConfig({
-          visibleLayers: prevConfig.visibleLayers,
-          showTooltips: prevConfig.showTooltips,
-          showLabels: prevConfig.showLabels,
-          enableClustering: prevConfig.enableClustering
-        });
-        
-        // Применяем настройки облегченного режима
-        return {
-          ...prevConfig,
-          ...lastLightConfig,
-          lightMode: true
-        };
-      } 
-      // Если переключаемся из облегченного режима в обычный
-      else {
-        // Сохраняем текущую конфигурацию облегченного режима
-        setLastLightConfig({
-          visibleLayers: prevConfig.visibleLayers,
-          showTooltips: prevConfig.showTooltips,
-          enableClustering: prevConfig.enableClustering
-        });
-        
-        // Возвращаем настройки обычного режима
-        return {
-          ...prevConfig,
-          ...lastNormalConfig,
-          lightMode: false
-        };
-      }
-    });
   };
 
   const toggleLayer = (layerName: string) => {
     setMapConfig(prevConfig => {
-      const newVisibleLayers = [...prevConfig.visibleLayers];
+      // Проверяем, включен ли слой в текущей конфигурации
+      const isLayerActive = prevConfig.visibleLayers.includes(layerName);
       
-      // Обработка синхронизации слоя labels с параметром showLabels
-      if (layerName === MAP_LAYERS.LABELS) {
-        const hasLabels = newVisibleLayers.includes(layerName);
-        // Если переключаем слой labels, также переключаем параметр showLabels
-        return {
-          ...prevConfig,
-          visibleLayers: hasLabels 
-            ? newVisibleLayers.filter(name => name !== layerName)
-            : [...newVisibleLayers, layerName],
-          showLabels: !hasLabels // Синхронизируем параметр showLabels со слоем
-        };
-      }
+      // Новый массив слоев
+      const newLayers = isLayerActive
+        ? prevConfig.visibleLayers.filter(layer => layer !== layerName) // Убираем слой
+        : [...prevConfig.visibleLayers, layerName]; // Добавляем слой
       
-      // Обычное переключение для других слоев
-      if (newVisibleLayers.includes(layerName)) {
-        return {
-          ...prevConfig,
-          visibleLayers: newVisibleLayers.filter(name => name !== layerName)
-        };
-      } else {
-        return {
-          ...prevConfig,
-          visibleLayers: [...newVisibleLayers, layerName]
-        };
-      }
+      return {
+        ...prevConfig,
+        visibleLayers: newLayers
+      };
     });
   };
 
@@ -314,14 +174,23 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
     setMapConfig,
     updateMapConfig,
     resetMapConfig,
-    toggleLightMode,
     toggleLayer,
     saveConfigToStorage,
     loadConfigFromStorage
   };
 
   return (
-    <MapConfigContext.Provider value={value}>
+    <MapConfigContext.Provider
+      value={{
+        mapConfig,
+        setMapConfig,
+        updateMapConfig,
+        resetMapConfig,
+        toggleLayer,
+        saveConfigToStorage,
+        loadConfigFromStorage
+      }}
+    >
       {children}
     </MapConfigContext.Provider>
   );

@@ -15,11 +15,9 @@ import {
   ErrorView,
   LoadingView
 } from './map-components';
-import { 
-  MapLayersManager,
-  MapControlsRenderer,
-  MapContentStateRenderer
-} from './map-submodules';
+import MapLayersManager from './map-layers/MapLayersManager';
+import MapContentStateRenderer from './map-content/MapContentStateRenderer';
+import MapControlsRenderer from './map-controls/MapControlsRenderer';
 import { useMapData, useControlPanel } from '../hooks';
 
 // Интерфейс для пользовательских слоёв

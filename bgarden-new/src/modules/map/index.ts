@@ -6,7 +6,6 @@ export { default as LightMapView } from './components/LightMapView';
 
 // Map Components
 export {
-  MapControlPanel,
   MapRegionsLayer,
   MapImageLayer,
   MapBoundsHandler,
@@ -16,6 +15,9 @@ export {
   MapReadyHandler,
   BaseMapContainer
 } from './components/map-components';
+
+// Компонент панели управления
+export { default as MapControlPanel } from './components/control-panel/MapControlPanel';
 
 // Контексты
 export { MapProvider, useMapContext } from './contexts/MapContext';
@@ -42,15 +44,14 @@ export { MapConfigProvider } from './contexts/MapConfigContext';
 // Компоненты панели управления
 export {
   LayerSelector,
-  ModeToggle,
   ConfigCheckbox,
   PanelHeader
 } from './components/control-panel';
 export type { ControlPanelSection } from './components/control-panel';
 
-// Подмодули карты
-export {
-  MapLayersManager,
-  MapContentStateRenderer,
-  MapControlsRenderer
-} from './components/map-submodules'; 
+// Компоненты для управления слоями
+export { default as MapLayersManager } from './components/map-layers/MapLayersManager';
+
+// Компоненты для отображения содержимого карты
+export { default as MapContentStateRenderer } from './components/map-content/MapContentStateRenderer';
+export { default as MapControlsRenderer } from './components/map-controls/MapControlsRenderer'; 
