@@ -1,7 +1,7 @@
 import React from 'react';
-import { Specimen, SectorType } from '../types';
-import { sectorTypeColors } from '../styles';
-import ActionButtons from './ActionButtons';
+import { Specimen, SectorType } from '../../types';
+import { sectorTypeColors } from '../../styles';
+import ActionButtons from '../specimens-controls/ActionButtons';
 
 interface SpecimenRowProps {
   specimen: Specimen;

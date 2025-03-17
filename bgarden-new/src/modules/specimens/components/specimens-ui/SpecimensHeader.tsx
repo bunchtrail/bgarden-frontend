@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SectorType } from '../types';
-import Button from '../../ui/components/Button';
-import { buttonClasses, animationClasses } from '../../../styles/global-styles';
+import { SectorType } from '../../types';
+import Button from '../../../ui/components/Button';
+import { buttonClasses, animationClasses } from '../../../../styles/global-styles';
 
 interface SpecimensHeaderProps {
   activeSectorType: SectorType | null;

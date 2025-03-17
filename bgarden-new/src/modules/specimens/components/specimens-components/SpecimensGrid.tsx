@@ -1,6 +1,6 @@
 import React from 'react';
-import { Specimen, SectorType } from '../types';
-import { layoutClasses } from '../../../styles/global-styles';
+import { Specimen, SectorType } from '../../types';
+import { layoutClasses } from '../../../../styles/global-styles';
 import SpecimenCard from './SpecimenCard';
 
 interface SpecimensGridProps {

@@ -1,17 +1,18 @@
 import React from 'react';
-import { layoutClasses } from '../../styles/global-styles';
+import { layoutClasses, cardClasses, animationClasses, textClasses } from '../../styles/global-styles';
 import { useSpecimens } from '../../modules/specimens/hooks/useSpecimens';
 
 // Импорт подкомпонентов
-import SpecimensHeader from '../../modules/specimens/components/SpecimensHeader';
-import SpecimensSearchBar from '../../modules/specimens/components/SpecimensSearchBar';
-import SpecimensSortControls from '../../modules/specimens/components/SpecimensSortControls';
-import SpecimensGrid from '../../modules/specimens/components/SpecimensGrid';
-import SpecimensTable from '../../modules/specimens/components/SpecimensTable';
-import SpecimensEmptyState from '../../modules/specimens/components/SpecimensEmptyState';
-import SpecimensLoading from '../../modules/specimens/components/SpecimensLoading';
-import SpecimensError from '../../modules/specimens/components/SpecimensError';
-import MobileAddButton from '../../modules/specimens/components/MobileAddButton';
+import SpecimensHeader from '../../modules/specimens/components/specimens-ui/SpecimensHeader';
+import SpecimensSearchBar from '../../modules/specimens/components/specimens-controls/SpecimensSearchBar';
+import SpecimensSortControls from '../../modules/specimens/components/specimens-controls/SpecimensSortControls';
+import SpecimensGrid from '../../modules/specimens/components/specimens-components/SpecimensGrid';
+import SpecimensTable from '../../modules/specimens/components/specimens-components/SpecimensTable';
+import SpecimensEmptyState from '../../modules/specimens/components/specimens-states/SpecimensEmptyState';
+import SpecimensLoading from '../../modules/specimens/components/specimens-states/SpecimensLoading';
+import SpecimensError from '../../modules/specimens/components/specimens-states/SpecimensError';
+import MobileAddButton from '../../modules/specimens/components/specimens-ui/MobileAddButton';
+import { Specimen } from '@/modules/specimens/types';
 
 /**
  * Страница со списком образцов растений
@@ -43,72 +44,114 @@ const SpecimensListPage: React.FC = () => {
   const handleRetryLoading = () => window.location.reload();
 
   return (
-    <div className={`${layoutClasses.container} py-6 mt-16`}>
-      {/* Заголовок страницы и кнопки действий */}
-      <SpecimensHeader 
-        activeSectorType={activeSectorType}
-        getSectorTypeName={getSectorTypeName}
-        handleResetSectorFilter={handleResetSectorFilter}
-        view={view}
-        toggleView={toggleView}
-      />
-
-      {/* Строка поиска и фильтрации */}
-      <div className="space-y-0">
-        <SpecimensSearchBar 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
+    <div className={`${layoutClasses.container} ${animationClasses.fadeIn} max-w-5xl mx-auto py-10 mt-20`}>
+      {/* Верхняя панель навигации с шагами */}
+      <div className="mb-8">
+        <h1 className={`${textClasses.heading} text-2xl mb-2`}>Коллекция образцов</h1>
+        <p className={`${textClasses.secondary} mb-6`}>
+          Просмотр и управление экземплярами растений ботанического сада
+        </p>
         
-        {/* Фильтры и сортировка */}
-        <SpecimensSortControls 
-          sortBy={sortBy}
-          getSortIcon={getSortIcon}
-          handleSort={handleSort}
-        />
+        {/* Прогресс-индикатор */}
+        <div className={`${cardClasses.base} ${cardClasses.outlined} rounded-xl p-4 bg-white`}>
+          <SpecimensHeader 
+            activeSectorType={activeSectorType}
+            getSectorTypeName={getSectorTypeName}
+            handleResetSectorFilter={handleResetSectorFilter}
+            view={view}
+            toggleView={toggleView}
+          />
+        </div>
       </div>
 
-      {/* Содержимое страницы в зависимости от состояния */}
-      {loading && sortedAndFilteredSpecimens.length === 0 ? (
-        <SpecimensLoading fullScreen={true} />
-      ) : error ? (
-        <SpecimensError 
-          errorMessage={error} 
-          onRetry={handleRetryLoading} 
-        />
-      ) : sortedAndFilteredSpecimens.length === 0 ? (
-        <SpecimensEmptyState 
-          searchQuery={searchQuery}
-          activeSectorType={activeSectorType}
-          getSectorTypeName={getSectorTypeName}
-          onResetSearch={handleResetSearch}
-          onResetSectorFilter={handleResetSectorFilter}
-        />
-      ) : view === 'grid' ? (
-        <SpecimensGrid 
-          specimens={sortedAndFilteredSpecimens}
-          getSectorTypeName={getSectorTypeName}
-          onDelete={handleDelete}
-        />
-      ) : (
-        <SpecimensTable 
-          specimens={sortedAndFilteredSpecimens}
-          getSectorTypeName={getSectorTypeName}
-          onDelete={handleDelete}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          handleSort={handleSort}
-          getSortIcon={getSortIcon}
-        />
-      )}
+      {/* Основная область контента */}
+      <div className={`${cardClasses.base} ${cardClasses.outlined} rounded-xl overflow-hidden`}>
+        {/* Панель поиска и фильтров */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="space-y-4">
+            <SpecimensSearchBar 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+            
+            <SpecimensSortControls 
+              sortBy={sortBy}
+              getSortIcon={getSortIcon}
+              handleSort={handleSort}
+            />
+          </div>
+        </div>
+
+        {/* Область отображения контента */}
+        <div className="min-h-[500px] relative overflow-hidden transition-all duration-300 bg-[#FAFAFA]">
+          {loading && sortedAndFilteredSpecimens.length === 0 ? (
+            <div className="flex items-center justify-center h-[500px]">
+              <SpecimensLoading fullScreen={true} />
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <SpecimensError 
+                errorMessage={error} 
+                onRetry={handleRetryLoading} 
+              />
+            </div>
+          ) : sortedAndFilteredSpecimens.length === 0 ? (
+            <div className="p-6">
+              <SpecimensEmptyState 
+                searchQuery={searchQuery}
+                activeSectorType={activeSectorType}
+                getSectorTypeName={getSectorTypeName}
+                onResetSearch={handleResetSearch}
+                onResetSectorFilter={handleResetSectorFilter}
+              />
+            </div>
+          ) : view === 'grid' ? (
+            <div className="p-6">
+              <SpecimensGrid 
+                specimens={sortedAndFilteredSpecimens}
+                getSectorTypeName={getSectorTypeName}
+                onDelete={handleDelete}
+              />
+            </div>
+          ) : (
+            <div className="p-6 pb-2">
+              <SpecimensTable 
+                specimens={sortedAndFilteredSpecimens}
+                getSectorTypeName={getSectorTypeName}
+                onDelete={handleDelete}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                handleSort={handleSort as (key: keyof Specimen) => void}
+                getSortIcon={getSortIcon as (key: keyof Specimen) => string}
+              />
+            </div>
+          )}
+
+          {/* Индикатор загрузки */}
+          {loading && sortedAndFilteredSpecimens.length > 0 && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+              <SpecimensLoading fullScreen={false} />
+            </div>
+          )}
+        </div>
+
+        {/* Нижняя панель с навигацией или дополнительными действиями */}
+        <div className="flex justify-between p-6 border-t border-gray-200">
+          <div>
+            {/* При необходимости здесь можно добавить кнопки для навигации между страницами */}
+          </div>
+          <div>
+            <p className={`${textClasses.small} ${textClasses.secondary}`}>
+              {sortedAndFilteredSpecimens.length > 0 
+                ? `Показано ${sortedAndFilteredSpecimens.length} образцов` 
+                : 'Нет образцов для отображения'}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Плавающая кнопка добавления образца на мобильных устройствах */}
       <MobileAddButton />
-
-      {/* Индикатор загрузки */}
-      {loading && sortedAndFilteredSpecimens.length > 0 && (
-        <SpecimensLoading fullScreen={false} />
-      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Specimen } from '../types';
-import { animationClasses } from '../../../styles/global-styles';
+import { Specimen } from '../../types';
+import { animationClasses } from '../../../../styles/global-styles';
 
 interface SpecimensSortControlsProps {
   sortBy: keyof Specimen;

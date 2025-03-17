@@ -1,6 +1,6 @@
 import React from 'react';
-import { Specimen, SectorType } from '../types';
-import { cardClasses } from '../../../styles/global-styles';
+import { Specimen, SectorType } from '../../types';
+import { cardClasses } from '../../../../styles/global-styles';
 import SpecimenRow from './SpecimenRow';
 
 interface SpecimensTableProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import LoadingSpinner from '../../ui/components/LoadingSpinner';
+import LoadingSpinner from '../../../ui/components/LoadingSpinner';
 
 interface SpecimensLoadingProps {
   fullScreen?: boolean;

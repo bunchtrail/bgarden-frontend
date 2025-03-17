@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../../ui/components/Button';
+import Button from '../../../ui/components/Button';
 
 interface SpecimensErrorProps {
   errorMessage: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../ui/components/Button';
+import Button from '../../../ui/components/Button';
 
 /**
  * Плавающая кнопка добавления образца для мобильных устройств

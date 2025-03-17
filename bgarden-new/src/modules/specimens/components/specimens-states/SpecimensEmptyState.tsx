@@ -1,7 +1,7 @@
 import React from 'react';
-import { SectorType } from '../types';
-import { cardClasses } from '../../../styles/global-styles';
-import Button from '../../ui/components/Button';
+import { SectorType } from '../../types';
+import { cardClasses } from '../../../../styles/global-styles';
+import Button from '../../../ui/components/Button';
 
 interface SpecimensEmptyStateProps {
   searchQuery: string;

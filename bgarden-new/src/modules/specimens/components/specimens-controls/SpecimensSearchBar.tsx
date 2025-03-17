@@ -1,5 +1,5 @@
 import React from 'react';
-import { cardClasses } from '../../../styles/global-styles';
+import { cardClasses } from '../../../../styles/global-styles';
 
 interface SpecimensSearchBarProps {
   searchQuery: string;
