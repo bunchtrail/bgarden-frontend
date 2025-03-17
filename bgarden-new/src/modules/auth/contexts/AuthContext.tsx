@@ -49,9 +49,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   // Проверка авторизации при загрузке
   useEffect(() => {
     let isMounted = true;
+    let isCheckingAuth = false; // Флаг для предотвращения повторных вызовов
     
     const checkAuth = async () => {
+      // Если уже выполняется проверка авторизации, не запускаем еще одну
+      if (isCheckingAuth) return;
+      
+      isCheckingAuth = true;
       setLoading(true);
+      
       try {
         // Начинаем проверку авторизации немедленно
         // Добавляем небольшую задержку перед проверкой, чтобы дать браузеру возможность полностью загрузить данные из localStorage
@@ -73,6 +79,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           setIsAuthenticated(false);
           setLoading(false);
         }
+      } finally {
+        isCheckingAuth = false; // Сбрасываем флаг в любом случае
       }
     };
 
@@ -93,7 +101,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     setUser(null);
 
     try {
-      await authService.login(data);
+      const response = await authService.login(data);
+
+      // Проверяем, требуется ли двухфакторная аутентификация
+      if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
+        setError(`Для учетной записи ${response.username} требуется двухфакторная аутентификация`);
+        return false;
+      }
 
       // Делаем небольшую задержку, чтобы токен успел сохраниться в localStorage
       await new Promise((resolve) => setTimeout(resolve, 100));

@@ -1,12 +1,21 @@
 import React from 'react';
 import { SpecimenFormData } from '../../../../types';
+import { ExpositionDto } from '../../../../services/expositionService';
+import { RegionData } from '@/modules/map/types/mapTypes';
 
 interface GeographySectionProps {
   formData: SpecimenFormData;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  regions: RegionData[];
+  expositions: ExpositionDto[];
 }
 
-export const GeographySection: React.FC<GeographySectionProps> = ({ formData, onChange }) => {
+export const GeographySection: React.FC<GeographySectionProps> = ({ 
+  formData, 
+  onChange, 
+  regions, 
+  expositions 
+}) => {
   return (
     <fieldset className="p-4 border rounded-md">
       <legend className="text-lg font-medium px-2">Географическая информация</legend>
@@ -25,7 +34,11 @@ export const GeographySection: React.FC<GeographySectionProps> = ({ formData, on
             required
           >
             <option value={0}>Выберите регион</option>
-            {/* Тут будет подгрузка регионов из API */}
+            {regions.map(region => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
           </select>
         </div>
         
@@ -42,7 +55,11 @@ export const GeographySection: React.FC<GeographySectionProps> = ({ formData, on
             required
           >
             <option value={0}>Выберите экспозицию</option>
-            {/* Тут будет подгрузка экспозиций из API */}
+            {expositions.map(exposition => (
+              <option key={exposition.id} value={exposition.id}>
+                {exposition.name}
+              </option>
+            ))}
           </select>
         </div>
         

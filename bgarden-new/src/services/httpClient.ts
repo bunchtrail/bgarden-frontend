@@ -21,6 +21,10 @@ const showErrorNotification = (message: string) => {
   }
 };
 
+// Для дебаунсинга ошибок авторизации
+let lastAuthErrorTime: number = 0;
+const AUTH_ERROR_DEBOUNCE_TIME = 5000; // 5 секунд
+
 // Базовый URL API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254/api';
 
@@ -122,6 +126,9 @@ async function request<T>(
       const token = tokenService.getToken();
       if (token) {
         requestHeaders.Authorization = `Bearer ${token}`;
+      } else if (requiresAuth && endpoint !== 'Auth/refresh-token') {
+        // Если токен отсутствует, но требуется авторизация, бросаем ошибку
+        throw new ApiError(401, 'Необходима авторизация', { isAuthError: true });
       }
     }
 
@@ -143,6 +150,13 @@ async function request<T>(
     
     // Обработка 401 Unauthorized - выход из системы
     if (response.status === 401) {
+      const now = Date.now();
+      // Примененяем дебаунсинг для сообщений об ошибках авторизации
+      if (now - lastAuthErrorTime > AUTH_ERROR_DEBOUNCE_TIME) {
+        lastAuthErrorTime = now;
+        showErrorNotification('Необходима авторизация');
+      }
+      
       // Выбрасываем ошибку авторизации, которую обработает вызывающий код
       throw new ApiError(401, 'Необходима авторизация', { isAuthError: true });
     }

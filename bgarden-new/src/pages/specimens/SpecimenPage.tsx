@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { specimenService } from '../../modules/specimens/services/specimenService';
+import { familyService, FamilyDto } from '../../modules/specimens/services/familyService';
+import { expositionService, ExpositionDto } from '../../modules/specimens/services/expositionService';
+import { getAllRegions } from '../../modules/specimens/services/regionService';
 import { Specimen, SpecimenFormData } from '../../modules/specimens/types';
+import { RegionData } from '../../modules/map/types/mapTypes';
 import LoadingSpinner from '../../modules/ui/components/LoadingSpinner';
 import Button from '../../modules/ui/components/Button';
 import Card from '../../modules/ui/components/Card';
@@ -17,6 +21,39 @@ const SpecimenPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  
+  // Справочные данные для формы
+  const [families, setFamilies] = useState<FamilyDto[]>([]);
+  const [expositions, setExpositions] = useState<ExpositionDto[]>([]);
+  const [regions, setRegions] = useState<RegionData[]>([]);
+  const [referencesLoading, setReferencesLoading] = useState<boolean>(true);
+
+  // Загрузка справочных данных
+  useEffect(() => {
+    const fetchReferenceData = async () => {
+      try {
+        setReferencesLoading(true);
+        
+        // Параллельная загрузка всех справочников
+        const [familiesData, expositionsData, regionsData] = await Promise.all([
+          familyService.getAllFamilies(),
+          expositionService.getAllExpositions(),
+          getAllRegions()
+        ]);
+        
+        setFamilies(familiesData);
+        setExpositions(expositionsData);
+        setRegions(regionsData);
+      } catch (err) {
+        console.error('Ошибка при загрузке справочных данных:', err);
+        setError('Не удалось загрузить справочные данные');
+      } finally {
+        setReferencesLoading(false);
+      }
+    };
+
+    fetchReferenceData();
+  }, []);
 
   // Загрузка данных образца
   useEffect(() => {
@@ -81,7 +118,7 @@ const SpecimenPage: React.FC = () => {
   };
 
   // Рендеринг в зависимости от состояния
-  if (loading) {
+  if (loading || referencesLoading) {
     return (
       <div className="flex justify-center items-center p-10 mt-16">
         <LoadingSpinner />
@@ -139,6 +176,9 @@ const SpecimenPage: React.FC = () => {
             specimen={specimen || undefined}
             onSubmit={handleSave}
             onCancel={handleCancel}
+            families={families}
+            expositions={expositions}
+            regions={regions}
           />
         </Card>
       ) : (

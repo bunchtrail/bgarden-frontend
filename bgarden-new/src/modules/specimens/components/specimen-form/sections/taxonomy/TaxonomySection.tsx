@@ -1,12 +1,14 @@
 import React from 'react';
 import { SpecimenFormData } from '../../../../types';
+import { FamilyDto } from '../../../../services/familyService';
 
 interface TaxonomySectionProps {
   formData: SpecimenFormData;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  families: FamilyDto[];
 }
 
-export const TaxonomySection: React.FC<TaxonomySectionProps> = ({ formData, onChange }) => {
+export const TaxonomySection: React.FC<TaxonomySectionProps> = ({ formData, onChange, families }) => {
   return (
     <fieldset className="p-4 border rounded-md">
       <legend className="text-lg font-medium px-2">Таксономическая информация</legend>
@@ -25,7 +27,11 @@ export const TaxonomySection: React.FC<TaxonomySectionProps> = ({ formData, onCh
             required
           >
             <option value={0}>Выберите семейство</option>
-            {/* Тут будет подгрузка семейств из API */}
+            {families.map(family => (
+              <option key={family.id} value={family.id}>
+                {family.name} {family.latinName ? `(${family.latinName})` : ''}
+              </option>
+            ))}
           </select>
         </div>
         

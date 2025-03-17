@@ -4,7 +4,8 @@ import {
     LoginDto,
     RegisterDto,
     TokenDto,
-    UserDto
+    UserDto,
+    TwoFactorAuthDto
 } from '../types';
 
 // Сервис авторизации
@@ -34,18 +35,29 @@ export const authService = {
     },
 
     // Авторизация пользователя
-    login: async (loginDto: LoginDto): Promise<TokenDto> => {
+    login: async (loginDto: LoginDto): Promise<TokenDto | TwoFactorAuthDto> => {
         try {
             // Очищаем данные авторизации перед попыткой входа
             tokenService.clearToken();
             
-            const response = await httpClient.post<TokenDto>('Auth/login', loginDto, {
+            const response = await httpClient.post<TokenDto | TwoFactorAuthDto>('Auth/login', loginDto, {
                 requiresAuth: false
             });
             
-            // Обычный вход, сохраняем токен
-            if (response.accessToken) {
-                tokenService.setAuthData(response);
+            // Проверяем, требуется ли двухфакторная аутентификация
+            if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
+                // Возвращаем ответ о необходимости двухфакторной аутентификации
+                return response;
+            }
+            
+            // Проверяем, что response содержит все поля TokenDto
+            if (
+                'accessToken' in response && 
+                'refreshToken' in response && 
+                'expiration' in response && 
+                'tokenType' in response
+            ) {
+                tokenService.setAuthData(response as TokenDto);
             }
             
             return response;
@@ -99,6 +111,23 @@ export const authService = {
         }
 
         try {
+            // Пытаемся декодировать токен и проверить его действительность
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const expirationTime = payload.exp * 1000;
+                const currentTime = Date.now();
+                
+                // Если токен истек, не отправляем запрос
+                if (expirationTime <= currentTime) {
+                    tokenService.clearToken();
+                    return null;
+                }
+            } catch (e) {
+                // Если не удалось декодировать токен, считаем его недействительным
+                tokenService.clearToken();
+                return null;
+            }
+            
             // Получаем данные пользователя с таймаутом в 3 секунды
             const userData = await httpClient.get<UserDto>('User/me', {
                 timeout: 3000,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
 import { cardClasses } from '@/styles/global-styles';
 
@@ -14,11 +14,17 @@ import NavigationButtons from './NavigationButtons';
 import { useFormNavigation } from './hooks/useFormNavigation';
 import { useFormValidation } from './hooks/useFormValidation';
 import { useFormChanges } from './hooks/useFormChanges';
+import { FamilyDto } from '../../services/familyService';
+import { ExpositionDto } from '../../services/expositionService';
+import { RegionData } from '@/modules/map/types/mapTypes';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
   onSubmit: (data: SpecimenFormData) => void;
   onCancel: () => void;
+  families: FamilyDto[];
+  expositions: ExpositionDto[];
+  regions: RegionData[];
 }
 
 /**
@@ -29,7 +35,7 @@ interface SpecimenFormProps {
  * @param onSubmit - Функция для отправки формы
  * @param onCancel - Функция отмены
  */
-const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCancel }) => {
+const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCancel, families, expositions, regions }) => {
   // Инициализация дефолтных значений формы
   const defaultFormData: SpecimenFormData = {
     inventoryNumber: '',
@@ -70,7 +76,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const { 
     activeStep, 
     slideDirection, 
-    goToNextStep: goToNextStepNav, 
+    goToNextStep, 
     goToPreviousStep, 
     goToStep 
   } = useFormNavigation();
@@ -100,13 +106,6 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       setFormData(specimen);
     }
   }, [specimen, setFormData]);
-
-  // Переход к следующему шагу с валидацией
-  const goToNextStep = () => {
-    if (validateCurrentStep(activeStep)) {
-      goToNextStepNav();
-    }
-  };
 
   // Отправка формы
   const handleSubmit = (e: React.FormEvent) => {
@@ -154,12 +153,59 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     }
   };
 
-  // Общее количество шагов формы
-  const TOTAL_STEPS = 4;
+  // Определение шагов формы
+  const formSteps = [
+    { id: 1, title: 'Основная информация' },
+    { id: 2, title: 'Таксономия' },
+    { id: 3, title: 'География' },
+    { id: 4, title: 'Дополнительно' }
+  ];
+
+  // Функция для проверки валидности шага без побочных эффектов
+  const checkStepValidity = (step: number) => {
+    const fieldsToValidate: Record<number, string[]> = {
+      1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
+      2: ['familyId', 'familyName'],
+      3: ['latitude', 'longitude', 'regionId'],
+      4: []
+    };
+    
+    const stepFields = fieldsToValidate[step] || [];
+    
+    // Проверяем только наличие заполненных обязательных полей
+    // без вызова функций, обновляющих состояние
+    return stepFields.every(field => {
+      const value = formData[field as keyof SpecimenFormData];
+      if (field === 'inventoryNumber' || field === 'russianName' || field === 'latinName') {
+        return value !== undefined && value !== '';
+      }
+      return true;
+    });
+  };
+
+  // Используем useMemo для вычисления статуса завершенности шагов
+  // без вызова функций, обновляющих состояние во время рендера
+  const completedSteps = useMemo(() => {
+    return {
+      1: checkStepValidity(1),
+      2: checkStepValidity(2),
+      3: checkStepValidity(3),
+      4: checkStepValidity(4)
+    };
+  }, [formData]);
+
+  // Проверка валидности текущего шага для кнопки "Далее"
+  const isCurrentStepValid = useMemo(() => {
+    return checkStepValidity(activeStep);
+  }, [activeStep, formData]);
+
+  // Проверка валидности всей формы для кнопки "Сохранить"
+  const isFormValid = useMemo(() => {
+    return [1, 2, 3, 4].every(step => checkStepValidity(step));
+  }, [formData]);
 
   return (
     <div>
-      {/* Прогресс-индикатор */}
       <FormStepper 
         activeStep={activeStep} 
         goToStep={goToStep} 
@@ -169,12 +215,15 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         {/* Контейнер шагов с анимацией */}
         <StepContainer slideDirection={slideDirection}>
           {/* Рендерер активного шага */}
-          <StepRenderer
-            activeStep={activeStep}
-            formData={formData}
+          <StepRenderer 
+            activeStep={activeStep} 
+            formData={formData} 
             onChange={handleChange}
             errors={errors}
             touchedFields={touchedFields}
+            families={families}
+            regions={regions}
+            expositions={expositions}
           />
         </StepContainer>
         
@@ -184,13 +233,15 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         />
         
         {/* Навигационные кнопки */}
-        <NavigationButtons
+        <NavigationButtons 
           activeStep={activeStep}
-          totalSteps={TOTAL_STEPS}
+          totalSteps={formSteps.length}
           onNext={goToNextStep}
           onPrevious={goToPreviousStep}
           onCancel={onCancel}
           onSubmit={handleSubmit}
+          isNextDisabled={!isCurrentStepValid}
+          isSubmitDisabled={!isFormValid}
         />
       </form>
     </div>

@@ -4,6 +4,9 @@ import { BasicInfoSection } from './sections/basic-info';
 import { TaxonomySection } from './sections/taxonomy';
 import { GeographySection } from './sections/geography';
 import { AdditionalInfoSection } from './sections/additional-info';
+import { FamilyDto } from '../../services/familyService';
+import { ExpositionDto } from '../../services/expositionService';
+import { RegionData } from '@/modules/map/types/mapTypes';
 
 interface StepRendererProps {
   activeStep: number;
@@ -11,6 +14,9 @@ interface StepRendererProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   errors?: Record<string, string>;
   touchedFields?: Record<string, boolean>;
+  families: FamilyDto[];
+  regions: RegionData[];
+  expositions: ExpositionDto[];
 }
 
 /**
@@ -21,7 +27,10 @@ const StepRenderer: React.FC<StepRendererProps> = ({
   formData,
   onChange,
   errors = {},
-  touchedFields = {}
+  touchedFields = {},
+  families,
+  regions,
+  expositions
 }) => {
   switch (activeStep) {
     case 1:
@@ -38,6 +47,7 @@ const StepRenderer: React.FC<StepRendererProps> = ({
         <TaxonomySection 
           formData={formData} 
           onChange={onChange}
+          families={families}
         />
       );
     case 3:
@@ -45,6 +55,8 @@ const StepRenderer: React.FC<StepRendererProps> = ({
         <GeographySection 
           formData={formData} 
           onChange={onChange}
+          regions={regions}
+          expositions={expositions}
         />
       );
     case 4:

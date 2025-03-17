@@ -8,6 +8,8 @@ interface NavigationButtonsProps {
   onPrevious: () => void;
   onCancel: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  isNextDisabled?: boolean;
+  isSubmitDisabled?: boolean;
 }
 
 /**
@@ -19,7 +21,9 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onNext,
   onPrevious,
   onCancel,
-  onSubmit
+  onSubmit,
+  isNextDisabled = false,
+  isSubmitDisabled = false
 }) => {
   return (
     <div className="flex justify-between pt-6 mt-4 border-t border-gray-200">
@@ -51,6 +55,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             variant="primary"
             onClick={onNext}
             className="flex items-center"
+            disabled={isNextDisabled}
           >
             Далее
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,6 +68,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             type="submit"
             className="flex items-center"
             onClick={onSubmit}
+            disabled={isSubmitDisabled}
           >
             Сохранить
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
