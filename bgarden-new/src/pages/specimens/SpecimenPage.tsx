@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { specimenService } from '../../modules/specimens/services/specimenService';
 import { familyService, FamilyDto } from '../../modules/specimens/services/familyService';
 import { expositionService, ExpositionDto } from '../../modules/specimens/services/expositionService';
@@ -17,6 +17,7 @@ import SpecimenForm from '../../modules/specimens/components/specimen-form';
 const SpecimenPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation(); // Получаем текущий URL
   const [specimen, setSpecimen] = useState<Specimen | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,13 @@ const SpecimenPage: React.FC = () => {
   const [expositions, setExpositions] = useState<ExpositionDto[]>([]);
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [referencesLoading, setReferencesLoading] = useState<boolean>(true);
+
+  // Проверяем URL на наличие '/edit' и переключаем режим редактирования
+  useEffect(() => {
+    if (location.pathname.includes('/edit')) {
+      setIsEditing(true);
+    }
+  }, [location.pathname]);
 
   // Загрузка справочных данных
   useEffect(() => {
@@ -99,6 +107,9 @@ const SpecimenPage: React.FC = () => {
       if (id === 'new') {
         // После создания перенаправляем на страницу созданного образца
         navigate(`/specimens/${result.id}`);
+      } else if (location.pathname.includes('/edit')) {
+        // Если мы находимся в режиме редактирования, то после сохранения перенаправляем на страницу просмотра
+        navigate(`/specimens/${id}`);
       }
     } catch (err) {
       setError('Ошибка при сохранении образца');
