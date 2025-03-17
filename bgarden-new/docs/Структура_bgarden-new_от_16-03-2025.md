@@ -158,7 +158,9 @@
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\notifications\types)`
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components)`
+          - `ActionButtons.tsx` (2.8 KB)
           - **icons** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\icons)`
+          - `MobileAddButton.tsx` (921.0 B)
           - **specimen-actions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-actions)`
           - **specimen-card** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-card)`
           - **specimen-form** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form)`
@@ -168,9 +170,11 @@
               - `FormStepper.tsx` (2.9 KB)
             - **geographic** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\geographic)`
             - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\hooks)`
+              - `useFormChanges.ts` (2.2 KB)
               - `useFormNavigation.tsx` (1.5 KB)
               - `useFormValidation.tsx` (2.3 KB)
-            - `index.ts` (101.0 B)
+            - `index.ts` (522.0 B)
+            - `NavigationButtons.tsx` (2.2 KB)
             - **sections** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections)`
               - **additional-info** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\additional-info)`
                 - `AdditionalInfoSection.tsx` (2.3 KB)
@@ -184,12 +188,24 @@
               - **taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\sections\taxonomy)`
                 - `index.ts` (53.0 B)
                 - `TaxonomySection.tsx` (2.0 KB)
-            - `SpecimenForm.tsx` (9.9 KB)
+            - `SpecimenForm.tsx` (6.4 KB)
+            - `StepContainer.tsx` (864.0 B)
+            - `StepRenderer.tsx` (1.5 KB)
             - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-form\utils)`
               - `calculateFormProgress.ts` (1.9 KB)
           - **specimen-gallery** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-gallery)`
           - **specimen-taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimen-taxonomy)`
+          - `SpecimenCard.tsx` (2.7 KB)
+          - `SpecimenRow.tsx` (2.1 KB)
           - **specimens-list** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\components\specimens-list)`
+          - `SpecimensEmptyState.tsx` (2.4 KB)
+          - `SpecimensError.tsx` (1.1 KB)
+          - `SpecimensGrid.tsx` (925.0 B)
+          - `SpecimensHeader.tsx` (3.5 KB)
+          - `SpecimensLoading.tsx` (723.0 B)
+          - `SpecimensSearchBar.tsx` (1.8 KB)
+          - `SpecimensSortControls.tsx` (1.7 KB)
+          - `SpecimensTable.tsx` (2.8 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\contexts)`
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\docs)`
           - `api-integration.md` (8.6 KB)
@@ -198,6 +214,7 @@
           - `README.md` (6.4 KB)
           - `styles-guide.md` (5.1 KB)
         - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\hooks)`
+          - `useSpecimens.ts` (7.0 KB)
         - `index.ts` (1.2 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\modules\specimens\services)`
           - `biometryService.ts` (1.8 KB)
@@ -249,7 +266,7 @@
       - **sector** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\sector)`
       - **specimens** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\pages\specimens)`
         - `SpecimenPage.tsx` (7.8 KB)
-        - `SpecimensListPage.tsx` (11.9 KB)
+        - `SpecimensListPage.tsx` (4.1 KB)
     - `react-app-env.d.ts` (41.0 B)
     - `reportWebVitals.ts` (425.0 B)
     - **routes** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\bgarden-new\src\routes)`

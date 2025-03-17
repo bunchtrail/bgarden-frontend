@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
-import { Button } from '@/modules/ui';
-import { BasicInfoSection } from './sections/basic-info';
-import { TaxonomySection } from './sections/taxonomy';
-import { GeographySection } from './sections/geography';
-import { AdditionalInfoSection } from './sections/additional-info';
+import { cardClasses } from '@/styles/global-styles';
 
-import { useFormNavigation } from './hooks/useFormNavigation';
-import { useFormValidation } from './hooks/useFormValidation';
-import { cardClasses, buttonClasses } from '@/styles/global-styles';
-
-// Импортируем недостающие компоненты и функции
+// Импортируем компоненты
 import FormStepper from './form-stepper/FormStepper';
 import FormProgress from './form-progress/FormProgress';
 import { calculateFormProgress } from './utils/calculateFormProgress';
+import StepContainer from './StepContainer';
+import StepRenderer from './StepRenderer';
+import NavigationButtons from './NavigationButtons';
+
+// Импортируем хуки
+import { useFormNavigation } from './hooks/useFormNavigation';
+import { useFormValidation } from './hooks/useFormValidation';
+import { useFormChanges } from './hooks/useFormChanges';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -30,8 +30,8 @@ interface SpecimenFormProps {
  * @param onCancel - Функция отмены
  */
 const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCancel }) => {
-  // Инициализация формы значениями по умолчанию или данными образца
-  const [formData, setFormData] = useState<SpecimenFormData>({
+  // Инициализация дефолтных значений формы
+  const defaultFormData: SpecimenFormData = {
     inventoryNumber: '',
     sectorType: 0,
     latitude: 0,
@@ -64,7 +64,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     illustration: '',
     notes: '',
     filledBy: ''
-  });
+  };
   
   // Подключаем custom hooks для управления формой
   const { 
@@ -80,55 +80,26 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     touchedFields,
     validateField,
     validateCurrentStep,
-    setTouchedFields,
-    setErrors
-  } = useFormValidation(formData);
+    setTouchedFields
+  } = useFormValidation(specimen || defaultFormData);
+
+  // Используем новый хук для управления изменениями формы
+  const {
+    formData,
+    setFormData,
+    handleChange
+  } = useFormChanges(specimen || defaultFormData, (name, value) => {
+    // Помечаем поле как затронутое и валидируем его
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+    validateField(name, value);
+  });
 
   // Обновление формы при получении данных образца
   useEffect(() => {
     if (specimen) {
       setFormData(specimen);
     }
-  }, [specimen]);
-
-  // Обработчик изменения полей формы
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
-    // Помечаем поле как затронутое для валидации
-    setTouchedFields(prev => ({
-      ...prev,
-      [name]: true
-    }));
-    
-    // Для чекбоксов обрабатываем отдельно
-    if (type === 'checkbox') {
-      const checkbox = e.target as HTMLInputElement;
-      setFormData(prev => ({
-        ...prev,
-        [name]: checkbox.checked
-      }));
-      return;
-    }
-    
-    // Для числовых полей преобразуем значение
-    if (type === 'number') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value === '' ? 0 : Number(value)
-      }));
-      return;
-    }
-    
-    // Для остальных полей просто устанавливаем значение
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Валидируем поле после изменения
-    validateField(name, type === 'number' ? (value === '' ? 0 : Number(value)) : value);
-  };
+  }, [specimen, setFormData]);
 
   // Переход к следующему шагу с валидацией
   const goToNextStep = () => {
@@ -183,43 +154,8 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     }
   };
 
-  // Рендер активного шага формы
-  const renderActiveStep = () => {
-    switch (activeStep) {
-      case 1:
-        return (
-          <BasicInfoSection 
-            formData={formData} 
-            onChange={handleChange}
-            errors={errors}
-            touchedFields={touchedFields}
-          />
-        );
-      case 2:
-        return (
-          <TaxonomySection 
-            formData={formData} 
-            onChange={handleChange}
-          />
-        );
-      case 3:
-        return (
-          <GeographySection 
-            formData={formData} 
-            onChange={handleChange}
-          />
-        );
-      case 4:
-        return (
-          <AdditionalInfoSection 
-            formData={formData} 
-            onChange={handleChange}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  // Общее количество шагов формы
+  const TOTAL_STEPS = 4;
 
   return (
     <div>
@@ -230,22 +166,17 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       />
       
       <form onSubmit={handleSubmit} className={`${cardClasses.outlined} ${cardClasses.content} rounded-xl`}>
-        {/* Анимированный контейнер шагов */}
-        <div className="overflow-hidden min-h-[500px]">
-          <div 
-            className={`transition-transform duration-300 transform ${
-              slideDirection === 'right' 
-                ? 'translate-x-full' 
-                : '-translate-x-full'
-            }`}
-            style={{ 
-              transform: 'translateX(0)' 
-            }}
-          >
-            {/* Содержимое активного шага */}
-            {renderActiveStep()}
-          </div>
-        </div>
+        {/* Контейнер шагов с анимацией */}
+        <StepContainer slideDirection={slideDirection}>
+          {/* Рендерер активного шага */}
+          <StepRenderer
+            activeStep={activeStep}
+            formData={formData}
+            onChange={handleChange}
+            errors={errors}
+            touchedFields={touchedFields}
+          />
+        </StepContainer>
         
         {/* Индикатор заполненности формы */}
         <FormProgress 
@@ -253,55 +184,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         />
         
         {/* Навигационные кнопки */}
-        <div className="flex justify-between pt-6 mt-4 border-t border-gray-200">
-          <div>
-            {activeStep > 1 ? (
-              <Button 
-                variant="neutral"
-                onClick={goToPreviousStep}
-                className="flex items-center"
-              >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Назад
-              </Button>
-            ) : (
-              <Button 
-                variant="neutral"
-                onClick={onCancel}
-              >
-                Отмена
-              </Button>
-            )}
-          </div>
-          
-          <div>
-            {activeStep < 4 ? (
-              <Button 
-                variant="primary"
-                onClick={goToNextStep}
-                className="flex items-center"
-              >
-                Далее
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Button>
-            ) : (
-              <Button 
-                variant="success" 
-                type="submit"
-                className="flex items-center"
-              >
-                Сохранить
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </Button>
-            )}
-          </div>
-        </div>
+        <NavigationButtons
+          activeStep={activeStep}
+          totalSteps={TOTAL_STEPS}
+          onNext={goToNextStep}
+          onPrevious={goToPreviousStep}
+          onCancel={onCancel}
+          onSubmit={handleSubmit}
+        />
       </form>
     </div>
   );
