@@ -46,22 +46,20 @@ const SpecimensListPage: React.FC = () => {
   return (
     <div className={`${layoutClasses.container} ${animationClasses.fadeIn} max-w-5xl mx-auto py-10 mt-20`}>
       {/* Верхняя панель навигации с шагами */}
-      <div className="mb-8">
+      <div>
         <h1 className={`${textClasses.heading} text-2xl mb-2`}>Коллекция образцов</h1>
         <p className={`${textClasses.secondary} mb-6`}>
           Просмотр и управление экземплярами растений ботанического сада
         </p>
         
-        {/* Прогресс-индикатор */}
-        <div className={`${cardClasses.base} ${cardClasses.outlined} rounded-xl p-4 bg-white`}>
-          <SpecimensHeader 
-            activeSectorType={activeSectorType}
-            getSectorTypeName={getSectorTypeName}
-            handleResetSectorFilter={handleResetSectorFilter}
-            view={view}
-            toggleView={toggleView}
-          />
-        </div>
+        {/* Компонент заголовка */}
+        <SpecimensHeader 
+          activeSectorType={activeSectorType}
+          getSectorTypeName={getSectorTypeName}
+          handleResetSectorFilter={handleResetSectorFilter}
+          view={view}
+          toggleView={toggleView}
+        />
       </div>
 
       {/* Основная область контента */}
