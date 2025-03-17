@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
 import { cardClasses } from '@/styles/global-styles';
+import { useNotification } from '@/modules/notifications';
 
 // Импортируем компоненты
 import FormStepper from './form-stepper/FormStepper';
@@ -100,6 +101,9 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     validateField(name, value);
   });
 
+  // Инициализация уведомлений
+  const notification = useNotification();
+
   // Обновление формы при получении данных образца
   useEffect(() => {
     if (specimen) {
@@ -142,8 +146,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     });
     
     if (isValid) {
+      notification.info('Отправка данных образца...', { duration: 3000 });
       onSubmit(formData);
     } else {
+      notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');
+      
       // Переходим к первому шагу с ошибкой
       const fieldsToValidate: Record<number, string[]> = {
         1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
@@ -249,11 +256,25 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
           onNext={() => {
             // Проверяем текущий шаг и переходим к следующему
             if (isCurrentStepValid) {
+              // Убираем уведомление о переходе на следующий шаг
               goToNextStep();
+            } else {
+              notification.warning('Пожалуйста, заполните все обязательные поля', {
+                title: 'Невозможно перейти дальше'
+              });
             }
           }}
-          onPrevious={goToPreviousStep}
-          onCancel={onCancel}
+          onPrevious={() => {
+            const prevStepInfo = formSteps[activeStep - 2];
+            notification.info(`Возврат к шагу "${prevStepInfo.title}"`, { 
+              duration: 2000 
+            });
+            goToPreviousStep();
+          }}
+          onCancel={() => {
+            notification.info('Ввод данных отменен', { duration: 3000 });
+            onCancel();
+          }}
           onSubmit={handleSubmit}
           isNextDisabled={!isCurrentStepValid}
           isSubmitDisabled={!isFormValid}
