@@ -18,7 +18,6 @@ import { ControlPanelSection } from './control-panel';
 const LIGHT_CONFIG: Partial<MapConfig> = {
   lightMode: true,
   showTooltips: false,
-  showLabels: false,
   visibleLayers: ['imagery', 'regions'],
   maxZoom: 2,
   minZoom: -1

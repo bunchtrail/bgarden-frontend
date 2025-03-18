@@ -6,7 +6,7 @@ import { NavItem } from '../types';
 export const useNavigation = (items: NavItem[]) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { pathname } = useLocation();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -15,11 +15,6 @@ export const useNavigation = (items: NavItem[]) => {
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
   }, []);
-
-  const handleLogout = useCallback(() => {
-    logout();
-    closeMenu();
-  }, [logout, closeMenu]);
 
   const isItemActive = useCallback(
     (item: NavItem) => {
@@ -50,7 +45,6 @@ export const useNavigation = (items: NavItem[]) => {
     isMenuOpen,
     toggleMenu,
     closeMenu,
-    handleLogout,
     isAuthenticated,
     user,
     filteredItems,

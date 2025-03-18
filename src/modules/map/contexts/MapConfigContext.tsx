@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { LatLngExpression, LatLngBoundsExpression, ControlPosition } from 'leaflet';
 
 // Доступные слои карты
@@ -6,7 +6,6 @@ export const MAP_LAYERS = {
   IMAGERY: 'imagery',
   REGIONS: 'regions',
   PLANTS: 'plants',
-  LABELS: 'labels'
 } as const;
 
 // Режимы взаимодействия с картой
@@ -32,8 +31,6 @@ export interface MapConfig {
   lightMode: boolean;
   visibleLayers: string[];
   showTooltips: boolean;
-  showLabels: boolean;
-  showMarkers: boolean; // Показывать/скрывать маркеры на карте
   zoomLevel: number;
   availableLayers: string[];
   showControls: boolean;
@@ -57,10 +54,8 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   lightMode: true,
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showTooltips: false,
-  showLabels: false,
-  showMarkers: true,
   zoomLevel: 1,
-  availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS, MAP_LAYERS.LABELS],
+  availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showControls: true,
   debug: false,
   enableClustering: true,
@@ -94,33 +89,37 @@ interface MapConfigProviderProps {
   initialConfig?: Partial<MapConfig>;
 }
 
-export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ 
-  children, 
-  initialConfig 
-}) => {
+export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, initialConfig }) => {
+  // Состояние для хранения конфигурации
   const [mapConfig, setMapConfig] = useState<MapConfig>({
     ...DEFAULT_MAP_CONFIG,
     ...initialConfig
   });
-  
-  // Состояние для отслеживания изменений
-  const [hasChanges, setHasChanges] = useState(false);
-  
-  // Синхронизация между параметром showLabels и слоем labels
+
+  // Эффект для восстановления конфигурации из localStorage при монтировании компонента
   useEffect(() => {
-    // Если включены метки, добавляем слой labels если его нет
-    if (mapConfig.showLabels && !mapConfig.visibleLayers.includes(MAP_LAYERS.LABELS)) {
-      updateMapConfig({
-        visibleLayers: [...mapConfig.visibleLayers, MAP_LAYERS.LABELS]
-      });
-    } 
-    // Если выключены метки, убираем слой labels если он есть
-    else if (!mapConfig.showLabels && mapConfig.visibleLayers.includes(MAP_LAYERS.LABELS)) {
-      updateMapConfig({
-        visibleLayers: mapConfig.visibleLayers.filter(l => l !== MAP_LAYERS.LABELS)
-      });
+    try {
+      const savedConfig = localStorage.getItem(STORAGE_KEY);
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setMapConfig(prevConfig => ({
+          ...prevConfig,
+          ...parsedConfig,
+          ...initialConfig // Приоритет имеют props из initialConfig
+        }));
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке конфигурации карты:', error);
     }
-  }, [mapConfig.showLabels]);
+  }, [initialConfig]);
+
+  // Функция для обновления конфигурации
+  const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
+    setMapConfig(prevConfig => ({
+      ...prevConfig,
+      ...updates
+    }));
+  }, []);
 
   const saveConfigToStorage = () => {
     try {
@@ -139,21 +138,6 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
     } catch (error) {
       console.error('Ошибка при загрузке конфигурации карты:', error);
     }
-  };
-
-  const updateMapConfig = (config: Partial<MapConfig>) => {
-    setMapConfig(prevConfig => {
-      const newConfig = { ...prevConfig, ...config };
-      
-      // Автосохранение конфигурации при каждом обновлении
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
-      } catch (error) {
-        console.error('Ошибка при автосохранении конфигурации карты:', error);
-      }
-      
-      return newConfig;
-    });
   };
 
   const resetMapConfig = () => {

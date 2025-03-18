@@ -17,7 +17,6 @@ interface UseMapLayersReturn {
   hasMapImage: boolean;
   filteredRegions: RegionData[];
   shouldShowRegions: boolean;
-  shouldShowLabels: boolean;
 }
 
 /**
@@ -50,11 +49,8 @@ export const useMapLayers = ({
     return regions;
   }, [regions]);
   
-  // Определяем, нужно ли показывать регионы и метки
+  // Определяем, нужно ли показывать регионы
   const shouldShowRegions = isLayerVisible('regions');
-  const shouldShowLabels = config?.showLabels !== undefined 
-    ? config.showLabels 
-    : isLayerVisible('labels');
 
   return {
     isLayerVisible,
@@ -62,7 +58,6 @@ export const useMapLayers = ({
     hasMapImage,
     filteredRegions,
     shouldShowRegions,
-    shouldShowLabels
   };
 };
 

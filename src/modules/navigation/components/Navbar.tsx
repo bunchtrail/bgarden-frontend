@@ -51,7 +51,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     isMenuOpen,
     toggleMenu,
     closeMenu,
-    handleLogout,
     user,
     filteredItems,
     isItemActive,
@@ -63,12 +62,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         ? navStyles.mobileAuthButton
         : navStyles.authButton;
 
+      // Если пользователь авторизован, не показываем кнопку входа/профиля
+      // т.к. пункт профиля уже есть в конфигурации меню
       if (user) {
-        return (
-          <button onClick={handleLogout} className={btnClasses}>
-            Выйти
-          </button>
-        );
+        return null;
       }
 
       return (
@@ -81,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </Link>
       );
     },
-    [user, handleLogout, closeMenu]
+    [user, closeMenu]
   );
 
   return (

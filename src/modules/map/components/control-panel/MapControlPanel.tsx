@@ -21,8 +21,7 @@ export interface PanelConfigPreset {
   showLabelToggle: boolean;
   showClusteringToggle: boolean;
   showMarkerToggle: boolean;
-  showPlantsToggle: boolean;
-  showDrawingControls: boolean; // Новая опция для отображения элементов управления рисованием
+  showDrawingControls: boolean;
   sections?: ControlPanelSection[];
 }
 
@@ -32,10 +31,9 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showLayerSelector: true,
     showModeToggle: true,
     showTooltipToggle: true,
-    showLabelToggle: true,
+    showLabelToggle: false,
     showClusteringToggle: true,
-    showMarkerToggle: true,
-    showPlantsToggle: true,
+    showMarkerToggle: false,
     showDrawingControls: true,
   },
   'light': {
@@ -45,7 +43,6 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showLabelToggle: false,
     showClusteringToggle: true,
     showMarkerToggle: false,
-    showPlantsToggle: true,
     showDrawingControls: false,
   },
   'minimal': {
@@ -55,7 +52,6 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showLabelToggle: false,
     showClusteringToggle: false,
     showMarkerToggle: false,
-    showPlantsToggle: false,
     showDrawingControls: false,
   },
   'geography': {
@@ -65,7 +61,6 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showLabelToggle: false,
     showClusteringToggle: true,
     showMarkerToggle: false,
-    showPlantsToggle: true,
     showDrawingControls: true,
   }
 };
@@ -80,7 +75,6 @@ interface MapControlPanelProps {
   showLabelToggle?: boolean;
   showClusteringToggle?: boolean;
   showMarkerToggle?: boolean;
-  showPlantsToggle?: boolean;
   showDrawingControls?: boolean;
   onClose?: () => void;
   customSections?: ControlPanelSection[];
@@ -105,7 +99,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   showLabelToggle,
   showClusteringToggle,
   showMarkerToggle,
-  showPlantsToggle,
   showDrawingControls,
   onClose,
   customSections = [],
@@ -150,7 +143,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
         showLabelToggle: showLabelToggle ?? false,
         showClusteringToggle: showClusteringToggle ?? false,
         showMarkerToggle: showMarkerToggle ?? false,
-        showPlantsToggle: showPlantsToggle ?? false,
         showDrawingControls: showDrawingControls ?? false,
         sections: customSections
       };
@@ -239,10 +231,8 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
         {config.showLayerSelector && (
           <LayerSelector 
             layers={[
-              { id: MAP_LAYERS.IMAGERY, label: 'Спутник' },
               { id: MAP_LAYERS.REGIONS, label: 'Участки' },
-              { id: MAP_LAYERS.PLANTS, label: 'Растения' },
-              { id: MAP_LAYERS.LABELS, label: 'Метки' }
+              { id: MAP_LAYERS.PLANTS, label: 'Растения' }
             ]}
             visibleLayers={mapConfig.visibleLayers}
             onToggleLayer={handleToggleLayer}
@@ -264,31 +254,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
                 label="Показывать подсказки"
                 checked={mapConfig.showTooltips}
                 onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
-              />
-            )}
-            
-            {config.showLabelToggle && (
-              <ConfigCheckbox 
-                label="Показывать метки"
-                checked={mapConfig.showLabels}
-                onChange={() => handleConfigChange('showLabels', !mapConfig.showLabels)}
-              />
-            )}
-            
-            {config.showMarkerToggle && (
-              <ConfigCheckbox 
-                label="Показывать маркеры"
-                checked={mapConfig.showMarkers}
-                onChange={() => handleConfigChange('showMarkers', !mapConfig.showMarkers)}
-              />
-            )}
-
-            {/* Настройки слоев - добавляем быстрый доступ к основным слоям */}
-            {config.showPlantsToggle && (
-              <ConfigCheckbox 
-                label="Показывать растения"
-                checked={isLayerVisible(MAP_LAYERS.PLANTS)}
-                onChange={() => handleToggleLayer(MAP_LAYERS.PLANTS)}
               />
             )}
 
