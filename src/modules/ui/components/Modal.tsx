@@ -62,6 +62,10 @@ export interface ModalProps {
    * Анимация появления модального окна
    */
   animation?: 'fade' | 'slide' | 'scale' | 'none';
+  /**
+   * Блокировать ли прокрутку страницы при открытии модального окна
+   */
+  blockScroll?: boolean;
 }
 
 /**
@@ -83,7 +87,8 @@ const Modal: React.FC<ModalProps> = ({
   closeOnEsc = true,
   showCloseButton = true,
   verticalPosition = 'center',
-  animation = 'fade'
+  animation = 'fade',
+  blockScroll = false
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -152,22 +157,29 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
-      // Блокируем прокрутку body
-      document.body.style.overflow = 'hidden';
+      // Блокируем прокрутку body только если это необходимо
+      if (blockScroll) {
+        document.body.style.overflow = 'hidden';
+      }
     } else {
       // Задержка, чтобы успела проиграться анимация при закрытии
       const timer = setTimeout(() => {
         setIsVisible(false);
-        // Разблокируем прокрутку body
-        document.body.style.overflow = '';
+        // Разблокируем прокрутку body, если она была заблокирована
+        if (blockScroll) {
+          document.body.style.overflow = '';
+        }
       }, 300);
       return () => clearTimeout(timer);
     }
     
     return () => {
-      document.body.style.overflow = '';
+      // Разблокируем прокрутку body при размонтировании компонента
+      if (blockScroll) {
+        document.body.style.overflow = '';
+      }
     };
-  }, [isOpen]);
+  }, [isOpen, blockScroll]);
   
   // Если модальное окно закрыто и не должно быть видимым, не рендерим его
   if (!isVisible && !isOpen) {

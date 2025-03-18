@@ -26,14 +26,6 @@ export const specimenRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/specimens/:id',
-    element: (
-      <ProtectedRoute>
-        <SpecimenPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: '/specimens/:id/edit',
     element: (
       <ProtectedRoute requiredRoles={[UserRole.Administrator, UserRole.Employee]}>

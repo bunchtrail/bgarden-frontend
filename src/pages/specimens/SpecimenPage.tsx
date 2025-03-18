@@ -105,11 +105,11 @@ const SpecimenPage: React.FC = () => {
       setIsEditing(false);
       
       if (id === 'new') {
-        // После создания перенаправляем на страницу созданного образца
-        navigate(`/specimens/${result.id}`);
+        // После создания перенаправляем на страницу списка образцов
+        navigate('/specimens');
       } else if (location.pathname.includes('/edit')) {
-        // Если мы находимся в режиме редактирования, то после сохранения перенаправляем на страницу просмотра
-        navigate(`/specimens/${id}`);
+        // После сохранения перенаправляем на страницу списка образцов
+        navigate('/specimens');
       }
     } catch (err) {
       setError('Ошибка при сохранении образца');

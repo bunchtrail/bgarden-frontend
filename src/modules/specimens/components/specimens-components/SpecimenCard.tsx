@@ -24,9 +24,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const sectorType = specimen.sectorType as SectorType;
   const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
   
-  const handleCardClick = () => {
-    navigate(`/specimens/${specimen.id}`);
-  };
+ 
   
   const cardHeaderAction = (
     <span 
@@ -156,7 +154,6 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
       subtitle={cardSubtitle}
       headerAction={cardHeaderAction}
       footer={footer}
-      onClick={handleCardClick}
     >
       {renderCardContent()}
     </Card>

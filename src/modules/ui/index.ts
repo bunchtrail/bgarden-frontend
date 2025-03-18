@@ -4,6 +4,7 @@ export { default as AbstractPattern } from './components/AbstractPattern';
 export { default as SectorCard } from './components/SectorCard';
 export { default as Button } from './components/Button';
 export { default as Card } from './components/Card';
+export { default as Modal } from './components/Modal';
 
 // Экспорт компонентов формы
 export * from './components/Form';
