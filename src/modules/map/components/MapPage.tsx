@@ -1,78 +1,250 @@
-import React, { useEffect, useState } from 'react';
-import { cardClasses } from '../../../styles/global-styles';
+import React, { useState, useCallback, useMemo, memo, ReactNode, useEffect } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useNavigate } from 'react-router-dom';
+import { useMapConfig, MapConfigProvider } from '../contexts/MapConfigContext';
 import { MapProvider } from '../contexts/MapContext';
-import { ModalProvider } from '../contexts/ModalContext';
-import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
-import MapControlPanel from './MapControlPanel';
-import { MapContainer, PlantDetailsModal } from './plant-map';
+import { MapData, getMapImageUrl } from '../services/mapService';
+import { RegionData } from '../types/mapTypes';
+import { MAP_STYLES } from '../styles';
+import { Card, LoadingSpinner } from '@/modules/ui';
+import { 
+  MapBoundsHandler,
+  MapReadyHandler,
+  BaseMapContainer,
+  ErrorView,
+  LoadingView
+} from './map-components';
+import MapLayersManager from './map-layers/MapLayersManager';
+import MapContentStateRenderer from './map-content/MapContentStateRenderer';
+import MapControlsRenderer from './map-controls/MapControlsRenderer';
+import { useMapData, useControlPanel } from '../hooks';
 
-// Компонент индикатора загрузки
-const LoadingIndicator: React.FC = () => (
-  <div className='flex justify-center items-center p-4'>
-    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-700'></div>
-    <span className='ml-2'>Загрузка карты...</span>
-  </div>
-);
+// Интерфейс для пользовательских слоёв
+export interface CustomMapLayerProps {
+  isVisible: boolean;
+  config?: Record<string, any>;
+}
 
-// Страница с картой и режимами работы
-const MapPage: React.FC = () => {
-  const [mapData, setMapData] = useState<MapData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+export interface MapLayerProps extends CustomMapLayerProps {
+  layerId: string;
+  order: number;
+  component: React.ComponentType<CustomMapLayerProps>;
+}
 
-  useEffect(() => {
-    const fetchMapData = async () => {
-      try {
-        setIsLoading(true);
-        const mapsData = await getActiveMap();
-        // Берем первую карту из массива, если она есть
-        if (mapsData && mapsData.length > 0) {
-          setMapData(mapsData[0]);
-        } else {
-          setError('Активная карта не найдена');
-        }
-      } catch (err) {
-        setError('Ошибка при загрузке карты');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+// Интерфейс для свойств основного компонента карты с поддержкой расширений
+interface MapPageContentProps {
+  extraControls?: ReactNode;
+  customLayers?: MapLayerProps[];
+  plugins?: ReactNode;
+  onRegionClick?: (regionId: string) => void;
+  controlPanelPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+  showControls?: boolean;
+  onDataLoaded?: (data: { mapData: MapData | null, regions: RegionData[] }) => void;
+  onError?: (error: Error) => void;
+}
 
-    fetchMapData();
-  }, []);
+/**
+ * Основной компонент содержимого карты 
+ * Инкапсулирует логику работы с картой и предоставляет возможности расширения
+ */
+const MapPageContent: React.FC<MapPageContentProps & { onMapReady?: (map: L.Map) => void }> = memo(({
+  extraControls,
+  customLayers = [],
+  plugins,
+  onRegionClick,
+  onMapReady,
+  controlPanelPosition = 'topRight',
+  showControls = true,
+  onDataLoaded,
+  onError
+}) => {
+  // Используем хук для загрузки данных карты
+  const {
+    mapData,
+    regions,
+    loading,
+    error,
+    mapImageUrl,
+    refreshMapData
+  } = useMapData({
+    autoLoad: true,
+    onDataLoaded,
+    onError
+  });
 
-  // Получаем URL изображения с помощью функции-помощника
-  const imageUrl = getMapImageUrl(mapData);
+  // Используем хук для панели управления
+  const {
+    showControlPanel,
+    toggleControlPanel,
+    controlPanelStyles
+  } = useControlPanel({
+    controlPanelPosition
+  });
 
-  // Функция для рендеринга модальных окон
-  const renderPlantModal = (modalId: string, plantId: string, onClose: () => void) => (
-    <PlantDetailsModal
-      key={modalId}
-      modalId={modalId}
-      plantId={plantId}
-      onClose={onClose}
-    />
-  );
+  // Состояние для хранения границ изображения
+  const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
+  const { mapConfig } = useMapConfig();
+  const [imageBoundsCalculated, setImageBoundsCalculated] = useState(false);
+  
+  // Обработчик обновления данных
+  const handleRefresh = useCallback(() => {
+    refreshMapData();
+  }, [refreshMapData]);
+
+  // Мемоизированный заголовок карты
+  const mapTitle = useMemo(() => {
+    return mapConfig.lightMode 
+      ? "Облегченная карта" 
+      : (mapData?.name || "Интерактивная карта ботанического сада");
+  }, [mapConfig.lightMode, mapData?.name]);
+
+  // Мемоизированный рендер содержимого карты Leaflet
+  const mapContainerContent = useMemo(() => {
+    if (!mapImageUrl) return null;
+    
+    return (
+      <BaseMapContainer
+        mapConfig={mapConfig}
+        showControls={true}
+      >
+        {/* Обработчик события ready */}
+        {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
+        
+        {/* Слои карты */}
+        <MapLayersManager 
+          visibleLayers={mapConfig.visibleLayers}
+          mapImageUrl={mapImageUrl}
+          imageBounds={imageBounds}
+          regions={regions}
+          customLayers={customLayers}
+          mapConfig={mapConfig}
+          onRegionClick={onRegionClick}
+          highlightSelected={!mapConfig.lightMode}
+        />
+        
+        {/* Обработчик границ карты */}
+        <MapBoundsHandler imageBounds={imageBounds} />
+
+        {/* Плагины */}
+        {plugins}
+      </BaseMapContainer>
+    );
+  }, [
+    mapImageUrl, 
+    mapConfig, 
+    onMapReady, 
+    regions, 
+    customLayers, 
+    onRegionClick, 
+    plugins, 
+    imageBounds
+  ]);
 
   return (
-    <div className='max-w-screen-2xl mx-auto h-[calc(100vh-4rem)] pt-6'>
-      <MapProvider>
-        <ModalProvider renderModal={renderPlantModal}>
-          {/* Карта занимает всё пространство */}
-          <div className='h-full w-full'>
-            <div className={`${cardClasses.base} p-0 overflow-hidden h-full`}>
-              {isLoading && <LoadingIndicator />}
-              <MapContainer loadingMap={isLoading} imageUrl={imageUrl} />
-            </div>
-          </div>
+    <div className={MAP_STYLES.mapContainer}>
+      <Card 
+        title={mapTitle}
+        headerAction={loading && <LoadingSpinner size="small" message="" />}
+        variant="elevated"
+        contentClassName="p-0"
+      >
+        <div className={MAP_STYLES.mapContent}>
+          {/* Компонент управления состоянием контента карты */}
+          <MapContentStateRenderer 
+            loading={loading} 
+            error={error} 
+            mapImageUrl={mapImageUrl} 
+            handleRefresh={handleRefresh}
+          >
+            {/* Элементы управления картой */}
+            <MapControlsRenderer 
+              showControls={showControls}
+              controlPanelStyles={controlPanelStyles}
+              toggleControlPanel={toggleControlPanel}
+              showControlPanel={showControlPanel}
+              extraControls={extraControls}
+            />
 
-          {/* Панель управления теперь располагается поверх карты */}
-          <MapControlPanel />
-        </ModalProvider>
-      </MapProvider>
+            {/* Расчет границ изображения вне MapContainer */}
+            <ImageBoundsCalculator 
+                mapImageUrl={mapImageUrl} 
+                onBoundsCalculated={bounds => {
+                    setImageBounds(bounds);
+                    setImageBoundsCalculated(true);
+                }}
+                isCalculated={imageBoundsCalculated}
+            />
+            
+            {/* Содержимое контейнера карты */}
+            {mapContainerContent}
+          </MapContentStateRenderer>
+        </div>
+      </Card>
     </div>
+  );
+});
+
+// Интерфейс для публичного компонента карты
+export interface MapPageProps extends Omit<MapPageContentProps, 'onDataLoaded' | 'onError'> {
+  initialConfig?: Record<string, any>; // Начальная конфигурация для MapConfigProvider
+  onMapReady?: (map: any) => void; // Колбэк при готовности карты
+}
+
+/**
+ * Публичный компонент карты с провайдером конфигурации
+ */
+const MapPage: React.FC<MapPageProps> = ({
+  initialConfig,
+  onMapReady,
+  ...contentProps
+}) => {
+  return (
+    <MapConfigProvider initialConfig={initialConfig}>
+      <MapProvider>
+        <MapPageContent
+          {...contentProps}
+          onMapReady={onMapReady}
+        />
+      </MapProvider>
+    </MapConfigProvider>
   );
 };
 
-export default MapPage;
+// Компонент для расчета границ изображения
+interface ImageBoundsCalculatorProps {
+    mapImageUrl: string | null;
+    onBoundsCalculated: (bounds: L.LatLngBoundsExpression) => void;
+    isCalculated: boolean;
+}
+
+const ImageBoundsCalculator: React.FC<ImageBoundsCalculatorProps> = ({
+    mapImageUrl, 
+    onBoundsCalculated,
+    isCalculated
+}) => {
+    // Расчет границ через useEffect
+    useEffect(() => {
+        if (!mapImageUrl || isCalculated) return;
+        
+        const img = new Image();
+        img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            console.log(`Загружено изображение: ${width}x${height}`);
+            
+            const calculatedBounds: L.LatLngBoundsExpression = [
+                [0, 0],
+                [height, width]
+            ];
+            
+            onBoundsCalculated(calculatedBounds);
+        };
+        
+        img.src = mapImageUrl;
+    }, [mapImageUrl, isCalculated, onBoundsCalculated]);
+    
+    return null;
+};
+
+export default MapPage; 

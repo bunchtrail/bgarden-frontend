@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/contexts/AuthContext';
 import { appStyles } from '../../styles/global-styles';
+import { useNotification } from '../../modules/notifications';
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -14,6 +15,7 @@ const RegisterPage: React.FC = () => {
 
   const { register, error, loading, clearError } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,30 +23,26 @@ const RegisterPage: React.FC = () => {
     clearError();
 
     // Валидация формы
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !firstName ||
-      !lastName
-    ) {
-      setFormError('Пожалуйста, заполните все поля');
+    if (!username || !password || !confirmPassword || !firstName || !lastName || !email) {
+      setFormError('Пожалуйста, заполните все обязательные поля');
+      notification.warning('Пожалуйста, заполните все обязательные поля');
       return;
     }
 
     if (password !== confirmPassword) {
       setFormError('Пароли не совпадают');
+      notification.warning('Пароли не совпадают');
       return;
     }
 
     if (password.length < 6) {
       setFormError('Пароль должен содержать не менее 6 символов');
+      notification.warning('Пароль должен содержать не менее 6 символов');
       return;
     }
 
     try {
-      // Регистрация пользователя
+      // Попытка регистрации
       const success = await register({
         username,
         email,
@@ -53,16 +51,15 @@ const RegisterPage: React.FC = () => {
         firstName,
         lastName,
         UserAgent: navigator.userAgent,
-        IpAddress: '127.0.0.1', // На фронте это поле можно оставить пустым, его заполнит сервер
       });
 
       if (success) {
-        // Перенаправление на главную страницу после успешной регистрации
+        notification.success('Регистрация успешно завершена');
         navigate('/');
       }
     } catch (err) {
-      // Ошибки уже обрабатываются в контексте auth
-      console.error('Ошибка регистрации:', err);
+      // Ошибки обрабатываются в AuthContext
+      notification.error(error || 'Ошибка при регистрации');
     }
   };
 

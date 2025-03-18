@@ -1,18 +1,38 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AuthProviderWithNotifications } from './modules/auth';
+import { BrowserRouter } from 'react-router-dom';
+import { NotificationProvider, useNotifications } from './modules/notifications';
+import { setNotificationHandler } from './services/httpClient';
 
-// Добавление стиля для анимации (использовалось в исходном App.tsx)
-import './styles/animations.css';
+// Компонент для инициализации обработчика уведомлений
+const NotificationInitializer: React.FC = () => {
+  const { addNotification } = useNotifications();
+  
+  useEffect(() => {
+    // Устанавливаем обработчик уведомлений для HTTP клиента
+    setNotificationHandler(addNotification);
+  }, [addNotification]);
+  
+  return null;
+};
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <NotificationProvider>
+        <NotificationInitializer />
+        <AuthProviderWithNotifications>
+          <App />
+        </AuthProviderWithNotifications>
+      </NotificationProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

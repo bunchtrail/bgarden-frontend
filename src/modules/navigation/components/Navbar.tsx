@@ -1,60 +1,46 @@
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigation } from '../hooks';
-import { NavConfig } from '../types';
+import { NavConfig, NavItem } from '../types';
 import { defaultNavConfig } from './configs/defaultNavConfig';
 import { CloseIcon, MenuIcon } from './icons';
 import { NavbarItem } from './NavbarItem';
+import { buttonClasses, layoutClasses, COLORS } from '../../../styles/global-styles';
 
 interface NavbarProps {
   config?: NavConfig;
   className?: string;
 }
 
+// Стили для навигации, специфичные для компонента
 const navStyles = {
-  // Минималистичный светлый фон с тонкой тенью
-  container:
-    'bg-white text-gray-800 border-b border-gray-200 shadow-sm backdrop-blur-sm bg-opacity-95',
-
-  // Улучшаем отзывчивость и добавляем небольшой вертикальный отступ
-  innerContainer: 'max-w-7xl mx-auto px-6 py-3 sm:px-8',
-
-  // Оптимизируем высоту и выравнивание
-  flexWrapper: 'flex justify-between items-center h-14',
-
-  // Сохраняем базовое выравнивание
+  // Контейнер и основная структура - использование глобальных стилей
+  container: 'w-full bg-white shadow-sm z-10 fixed top-0 left-0 right-0',
+  innerContainer: `${layoutClasses.container} mx-auto px-4 sm:px-6 lg:px-8`,
+  flexWrapper: 'flex justify-between items-center py-3',
+  
+  // Логотип и брендинг
   logoContainer: 'flex items-center',
-
-  // Утонченный логотип
-  logo: 'flex-shrink-0 flex items-center',
-
-  // Сохраняем размер, но с улучшенным качеством отображения
-  logoImage: 'h-10 w-10 object-contain rounded-full',
-
-  // Шрифт в стиле Apple - легкий, но четкий
-  logoText: 'ml-3 font-medium text-lg tracking-tight',
-
-  // Увеличиваем расстояние между элементами для большей воздушности
-  desktopNav: 'hidden md:flex items-center space-x-8',
-
-  // Улучшаем мобильную кнопку
-  mobileMenuBtn: 'md:hidden flex items-center',
-
-  // Более утонченная кнопка меню с нейтральным взаимодействием
-  menuButton:
-    'inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200',
-
-  // Улучшаем мобильное меню, добавляя плавность и стеклянный эффект
-  mobileMenu:
-    'md:hidden px-4 pt-3 pb-4 space-y-2 bg-white bg-opacity-98 shadow-md rounded-lg',
-
-  // Минималистичные кнопки авторизации
-  authButton:
-    'px-5 py-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors duration-200 text-sm font-medium',
-
-  // Согласованные стили для мобильного вида
-  mobileAuthButton:
-    'block w-full text-left px-4 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-sm font-medium',
+  logo: 'flex items-center text-[#1D1D1F] hover:opacity-90 transition-opacity',
+  logoImage: 'h-8 w-auto',
+  logoText: 'ml-2 text-lg font-medium',
+  
+  // Навигационные элементы для desktop
+  desktopNav: 'hidden md:flex items-center space-x-6',
+  desktopLink: 'text-[#1D1D1F] hover:text-[#0A84FF] transition-colors duration-200 text-sm font-medium',
+  desktopActiveLink: 'text-[#0A84FF] font-semibold',
+  
+  // Мобильное меню
+  mobileMenuBtn: 'flex items-center md:hidden',
+  menuButton: 'inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none',
+  mobileMenu: 'md:hidden bg-white shadow-lg fixed inset-x-0 top-14 z-50 transform transition-transform duration-300 ease-in-out',
+  mobileMenuInner: 'px-4 pt-2 pb-3 space-y-1',
+  mobileLink: 'block px-4 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-sm font-medium',
+  mobileActiveLink: 'bg-gray-50 text-[#0A84FF] font-semibold',
+  
+  // Кнопки авторизации из глобальных стилей
+  authButton: `${buttonClasses.base} ${buttonClasses.primary}`,
+  mobileAuthButton: `block w-full text-left px-4 py-2.5 rounded-md hover:bg-gray-50 transition-colors duration-200 text-sm font-medium ${buttonClasses.neutral}`,
 };
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -73,13 +59,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const renderAuthButton = useCallback(
     (isMobile = false) => {
-      const buttonClasses = isMobile
+      const btnClasses = isMobile
         ? navStyles.mobileAuthButton
         : navStyles.authButton;
 
       if (user) {
         return (
-          <button onClick={handleLogout} className={buttonClasses}>
+          <button onClick={handleLogout} className={btnClasses}>
             Выйти
           </button>
         );
@@ -88,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       return (
         <Link
           to='/login'
-          className={buttonClasses}
+          className={btnClasses}
           onClick={isMobile ? closeMenu : undefined}
         >
           Войти

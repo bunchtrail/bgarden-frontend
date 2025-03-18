@@ -1,22 +1,14 @@
-// Экспорт типов
-export * from './types';
+import SpecimenForm from './SpecimenForm';
 
-// Экспорт компонентов полей формы
-export * from './FormFields';
+export { default as SpecimenForm } from './SpecimenForm';
+export { default as StepContainer } from './StepContainer';
+export { default as StepRenderer } from './StepRenderer';
+export { default as NavigationButtons } from './NavigationButtons';
 
-// Экспорт компонента вкладок
-export * from './Tabs';
+// Re-export hooks
+export * from './hooks/useFormNavigation';
+export * from './hooks/useFormValidation';
+export * from './hooks/useFormChanges';
 
-// Экспорт секций формы
-export * from './AdditionalInfoSection';
-export * from './BasicInfoSection';
-export * from './ExpositionInfoSection';
-export * from './GeographicInfoSection';
-
-// Экспорт контейнера формы
-export * from './SpecimenFormContainer';
-
-// Для будущего использования
-// export * from './GeographicInfoSection';
-// export * from './ExpositionInfoSection';
-// export * from './AdditionalInfoSection'; 
+// Добавляем default экспорт
+export default SpecimenForm; 

@@ -1,14 +1,7 @@
-// Экспорт компонентов карты 
+// Экспорт основных компонентов и типов
+export { default as MapPage } from './MapPage';
+export * from './MapPage'; // Для экспорта типов
 
-import ControlPanel from './ControlPanel';
-import MapActions from './MapActions';
-import MapLegend from './MapLegend';
-import MapPage from './MapPage';
-import MapControlPanel from './MapControlPanel';
-
-export * from './plant-map';
-
-export {
-    ControlPanel, MapActions,
-    MapLegend, MapPage, MapControlPanel
-};
+// Экспорт подкомпонентов карты
+export * from './map-components';
+export * from './map-submodules'; 

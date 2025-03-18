@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/contexts/AuthContext';
-import { appStyles } from '../../styles/global-styles';
+import { useNotification } from '../../modules/notifications';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
+  const [isTwoFactorRequired, setIsTwoFactorRequired] = useState(false);
+  const [twoFactorUsername, setTwoFactorUsername] = useState('');
   const { login, error, loading, clearError } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +21,7 @@ const LoginPage: React.FC = () => {
     // Валидация формы
     if (!username || !password) {
       setFormError('Пожалуйста, заполните все поля');
+      notification.warning('Пожалуйста, заполните все поля');
       return;
     }
 
@@ -32,11 +36,19 @@ const LoginPage: React.FC = () => {
 
       if (success) {
         // Перенаправление на главную страницу
+        notification.success('Вы успешно вошли в систему');
         navigate('/');
+      } else if (error?.includes('двухфакторная аутентификация')) {
+        // Показываем сообщение о двухфакторной аутентификации
+        setIsTwoFactorRequired(true);
+        setTwoFactorUsername(username);
+        notification.info('Требуется двухфакторная аутентификация');
+      } else {
+        notification.error(error || 'Ошибка при входе в систему');
       }
     } catch (err) {
       // Ошибки уже обрабатываются в контексте auth
-      console.error('Ошибка входа:', err);
+      notification.error(error || 'Ошибка при входе в систему');
     }
   };
 
@@ -116,7 +128,24 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
 
-              {(error || formError) && (
+              {isTwoFactorRequired && (
+                <div className='animate-fadeIn text-amber-600 text-xs mt-3 py-2 px-3 bg-amber-50 rounded-lg border border-amber-200'>
+                  <div className="flex items-start space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="font-medium">Требуется двухфакторная аутентификация</p>
+                      <p className="mt-1">
+                        Для входа в аккаунт <span className="font-semibold">{twoFactorUsername}</span> требуется дополнительная проверка. 
+                        Пожалуйста, проверьте свою электронную почту или свяжитесь с администратором.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(error || formError) && !isTwoFactorRequired && (
                 <div className='animate-shake text-[#FF3B30] text-xs mt-3 py-2 px-3 bg-[#FFE5E5]/50 rounded-lg border border-[#FF3B30]/20'>
                   {formError || error}
                 </div>

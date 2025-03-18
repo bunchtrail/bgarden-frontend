@@ -1,40 +1,42 @@
-// Форма добавления растения 
+// Типы данных для работы с картой
 
-import { SpecimenData } from '../services/plantService';
-
-// Типы для карты
-
-// Координаты на карте
-export interface MapCoordinates {
-  lat: number;
-  lng: number;
+// Тип для SectorType (соответствует бэкенду)
+export enum SectorType {
+  UNDEFINED = 0,
+  GREENHOUSE = 1,
+  GARDEN = 2,
+  ROCKERY = 3,
+  AQUATIC = 4,
+  OTHER = 5
 }
 
-// Тип для событий карты
-export interface MapEvent {
-  type: string;
-  payload: any;
-}
-
-// Интерфейс для данных области с API
+// Тип данных для региона (области) карты
 export interface RegionData {
   id: number;
   name: string;
-  description: string;
-  latitude: number;
-  longitude: number;
-  radius: number | null;
-  boundaryWkt: string;
-  polygonCoordinates: string;
-  strokeColor: string;
-  fillColor: string;
-  fillOpacity: number;
-  sectorType: number;
-  specimensCount: number;
+  description?: string;
+  latitude: number; // Координаты центра области (широта)
+  longitude: number; // Координаты центра области (долгота)
+  radius?: number; // Радиус области в метрах (если область приблизительно круглая)
+  boundaryWkt?: string; // Многоугольник, описывающий границы области (в формате Well-known text)
+  polygonCoordinates: string; // Координаты в формате JSON строки
+  strokeColor?: string; // Цвет границы области
+  fillColor?: string; // Цвет заливки области
+  fillOpacity?: number; // Прозрачность заливки (0-1)
+  sectorType: SectorType; // Тип сектора, к которому относится область
+  specimensCount: number; // Количество экземпляров растений в регионе
 }
 
-// Экспортируем также тип SpecimenData для использования в других модулях
-export type { SpecimenData };
+// Тип данных для точки на карте
+export interface MapPoint {
+  x: number;
+  y: number;
+}
 
-    export { }; // Типы данных карты и растений 
-
+// Типы для фильтров областей
+export enum RegionFilterType {
+  ALL = 'all',
+  WITH_SPECIMENS = 'withSpecimens',
+  WITHOUT_SPECIMENS = 'withoutSpecimens',
+  CUSTOM = 'custom'
+} 

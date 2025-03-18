@@ -2,76 +2,46 @@ import { UserRole } from '../../../../modules/auth/types';
 import { NavConfig } from '../../types';
 
 export const defaultNavConfig: NavConfig = {
+  logo: {
+    title: 'Ботанический сад',
+    path: '/',
+    imageSrc: '/logo192.png',
+  },
   items: [
     {
       id: 'home',
       label: 'Главная',
       path: '/',
-      requiredAuth: false,
+      requireAuth: false,
+      order: 0,
     },
     {
-      id: 'specimens',
+      id: 'catalog',
       label: 'Каталог растений',
       path: '/specimens',
-      requiredAuth: false,
+      requireAuth: false,
+      order: 1,
     },
     {
       id: 'map',
-      label: 'Карта',
+      label: 'Карта сада',
       path: '/map',
-      requiredAuth: true,
-      roles: [UserRole.Administrator.toString(), UserRole.Employee.toString()],
+      requireAuth: false,
+      order: 2,
     },
     {
       id: 'expositions',
       label: 'Экспозиции',
-      path: '#',
-      requiredAuth: false,
-      dropdownItems: [
-        {
-          id: 'expositions-list',
-          label: 'Список экспозиций',
-          path: '/expositions',
-          requiredAuth: false,
-        },
-      ],
-    },
-    {
-      id: 'admin',
-      label: 'Управление',
-      path: '#',
-      requiredAuth: true,
-      roles: [UserRole.Administrator.toString(), UserRole.Employee.toString()],
-      dropdownItems: [
-        {
-          id: 'users',
-          label: 'Пользователи',
-          path: '/admin/users',
-          requiredAuth: true,
-          roles: [UserRole.Administrator.toString()],
-        },
-        {
-          id: 'settings',
-          label: 'Настройки',
-          path: '/admin/settings',
-          requiredAuth: true,
-          roles: [
-            UserRole.Administrator.toString(),
-            UserRole.Employee.toString(),
-          ],
-        },
-      ],
+      path: '/expositions',
+      requireAuth: false,
+      order: 3,
     },
     {
       id: 'profile',
       label: 'Профиль',
       path: '/profile',
-      requiredAuth: true,
+      requireAuth: true,
+      order: 4,
     },
   ],
-  logo: {
-    path: '/',
-    title: 'Ботанический сад',
-    imageSrc: '/logo192.png',
-  },
 };

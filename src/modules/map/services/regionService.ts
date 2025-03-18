@@ -2,25 +2,15 @@
 
 import { Area } from '../contexts/MapContext';
 import { RegionData } from '../types/mapTypes';
+import httpClient from '@/services/httpClient';
+import { logError, logWarning } from '@/utils/logger';
 
 // Функция для получения всех областей (регионов) с сервера
 export const getAllRegions = async (): Promise<RegionData[]> => {
   try {
-    const response = await fetch('http://localhost:7254/api/Region', {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка при получении областей: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    return await httpClient.get<RegionData[]>('/Region');
   } catch (error) {
-    console.error('Ошибка при получении областей:', error);
+    logError('Ошибка при получении областей:', error);
     throw error;
   }
 };
@@ -28,69 +18,61 @@ export const getAllRegions = async (): Promise<RegionData[]> => {
 // Функция для создания новой области (региона) на сервере
 export const createRegion = async (regionData: Omit<RegionData, 'id' | 'specimensCount'>): Promise<RegionData> => {
   try {
-    const response = await fetch('http://localhost:7254/api/Region', {
-      method: 'POST',
-      headers: {
-        'accept': 'text/plain',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id: 0, // API заменит на следующий доступный ID
-        ...regionData,
-        specimensCount: 0 // Начальное количество экземпляров
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка при создании области: ${response.status}`);
+    // Проверяем и обрабатываем координаты
+    let processedData = { ...regionData };
+    
+    // Проверка, если polygonCoordinates передан как строка
+    if (typeof processedData.polygonCoordinates !== 'string') {
+      processedData.polygonCoordinates = JSON.stringify(processedData.polygonCoordinates);
     }
-
-    const createdRegion = await response.json();
-    return createdRegion;
+    
+    // Формируем объект для отправки на сервер
+    const newRegion = {
+      id: 0, // API заменит на следующий доступный ID
+      ...processedData,
+      specimensCount: 0 // Начальное количество экземпляров
+    };
+    
+    console.log('Отправляем на сервер данные:', newRegion);
+    
+    return await httpClient.post<RegionData>('/Region', newRegion);
   } catch (error) {
-    console.error('Ошибка при создании области:', error);
+    logError('Ошибка при создании области:', error);
     throw error;
   }
 };
 
-// Функция для преобразования координат из строки в массив точек
-const parsePolygonCoordinates = (coordsString: string): [number, number][] => {
+// Преобразование координат из строки в массив [lat, lng]
+export const parseCoordinates = (coordsString: string | null | undefined): [number, number][] => {
+  if (!coordsString) {
+    logWarning(`Координаты отсутствуют (${coordsString}). Используем координаты по умолчанию.`);
+    return getDefaultCoordinates();
+  }
+
+  // Проверка, не пытаемся ли мы распарсить буквальную строку "string"
+  if (coordsString === "string") {
+    logWarning(`Получено буквальное значение "string" вместо координат. Используем координаты по умолчанию.`);
+    return getDefaultCoordinates();
+  }
+
   try {
-    // Добавляем проверку на null или undefined
-    if (!coordsString) {
-      console.warn(`Координаты отсутствуют (${coordsString}). Используем координаты по умолчанию.`);
+    const coordsArray = JSON.parse(coordsString);
+    
+    // Проверка валидности массива координат - минимум 3 точки для полигона
+    if (!coordsArray || !Array.isArray(coordsArray) || coordsArray.length < 3) {
+      logWarning('Массив координат пуст или содержит менее 3 точек');
       return getDefaultCoordinates();
     }
     
-    // Если coordsString уже является массивом, просто используем его
-    if (Array.isArray(coordsString)) {
-      return coordsString.map((coord: [number, number]) => [coord[0], coord[1]]);
-    }
-    
-    // Проверяем, что строка имеет значение 'string' (ошибка тестовых данных)
-    if (coordsString === 'string') {
-      console.warn(`Получено буквальное значение "string" вместо координат. Используем координаты по умолчанию.`);
-      return getDefaultCoordinates();
-    }
-    
-    // Проверяем, что строка начинается с '[' для JSON
-    if (typeof coordsString === 'string' && coordsString.trim().startsWith('[')) {
-      // Преобразуем строку в объект JavaScript
-      const coordsArray = JSON.parse(coordsString);
-      // Проверяем, что массив не пуст
-      if (!coordsArray || coordsArray.length < 3) {
-        console.warn('Массив координат пуст или содержит менее 3 точек');
-        return getDefaultCoordinates();
-      }
-      // Преобразуем координаты в формат [x, y]
-      return coordsArray.map((coord: [number, number]) => [coord[0], coord[1]]);
-    } else {
-      // Если формат не JSON, возможно, это строка в другом формате
-      console.warn('Строка координат не в формате JSON:', coordsString);
-      return getDefaultCoordinates();
-    }
+    return coordsArray.map((coord: [number, number]) => [coord[0], coord[1]]);
   } catch (error) {
-    console.error('Ошибка при разборе координат:', error);
+    // Если это не JSON, пробуем другие варианты парсинга
+    if (typeof coordsString === 'string' && coordsString.includes(',')) {
+      logWarning('Строка координат не в формате JSON: ' + coordsString);
+      // Дополнительная логика для других форматов
+    }
+    
+    logError('Ошибка при разборе координат', error);
     return getDefaultCoordinates();
   }
 };
@@ -109,7 +91,7 @@ const getDefaultCoordinates = (): [number, number][] => {
 export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
   return regions.map(region => {
     // Парсим координаты из строки JSON
-    const points = parsePolygonCoordinates(region.polygonCoordinates);
+    const points = parseCoordinates(region.polygonCoordinates);
     
     return {
       id: `region-${region.id}`,
@@ -125,5 +107,7 @@ export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
 
 // Функция для преобразования точек области в строку JSON для API
 export const convertPointsToPolygonCoordinates = (points: [number, number][]): string => {
+  // В нашем проекте используется нестандартная система координат, 
+  // поэтому сохраняем формат как есть
   return JSON.stringify(points);
 };

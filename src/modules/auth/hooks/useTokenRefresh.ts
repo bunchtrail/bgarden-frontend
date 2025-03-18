@@ -1,54 +1,90 @@
-import { useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useEffect, useRef, useCallback } from 'react';
+import { tokenService } from '../../../services/httpClient';
+import { TokenDto } from '../types';
+import { logError } from '../../../utils/logger';
+
+// Интервал проверки токена (в миллисекундах)
+const TOKEN_CHECK_INTERVAL = 60000; // 1 минута
 
 /**
  * Хук для автоматического обновления токена авторизации
- * @param refreshInterval Интервал обновления токена в миллисекундах (по умолчанию 15 минут)
+ * @param isAuthenticated Флаг аутентификации пользователя
+ * @param refreshCallback Функция обновления токена
  */
-export const useTokenRefresh = (refreshInterval = 15 * 60 * 1000) => {
-  const { isAuthenticated, refreshToken } = useAuth();
-  const timerRef = useRef<number | null>(null);
+export const useTokenRefresh = (
+  isAuthenticated: boolean,
+  refreshCallback: () => Promise<TokenDto | void>
+) => {
+  // Используем useRef для хранения таймера, чтобы избежать его пересоздания при ререндерах
+  const refreshTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const setupRefreshTimer = () => {
-      if (isAuthenticated) {
-        // Очищаем предыдущий таймер если он существует
-        if (timerRef.current) {
-          window.clearInterval(timerRef.current);
+    const checkAndRefreshToken = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        // Получаем токен из localStorage
+        const token = tokenService.getToken();
+        if (!token) return;
+
+        // Проверка необходимости обновления токена
+        const needRefresh = isTokenExpiringSoon(token);
+        
+        if (needRefresh) {
+          console.log('Токен скоро истечет, обновляем...');
+          await refreshCallback();
         }
-
-        // Устанавливаем новый таймер для обновления токена
-        timerRef.current = window.setInterval(async () => {
-          try {
-            // Получаем текущий токен обновления из куков
-            const currentRefreshToken = document.cookie
-              .split('; ')
-              .find(row => row.startsWith('refreshToken='))
-              ?.split('=')[1];
-
-            if (currentRefreshToken) {
-              // Вызываем refreshToken без параметров, как определено в AuthContext
-              await refreshToken();
-            }
-          } catch (error) {
-            // Ошибка при обновлении токена
-          }
-        }, refreshInterval);
-      } else if (timerRef.current) {
-        // Если пользователь вышел, очищаем таймер
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
+      } catch (error) {
+        logError('Ошибка при обновлении токена:', error);
       }
     };
 
-    setupRefreshTimer();
+    // Запуск таймера только если пользователь аутентифицирован
+    if (isAuthenticated) {
+      // Проверяем токен сразу при монтировании компонента
+      checkAndRefreshToken();
+      
+      // Устанавливаем интервал для регулярной проверки
+      refreshTimerRef.current = window.setInterval(() => {
+        checkAndRefreshToken();
+      }, TOKEN_CHECK_INTERVAL);
+    }
 
-    // Очистка при размонтировании компонента
+    // Очистка таймера при размонтировании компонента или изменении isAuthenticated
     return () => {
-      if (timerRef.current) {
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
+      if (refreshTimerRef.current !== null) {
+        clearInterval(refreshTimerRef.current);
+        refreshTimerRef.current = null;
       }
     };
-  }, [isAuthenticated, refreshToken, refreshInterval]);
-}; 
+  }, [isAuthenticated, refreshCallback]);
+};
+
+/**
+ * Проверяет, истекает ли токен в ближайшее время
+ * @param token JWT токен
+ * @returns true, если токен истекает менее чем через 5 минут
+ */
+function isTokenExpiringSoon(token: string): boolean {
+  try {
+    // Парсим JWT токен для получения полезной нагрузки
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    
+    // Получаем время истечения токена
+    const expirationTime = payload.exp * 1000; // переводим в миллисекунды
+    
+    // Получаем текущее время
+    const currentTime = Date.now();
+    
+    // Проверяем, истекает ли токен в ближайшие 5 минут
+    const timeUntilExpiration = expirationTime - currentTime;
+    const fiveMinutesInMs = 5 * 60 * 1000;
+    
+    return timeUntilExpiration <= fiveMinutesInMs;
+  } catch (error) {
+    logError('Ошибка при проверке токена:', error);
+    return false;
+  }
+}
+
+export default useTokenRefresh; 

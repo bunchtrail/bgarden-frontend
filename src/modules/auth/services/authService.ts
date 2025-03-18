@@ -1,110 +1,72 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import httpClient, { ApiError, tokenService } from '../../../services/httpClient';
 import {
     ErrorResponse,
     LoginDto,
     RegisterDto,
     TokenDto,
-    UserDto
+    UserDto,
+    TwoFactorAuthDto
 } from '../types';
-
-// Обновляем URL API для бэкенда ботанического сада
-const API_URL =  'http://localhost:7254/api';
-
-// Создаем экземпляр axios с базовыми настройками
-const api: AxiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/plain'
-    },
-    withCredentials: true,
-});
-
-// Очистка данных авторизации
-export const clearAuthData = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-};
-
-// Добавляем перехватчик запросов для добавления токена авторизации
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
-// Добавляем перехватчик ответов для обработки ошибок
-api.interceptors.response.use(
-    (response) => response,
-    async (error: AxiosError<ErrorResponse>) => {
-        if (error.response?.status === 401) {
-            // Не очищаем данные авторизации здесь, а просто возвращаем ошибку с флагом
-            return Promise.reject({
-                message: 'Сессия истекла. Пожалуйста, войдите снова.',
-                statusCode: 401,
-                isAuthError: true // Добавляем флаг для идентификации ошибки авторизации
-            });
-        }
-        if (error.response?.status === 403) {
-            return Promise.reject({
-                message: 'У вас нет прав для выполнения этого действия',
-                statusCode: 403
-            });
-        }
-        return Promise.reject({
-            message: error.response?.data?.message || 'Произошла ошибка при выполнении запроса',
-            statusCode: error.response?.status || 500
-        });
-    }
-);
 
 // Сервис авторизации
 export const authService = {
-    // Методы авторизации, соответствующие AuthController API
+    // Методы авторизации
     
     // Регистрация пользователя
     register: async (registerDto: RegisterDto): Promise<TokenDto> => {
         try {
-            const response = await api.post<TokenDto>('/Auth/register', registerDto);
-            if (response.data.accessToken) {
-                localStorage.setItem('token', response.data.accessToken);
-                localStorage.setItem('username', response.data.username);
+            const response = await httpClient.post<TokenDto>('Auth/register', registerDto, {
+                requiresAuth: false
+            });
+            
+            if (response.accessToken) {
+                tokenService.setAuthData(response);
             }
-            return response.data;
+            return response;
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 400) {
-                    throw new Error(error.response?.data?.message || 'Ошибка при регистрации. Проверьте правильность введенных данных.');
+            if (error instanceof ApiError) {
+                if (error.status === 400) {
+                    throw new Error(error.data?.message || 'Ошибка при регистрации. Проверьте правильность введенных данных.');
                 }
-                throw new Error(error.response?.data?.message || 'Ошибка при регистрации пользователя');
+                throw new Error(error.data?.message || 'Ошибка при регистрации пользователя');
             }
             throw error;
         }
     },
 
     // Авторизация пользователя
-    login: async (loginDto: LoginDto): Promise<TokenDto> => {
+    login: async (loginDto: LoginDto): Promise<TokenDto | TwoFactorAuthDto> => {
         try {
             // Очищаем данные авторизации перед попыткой входа
-            clearAuthData();
+            tokenService.clearToken();
             
-            const response = await api.post<TokenDto>('/Auth/login', loginDto);
+            const response = await httpClient.post<TokenDto | TwoFactorAuthDto>('Auth/login', loginDto, {
+                requiresAuth: false
+            });
             
-            // Обычный вход, сохраняем токен
-            if (response.data.accessToken) {
-                localStorage.setItem('token', response.data.accessToken);
-                localStorage.setItem('username', response.data.username);
+            // Проверяем, требуется ли двухфакторная аутентификация
+            if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
+                // Возвращаем ответ о необходимости двухфакторной аутентификации
+                return response;
             }
             
-            return response.data;
+            // Проверяем, что response содержит все поля TokenDto
+            if (
+                'accessToken' in response && 
+                'refreshToken' in response && 
+                'expiration' in response && 
+                'tokenType' in response
+            ) {
+                tokenService.setAuthData(response as TokenDto);
+            }
+            
+            return response;
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 401) {
+            if (error instanceof ApiError) {
+                if (error.status === 401) {
                     throw new Error('Неверное имя пользователя или пароль');
                 }
-                throw new Error(error.response?.data?.message || 'Ошибка при входе в систему');
+                throw new Error(error.data?.message || 'Ошибка при входе в систему');
             }
             throw error;
         }
@@ -112,31 +74,36 @@ export const authService = {
     
     // Обновление токена
     refreshToken: async (): Promise<TokenDto> => {
-        const response = await api.post<TokenDto>('/Auth/refresh-token');
-        if (response.data.accessToken) {
-            localStorage.setItem('token', response.data.accessToken);
+        try {
+            const response = await httpClient.post<TokenDto>('Auth/refresh-token');
+            if (response.accessToken) {
+                tokenService.setToken(response.accessToken);
+            }
+            return response;
+        } catch (error) {
+            tokenService.clearToken();
+            throw error;
         }
-        return response.data;
     },
     
     // Выход из системы
     logout: async (): Promise<void> => {
         try {
-            await api.post('/Auth/logout');
+            await httpClient.post('Auth/logout');
         } finally {
-            clearAuthData();
+            tokenService.clearToken();
         }
     },
     
     // Разблокировка пользователя (только для администраторов)
     unlockUser: async (username: string): Promise<boolean> => {
-        const response = await api.post<{ message: string }>(`/Auth/unlock-user/${username}`);
-        return !!response.data;
+        const response = await httpClient.post<{ message: string }>(`Auth/unlock-user/${username}`);
+        return !!response;
     },
 
     // Проверка авторизации
     checkAuth: async (): Promise<UserDto | null> => {
-        const token = localStorage.getItem('token');
+        const token = tokenService.getToken();
         const username = localStorage.getItem('username');
 
         if (!token || !username) {
@@ -144,26 +111,63 @@ export const authService = {
         }
 
         try {
-            // Устанавливаем таймаут для запроса, чтобы не блокировать UI на долгое время
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            // Пытаемся декодировать токен и проверить его действительность
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const expirationTime = payload.exp * 1000;
+                const currentTime = Date.now();
+                
+                // Если токен истек, не отправляем запрос
+                if (expirationTime <= currentTime) {
+                    tokenService.clearToken();
+                    return null;
+                }
+            } catch (e) {
+                // Если не удалось декодировать токен, считаем его недействительным
+                tokenService.clearToken();
+                return null;
+            }
             
-            // Используем эндпоинт User/me для получения данных пользователя
-            const userData = await api.get<UserDto>('/User/me', {
-                signal: controller.signal,
-                // Добавляем кеширование запросов
+            // Получаем данные пользователя с таймаутом в 3 секунды
+            const userData = await httpClient.get<UserDto>('User/me', {
+                timeout: 3000,
                 headers: {
                     'Cache-Control': 'max-age=60'
                 }
             });
             
-            clearTimeout(timeoutId);
-            return userData.data;
+            return userData;
         } catch (err) {
             console.error('Ошибка при проверке авторизации:', err);
             return null;
         }
+    },
+
+    // Обработчик ошибок авторизации
+    handleAuthError: (error: unknown): ErrorResponse => {
+        if (error instanceof ApiError) {
+            return {
+                message: error.message,
+                statusCode: error.status,
+                isAuthError: error.isAuthError
+            };
+        }
+        
+        if (error instanceof Error) {
+            return {
+                message: error.message, 
+                statusCode: 500
+            };
+        }
+        
+        return {
+            message: 'Неизвестная ошибка авторизации',
+            statusCode: 500
+        };
     }
 };
 
-export default api; 
+// Экспортируем функцию очистки данных авторизации для обратной совместимости
+export const clearAuthData = tokenService.clearToken;
+
+export default authService; 

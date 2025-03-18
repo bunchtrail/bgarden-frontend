@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import httpClient from '../../../services/httpClient';
 
 // Интерфейс для объекта данных фенологии
 export interface PhenologyDto {
@@ -12,64 +12,37 @@ export interface PhenologyDto {
   notes?: string;
 }
 
-// Используем тот же базовый URL, что и в других сервисах
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254';
-
-// Создаем экземпляр axios с базовыми настройками
-const api: AxiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/plain'
-    },
-    withCredentials: true,
-});
-
-// Добавляем перехватчик запросов для добавления токена авторизации
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
 // Класс для работы с API фенологии растений
 class PhenologyService {
     // Получить все фенологические данные
     async getAllPhenologyRecords(): Promise<PhenologyDto[]> {
-        const response = await api.get<PhenologyDto[]>('/api/Phenology');
-        return response.data;
+        return httpClient.get<PhenologyDto[]>('Phenology');
     }
 
     // Получить фенологию по ID
     async getPhenologyById(id: number): Promise<PhenologyDto> {
-        const response = await api.get<PhenologyDto>(`/api/Phenology/${id}`);
-        return response.data;
+        return httpClient.get<PhenologyDto>(`Phenology/${id}`);
     }
 
     // Получить фенологии для образца
     async getPhenologyForSpecimen(specimenId: number): Promise<PhenologyDto[]> {
-        const response = await api.get<PhenologyDto[]>(`/api/Phenology/specimen/${specimenId}`);
-        return response.data;
+        return httpClient.get<PhenologyDto[]>(`Phenology/specimen/${specimenId}`);
     }
 
     // Создать новую фенологическую запись
     async createPhenology(phenology: Omit<PhenologyDto, 'id'>): Promise<PhenologyDto> {
-        const response = await api.post<PhenologyDto>('/api/Phenology', phenology);
-        return response.data;
+        return httpClient.post<PhenologyDto>('Phenology', phenology);
     }
 
     // Обновить фенологическую запись
     async updatePhenology(id: number, phenology: PhenologyDto): Promise<PhenologyDto> {
-        const response = await api.put<PhenologyDto>(`/api/Phenology/${id}`, phenology);
-        return response.data;
+        return httpClient.put<PhenologyDto>(`Phenology/${id}`, phenology);
     }
 
     // Удалить фенологическую запись
     async deletePhenology(id: number): Promise<boolean> {
-        const response = await api.delete(`/api/Phenology/${id}`);
-        return response.status === 200;
+        await httpClient.delete(`Phenology/${id}`);
+        return true;
     }
 }
 
