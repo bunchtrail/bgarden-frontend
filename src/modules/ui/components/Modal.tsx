@@ -33,7 +33,7 @@ export interface ModalProps {
   /**
    * Вариант стиля модального окна
    */
-  variant?: 'outlined' | 'elevated' | 'filled';
+  variant?: 'outlined' | 'elevated' | 'filled' | 'glass';
   /**
    * Дополнительные CSS классы для контейнера модального окна
    */
@@ -61,7 +61,7 @@ export interface ModalProps {
   /**
    * Анимация появления модального окна
    */
-  animation?: 'fade' | 'slide' | 'scale' | 'none';
+  animation?: 'fade' | 'slide' | 'scale' | 'spring' | 'none';
   /**
    * Блокировать ли прокрутку страницы при открытии модального окна
    */
@@ -97,11 +97,17 @@ const Modal: React.FC<ModalProps> = ({
   const baseClass = cardClasses.base;
   
   // Класс для варианта стиля
-  const variantClass = variant === 'outlined' 
-    ? cardClasses.outlined
-    : variant === 'filled'
-    ? cardClasses.filled
-    : cardClasses.elevated;
+  let variantClass = '';
+  
+  if (variant === 'outlined') {
+    variantClass = cardClasses.outlined;
+  } else if (variant === 'filled') {
+    variantClass = cardClasses.filled;
+  } else if (variant === 'glass') {
+    variantClass = 'bg-white/60 backdrop-blur-xl border border-white/30 shadow-lg';
+  } else {
+    variantClass = 'bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-xl border border-white/30 shadow-lg';
+  }
   
   // Определяем класс размера
   const sizeClass = {
@@ -123,11 +129,12 @@ const Modal: React.FC<ModalProps> = ({
     fade: 'animate-fadeIn',
     slide: 'animate-slideInUp',
     scale: 'animate-scaleIn',
+    spring: 'transition-all duration-500 transform ease-out',
     none: ''
   }[animation];
   
   // Базовые классы для модального окна
-  const modalClasses = `${baseClass} ${variantClass} ${sizeClass} ${positionClass} ${animationClass} ${className} z-50 overflow-auto max-h-[90vh]`;
+  const modalClasses = `${baseClass} ${variantClass} ${sizeClass} ${positionClass} ${animationClass} ${className} z-50 overflow-auto max-h-[90vh] ring-1 ring-white/50`;
   
   // Функция обработки клика на оверлей
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -161,7 +168,18 @@ const Modal: React.FC<ModalProps> = ({
       if (blockScroll) {
         document.body.style.overflow = 'hidden';
       }
+      
+      // Добавляем класс spring-анимации если используется
+      if (animation === 'spring' && modalRef.current) {
+        modalRef.current.style.transform = 'scale(1)';
+      }
     } else {
+      // Обрабатываем spring-анимацию, если используется
+      if (animation === 'spring' && modalRef.current) {
+        modalRef.current.style.transform = 'scale(0.95)';
+        modalRef.current.style.opacity = '0';
+      }
+      
       // Задержка, чтобы успела проиграться анимация при закрытии
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -179,16 +197,22 @@ const Modal: React.FC<ModalProps> = ({
         document.body.style.overflow = '';
       }
     };
-  }, [isOpen, blockScroll]);
+  }, [isOpen, blockScroll, animation]);
   
   // Если модальное окно закрыто и не должно быть видимым, не рендерим его
   if (!isVisible && !isOpen) {
     return null;
   }
   
+  // Инициализируем стиль для spring-анимации
+  const initialSpringStyle = animation === 'spring' ? { 
+    transform: isOpen ? 'scale(1)' : 'scale(0.95)', 
+    opacity: isOpen ? 1 : 0 
+  } : {};
+  
   return (
     <div 
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={handleOverlayClick}
@@ -201,14 +225,14 @@ const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         className={modalClasses}
         onClick={(e) => e.stopPropagation()}
-        style={{ pointerEvents: 'all' }}
+        style={{ ...initialSpringStyle, pointerEvents: 'all' }}
       >
         {/* Шапка модального окна */}
         {(title || showCloseButton) && (
-          <div className={`${cardClasses.header} border-b border-[#E5E5EA]`}>
+          <div className={`flex items-center justify-between px-5 pt-4 pb-2 border-b border-[#E5E5EA]/40`}>
             <div className="flex-grow">
               {typeof title === 'string' ? (
-                <h3 className={cardClasses.title}>{title}</h3>
+                <h3 className="text-lg font-semibold text-[#000000] tracking-tight antialiased">{title}</h3>
               ) : (
                 title
               )}
@@ -218,11 +242,11 @@ const Modal: React.FC<ModalProps> = ({
               {showCloseButton && (
                 <button 
                   type="button"
-                  className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-colors"
+                  className="p-1.5 rounded-full text-[#1D1D1F] hover:text-black hover:bg-[#F5F5F7]/90 transition-all duration-300 transform active:scale-95"
                   onClick={onClose}
                   aria-label="Закрыть"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
@@ -233,13 +257,13 @@ const Modal: React.FC<ModalProps> = ({
         )}
         
         {/* Содержимое модального окна */}
-        <div className={`${cardClasses.content} ${contentClassName}`}>
+        <div className={`px-5 py-4 text-[#000000] antialiased font-normal tracking-normal leading-relaxed ${contentClassName}`}>
           {children}
         </div>
         
         {/* Футер модального окна */}
         {footer && (
-          <div className={cardClasses.footer}>
+          <div className="px-5 py-3 border-t border-[#E5E5EA]/40 bg-[#F5F5F7]/30 text-[#1D1D1F] antialiased">
             {footer}
           </div>
         )}

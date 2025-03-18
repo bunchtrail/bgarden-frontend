@@ -32,7 +32,9 @@ class SpecimenService {
             // Используем httpClient вместо прямого fetch
             const data = await httpClient.get<Specimen[]>(`Specimen/sector/${sectorType}`, {
                 // Устанавливаем необязательный timeout, чтобы запрос не висел слишком долго
-                timeout: 5000
+                timeout: 5000,
+                // Подавляем логирование ошибки 404 (Not Found)
+                suppressErrorsForStatus: [404]
             });
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
@@ -42,15 +44,15 @@ class SpecimenService {
             }
             
             return data;
-        } catch (error) {
-            // Если получили 404, просто возвращаем пустой массив
+        } catch (error: any) {
+            // Если получили 404, просто возвращаем пустой массив без логирования ошибки
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
                 console.log(`В секторе типа ${sectorType} нет растений.`);
                 return [];
             }
             
+            // Для других ошибок логируем и возвращаем пустой массив
             console.error('Ошибка при получении образцов для сектора:', error);
-            // Скрываем ошибку от внешнего кода, чтобы не выводить ее на страницу
             return [];
         }
     }
@@ -66,8 +68,16 @@ class SpecimenService {
             // Подготавливаем данные согласно требуемому формату API
             const specimenData = {
                 id: 0, // API ожидает id=0 для новых записей
-                ...specimen
+                ...specimen,
+                // Убеждаемся, что sectorType передается как число
+                sectorType: Number(specimen.sectorType)
             };
+            
+            console.log('Тип сектора перед отправкой:', {
+                originalValue: specimen.sectorType,
+                convertedValue: specimenData.sectorType,
+                type: typeof specimenData.sectorType
+            });
             
             console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
             

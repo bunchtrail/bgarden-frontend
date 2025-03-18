@@ -81,18 +81,16 @@ export const useSpecimens = () => {
 
   // Обработчик удаления образца
   const handleDelete = async (id: number) => {
-    if (window.confirm('Вы уверены, что хотите удалить этот образец?')) {
-      try {
-        setLoading(true);
-        await specimenService.deleteSpecimen(id);
-        // Обновляем локальный список без перезагрузки с сервера
-        setSpecimens(specimens.filter(specimen => specimen.id !== id));
-      } catch (err) {
-        setError('Ошибка при удалении образца');
-        console.error('Ошибка при удалении образца:', err);
-      } finally {
-        setLoading(false);
-      }
+    try {
+      setLoading(true);
+      await specimenService.deleteSpecimen(id);
+      // Обновляем локальный список без перезагрузки с сервера
+      setSpecimens(specimens.filter(specimen => specimen.id !== id));
+    } catch (err) {
+      setError('Ошибка при удалении образца');
+      console.error('Ошибка при удалении образца:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

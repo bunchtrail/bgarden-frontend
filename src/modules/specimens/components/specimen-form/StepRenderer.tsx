@@ -34,6 +34,11 @@ const StepRenderer: React.FC<StepRendererProps> = ({
 }) => {
   switch (activeStep) {
     case 1:
+      console.log('StepRenderer - первый шаг, сектор:', {
+        activeStep,
+        sectorType: formData.sectorType,
+        sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(formData.sectorType)]
+      });
       return (
         <BasicInfoSection 
           formData={formData} 

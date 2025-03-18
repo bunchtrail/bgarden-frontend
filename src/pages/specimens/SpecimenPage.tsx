@@ -73,7 +73,22 @@ const SpecimenPage: React.FC = () => {
           setSpecimen(specimenData);
         } else {
           // Новый образец - устанавливаем пустой объект
-          setSpecimen(null);
+          // Проверяем, есть ли параметр sectorType в URL
+          const params = new URLSearchParams(location.search);
+          const sectorTypeParam = params.get('sectorType');
+          
+          // Создаем базовый образец с учетом типа сектора из URL
+          if (sectorTypeParam) {
+            const sectorType = Number(sectorTypeParam);
+            console.log('SpecimenPage - создание нового образца с сектором из URL:', {
+              sectorType,
+              url: window.location.href
+            });
+            // Создаем пустой образец с указанным типом сектора
+            setSpecimen(null);
+          } else {
+            setSpecimen(null);
+          }
           setIsEditing(true);
         }
       } catch (err) {
@@ -85,12 +100,20 @@ const SpecimenPage: React.FC = () => {
     };
 
     fetchSpecimen();
-  }, [id]);
+  }, [id, location.search]);
 
   // Обработчик сохранения образца
   const handleSave = async (updatedSpecimen: SpecimenFormData) => {
     try {
       setLoading(true);
+      
+      // Добавляем логирование сектора перед отправкой
+      console.log('SpecimenPage - sectorType перед сохранением:', {
+        value: updatedSpecimen.sectorType,
+        type: typeof updatedSpecimen.sectorType,
+        url: window.location.href
+      });
+      
       let result;
 
       if (id && id !== 'new') {

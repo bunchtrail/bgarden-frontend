@@ -50,6 +50,7 @@ export type RequestOptions = {
   body?: any;
   signal?: AbortSignal;
   timeout?: number;
+  suppressErrorsForStatus?: number[];
 };
 
 // Класс для обработки ошибок
@@ -114,7 +115,8 @@ async function request<T>(
     requiresAuth = true, 
     body,
     signal,
-    timeout
+    timeout,
+    suppressErrorsForStatus = []
   } = options;
 
   // Создаем AbortController если задан таймаут и не задан внешний signal
@@ -192,6 +194,13 @@ async function request<T>(
 
     return data as T;
   } catch (error) {
+    // Проверяем, нужно ли подавить ошибку с этим статус-кодом
+    if (error instanceof ApiError && 
+        suppressErrorsForStatus.includes(error.status)) {
+      console.log(`Подавлена ошибка ${error.status} для запроса ${endpoint}`);
+      throw error; // Пробрасываем ошибку дальше без логирования
+    }
+    
     console.error('Request failed:', error);
     
     // Если есть функция для уведомлений, показываем сообщение

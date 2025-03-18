@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
 import { cardClasses } from '@/styles/global-styles';
 import { useNotification } from '@/modules/notifications';
+import { useLocation } from 'react-router-dom';
 
 // Импортируем компоненты
 import FormStepper from './form-stepper/FormStepper';
@@ -37,10 +38,22 @@ interface SpecimenFormProps {
  * @param onCancel - Функция отмены
  */
 const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCancel, families, expositions, regions }) => {
-  // Инициализация дефолтных значений формы
+  const location = useLocation();
+  
+  // Получаем тип сектора из URL, если он там есть
+  const getSectorTypeFromUrl = (): number | null => {
+    const params = new URLSearchParams(location.search);
+    const sectorTypeParam = params.get('sectorType');
+    return sectorTypeParam ? Number(sectorTypeParam) : null;
+  };
+  
+  // Получаем тип сектора из URL
+  const sectorTypeFromUrl = getSectorTypeFromUrl();
+  
+  // Инициализация дефолтных значений формы с учетом значения из URL
   const defaultFormData: SpecimenFormData = {
     inventoryNumber: '',
-    sectorType: 0,
+    sectorType: sectorTypeFromUrl !== null ? sectorTypeFromUrl : 0,
     latitude: 0,
     longitude: 0,
     regionId: 0,
@@ -109,7 +122,15 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     if (specimen) {
       setFormData(specimen);
     }
-  }, [specimen, setFormData]);
+    
+    // Логируем значение sectorType при загрузке страницы
+    console.log('Значение sectorType при загрузке страницы:', {
+      sectorType: specimen?.sectorType ?? defaultFormData.sectorType,
+      sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][specimen?.sectorType ?? defaultFormData.sectorType],
+      url: window.location.href,
+      sectorTypeFromUrl
+    });
+  }, [specimen, setFormData, sectorTypeFromUrl]);
 
   // Отправка формы
   const handleSubmit = (e: React.FormEvent) => {
@@ -147,6 +168,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     
     if (isValid) {
       notification.info('Отправка данных образца...', { duration: 3000 });
+      
+      // Логируем данные о типе сектора перед отправкой
+      console.log('Отправка формы с данными о секторе:', {
+        sectorType: formData.sectorType,
+        type: typeof formData.sectorType,
+        sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(formData.sectorType)]
+      });
+      
       onSubmit(formData);
     } else {
       notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');

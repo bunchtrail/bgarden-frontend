@@ -20,6 +20,12 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     return touchedFields[fieldName] ? errors[fieldName] : '';
   };
 
+  // Вывод значения сектора в консоль при рендеринге компонента
+  console.log('BasicInfoSection - текущий сектор:', {
+    sectorType: formData.sectorType,
+    sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(formData.sectorType)]
+  });
+
   return (
     <div className="animate__animated animate__fadeIn">
       <h3 className="text-xl font-semibold mb-4 text-green-700 border-b pb-2">Основная информация</h3>
@@ -85,12 +91,26 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             id="sectorType"
             name="sectorType"
             label="Тип сектора *"
-            value={formData.sectorType}
-            onChange={onChange}
+            value={String(formData.sectorType)}
+            onChange={(e) => {
+              const numericValue = Number(e.target.value);
+              console.log('Выбран сектор:', {
+                value: numericValue,
+                label: ['Дендрологический', 'Флора', 'Цветущий'][numericValue]
+              });
+              onChange({
+                ...e,
+                target: {
+                  ...e.target,
+                  name: 'sectorType',
+                  value: numericValue.toString()
+                }
+              } as React.ChangeEvent<HTMLSelectElement>);
+            }}
             options={[
-              { value: 0, label: 'Дендрологический' },
-              { value: 1, label: 'Флора' },
-              { value: 2, label: 'Цветущий' }
+              { value: '0', label: 'Дендрологический' },
+              { value: '1', label: 'Флора' },
+              { value: '2', label: 'Цветущий' }
             ]}
             fullWidth
             helperText="Категория размещения образца"

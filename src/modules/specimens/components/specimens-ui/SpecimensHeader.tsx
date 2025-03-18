@@ -70,7 +70,10 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
           </Button>
           <Button 
             variant="success"
-            onClick={() => navigate('/specimens/new')}
+            onClick={() => navigate(activeSectorType !== null 
+              ? `/specimens/new?sectorType=${activeSectorType}` 
+              : '/specimens/new'
+            )}
             className={`flex items-center ${animationClasses.springHover}`}
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
