@@ -1,1 +1,0 @@
-export { TaxonomySection } from './TaxonomySection'; 
