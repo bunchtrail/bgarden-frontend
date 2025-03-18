@@ -39,13 +39,18 @@ export type { RegionData } from './types/mapTypes';
 export { MAP_STYLES } from './styles';
 
 // Контекст и хуки
-export { MapConfigProvider } from './contexts/MapConfigContext';
+export { 
+  MapConfigProvider,
+  MAP_LAYERS,
+  MAP_MODES
+} from './contexts/MapConfigContext';
 
 // Компоненты панели управления
 export {
   LayerSelector,
   ConfigCheckbox,
-  PanelHeader
+  PanelHeader,
+  ModeToggle
 } from './components/control-panel';
 export type { ControlPanelSection } from './components/control-panel';
 

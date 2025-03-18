@@ -9,6 +9,13 @@ export const MAP_LAYERS = {
   LABELS: 'labels'
 } as const;
 
+// Режимы взаимодействия с картой
+export const MAP_MODES = {
+  VIEW: 'view',
+  DRAW: 'draw',
+  EDIT: 'edit'
+} as const;
+
 // Имя ключа для хранения конфигурации в localStorage
 const STORAGE_KEY = 'bgarden_map_config';
 
@@ -32,6 +39,9 @@ export interface MapConfig {
   showControls: boolean;
   debug: boolean;
   enableClustering: boolean; // Включить/выключить кластеризацию маркеров
+  // Настройки режима взаимодействия с картой
+  interactionMode: string; // Режим взаимодействия с картой (просмотр, рисование, редактирование)
+  drawingEnabled: boolean; // Включен ли режим рисования областей
 }
 
 // Настройки по умолчанию для стандартной карты
@@ -54,6 +64,9 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   showControls: true,
   debug: false,
   enableClustering: true,
+  // Настройки режима взаимодействия с картой
+  interactionMode: MAP_MODES.VIEW,
+  drawingEnabled: false,
 };
 
 interface MapConfigContextProps {

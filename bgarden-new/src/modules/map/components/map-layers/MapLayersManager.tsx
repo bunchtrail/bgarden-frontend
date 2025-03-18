@@ -1,15 +1,18 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster'; // Убедитесь, что этот пакет установлен
 import { RegionData } from '../../types/mapTypes';
-import { MapLayerProps } from '../MapPage';
+// Убираем импорт и используем локальное объявление
+// import { MapLayerProps } from '../MapPage';
 import { MapImageLayer, MapRegionsLayer } from '../map-components';
 import { useMapLayers } from '../../hooks/useMapLayers';
-import { MapConfig } from '../../contexts/MapConfigContext';
+import { MapConfig, MAP_LAYERS } from '../../contexts/MapConfigContext';
 import { getAllSpecimens, convertSpecimensToPlants } from '../../services/plantService';
 import { Plant } from '../../contexts/MapContext';
 import { useMap } from 'react-leaflet';
 import { MAP_COLORS } from '../../styles';
+// Импортируем компонент напрямую, а не через индексный файл
+import MapDrawingLayer from './MapDrawingLayer';
 
 // Компонент слоя маркеров растений
 const PlantMarkersLayer: React.FC<{ isVisible: boolean, mapConfig: MapConfig }> = ({ isVisible, mapConfig }) => {
@@ -178,6 +181,20 @@ const PlantMarkersLayer: React.FC<{ isVisible: boolean, mapConfig: MapConfig }> 
   return null; // Этот компонент не возвращает видимый React-элемент
 };
 
+// Интерфейс для пользовательских слоёв
+export interface CustomMapLayerProps {
+  isVisible: boolean;
+  config?: Record<string, any>;
+}
+
+export interface MapLayerProps {
+  layerId: string;
+  order: number;
+  component: React.ComponentType<CustomMapLayerProps>;
+  isVisible: boolean;
+  config?: Record<string, any>;
+}
+
 interface MapLayersManagerProps {
   visibleLayers: string[];
   mapImageUrl: string | null;
@@ -188,6 +205,7 @@ interface MapLayersManagerProps {
   onRegionClick?: (regionId: string) => void;
   selectedRegionIds?: string[];
   highlightSelected?: boolean;
+  children?: ReactNode;
 }
 
 /**
@@ -225,12 +243,15 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = memo(({
     ? regions.filter(region => selectedRegionIds.includes(String(region.id)))
     : filteredRegions;
 
+  // Сортируем слои по порядку (если указан)
+  const sortedCustomLayers = [...customLayers].sort((a, b) => a.order - b.order);
+
   // Проверяем, что мы находимся внутри контекста Leaflet
   const renderLayers = () => {
     return (
       <>
         {/* Слой изображения карты */}
-        {hasMapImage && isLayerVisible('imagery') && mapImageUrl && (
+        {hasMapImage && isLayerVisible(MAP_LAYERS.IMAGERY) && mapImageUrl && (
           <MapImageLayer 
             imageUrl={mapImageUrl} 
             bounds={imageBounds}
@@ -250,13 +271,24 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = memo(({
         {/* Слой маркеров растений */}
         <PlantMarkersLayer isVisible={isLayerVisible('plants')} mapConfig={mapConfig} />
         
+        {/* Слой для рисования областей (всегда доступен, видимость зависит от режима) */}
+        <MapDrawingLayer 
+          isVisible={mapConfig.drawingEnabled} 
+          config={{
+            color: '#3B82F6',
+            fillColor: '#60A5FA',
+            fillOpacity: 0.3,
+            weight: 2
+          }}
+        />
+        
         {/* Пользовательские слои в порядке их приоритета */}
-        {sortedLayers.map(layer => {
+        {sortedCustomLayers.map(layer => {
           const CustomLayer = layer.component;
           return (
             <CustomLayer 
               key={layer.layerId}
-              isVisible={isLayerVisible(layer.layerId)}
+              isVisible={layer.isVisible && isLayerVisible(layer.layerId)}
               config={layer.config}
             />
           );

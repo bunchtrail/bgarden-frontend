@@ -4,7 +4,8 @@ import {
   LayerSelector, 
   ConfigCheckbox, 
   PanelHeader,
-  ControlPanelSection
+  ControlPanelSection,
+  ModeToggle
 } from './index';
 import { animationClasses } from '../../../../styles/global-styles';
 import { MAP_LAYERS } from '../../contexts/MapConfigContext';
@@ -21,6 +22,7 @@ export interface PanelConfigPreset {
   showClusteringToggle: boolean;
   showMarkerToggle: boolean;
   showPlantsToggle: boolean;
+  showDrawingControls: boolean; // Новая опция для отображения элементов управления рисованием
   sections?: ControlPanelSection[];
 }
 
@@ -28,12 +30,13 @@ export interface PanelConfigPreset {
 export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPreset> = {
   'full': {
     showLayerSelector: true,
-    showModeToggle: false,
+    showModeToggle: true,
     showTooltipToggle: true,
     showLabelToggle: true,
     showClusteringToggle: true,
     showMarkerToggle: true,
     showPlantsToggle: true,
+    showDrawingControls: true,
   },
   'light': {
     showLayerSelector: false,
@@ -43,6 +46,7 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showClusteringToggle: true,
     showMarkerToggle: false,
     showPlantsToggle: true,
+    showDrawingControls: false,
   },
   'minimal': {
     showLayerSelector: false,
@@ -52,15 +56,17 @@ export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPres
     showClusteringToggle: false,
     showMarkerToggle: false,
     showPlantsToggle: false,
+    showDrawingControls: false,
   },
   'geography': {
     showLayerSelector: false,
-    showModeToggle: false,
+    showModeToggle: true,
     showTooltipToggle: false,
     showLabelToggle: false,
     showClusteringToggle: true,
     showMarkerToggle: false,
     showPlantsToggle: true,
+    showDrawingControls: true,
   }
 };
 
@@ -75,6 +81,7 @@ interface MapControlPanelProps {
   showClusteringToggle?: boolean;
   showMarkerToggle?: boolean;
   showPlantsToggle?: boolean;
+  showDrawingControls?: boolean;
   onClose?: () => void;
   customSections?: ControlPanelSection[];
   children?: ReactNode;
@@ -99,6 +106,7 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   showClusteringToggle,
   showMarkerToggle,
   showPlantsToggle,
+  showDrawingControls,
   onClose,
   customSections = [],
   children,
@@ -143,6 +151,7 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
         showClusteringToggle: showClusteringToggle ?? false,
         showMarkerToggle: showMarkerToggle ?? false,
         showPlantsToggle: showPlantsToggle ?? false,
+        showDrawingControls: showDrawingControls ?? false,
         sections: customSections
       };
     }
@@ -238,6 +247,11 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             visibleLayers={mapConfig.visibleLayers}
             onToggleLayer={handleToggleLayer}
           />
+        )}
+
+        {/* Режим взаимодействия с картой */}
+        {config.showModeToggle && (
+          <ModeToggle />
         )}
 
         {/* Основные настройки карты */}
