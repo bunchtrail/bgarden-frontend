@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import 'leaflet-draw';
@@ -7,6 +7,12 @@ import { useMapConfig, MAP_MODES } from '../../contexts/MapConfigContext';
 import { useMap as useMapContext } from '../../hooks';
 import { Area } from '../../contexts/MapContext';
 import { COLORS } from '../../../../styles/global-styles';
+import { createRegion, convertPointsToPolygonCoordinates } from '../../services/regionService';
+import { logError } from '@/utils/logger';
+import { RegionData, SectorType } from '../../types/mapTypes';
+import { Button } from '../../../../modules/ui';
+import Modal from '../../../../modules/ui/components/Modal';
+import { TextField } from '../../../../modules/ui/components/Form';
 
 // Дополняем типы Leaflet
 declare module 'leaflet' {
@@ -51,11 +57,96 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   const areasRef = useRef<Area[]>(areas);
   const isDrawingMode = mapConfig.interactionMode === MAP_MODES.DRAW;
   const isEditMode = mapConfig.interactionMode === MAP_MODES.EDIT;
+  
+  // Состояние для модального окна
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newAreaName, setNewAreaName] = useState('');
+  const [newAreaDescription, setNewAreaDescription] = useState('');
+  const [tempAreaData, setTempAreaData] = useState<{
+    newAreaId: string;
+    layer: L.Layer;
+    points: [number, number][];
+  } | null>(null);
 
   // Обновляем ссылку на текущие области
   useEffect(() => {
     areasRef.current = areas;
   }, [areas]);
+
+  // Вычисляем центр полигона
+  const calculatePolygonCenter = useCallback((points: [number, number][]): [number, number] => {
+    if (!points || points.length === 0) return [0, 0];
+    
+    const totalPoints = points.length;
+    let sumLat = 0;
+    let sumLng = 0;
+    
+    points.forEach(point => {
+      sumLat += point[0];
+      sumLng += point[1];
+    });
+    
+    return [
+      parseFloat((sumLat / totalPoints).toFixed(6)),
+      parseFloat((sumLng / totalPoints).toFixed(6))
+    ];
+  }, []);
+
+  // Функция для сохранения области на сервере
+  const saveAreaToServer = useCallback((
+    areaId: string, 
+    areaName: string, 
+    areaDescription: string, 
+    points: [number, number][]
+  ) => {
+    // Рассчитываем центр области
+    const [centerLat, centerLng] = calculatePolygonCenter(points);
+    
+    // Отправляем новую область на сервер
+    const polygonCoordinates = convertPointsToPolygonCoordinates(points);
+    
+    // Создаем объект с данными для API
+    const regionData: Omit<RegionData, 'id' | 'specimensCount'> = {
+      name: areaName,
+      description: areaDescription || '',
+      polygonCoordinates: polygonCoordinates,
+      strokeColor: config?.color || COLORS.primary.main,
+      fillColor: config?.fillColor || COLORS.primary.light,
+      fillOpacity: config?.fillOpacity || 0.3,
+      latitude: centerLat, 
+      longitude: centerLng,
+      radius: 0,
+      boundaryWkt: '',
+      sectorType: SectorType.UNDEFINED
+    };
+    
+    createRegion(regionData).then(response => {
+      // Сохраняем новый ID, который мы получили от сервера
+      const newRegionId = `region-${response.id}`;
+      
+      // Обновляем ID области в локальном хранилище
+      const updatedAreas = areasRef.current.map(area => 
+        area.id === areaId 
+          ? { ...area, id: newRegionId }
+          : area
+      );
+      
+      // Важно: также обновляем ID в слое на карте
+      if (drawnItemsRef.current) {
+        drawnItemsRef.current.eachLayer((layer: any) => {
+          if (layer.options?.areaId === areaId) {
+            // Обновляем ID в опциях слоя
+            layer.options.areaId = newRegionId;
+          }
+        });
+      }
+      
+      // Обновляем состояние
+      setAreas(updatedAreas);
+    }).catch(error => {
+      logError('Ошибка при сохранении области:', error);
+    });
+  }, [calculatePolygonCenter, config, setAreas]);
 
   // Создаем группу для хранения нарисованных объектов при первом рендере
   useEffect(() => {
@@ -63,7 +154,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
 
     // Инициализация drawnItems если еще не создана
     if (!drawnItemsRef.current) {
-      console.log('Создаем группу для нарисованных объектов');
       drawnItemsRef.current = new L.FeatureGroup();
       map.addLayer(drawnItemsRef.current);
 
@@ -116,25 +206,28 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
           // Добавляем слой в группу нарисованных объектов
           drawnItemsRef.current.addLayer(layer);
           
-          // Сохраняем нарисованную область в контекст
-          let newArea: Area = {
-            id: newAreaId,
-            name: `Новая область ${areasRef.current.length + 1}`,
-            points: []
-          };
+          // Подготавливаем данные для новой области
+          let points: [number, number][] = [];
           
           if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
             const coords = layer.getLatLngs()[0];
             if (Array.isArray(coords)) {
               // Приводим координаты к нужному формату
-              newArea.points = coords.map((coord: any) => 
+              points = coords.map((coord: any) => 
                 [coord.lat, coord.lng] as [number, number]
               );
               
-              console.log('Новая область создана:', newArea);
+              // Сохраняем временные данные новой области
+              setTempAreaData({
+                newAreaId,
+                layer,
+                points
+              });
               
-              // Обновляем состояние областей
-              setAreas([...areasRef.current, newArea]);
+              // Открываем модальное окно для ввода имени области
+              setNewAreaName(`Новая область ${areasRef.current.length + 1}`);
+              setNewAreaDescription('');
+              setIsModalOpen(true);
             }
           }
         }
@@ -168,7 +261,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
         });
         
         if (hasChanges) {
-          console.log('Области обновлены после редактирования');
           setAreas(updatedAreas);
         }
       });
@@ -184,7 +276,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
         });
         
         if (deletedIds.length > 0) {
-          console.log('Удаляем области:', deletedIds);
           const updatedAreas = areasRef.current.filter(area => !deletedIds.includes(area.id));
           setAreas(updatedAreas);
         }
@@ -193,11 +284,9 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       initializedRef.current = true;
     }
 
-    // Загружаем существующие области только при первом рендере
-    // или если слой был очищен, но не при каждом обновлении areas
-    if (drawnItemsRef.current && (!initializedRef.current || drawnItemsRef.current.getLayers().length === 0)) {
-      // Сначала добавляем к каждой области на карте areaId
-      // чтобы потом можно было определить, какие области уже отображены
+    // Загружаем существующие области на карту
+    if (drawnItemsRef.current) {
+      // Получаем список ID слоев, которые уже на карте
       const displayedAreaIds = Array.from(drawnItemsRef.current.getLayers())
         .map((layer: any) => layer.options?.areaId)
         .filter(Boolean);
@@ -205,7 +294,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       // Отображаем только те области, которые еще не на карте
       areas.forEach(area => {
         if (area.points.length > 2 && !displayedAreaIds.includes(area.id)) {
-          console.log('Добавляем область на карту:', area.id);
           const polygon = L.polygon(area.points, {
             color: area.strokeColor || config?.color || COLORS.primary.main,
             fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
@@ -224,33 +312,18 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       map.off(L.Draw.Event.EDITED);
       map.off(L.Draw.Event.DELETED);
     };
-  }, [map, isVisible, config]);
+  }, [map, isVisible, config, calculatePolygonCenter, areas, saveAreaToServer]);
 
-  // Обновляем слои при изменении областей
+  // Обновляем слои при изменении областей - синхронизация состояния
   useEffect(() => {
-    if (!isVisible || !drawnItemsRef.current || !initializedRef.current) return;
+    if (!isVisible || !drawnItemsRef.current) return;
     
-    // Получаем список ID слоев, которые уже на карте
-    const displayedLayers: Record<string, L.Layer> = {};
-    drawnItemsRef.current.eachLayer((layer: any) => {
-      if (layer.options?.areaId) {
-        displayedLayers[layer.options.areaId] = layer;
-      }
-    });
+    // Очищаем все слои
+    drawnItemsRef.current.clearLayers();
     
-    // Добавляем новые области и удаляем отсутствующие
-    const currentAreaIds = areas.map(area => area.id);
-    
-    // Удаляем слои, которых нет в текущем массиве областей
-    Object.keys(displayedLayers).forEach(areaId => {
-      if (!currentAreaIds.includes(areaId)) {
-        drawnItemsRef.current?.removeLayer(displayedLayers[areaId]);
-      }
-    });
-    
-    // Добавляем области, которых нет на карте
+    // Добавляем все области заново
     areas.forEach(area => {
-      if (area.points.length > 2 && !displayedLayers[area.id]) {
+      if (area.points.length > 2) {
         const polygon = L.polygon(area.points, {
           color: area.strokeColor || config?.color || COLORS.primary.main,
           fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
@@ -275,7 +348,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       try {
         map.removeControl(drawControl);
       } catch (e) {
-        console.log('Контрол уже удален или не существует');
+        // Контрол уже удален или не существует
       }
     }
 
@@ -283,12 +356,89 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       try {
         map.removeControl(drawControl);
       } catch (e) {
-        console.log('Контрол уже удален или не существует');
+        // Контрол уже удален или не существует
       }
     };
   }, [map, isVisible, isDrawingMode, isEditMode, drawControl]);
 
-  return null;
+  // Обработчик сохранения имени области из модального окна
+  const handleSaveAreaName = () => {
+    if (!tempAreaData) return;
+    
+    const { newAreaId, points } = tempAreaData;
+    
+    // Создаем новую область с введенным именем
+    const newArea: Area = {
+      id: newAreaId,
+      name: newAreaName || `Новая область ${areasRef.current.length + 1}`,
+      description: newAreaDescription,
+      points: points
+    };
+    
+    // Обновляем состояние областей
+    const updatedAreas = [...areasRef.current, newArea];
+    setAreas(updatedAreas);
+    
+    // Сохраняем на сервере
+    saveAreaToServer(newAreaId, newArea.name, newArea.description || '', points);
+    
+    // Закрываем модальное окно и очищаем временные данные
+    setIsModalOpen(false);
+    setTempAreaData(null);
+  };
+
+  // Обработчик отмены создания области
+  const handleCancelAreaCreation = () => {
+    if (tempAreaData && drawnItemsRef.current) {
+      // Удаляем нарисованную область с карты
+      drawnItemsRef.current.removeLayer(tempAreaData.layer);
+    }
+    
+    // Закрываем модальное окно и очищаем временные данные
+    setIsModalOpen(false);
+    setTempAreaData(null);
+  };
+
+  return (
+    <>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCancelAreaCreation}
+        title="Создание новой области"
+        footer={
+          <div className="flex justify-end space-x-3">
+            <Button variant="neutral" onClick={handleCancelAreaCreation}>
+              Отмена
+            </Button>
+            <Button onClick={handleSaveAreaName}>
+              Сохранить
+            </Button>
+          </div>
+        }
+        size="small"
+        animation="fade"
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        className="z-[9999]"
+      >
+        <div className="space-y-4">
+          <TextField
+            label="Название области"
+            value={newAreaName}
+            onChange={(e) => setNewAreaName(e.target.value)}
+            fullWidth
+            autoFocus
+          />
+          <TextField
+            label="Описание (необязательно)"
+            value={newAreaDescription}
+            onChange={(e) => setNewAreaDescription(e.target.value)}
+            fullWidth
+          />
+        </div>
+      </Modal>
+    </>
+  );
 };
 
 export default MapDrawingLayer; 

@@ -172,4 +172,14 @@
 .leaflet-popup-close-button:hover {
   color: #0A84FF !important;
   transform: scale(1.1);
+}
+
+/* Установка z-index для контейнера карты */
+.leaflet-map-pane {
+  z-index: 100 !important;
+}
+
+.leaflet-top, 
+.leaflet-bottom {
+  z-index: 1000 !important;
 } 

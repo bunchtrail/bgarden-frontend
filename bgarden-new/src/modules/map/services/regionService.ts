@@ -18,11 +18,22 @@ export const getAllRegions = async (): Promise<RegionData[]> => {
 // Функция для создания новой области (региона) на сервере
 export const createRegion = async (regionData: Omit<RegionData, 'id' | 'specimensCount'>): Promise<RegionData> => {
   try {
+    // Проверяем и обрабатываем координаты
+    let processedData = { ...regionData };
+    
+    // Проверка, если polygonCoordinates передан как строка
+    if (typeof processedData.polygonCoordinates !== 'string') {
+      processedData.polygonCoordinates = JSON.stringify(processedData.polygonCoordinates);
+    }
+    
+    // Формируем объект для отправки на сервер
     const newRegion = {
       id: 0, // API заменит на следующий доступный ID
-      ...regionData,
+      ...processedData,
       specimensCount: 0 // Начальное количество экземпляров
     };
+    
+    console.log('Отправляем на сервер данные:', newRegion);
     
     return await httpClient.post<RegionData>('/Region', newRegion);
   } catch (error) {
@@ -96,5 +107,7 @@ export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
 
 // Функция для преобразования точек области в строку JSON для API
 export const convertPointsToPolygonCoordinates = (points: [number, number][]): string => {
+  // В нашем проекте используется нестандартная система координат, 
+  // поэтому сохраняем формат как есть
   return JSON.stringify(points);
 };
