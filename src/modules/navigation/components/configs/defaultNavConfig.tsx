@@ -5,7 +5,7 @@ export const defaultNavConfig: NavConfig = {
   logo: {
     title: 'Ботанический сад',
     path: '/',
-    imageSrc: '/logo192.png',
+    imageSrc: '/images/BotGardenMainImage.jpg',
   },
   items: [
     {

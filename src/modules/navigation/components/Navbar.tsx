@@ -22,8 +22,8 @@ const navStyles = {
   // Логотип и брендинг
   logoContainer: 'flex items-center',
   logo: 'flex items-center text-[#1D1D1F] hover:opacity-90 transition-opacity',
-  logoImage: 'h-8 w-auto',
-  logoText: 'ml-2 text-lg font-medium',
+  logoImage: 'h-10 w-10 rounded-full object-cover border-2 border-[#0A84FF]',
+  logoText: 'ml-3 text-lg font-medium',
   
   // Навигационные элементы для desktop
   desktopNav: 'hidden md:flex items-center space-x-6',

@@ -363,7 +363,28 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
           }
         });
         
-        if (hasChanges) {
+        if (hasChanges && drawnItemsRef.current) {
+          // Очищаем все слои перед обновлением
+          drawnItemsRef.current.clearLayers();
+          
+          // Перерисовываем все области заново
+          updatedAreas.forEach(area => {
+            if (area.points.length > 2) {
+              const polygon = L.polygon(area.points, {
+                color: area.strokeColor || config?.color || COLORS.primary.main,
+                fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
+                fillOpacity: area.fillOpacity || config?.fillOpacity || 0.3,
+                weight: config?.weight || 2,
+                areaId: area.id
+              });
+              
+              // Делаем полигон перетаскиваемым
+              makePolygonDraggable(polygon);
+              
+              drawnItemsRef.current?.addLayer(polygon);
+            }
+          });
+          
           setAreas(updatedAreas);
         }
       });
