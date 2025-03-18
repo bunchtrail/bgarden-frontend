@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getMapImageUrl, MapData } from '../services/mapService';
@@ -36,6 +36,7 @@ interface LightMapViewProps {
   controlPanelPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
   customSections?: ControlPanelSection[];
   controlPanelMode?: 'light' | 'minimal' | 'geography' | 'custom';
+  children?: ReactNode;
 }
 
 // Компонент облегченной карты
@@ -49,7 +50,8 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
   showControls = false,
   aspectRatio = 'landscape',
   customSections = [],
-  controlPanelMode = 'light'
+  controlPanelMode = 'light',
+  children
 }) => {
   const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
   const { mapConfig, updateMapConfig } = useMapConfig();
@@ -130,6 +132,8 @@ const LightMapViewContent: React.FC<LightMapViewProps> = ({
         />
         
         <MapBoundsHandler imageBounds={imageBounds} />
+        
+        {children}
       </BaseMapContainer>
       
       {showControls && (

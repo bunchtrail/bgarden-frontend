@@ -66,6 +66,17 @@ const PlantMarkersLayer: React.FC<{ isVisible: boolean, mapConfig: MapConfig }> 
     });
   };
 
+  // Функция для очистки всех маркеров и кластеров
+  const clearAllMarkers = () => {
+    if (markerClusterGroup && map) {
+      map.removeLayer(markerClusterGroup);
+      setMarkerClusterGroup(null);
+    }
+    
+    markers.forEach(marker => marker.remove());
+    setMarkers([]);
+  };
+
   useEffect(() => {
     // Загружаем данные растений при монтировании компонента
     const loadPlants = async () => {
@@ -80,21 +91,22 @@ const PlantMarkersLayer: React.FC<{ isVisible: boolean, mapConfig: MapConfig }> 
 
     if (isVisible) {
       loadPlants();
+    } else {
+      // Очищаем маркеры, если слой невидим
+      clearAllMarkers();
     }
   }, [isVisible]);
 
   // Эффект для отрисовки маркеров на карте
   useEffect(() => {
-    if (!isVisible || !map || plants.length === 0) return;
+    if (!isVisible || !map || plants.length === 0) {
+      // Очищаем маркеры, если слой невидим или данные отсутствуют
+      clearAllMarkers();
+      return;
+    }
 
     // Очищаем предыдущие маркеры
-    if (markerClusterGroup) {
-      map.removeLayer(markerClusterGroup);
-      setMarkerClusterGroup(null);
-    }
-    
-    markers.forEach(marker => marker.remove());
-    setMarkers([]);
+    clearAllMarkers();
 
     // Создаем маркеры растений
     const newMarkers: L.Marker[] = [];
@@ -168,15 +180,20 @@ const PlantMarkersLayer: React.FC<{ isVisible: boolean, mapConfig: MapConfig }> 
 
     // Очистка маркеров при размонтировании компонента
     return () => {
-      if (markerClusterGroup) {
-        map.removeLayer(markerClusterGroup);
-      }
-      
-      newMarkers.forEach(marker => {
-        marker.remove();
-      });
+      clearAllMarkers();
     };
   }, [isVisible, map, plants, mapConfig.enableClustering]);
+
+  // Дополнительный эффект для очистки маркеров при изменении видимости
+  useEffect(() => {
+    if (!isVisible) {
+      clearAllMarkers();
+    }
+    
+    return () => {
+      clearAllMarkers();
+    };
+  }, [isVisible]);
 
   return null; // Этот компонент не возвращает видимый React-элемент
 };
@@ -239,9 +256,7 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = memo(({
   });
 
   // Фильтруем регионы по ID, если указаны
-  const displayRegions = selectedRegionIds.length > 0
-    ? regions.filter(region => selectedRegionIds.includes(String(region.id)))
-    : filteredRegions;
+  const displayRegions = filteredRegions; // Всегда показываем все регионы
 
   // Сортируем слои по порядку (если указан)
   const sortedCustomLayers = [...customLayers].sort((a, b) => a.order - b.order);

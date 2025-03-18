@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SpecimenFormData } from '../../../../types';
 import { ExpositionDto } from '../../../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
@@ -6,6 +6,8 @@ import LightMapView from '@/modules/map/components/LightMapView';
 import { MapData } from '@/modules/map/services/mapService';
 import { getActiveMap } from '@/modules/map/services/mapService';
 import { ControlPanelSection } from '@/modules/map/components/control-panel';
+import L from 'leaflet';
+import { useMap, Marker, Popup } from 'react-leaflet';
 
 // Расширяем интерфейс SpecimenFormData для дополнительных полей
 interface ExtendedSpecimenFormData extends SpecimenFormData {
@@ -19,13 +21,75 @@ interface GeographySectionProps {
   expositions: ExpositionDto[];
 }
 
+// Компонент для управления маркером на карте
+const MapMarker: React.FC<{
+  position: [number, number] | null;
+  onPositionChange: (lat: number, lng: number) => void;
+}> = ({ position, onPositionChange }) => {
+  const map = useMap();
+  
+  // Обработчик клика по карте
+  useEffect(() => {
+    if (!map) return;
+    
+    const handleMapClick = (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      onPositionChange(lat, lng);
+    };
+    
+    map.on('click', handleMapClick);
+    
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [map, onPositionChange]);
+  
+  if (!position) return null;
+  
+  // Создаем стилизованный зеленый значок маркера
+  const greenMarkerIcon = L.divIcon({
+    className: 'custom-plant-marker',
+    html: `<div style="
+      width: 16px;
+      height: 16px;
+      background-color: #2D8731;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    "></div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+  
+  return (
+    <Marker 
+      position={position}
+      draggable={true}
+      icon={greenMarkerIcon}
+      eventHandlers={{
+        dragend: (e) => {
+          const marker = e.target;
+          const position = marker.getLatLng();
+          onPositionChange(position.lat, position.lng);
+        }
+      }}
+    >
+      <Popup>
+        Положение растения <br />
+        Перетащите маркер для изменения
+      </Popup>
+    </Marker>
+  );
+};
+
 // Отдельный компонент карты для правильной работы с контекстами
 const RegionMapSelector: React.FC<{
   regions: RegionData[];
   selectedRegionIds: string[];
   onRegionClick: (regionId: string) => void;
-  onCoordinatesChange?: (lat: number, lng: number) => void;
-}> = ({ regions, selectedRegionIds, onRegionClick, onCoordinatesChange }) => {
+  onCoordinatesChange: (lat: number, lng: number) => void;
+  markerPosition: [number, number] | null;
+}> = ({ regions, selectedRegionIds, onRegionClick, onCoordinatesChange, markerPosition }) => {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +121,12 @@ const RegionMapSelector: React.FC<{
         aspectRatio="landscape"
         showControls={true}
         controlPanelMode="geography"
-      />
+      >
+        <MapMarker 
+          position={markerPosition}
+          onPositionChange={onCoordinatesChange}
+        />
+      </LightMapView>
     </div>
   );
 };
@@ -69,6 +138,18 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
   expositions 
 }) => {
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+  
+  // Инициализация маркера, если есть координаты в formData
+  useEffect(() => {
+    if (formData.latitude && formData.longitude) {
+      const lat = parseFloat(formData.latitude.toString());
+      const lng = parseFloat(formData.longitude.toString());
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setMarkerPosition([lat, lng]);
+      }
+    }
+  }, []);
 
   // Обновляем выбранный регион при изменении formData.regionId
   useEffect(() => {
@@ -93,11 +174,23 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
       
       // Приводим к нужному типу через unknown
       onChange(mockEvent as unknown as React.ChangeEvent<HTMLSelectElement>);
+      
+      // Находим центр выбранного региона для установки маркера, если координаты еще не заданы
+      const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
+      if (selectedRegion && (!formData.latitude || !formData.longitude)) {
+        // Преобразуем числовые координаты в строковые для handleCoordinatesChange, т.к. функция ожидает числа
+        const lat = Number(selectedRegion.latitude);
+        const lng = Number(selectedRegion.longitude);
+        handleCoordinatesChange(lat, lng);
+      }
     }
   };
 
   // Обработчик изменения координат
   const handleCoordinatesChange = (lat: number, lng: number) => {
+    // Обновляем положение маркера
+    setMarkerPosition([lat, lng]);
+    
     // Обновляем поля широты и долготы
     onChange({
       target: { name: 'latitude', value: lat.toString() }
@@ -106,6 +199,52 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
     onChange({
       target: { name: 'longitude', value: lng.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
+    // Если точка находится внутри какого-то региона, выбираем этот регион
+    const containingRegion = findRegionContainingPoint(regions, lat, lng);
+    
+    if (containingRegion && containingRegion.id.toString() !== formData.regionId?.toString()) {
+      onChange({
+        target: { name: 'regionId', value: containingRegion.id.toString() }
+      } as unknown as React.ChangeEvent<HTMLSelectElement>);
+    }
+  };
+  
+  // Функция для определения региона, в котором находится точка
+  const findRegionContainingPoint = (regions: RegionData[], lat: number, lng: number): RegionData | undefined => {
+    // Сначала проверяем через polygonCoordinates, если доступно
+    for (const region of regions) {
+      if (region.polygonCoordinates) {
+        try {
+          // Парсим координаты из JSON строки
+          const coordinates = JSON.parse(region.polygonCoordinates);
+          
+          if (Array.isArray(coordinates) && coordinates.length > 0) {
+            // Создаем полигон и проверяем, содержит ли он точку
+            const polygonPoints = coordinates.map((coord: [number, number]) => 
+              L.latLng(coord[0], coord[1])
+            );
+            
+            const polygon = L.polygon(polygonPoints);
+            if (polygon.getBounds().contains(L.latLng(lat, lng))) {
+              return region;
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка при парсинге координат полигона:', error);
+        }
+      }
+      
+      // Простая проверка по радиусу, если нет полигона
+      if (region.radius) {
+        const distance = L.latLng(lat, lng).distanceTo(L.latLng(Number(region.latitude), Number(region.longitude)));
+        if (distance <= region.radius) {
+          return region;
+        }
+      }
+    }
+    
+    return undefined;
   };
 
   // Безопасно получаем строковое представление regionId
@@ -135,9 +274,10 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
               selectedRegionIds={selectedRegionIds}
               onRegionClick={handleRegionClick}
               onCoordinatesChange={handleCoordinatesChange}
+              markerPosition={markerPosition}
             />
             <small className="block mt-2 text-gray-500">
-              Выберите участок сада, нажав на него на карте
+              Выберите участок сада, нажав на него на карте. Для установки точного местоположения растения кликните на карту или перетащите маркер.
             </small>
           </div>
           
