@@ -29,7 +29,7 @@ export { useMap, useMapData, useMapLayers } from './hooks';
 
 // Сервисы
 export { getMapImageUrl, getActiveMap } from './services/mapService';
-export { getAllRegions, convertRegionsToAreas, parseCoordinates } from './services/regionService';
+export { getAllRegions, convertRegionsToAreas, parseCoordinates, updateRegion } from './services/regionService';
 
 // Типы
 export type { MapData } from './services/mapService';

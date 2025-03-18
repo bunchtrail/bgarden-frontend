@@ -105,6 +105,32 @@ export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
   });
 };
 
+// Функция для обновления существующей области (региона) на сервере
+export const updateRegion = async (regionId: string, regionData: Omit<RegionData, 'id' | 'specimensCount'>): Promise<RegionData> => {
+  try {
+    // Проверяем и обрабатываем координаты
+    let processedData = { ...regionData };
+    
+    // Проверка, если polygonCoordinates передан как строка
+    if (typeof processedData.polygonCoordinates !== 'string') {
+      processedData.polygonCoordinates = JSON.stringify(processedData.polygonCoordinates);
+    }
+    
+    // Формируем объект для отправки на сервер (включаем ID для обновления)
+    const updatedRegion = {
+      id: parseInt(regionId), // Преобразуем строковый ID в число
+      ...processedData,
+    };
+    
+    console.log('Отправляем на сервер обновленные данные:', updatedRegion);
+    
+    return await httpClient.put<RegionData>(`/Region/${regionId}`, updatedRegion);
+  } catch (error) {
+    logError('Ошибка при обновлении области:', error);
+    throw error;
+  }
+};
+
 // Функция для преобразования точек области в строку JSON для API
 export const convertPointsToPolygonCoordinates = (points: [number, number][]): string => {
   // В нашем проекте используется нестандартная система координат, 

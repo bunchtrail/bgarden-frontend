@@ -7,12 +7,31 @@ import { useMapConfig, MAP_MODES } from '../../contexts/MapConfigContext';
 import { useMap as useMapContext } from '../../hooks';
 import { Area } from '../../contexts/MapContext';
 import { COLORS } from '../../../../styles/global-styles';
-import { createRegion, convertPointsToPolygonCoordinates } from '../../services/regionService';
+import { createRegion, updateRegion, convertPointsToPolygonCoordinates } from '../../services/regionService';
 import { logError } from '@/utils/logger';
 import { RegionData, SectorType } from '../../types/mapTypes';
 import { Button } from '../../../../modules/ui';
 import Modal from '../../../../modules/ui/components/Modal';
 import { TextField } from '../../../../modules/ui/components/Form';
+
+// Дополняем типы Leaflet для устаревшего метода _flat
+declare module 'leaflet' {
+  namespace LineUtil {
+    // Объявляем устаревший метод _flat
+    const _flat: (latlngs: any) => boolean;
+    // isFlat уже должен быть объявлен в типах
+  }
+}
+
+// Исправляем устаревшее использование _flat
+// Это решит проблему "Deprecated use of _flat, please use L.LineUtil.isFlat instead."
+if (typeof L.LineUtil !== 'undefined') {
+  if (!L.LineUtil.isFlat && L.LineUtil._flat) {
+    L.LineUtil.isFlat = function(latlngs) {
+      return L.LineUtil._flat(latlngs);
+    };
+  }
+}
 
 // Дополняем типы Leaflet
 declare module 'leaflet' {
@@ -31,6 +50,18 @@ declare module 'leaflet' {
   }
   interface PolylineOptions {
     areaId?: string;
+  }
+  interface Polygon {
+    editing?: {
+      enable: () => void;
+      disable: () => void;
+    };
+  }
+  interface Rectangle {
+    editing?: {
+      enable: () => void;
+      disable: () => void;
+    };
   }
 }
 
@@ -60,8 +91,10 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   
   // Состояние для модального окна
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newAreaName, setNewAreaName] = useState('');
   const [newAreaDescription, setNewAreaDescription] = useState('');
+  const [editingAreaId, setEditingAreaId] = useState<string | null>(null);
   const [tempAreaData, setTempAreaData] = useState<{
     newAreaId: string;
     layer: L.Layer;
@@ -120,33 +153,83 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       sectorType: SectorType.UNDEFINED
     };
     
-    createRegion(regionData).then(response => {
-      // Сохраняем новый ID, который мы получили от сервера
-      const newRegionId = `region-${response.id}`;
+    // Проверяем, редактируем ли мы существующую область или создаем новую
+    const isEditingExistingRegion = areaId.startsWith('region-');
+    
+    if (isEditingExistingRegion) {
+      // Получаем ID региона из ID области (убираем префикс 'region-')
+      const regionId = areaId.replace('region-', '');
       
-      // Обновляем ID области в локальном хранилище
-      const updatedAreas = areasRef.current.map(area => 
-        area.id === areaId 
-          ? { ...area, id: newRegionId }
-          : area
-      );
-      
-      // Важно: также обновляем ID в слое на карте
-      if (drawnItemsRef.current) {
-        drawnItemsRef.current.eachLayer((layer: any) => {
-          if (layer.options?.areaId === areaId) {
-            // Обновляем ID в опциях слоя
-            layer.options.areaId = newRegionId;
-          }
-        });
-      }
-      
-      // Обновляем состояние
-      setAreas(updatedAreas);
-    }).catch(error => {
-      logError('Ошибка при сохранении области:', error);
-    });
+      // Обновляем существующий регион
+      updateRegion(regionId, regionData).then(() => {
+        // Обновляем область в локальном хранилище
+        const updatedAreas = areasRef.current.map(area => 
+          area.id === areaId 
+            ? { ...area, name: areaName, description: areaDescription, points }
+            : area
+        );
+        
+        setAreas(updatedAreas);
+      }).catch((error: any) => {
+        logError('Ошибка при обновлении области:', error);
+      });
+    } else {
+      // Создаем новый регион
+      createRegion(regionData).then(response => {
+        // Сохраняем новый ID, который мы получили от сервера
+        const newRegionId = `region-${response.id}`;
+        
+        // Обновляем ID области в локальном хранилище
+        const updatedAreas = areasRef.current.map(area => 
+          area.id === areaId 
+            ? { ...area, id: newRegionId }
+            : area
+        );
+        
+        // Важно: также обновляем ID в слое на карте
+        if (drawnItemsRef.current) {
+          drawnItemsRef.current.eachLayer((layer: any) => {
+            if (layer.options?.areaId === areaId) {
+              // Обновляем ID в опциях слоя
+              layer.options.areaId = newRegionId;
+            }
+          });
+        }
+        
+        // Обновляем состояние
+        setAreas(updatedAreas);
+      }).catch(error => {
+        logError('Ошибка при сохранении области:', error);
+      });
+    }
   }, [calculatePolygonCenter, config, setAreas]);
+
+  // Функция для добавления возможности перетаскивания полигона
+  const makePolygonDraggable = useCallback((polygon: L.Polygon | L.Rectangle) => {
+    polygon.on('click', function(e: any) {
+      if (isEditMode) {
+        // Предотвращаем распространение события
+        L.DomEvent.stop(e);
+        
+        // Активируем режим редактирования области
+        try {
+          // Используем безопасный подход с проверкой существования свойства
+          const editableLayer = polygon as any;
+          if (editableLayer.editing && typeof editableLayer.editing.enable === 'function') {
+            editableLayer.editing.enable();
+            
+            // Показываем информацию пользователю только один раз
+            if (!localStorage.getItem('drag_polygon_hint_shown')) {
+              alert('Для перемещения всей области целиком: \n1. Удерживайте клавишу Ctrl (или Command на Mac) \n2. Нажмите на любую точку области и перетащите её');
+              localStorage.setItem('drag_polygon_hint_shown', 'true');
+            }
+          }
+        } catch (err) {
+          console.error('Ошибка при включении режима редактирования:', err);
+        }
+      }
+    });
+  }, [isEditMode]);
 
   // Создаем группу для хранения нарисованных объектов при первом рендере
   useEffect(() => {
@@ -187,7 +270,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
         edit: {
           featureGroup: drawnItemsRef.current,
           remove: true,
-          edit: false
+          edit: {}
         }
       });
 
@@ -205,6 +288,12 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
           
           // Добавляем слой в группу нарисованных объектов
           drawnItemsRef.current.addLayer(layer);
+          
+          // Добавляем возможность перетаскивать полигон
+          if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+            // Делаем полигон перетаскиваемым
+            makePolygonDraggable(layer);
+          }
           
           // Подготавливаем данные для новой области
           let points: [number, number][] = [];
@@ -248,12 +337,26 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
               const areaIndex = updatedAreas.findIndex(area => area.id === areaId);
               
               if (areaIndex !== -1) {
+                // Обновляем координаты
+                const newPoints = coords.map((coord: any) => 
+                  [coord.lat, coord.lng] as [number, number]
+                );
+                
                 updatedAreas[areaIndex] = {
                   ...updatedAreas[areaIndex],
-                  points: coords.map((coord: any) => 
-                    [coord.lat, coord.lng] as [number, number]
-                  )
+                  points: newPoints
                 };
+                
+                // Если область имеет ID региона (начинается с 'region-'), сохраняем изменения на сервере
+                if (areaId.startsWith('region-')) {
+                  saveAreaToServer(
+                    areaId,
+                    updatedAreas[areaIndex].name,
+                    updatedAreas[areaIndex].description || '',
+                    newPoints
+                  );
+                }
+                
                 hasChanges = true;
               }
             }
@@ -281,6 +384,22 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
         }
       });
       
+      // Добавляем слушатель событий для клика по полигонам (для редактирования свойств)
+      drawnItemsRef.current.on('click', (event: any) => {
+        if (isEditMode && event.layer && event.layer.options && event.layer.options.areaId) {
+          const clickedAreaId = event.layer.options.areaId;
+          const area = areasRef.current.find(a => a.id === clickedAreaId);
+          
+          if (area) {
+            // Открываем модальное окно для редактирования свойств области
+            setEditingAreaId(clickedAreaId);
+            setNewAreaName(area.name);
+            setNewAreaDescription(area.description || '');
+            setIsEditModalOpen(true);
+          }
+        }
+      });
+      
       initializedRef.current = true;
     }
 
@@ -301,6 +420,10 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
             weight: config?.weight || 2,
             areaId: area.id // Сохраняем ID области для редактирования
           });
+          
+          // Делаем полигон перетаскиваемым
+          makePolygonDraggable(polygon);
+          
           drawnItemsRef.current?.addLayer(polygon);
         }
       });
@@ -312,7 +435,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       map.off(L.Draw.Event.EDITED);
       map.off(L.Draw.Event.DELETED);
     };
-  }, [map, isVisible, config, calculatePolygonCenter, areas, saveAreaToServer]);
+  }, [map, isVisible, config, calculatePolygonCenter, areas, saveAreaToServer, isEditMode, makePolygonDraggable]);
 
   // Обновляем слои при изменении областей - синхронизация состояния
   useEffect(() => {
@@ -331,10 +454,14 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
           weight: config?.weight || 2,
           areaId: area.id
         });
+        
+        // Делаем полигон перетаскиваемым
+        makePolygonDraggable(polygon);
+        
         drawnItemsRef.current?.addLayer(polygon);
       }
     });
-  }, [areas, isVisible, config]);
+  }, [areas, isVisible, config, isEditMode, makePolygonDraggable]);
 
   // Управление видимостью controls в зависимости от режима
   useEffect(() => {
@@ -399,6 +526,45 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
     setTempAreaData(null);
   };
 
+  // Обработчик сохранения изменений области
+  const handleSaveAreaEdit = () => {
+    if (!editingAreaId) return;
+    
+    // Находим область в текущем списке
+    const areaIndex = areasRef.current.findIndex(area => area.id === editingAreaId);
+    
+    if (areaIndex !== -1) {
+      const area = areasRef.current[areaIndex];
+      
+      // Обновляем свойства области
+      const updatedArea: Area = {
+        ...area,
+        name: newAreaName || area.name,
+        description: newAreaDescription
+      };
+      
+      // Обновляем массив областей
+      const updatedAreas = [...areasRef.current];
+      updatedAreas[areaIndex] = updatedArea;
+      setAreas(updatedAreas);
+      
+      // Сохраняем изменения на сервере, если это существующий регион
+      if (editingAreaId.startsWith('region-')) {
+        saveAreaToServer(editingAreaId, updatedArea.name, updatedArea.description || '', updatedArea.points);
+      }
+    }
+    
+    // Закрываем модальное окно и очищаем состояние
+    setIsEditModalOpen(false);
+    setEditingAreaId(null);
+  };
+
+  // Обработчик отмены редактирования области
+  const handleCancelAreaEdit = () => {
+    setIsEditModalOpen(false);
+    setEditingAreaId(null);
+  };
+
   return (
     <>
       <Modal
@@ -411,6 +577,43 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
               Отмена
             </Button>
             <Button onClick={handleSaveAreaName}>
+              Сохранить
+            </Button>
+          </div>
+        }
+        size="small"
+        animation="fade"
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        className="z-[9999]"
+      >
+        <div className="space-y-4">
+          <TextField
+            label="Название области"
+            value={newAreaName}
+            onChange={(e) => setNewAreaName(e.target.value)}
+            fullWidth
+            autoFocus
+          />
+          <TextField
+            label="Описание (необязательно)"
+            value={newAreaDescription}
+            onChange={(e) => setNewAreaDescription(e.target.value)}
+            fullWidth
+          />
+        </div>
+      </Modal>
+      
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={handleCancelAreaEdit}
+        title="Редактирование области"
+        footer={
+          <div className="flex justify-end space-x-3">
+            <Button variant="neutral" onClick={handleCancelAreaEdit}>
+              Отмена
+            </Button>
+            <Button onClick={handleSaveAreaEdit}>
               Сохранить
             </Button>
           </div>
