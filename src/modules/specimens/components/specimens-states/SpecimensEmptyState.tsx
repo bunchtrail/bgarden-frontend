@@ -40,6 +40,11 @@ const SpecimensEmptyState: React.FC<SpecimensEmptyStateProps> = ({
     navigate('/specimens/new');
   };
 
+  // Обработчик изменения сектора
+  const handleSectorChange = (sectorType: SectorType) => {
+    navigate(`/specimens?sectorType=${sectorType}`);
+  };
+
   // Проверяем, пустая ли база данных (нет ни запроса поиска, ни фильтра сектора)
   const isEmptyDatabase = !searchQuery && activeSectorType === null;
 
@@ -52,7 +57,8 @@ const SpecimensEmptyState: React.FC<SpecimensEmptyStateProps> = ({
       <p className={`mt-2 ${textClasses.secondary} max-w-md mx-auto`}>
         {getMessage()}
       </p>
-      <div className="mt-8 space-x-4">
+      
+      <div className="mt-8 space-y-4">
         {searchQuery && (
           <Button 
             variant="primary"
@@ -62,15 +68,39 @@ const SpecimensEmptyState: React.FC<SpecimensEmptyStateProps> = ({
             Сбросить поиск
           </Button>
         )}
+        
         {activeSectorType !== null && (
-          <Button 
-            variant="neutral"
-            onClick={onResetSectorFilter}
-            className={animationClasses.transition}
-          >
-            Сбросить фильтр сектора
-          </Button>
+          <div className="inline-flex flex-wrap justify-center items-center gap-2 max-w-lg mx-auto">
+            <div className={`${textClasses.body} ${textClasses.secondary}`}>
+              Попробуйте другой сектор:
+            </div>
+            {Object.values(SectorType)
+              .filter(value => typeof value === 'number' && value !== activeSectorType)
+              .map(sectorType => (
+                <button
+                  key={sectorType}
+                  className={`${buttonClasses.base} ${buttonClasses.neutral} py-1 px-3 text-xs ${animationClasses.transition}`}
+                  onClick={() => handleSectorChange(sectorType as SectorType)}
+                >
+                  {getSectorTypeName(sectorType as SectorType)}
+                </button>
+              ))}
+            <Button 
+              variant="neutral"
+              size="small"
+              onClick={onResetSectorFilter}
+              className={`text-xs ${animationClasses.transition}`}
+            >
+              <span className="flex items-center">
+                <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Сбросить 
+              </span>
+            </Button>
+          </div>
         )}
+        
         {isEmptyDatabase && (
           <Button 
             variant="primary"

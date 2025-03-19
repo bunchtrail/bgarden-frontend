@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { textClasses, buttonClasses, animationClasses, COLORS } from '../../../../styles/global-styles';
 
 export interface SelectOption {
   value: string | number;
@@ -36,23 +37,23 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    // Базовые стили для выпадающего списка
-    const baseSelectStyles = 'block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200';
+    // Базовые стили для выпадающего списка, используя глобальные стили
+    const baseSelectStyles = `block w-full py-2 px-4 rounded-lg ${animationClasses.transition} focus:outline-none focus:ring-2`;
     
     // Стили в зависимости от состояния (ошибка, отключено)
     const selectStateStyles = error
-      ? 'border-red-500 focus:ring-red-200 text-red-900'
+      ? `border-${COLORS.danger.main} focus:ring-${COLORS.danger.light} text-${COLORS.danger.dark}`
       : disabled
       ? 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed'
-      : 'border-gray-300 focus:ring-blue-200 focus:border-blue-500';
+      : `border border-[#E5E5EA] focus:ring-${COLORS.primary.light} focus:border-${COLORS.primary.main}`;
     
     // Стили контейнера
-    const containerStyles = `${fullWidth ? 'w-full' : ''} mb-4`;
+    const containerStyles = `${fullWidth ? 'w-full' : ''} mb-4 ${className}`;
     
     return (
-      <div className={`${containerStyles} ${className}`}>
+      <div className={containerStyles}>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className={`block ${textClasses.body} ${textClasses.primary} font-medium mb-1`}>
             {label}
           </label>
         )}
@@ -77,6 +78,24 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
+          {!endIcon && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M19 9l-7 7-7-7" 
+                />
+              </svg>
+            </div>
+          )}
           {endIcon && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
               {endIcon}
@@ -84,7 +103,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           )}
         </div>
         {(helperText || error) && (
-          <p className={`mt-1 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}>
+          <p className={`mt-1 ${textClasses.small} ${error ? `text-${COLORS.danger.main}` : textClasses.secondary}`}>
             {error || helperText}
           </p>
         )}

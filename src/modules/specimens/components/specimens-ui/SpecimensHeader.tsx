@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SectorType } from '../../types';
 import Button from '../../../ui/components/Button';
-import { cardClasses, buttonClasses, animationClasses, textClasses } from '../../../../styles/global-styles';
+import { cardClasses, buttonClasses, animationClasses, textClasses, chipClasses } from '../../../../styles/global-styles';
 
 interface SpecimensHeaderProps {
   activeSectorType: SectorType | null;
@@ -24,26 +24,51 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Обработчик смены сектора
+  const handleSectorChange = (sectorType: SectorType) => {
+    navigate(`/specimens?sectorType=${sectorType}`);
+  };
+
   return (
     <div className={`${cardClasses.outlined} rounded-xl p-6 bg-white mb-8`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className={`${textClasses.heading} text-3xl tracking-tight`}>Образцы растений</h1>
-          {activeSectorType !== null && (
-            <div className="flex items-center mt-2">
-              <span className="text-sm bg-[#E1F0FF] text-[#0A84FF] py-1 px-3 rounded-full font-medium shadow-sm">
-                Сектор: {getSectorTypeName(activeSectorType)}
-              </span>
-              <Button 
-                variant="neutral" 
-                size="small" 
-                className="ml-2 text-xs hover:bg-gray-200 transition-colors duration-200"
-                onClick={handleResetSectorFilter}
-              >
-                Сбросить фильтр
-              </Button>
+          <div className="mt-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <span className={`${textClasses.body} ${textClasses.secondary} pr-1 mb-1 sm:mb-0`}>Сектор:</span>
+              <div className="flex flex-wrap gap-2">
+                {Object.values(SectorType)
+                  .filter(value => typeof value === 'number')
+                  .map(sectorType => (
+                    <button
+                      key={sectorType}
+                      className={`${buttonClasses.base} ${animationClasses.transition} ${
+                        activeSectorType === sectorType 
+                          ? `${chipClasses.primary} font-medium shadow-sm` 
+                          : `${buttonClasses.neutral} text-xs`
+                      }`}
+                      onClick={() => handleSectorChange(sectorType as SectorType)}
+                    >
+                      {getSectorTypeName(sectorType as SectorType)}
+                    </button>
+                  ))}
+                {activeSectorType !== null && (
+                  <Button 
+                    variant="neutral" 
+                    size="small" 
+                    className={`ml-1 text-xs ${animationClasses.transition} flex items-center h-[34px]`}
+                    onClick={handleResetSectorFilter}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Сбросить
+                  </Button>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
         <div className="flex space-x-3">
           <Button 
