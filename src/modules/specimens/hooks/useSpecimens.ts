@@ -1,233 +1,199 @@
-import { useEffect, useState } from 'react';
-import { specimenService } from '../services';
-import { SectorType, Specimen } from '../types';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { specimenService } from '../services/specimenService';
+import { Specimen, SpecimenFilterParams, SectorType } from '../types';
 
-interface UseSpecimensProps {
-  sectorType: SectorType;
-  onError?: (error: Error) => void;
-}
-
-interface UseSpecimensResult {
-  specimens: Specimen[];
-  filteredSpecimens: Specimen[];
-  setFilteredSpecimens: React.Dispatch<React.SetStateAction<Specimen[]>>;
-  currentSpecimen: Specimen | null;
-  setCurrentSpecimen: React.Dispatch<React.SetStateAction<Specimen | null>>;
-  currentIndex: number;
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
-  isLoading: boolean;
-  error: string | null;
-  
-  // Действия с образцами
-  createSpecimen: (data: Omit<Specimen, 'id'>) => Promise<Specimen>;
-  updateSpecimen: (id: number, data: Specimen) => Promise<Specimen>;
-  deleteSpecimen: (id: number) => Promise<boolean>;
-  
-  // Навигация по образцам
-  navigateToFirst: () => void;
-  navigateToLast: () => void;
-  navigateToPrev: () => void;
-  navigateToNext: () => void;
-  navigateToIndex: (index: number) => void;
-}
-
-export const useSpecimens = ({ sectorType, onError }: UseSpecimensProps): UseSpecimensResult => {
-  // Состояние данных
+/**
+ * Хук для работы со списком образцов растений
+ */
+export const useSpecimens = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [specimens, setSpecimens] = useState<Specimen[]>([]);
-  const [filteredSpecimens, setFilteredSpecimens] = useState<Specimen[]>([]);
-  const [currentSpecimen, setCurrentSpecimen] = useState<Specimen | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<SpecimenFilterParams>({});
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeSectorType, setActiveSectorType] = useState<SectorType | null>(null);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<keyof Specimen>('russianName');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Загрузка образцов при изменении сектора
+  // Получение параметров фильтрации из URL
   useEffect(() => {
-    loadSpecimens();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectorType]);
+    const params = new URLSearchParams(location.search);
+    const sectorTypeParam = params.get('sectorType');
+    
+    if (sectorTypeParam) {
+      const sectorType = Number(sectorTypeParam) as SectorType;
+      setActiveSectorType(sectorType);
+      setFilters(prev => ({ ...prev, sectorType }));
+    }
+  }, [location.search]);
 
-  // Установка текущего образца при изменении индекса или списка образцов
+  // Функция для отображения типа сектора в виде текста
+  const getSectorTypeName = (sectorType: SectorType): string => {
+    switch (sectorType) {
+      case SectorType.Dendrology:
+        return 'Дендрология';
+      case SectorType.Flora:
+        return 'Флора';
+      case SectorType.Flowering:
+        return 'Цветоводство';
+      default:
+        return 'Все секторы';
+    }
+  };
+
+  // Загрузка списка образцов
   useEffect(() => {
-    if (filteredSpecimens.length > 0 && currentIndex >= 0 && currentIndex < filteredSpecimens.length) {
-      setCurrentSpecimen(filteredSpecimens[currentIndex]);
-    } else {
-      setCurrentSpecimen(null);
-    }
-  }, [filteredSpecimens, currentIndex]);
+    const fetchSpecimens = async () => {
+      try {
+        setLoading(true);
+        let data: Specimen[] = [];
 
-  // Загрузка образцов с сервера
-  const loadSpecimens = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const data = await specimenService.getSpecimensBySectorType(sectorType);
-      setSpecimens(data);
-      setFilteredSpecimens(data);
-      
-      // Сбрасываем текущий индекс и устанавливаем первый образец как текущий
-      if (data.length > 0) {
-        setCurrentIndex(0);
-        setCurrentSpecimen(data[0]);
-      } else {
-        setCurrentSpecimen(null);
-      }
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка загрузки образцов';
-      setError(errorMessage);
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Создание нового образца
-  const createSpecimen = async (data: Omit<Specimen, 'id'>): Promise<Specimen> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const savedSpecimen = await specimenService.createSpecimen(data);
-      
-      // Обновляем список образцов
-      setSpecimens(prev => [...prev, savedSpecimen]);
-      setFilteredSpecimens(prev => [...prev, savedSpecimen]);
-      
-      // Устанавливаем новый образец как текущий
-      setCurrentIndex(filteredSpecimens.length);
-      setCurrentSpecimen(savedSpecimen);
-      
-      return savedSpecimen;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка создания образца';
-      setError(errorMessage);
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Обновление существующего образца
-  const updateSpecimen = async (id: number, data: Specimen): Promise<Specimen> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const updatedSpecimen = await specimenService.updateSpecimen(id, data);
-      
-      // Обновляем списки образцов
-      setSpecimens(prev => prev.map(s => s.id === id ? updatedSpecimen : s));
-      setFilteredSpecimens(prev => prev.map(s => s.id === id ? updatedSpecimen : s));
-      
-      // Обновляем текущий образец, если это он
-      if (currentSpecimen?.id === id) {
-        setCurrentSpecimen(updatedSpecimen);
-      }
-      
-      return updatedSpecimen;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка обновления образца';
-      setError(errorMessage);
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Удаление образца
-  const deleteSpecimen = async (id: number): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const success = await specimenService.deleteSpecimen(id);
-      
-      if (success) {
-        // Удаляем образец из списков
-        const updatedSpecimens = specimens.filter(s => s.id !== id);
-        const updatedFiltered = filteredSpecimens.filter(s => s.id !== id);
-        
-        setSpecimens(updatedSpecimens);
-        setFilteredSpecimens(updatedFiltered);
-        
-        // Корректируем текущий индекс
-        if (updatedFiltered.length === 0) {
-          setCurrentIndex(-1);
-          setCurrentSpecimen(null);
-        } else if (currentIndex >= updatedFiltered.length) {
-          setCurrentIndex(updatedFiltered.length - 1);
-          setCurrentSpecimen(updatedFiltered[updatedFiltered.length - 1]);
+        // Если указан тип сектора, то загружаем только образцы этого сектора
+        if (filters.sectorType !== undefined) {
+          console.log(`Загрузка образцов для сектора типа: ${filters.sectorType}`);
+          data = await specimenService.getSpecimensBySectorType(filters.sectorType);
+        } else {
+          // Загружаем все образцы
+          console.log('Загрузка всех образцов');
+          data = await specimenService.getAllSpecimens();
         }
+        
+        // Обеспечиваем, что data всегда массив
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+        
+        setSpecimens(data);
+        setError(null); // Сбрасываем ошибку, если она была
+      } catch (err) {
+        console.error('Ошибка при загрузке списка образцов:', err);
+        // Проверяем, не 404 ли это ошибка (отсутствие данных)
+        if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
+          // Для 404 ошибки мы просто устанавливаем пустой массив без ошибки
+          setSpecimens([]);
+          setError(null);
+        } else {
+          setError('Не удалось загрузить список образцов');
+          setSpecimens([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpecimens();
+  }, [filters.sectorType]);
+
+  // Обработчик удаления образца
+  const handleDelete = async (id: number) => {
+    try {
+      setLoading(true);
+      await specimenService.deleteSpecimen(id);
+      // Обновляем локальный список без перезагрузки с сервера
+      setSpecimens(specimens.filter(specimen => specimen.id !== id));
+    } catch (err) {
+      setError('Ошибка при удалении образца');
+      console.error('Ошибка при удалении образца:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Сброс фильтра по типу сектора
+  const handleResetSectorFilter = () => {
+    setActiveSectorType(null);
+    setFilters(prev => {
+      const { sectorType, ...rest } = prev;
+      return rest;
+    });
+    
+    // Удаляем параметр из URL без перезагрузки страницы
+    const params = new URLSearchParams(location.search);
+    params.delete('sectorType');
+    navigate({ search: params.toString() }, { replace: true });
+  };
+
+  // Переключение вида отображения (сетка/список)
+  const toggleView = () => {
+    setView(prev => prev === 'grid' ? 'list' : 'grid');
+  };
+
+  // Сортировка образцов
+  const handleSort = (key: keyof Specimen) => {
+    if (sortBy === key) {
+      // Если уже сортируем по этому полю, меняем порядок
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Иначе устанавливаем новое поле и сортируем по возрастанию
+      setSortBy(key);
+      setSortOrder('asc');
+    }
+  };
+
+  // Фильтрация и сортировка образцов
+  const sortedAndFilteredSpecimens = useMemo(() => {
+    // Фильтрация образцов на основе searchQuery
+    const filtered = specimens.filter(specimen => {
+      if (!searchQuery) return true;
+      
+      const query = searchQuery.toLowerCase();
+      return (
+        (specimen.russianName?.toLowerCase().includes(query) || false) ||
+        (specimen.latinName?.toLowerCase().includes(query) || false) ||
+        (specimen.inventoryNumber?.toLowerCase().includes(query) || false) ||
+        (specimen.familyName?.toLowerCase().includes(query) || false)
+      );
+    });
+
+    // Сортировка образцов
+    return [...filtered].sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (aValue === bValue) return 0;
+      
+      // Сортировка строк
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortOrder === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
       }
       
-      return success;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка удаления образца';
-      setError(errorMessage);
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      // Сортировка чисел
+      return sortOrder === 'asc'
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    });
+  }, [specimens, searchQuery, sortBy, sortOrder]);
 
-  // Функции навигации по списку образцов
-  const navigateToFirst = () => {
-    if (filteredSpecimens.length > 0) {
-      setCurrentIndex(0);
-    }
-  };
-
-  const navigateToLast = () => {
-    if (filteredSpecimens.length > 0) {
-      setCurrentIndex(filteredSpecimens.length - 1);
-    }
-  };
-
-  const navigateToPrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const navigateToNext = () => {
-    if (currentIndex < filteredSpecimens.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const navigateToIndex = (index: number) => {
-    if (index >= 0 && index < filteredSpecimens.length) {
-      setCurrentIndex(index);
-    }
+  // Получение символа для сортировки
+  const getSortIcon = (key: keyof Specimen): string => {
+    if (sortBy !== key) return '';
+    return sortOrder === 'asc' ? '▲' : '▼';
   };
 
   return {
     specimens,
-    filteredSpecimens,
-    setFilteredSpecimens,
-    currentSpecimen,
-    setCurrentSpecimen,
-    currentIndex,
-    setCurrentIndex,
-    isLoading,
+    loading,
     error,
-    
-    // Действия с образцами
-    createSpecimen,
-    updateSpecimen,
-    deleteSpecimen,
-    
-    // Навигация
-    navigateToFirst,
-    navigateToLast,
-    navigateToPrev,
-    navigateToNext,
-    navigateToIndex
+    filters,
+    searchQuery,
+    setSearchQuery,
+    activeSectorType,
+    setActiveSectorType,
+    view,
+    sortBy,
+    sortOrder,
+    sortedAndFilteredSpecimens,
+    getSectorTypeName,
+    handleDelete,
+    handleResetSectorFilter,
+    toggleView,
+    handleSort,
+    getSortIcon
   };
 }; 

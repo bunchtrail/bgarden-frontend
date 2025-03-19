@@ -1,7 +1,8 @@
 // Сервис взаимодействия с API карты 
 // Форма добавления растения 
 
-import { getApiUrl, getResourceUrl } from '../../../config/apiConfig';
+import httpClient from '@/services/httpClient';
+import { logError } from '@/utils/logger';
 
 export interface MapData {
   id: number;
@@ -19,13 +20,9 @@ export interface MapData {
 // Функция для получения активной карты
 export const getActiveMap = async (): Promise<MapData[]> => {
   try {
-    const response = await fetch(getApiUrl('/api/Map/active'));
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    return await httpClient.get<MapData[]>('/Map/active');
   } catch (error) {
-    console.error('Ошибка при получении активной карты:', error);
+    logError('Ошибка при получении активной карты:', error);
     throw error;
   }
 };
@@ -33,5 +30,11 @@ export const getActiveMap = async (): Promise<MapData[]> => {
 // Функция для получения полного URL изображения карты
 export const getMapImageUrl = (mapData: MapData | null): string | null => {
   if (!mapData || !mapData.filePath) return null;
-  return getResourceUrl(mapData.filePath);
+  
+  // Используем константу API из httpClient, но без /api в конце пути
+  const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:7254').replace(/\/api\/?$/, '');
+  
+  // Если путь начинается с /, то просто добавляем baseUrl
+  // В противном случае добавляем / между baseUrl и filePath
+  return `${baseUrl}${mapData.filePath.startsWith('/') ? '' : '/'}${mapData.filePath}`;
 };

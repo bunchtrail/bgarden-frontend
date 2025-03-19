@@ -1,20 +1,24 @@
+import { ReactNode } from 'react';
+
 export interface NavItem {
   id: string;
   label: string;
   path: string;
-  requiredAuth?: boolean;
-  roles?: string[];
-  icon?: React.ReactNode;
-  children?: NavItem[];
-  isActive?: (pathname: string) => boolean;
+  icon?: ReactNode;
+  order?: number;
+  requireAuth?: boolean;
   dropdownItems?: NavItem[];
+  hideMobile?: boolean;
+  hideDesktop?: boolean;
+}
+
+export interface NavLogo {
+  title: string;
+  path: string;
+  imageSrc: string;
 }
 
 export interface NavConfig {
+  logo: NavLogo;
   items: NavItem[];
-  logo: {
-    path: string;
-    title: string;
-    imageSrc: string;
-  };
 } 

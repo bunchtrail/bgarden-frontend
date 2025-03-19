@@ -75,12 +75,18 @@ export interface ErrorResponse {
 export interface TokenDto {
     accessToken: string;
     refreshToken: string;
-    expiresIn: number;
-    userId: number;
+    expiration: string;
+    tokenType: string;
     username: string;
+    requiresTwoFactor: boolean;
 }
 
 export interface RefreshTokenDto {
     token: string;
     IpAddress?: string;
+}
+
+export interface TwoFactorAuthDto {
+    requiresTwoFactor: boolean;
+    username: string;
 } 

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import httpClient from '../../../services/httpClient';
 
 // Интерфейс для объекта данных биометрии
 export interface BiometryDto {
@@ -11,64 +11,37 @@ export interface BiometryDto {
   notes?: string;
 }
 
-// Используем тот же базовый URL, что и в других сервисах
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254';
-
-// Создаем экземпляр axios с базовыми настройками
-const api: AxiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/plain'
-    },
-    withCredentials: true,
-});
-
-// Добавляем перехватчик запросов для добавления токена авторизации
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
 // Класс для работы с API биометрии растений
 class BiometryService {
     // Получить все биометрические данные
     async getAllBiometryRecords(): Promise<BiometryDto[]> {
-        const response = await api.get<BiometryDto[]>('/api/Biometry');
-        return response.data;
+        return httpClient.get<BiometryDto[]>('Biometry');
     }
 
     // Получить биометрию по ID
     async getBiometryById(id: number): Promise<BiometryDto> {
-        const response = await api.get<BiometryDto>(`/api/Biometry/${id}`);
-        return response.data;
+        return httpClient.get<BiometryDto>(`Biometry/${id}`);
     }
 
     // Получить биометрические данные для образца
     async getBiometryForSpecimen(specimenId: number): Promise<BiometryDto[]> {
-        const response = await api.get<BiometryDto[]>(`/api/Biometry/specimen/${specimenId}`);
-        return response.data;
+        return httpClient.get<BiometryDto[]>(`Biometry/specimen/${specimenId}`);
     }
 
     // Создать новую биометрическую запись
     async createBiometry(biometry: Omit<BiometryDto, 'id'>): Promise<BiometryDto> {
-        const response = await api.post<BiometryDto>('/api/Biometry', biometry);
-        return response.data;
+        return httpClient.post<BiometryDto>('Biometry', biometry);
     }
 
     // Обновить биометрическую запись
     async updateBiometry(id: number, biometry: BiometryDto): Promise<BiometryDto> {
-        const response = await api.put<BiometryDto>(`/api/Biometry/${id}`, biometry);
-        return response.data;
+        return httpClient.put<BiometryDto>(`Biometry/${id}`, biometry);
     }
 
     // Удалить биометрическую запись
     async deleteBiometry(id: number): Promise<boolean> {
-        const response = await api.delete(`/api/Biometry/${id}`);
-        return response.status === 200;
+        await httpClient.delete(`Biometry/${id}`);
+        return true;
     }
 }
 

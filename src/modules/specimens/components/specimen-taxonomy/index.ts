@@ -1,1 +1,0 @@
-export { SpecimenTaxonomy } from './SpecimenTaxonomy'; 

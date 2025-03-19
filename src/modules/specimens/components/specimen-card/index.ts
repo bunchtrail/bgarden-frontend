@@ -1,1 +1,0 @@
-export { SpecimenCard } from './SpecimenCard';

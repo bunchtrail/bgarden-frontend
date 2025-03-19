@@ -1,5 +1,14 @@
-import axios, { AxiosInstance } from 'axios';
-import { Specimen } from '../types';
+import httpClient from '@/services/httpClient';
+import { logError, logWarning } from '@/utils/logger';
+import { RegionData } from '@/modules/map/types/mapTypes';
+
+// Интерфейс для образца растения
+interface Specimen {
+  id: number;
+  name: string;
+  latinName?: string;
+  // другие поля добавляются по мере необходимости
+}
 
 // Интерфейс для объекта данных региона
 export interface RegionDto {
@@ -9,110 +18,119 @@ export interface RegionDto {
   climate?: string;
 }
 
-// Используем тот же базовый URL, что и в других сервисах
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7254';
+// Сервис для работы с регионами в контексте образцов
+// Адаптирован на основе сервиса регионов из модуля карты
 
-// Создаем экземпляр axios с базовыми настройками
-const api: AxiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/plain'
-    },
-    withCredentials: true,
-});
-
-// Добавляем перехватчик запросов для добавления токена авторизации
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
-// Класс для работы с API регионов
-class RegionService {
-    // Получить все регионы
-    async getAllRegions(): Promise<RegionDto[]> {
-        try {
-            const response = await api.get<RegionDto[]>('/api/Region');
-            
-            // Если API вернул пустой список или произошла ошибка, используем временные данные
-            if (!response.data || response.data.length === 0) {
-                console.log('API вернул пустой список регионов, используем временные данные');
-                return this.getDefaultRegions();
-            }
-            
-            return response.data;
-        } catch (error) {
-            console.error('Ошибка при получении списка регионов:', error);
-            // В случае ошибки также возвращаем временные данные
-            return this.getDefaultRegions();
-        }
+// Функция для получения всех регионов
+export const getAllRegions = async (): Promise<RegionData[]> => {
+  try {
+    const regions = await httpClient.get<RegionData[]>('Region');
+    
+    // Если API вернул пустой список или произошла ошибка, используем временные данные
+    if (!regions || regions.length === 0) {
+      logWarning('API вернул пустой список регионов, используем временные данные');
+      return getDefaultRegions();
     }
     
-    // Метод для получения стандартных регионов, если API не работает
-    private getDefaultRegions(): RegionDto[] {
-        const defaultRegions = [
-            { id: 1, name: "Европа", description: "Европейская часть" },
-            { id: 2, name: "Азия", description: "Азиатская часть" },
-            { id: 3, name: "Северная Америка", description: "Североамериканская часть" },
-            { id: 4, name: "Южная Америка", description: "Южноамериканская часть" },
-            { id: 5, name: "Африка", description: "Африканская часть" },
-            { id: 6, name: "Австралия", description: "Австралия и Океания" }
-        ];
-        console.log('Возвращаю дефолтные регионы:', defaultRegions);
-        return defaultRegions;
-    }
+    return regions;
+  } catch (error) {
+    logError('Ошибка при получении списка регионов:', error);
+    // В случае ошибки также возвращаем временные данные
+    return getDefaultRegions();
+  }
+};
 
-    // Получить регион по ID
-    async getRegionById(id: number): Promise<RegionDto> {
-        const response = await api.get<RegionDto>(`/api/Region/${id}`);
-        return response.data;
-    }
+// Функция для получения дефолтных регионов (для обеспечения бесперебойной работы)
+export const getDefaultRegions = (): RegionData[] => {
+  const defaultRegions = [
+    { id: 1, name: "Европа", description: "Европейская часть" },
+    { id: 2, name: "Азия", description: "Азиатская часть" },
+    { id: 3, name: "Северная Америка", description: "Североамериканская часть" },
+    { id: 4, name: "Южная Америка", description: "Южноамериканская часть" },
+    { id: 5, name: "Африка", description: "Африканская часть" },
+    { id: 6, name: "Австралия", description: "Австралия и Океания" }
+  ];
+  
+  logWarning('Возвращаю дефолтные регионы');
+  return defaultRegions as RegionData[];
+};
 
-    // Получить список экземпляров растений в регионе
-    async getSpecimensInRegion(regionId: number): Promise<Specimen[]> {
-        const response = await api.get<Specimen[]>(`/api/Region/${regionId}/specimens`);
-        return response.data;
-    }
+// Функция для получения региона по ID
+export const getRegionById = async (id: number): Promise<RegionData> => {
+  try {
+    return await httpClient.get<RegionData>(`Region/${id}`);
+  } catch (error) {
+    logError(`Ошибка при получении региона с ID ${id}:`, error);
+    throw error;
+  }
+};
 
-    // Сопоставить секторы с регионами (временное решение, пока API не возвращает правильные данные)
-    getSectorRegionMapping(sectorData: any[]): Record<number, RegionDto> {
-        // Временное сопоставление секторов и регионов
-        const sectorToRegion: Record<number, RegionDto> = {};
-        
-        // Пример: сектор с ID 1 соответствует региону "Европа"
-        sectorToRegion[1] = { id: 1, name: "Европа", description: "Европейская часть" };
-        
-        // Сектор с ID 2 соответствует региону "Азия"
-        sectorToRegion[2] = { id: 2, name: "Азия", description: "Азиатская часть" };
-        
-        // Сектор с ID 3 соответствует региону "Северная Америка"
-        sectorToRegion[3] = { id: 3, name: "Северная Америка", description: "Североамериканская часть" };
-        
-        return sectorToRegion;
-    }
+// Функция для получения списка экземпляров растений в регионе
+export const getSpecimensInRegion = async (regionId: number): Promise<Specimen[]> => {
+  try {
+    return await httpClient.get<Specimen[]>(`Region/${regionId}/specimens`);
+  } catch (error) {
+    logError(`Ошибка при получении образцов из региона ${regionId}:`, error);
+    return [];
+  }
+};
 
-    // Создать новый регион
-    async createRegion(region: Omit<RegionDto, 'id'>): Promise<RegionDto> {
-        const response = await api.post<RegionDto>('/api/Region', region);
-        return response.data;
-    }
+// Функция для сопоставления секторов с регионами (временное решение)
+export const getSectorRegionMapping = (sectorData: any[]): Record<number, RegionData> => {
+  // Временное сопоставление секторов и регионов
+  const sectorToRegion: Record<number, RegionData> = {};
+  
+  // Пример: сектор с ID 1 соответствует региону "Европа"
+  sectorToRegion[1] = { id: 1, name: "Европа", description: "Европейская часть" } as RegionData;
+  
+  // Сектор с ID 2 соответствует региону "Азия"
+  sectorToRegion[2] = { id: 2, name: "Азия", description: "Азиатская часть" } as RegionData;
+  
+  // Сектор с ID 3 соответствует региону "Северная Америка"
+  sectorToRegion[3] = { id: 3, name: "Северная Америка", description: "Североамериканская часть" } as RegionData;
+  
+  return sectorToRegion;
+};
 
-    // Обновить существующий регион
-    async updateRegion(id: number, region: RegionDto): Promise<RegionDto> {
-        const response = await api.put<RegionDto>(`/api/Region/${id}`, region);
-        return response.data;
-    }
+// Функция для создания нового региона
+export const createRegion = async (region: Omit<RegionData, 'id'>): Promise<RegionData> => {
+  try {
+    return await httpClient.post<RegionData>('Region', region);
+  } catch (error) {
+    logError('Ошибка при создании региона:', error);
+    throw error;
+  }
+};
 
-    // Удалить регион
-    async deleteRegion(id: number): Promise<boolean> {
-        const response = await api.delete(`/api/Region/${id}`);
-        return response.status === 200;
-    }
-}
+// Функция для обновления существующего региона
+export const updateRegion = async (id: number, region: RegionData): Promise<RegionData> => {
+  try {
+    return await httpClient.put<RegionData>(`Region/${id}`, region);
+  } catch (error) {
+    logError(`Ошибка при обновлении региона ${id}:`, error);
+    throw error;
+  }
+};
 
-// Экспортируем экземпляр сервиса для использования в приложении
-export const regionService = new RegionService(); 
+// Функция для удаления региона
+export const deleteRegion = async (id: number): Promise<boolean> => {
+  try {
+    await httpClient.delete(`Region/${id}`);
+    return true;
+  } catch (error) {
+    logError(`Ошибка при удалении региона ${id}:`, error);
+    throw error;
+  }
+};
+
+// Для обратной совместимости - объект с теми же методами
+export const regionService = {
+  getAllRegions,
+  getRegionById,
+  getSpecimensInRegion,
+  getSectorRegionMapping,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getDefaultRegions
+}; 

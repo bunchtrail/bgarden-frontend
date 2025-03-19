@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { COLORS } from '../../../styles/global-styles';
-import { useNavigation } from '../hooks';
 import { NavItem } from '../types';
 
 interface NavbarItemProps {
@@ -15,13 +14,9 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
   item,
   isMobile = false,
   onItemClick,
-  isActive: isActiveFromProps,
+  isActive = false,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { isItemActive } = useNavigation([]);
-
-  const isActive =
-    isActiveFromProps !== undefined ? isActiveFromProps : isItemActive(item);
 
   const toggleDropdown = (e: React.MouseEvent) => {
     if (item.dropdownItems?.length) {
@@ -35,7 +30,7 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
     'rounded-md transition-colors relative text-sm font-medium';
   // Минималистичное выделение активного элемента
   const activeClasses = isActive
-    ? `text-${COLORS.SUCCESS}`
+    ? `text-${COLORS.primary.main}`
     : 'hover:text-gray-800 hover:bg-gray-100';
   const mobileClasses = isMobile
     ? 'block px-4 py-2 w-full text-left'
@@ -74,9 +69,7 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
                 key={dropdownItem.id}
                 to={dropdownItem.path}
                 className={`${baseClasses} ${
-                  isItemActive(dropdownItem)
-                    ? `text-${COLORS.SUCCESS}`
-                    : 'hover:bg-gray-100'
+                  isActive ? `text-${COLORS.primary.main}` : 'hover:bg-gray-100'
                 } ${isMobile ? 'pl-6' : 'px-4'} py-2 block w-full text-left`}
                 onClick={() => {
                   setIsDropdownOpen(false);
@@ -101,7 +94,7 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
       className={`${baseClasses} ${activeClasses} ${mobileClasses}`}
       onClick={onItemClick}
       style={{
-        color: isActive ? COLORS.SUCCESS : 'inherit',
+        color: isActive ? COLORS.primary.main : 'inherit',
       }}
     >
       {item.icon && <span className='mr-2'>{item.icon}</span>}

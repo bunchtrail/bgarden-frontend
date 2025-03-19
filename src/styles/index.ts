@@ -6,6 +6,7 @@
 import './animations.css';
 import { appStyles } from './global-styles';
 
+// Экспорт глобальных стилей и переиспользуемых классов
 export * from './global-styles';
 
 // Экспорт по умолчанию для удобства
