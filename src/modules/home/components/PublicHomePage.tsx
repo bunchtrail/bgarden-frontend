@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { buttonClasses, layoutClasses, textClasses } from '../../../styles/global-styles';
-import TimeBasedGreeting, { TimeInfo } from './TimeBasedGreeting';
+import { TimeBasedGreeting, TimeInfo } from './time-based-greeting';
 import SectorGrid from './SectorGrid';
 
 interface PublicHomePageProps {

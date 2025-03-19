@@ -1,7 +1,7 @@
 import React from 'react';
 import { User } from '../../../modules/auth/types';
 import { layoutClasses } from '../../../styles/global-styles';
-import TimeBasedGreeting, { TimeInfo } from './TimeBasedGreeting';
+import { TimeBasedGreeting, TimeInfo } from './time-based-greeting';
 import SectorGrid from './SectorGrid';
 import UserTools from './UserTools';
 
