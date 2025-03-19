@@ -7,9 +7,10 @@ import {
 } from '../modules/home';
 import { useAuth } from '../modules/auth/hooks';
 import { User } from '../modules/auth/types';
+import { LoadingSpinner } from '../modules/ui';
 
 const Home: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
   const [timeInfo, setTimeInfo] = useState<TimeInfo>(getTimeBasedGreeting());
 
   // Обновляем приветствие каждые 30 минут
@@ -32,6 +33,15 @@ const Home: React.FC = () => {
     role: user.role,
     name: user.fullName || user.username // Используем fullName или username как name
   } : null;
+
+  // Показываем загрузчик, пока проверяется аутентификация
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
+        <LoadingSpinner size="large" message="Загрузка данных..." />
+      </div>
+    );
+  }
 
   return isAuthenticated && adaptedUser ? (
     <AuthenticatedHomePage 

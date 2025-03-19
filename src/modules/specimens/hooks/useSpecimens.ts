@@ -68,9 +68,18 @@ export const useSpecimens = () => {
         }
         
         setSpecimens(data);
+        setError(null); // Сбрасываем ошибку, если она была
       } catch (err) {
         console.error('Ошибка при загрузке списка образцов:', err);
-        setError('Не удалось загрузить список образцов');
+        // Проверяем, не 404 ли это ошибка (отсутствие данных)
+        if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
+          // Для 404 ошибки мы просто устанавливаем пустой массив без ошибки
+          setSpecimens([]);
+          setError(null);
+        } else {
+          setError('Не удалось загрузить список образцов');
+          setSpecimens([]);
+        }
       } finally {
         setLoading(false);
       }

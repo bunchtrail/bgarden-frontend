@@ -9,7 +9,10 @@ class SpecimenService {
             console.log('Запрос всех образцов');
             
             // Используем httpClient вместо прямого fetch
-            const data = await httpClient.get<Specimen[]>('Specimen/all');
+            const data = await httpClient.get<Specimen[]>('Specimen/all', {
+                // Подавляем логирование ошибки 404 (Not Found)
+                suppressErrorsForStatus: [404]
+            });
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
             if (!Array.isArray(data)) {
@@ -18,7 +21,13 @@ class SpecimenService {
             }
             
             return data;
-        } catch (error) {
+        } catch (error: any) {
+            // Если получили 404, просто возвращаем пустой массив без логирования ошибки
+            if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+                console.log('В базе данных нет образцов растений.');
+                return [];
+            }
+            
             console.error('Ошибка при получении всех образцов:', error);
             return [];
         }

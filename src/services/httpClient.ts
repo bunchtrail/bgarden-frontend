@@ -198,7 +198,14 @@ async function request<T>(
     if (error instanceof ApiError && 
         suppressErrorsForStatus.includes(error.status)) {
       console.log(`Подавлена ошибка ${error.status} для запроса ${endpoint}`);
-      throw error; // Пробрасываем ошибку дальше без логирования
+      
+      // Вместо пробрасывания ошибки, возвращаем значение по умолчанию для GET запросов
+      if (method === 'GET') {
+        // Для GET запросов возвращаем пустой массив
+        return ([] as unknown) as T;
+      }
+      
+      throw error; // Для других методов все равно пробрасываем ошибку
     }
     
     console.error('Request failed:', error);
