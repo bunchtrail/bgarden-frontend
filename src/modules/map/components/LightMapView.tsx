@@ -9,10 +9,10 @@ import {
   BaseMapContainer,
 } from './map-components';
 import MapLayersManager from './map-layers/MapLayersManager';
-import MapControlPanel, { PANEL_PRESETS } from './control-panel/MapControlPanel';
+import MapControlPanel from './control-panel/MapControlPanel';
+import { PANEL_PRESETS, ControlPanelSection } from './control-panel';
 import { useMapConfig, MapConfigProvider, MapConfig } from '../contexts/MapConfigContext';
 import { MapProvider } from '../contexts/MapContext';
-import { ControlPanelSection } from './control-panel';
 
 // Конфигурация для облегченной версии карты
 const LIGHT_CONFIG: Partial<MapConfig> = {

@@ -1,97 +1,20 @@
-import React, { ReactNode, useState, useEffect } from 'react';
-import { useMapConfig } from '../../contexts/MapConfigContext';
+import React, { ReactNode } from 'react';
 import { 
   LayerSelector, 
   PanelHeader,
-  ControlPanelSection,
-  ModeToggle
+  ModeToggle,
+  MapSettingsSection,
+  ControlButtons,
+  CustomSections,
+  MapControlPanelProps
 } from './index';
 import { 
   animationClasses, 
-  cardClasses, 
-  textClasses, 
-  buttonClasses 
+  cardClasses
 } from '../../../../styles/global-styles';
 import { MAP_LAYERS } from '../../contexts/MapConfigContext';
-import { MAP_STYLES, MAP_COLORS } from '../../styles';
-import { Switch } from '../../../ui/components/Form';
-import Button from '../../../ui/components/Button';
-
-// Определяем типы режимов панели
-export type PanelMode = 'full' | 'light' | 'minimal' | 'geography' | 'custom';
-
-// Интерфейс для пресета настроек панели управления
-export interface PanelConfigPreset {
-  showLayerSelector: boolean;
-  showModeToggle: boolean;
-  showTooltipToggle: boolean;
-  showLabelToggle: boolean;
-  showClusteringToggle: boolean;
-  showMarkerToggle: boolean;
-  showDrawingControls: boolean;
-  sections?: ControlPanelSection[];
-}
-
-// Предопределенные пресеты для разных режимов панели
-export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPreset> = {
-  'full': {
-    showLayerSelector: true,
-    showModeToggle: true,
-    showTooltipToggle: true,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: true,
-  },
-  'light': {
-    showLayerSelector: false,
-    showModeToggle: false,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: false,
-  },
-  'minimal': {
-    showLayerSelector: false,
-    showModeToggle: false,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: false,
-    showMarkerToggle: false,
-    showDrawingControls: false,
-  },
-  'geography': {
-    showLayerSelector: false,
-    showModeToggle: true,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: true,
-  }
-};
-
-interface MapControlPanelProps {
-  className?: string;
-  // Режим панели управления
-  panelMode?: PanelMode;
-  showLayerSelector?: boolean;
-  showModeToggle?: boolean;
-  showTooltipToggle?: boolean;
-  showLabelToggle?: boolean;
-  showClusteringToggle?: boolean;
-  showMarkerToggle?: boolean;
-  showDrawingControls?: boolean;
-  onClose?: () => void;
-  customSections?: ControlPanelSection[];
-  children?: ReactNode;
-  onConfigChange?: (key: string, value: boolean | string | number) => void;
-  header?: ReactNode;
-  footer?: ReactNode;
-  // Возможность передать полный пресет конфигурации
-  configPreset?: PanelConfigPreset;
-}
+import { useMapControlPanel } from '../../hooks/useMapControlPanel';
+import { useMapConfig } from '../../contexts/MapConfigContext';
 
 /**
  * Компонент панели управления картой
@@ -115,100 +38,35 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
   footer,
   configPreset
 }) => {
-  const { 
-    mapConfig, 
-    updateMapConfig,
-    resetMapConfig,
-    saveConfigToStorage,
-    toggleLayer
-  } = useMapConfig();
+  // Получаем доступ к контексту конфигурации карты
+  const { mapConfig } = useMapConfig();
   
-  // Состояние для анимации
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  // Состояние для отслеживания изменений, чтобы показывать кнопку сброса
-  const [hasChanges, setHasChanges] = useState(false);
-
-  // Эффект для обнаружения изменений в конфигурации
-  useEffect(() => {
-    setHasChanges(true);
-  }, [mapConfig]);
-
-  // Получаем конфигурацию панели управления в зависимости от режима
-  const getPanelConfig = (): PanelConfigPreset => {
-    // Если передан пресет, используем его
-    if (configPreset) {
-      return configPreset;
-    }
-
-    // Для режима custom используем значения из пропсов
-    if (panelMode === 'custom') {
-      return {
-        showLayerSelector: showLayerSelector ?? false,
-        showModeToggle: showModeToggle ?? false,
-        showTooltipToggle: showTooltipToggle ?? false,
-        showLabelToggle: showLabelToggle ?? false,
-        showClusteringToggle: showClusteringToggle ?? false,
-        showMarkerToggle: showMarkerToggle ?? false,
-        showDrawingControls: showDrawingControls ?? false,
-        sections: customSections
-      };
-    }
-
-    // В остальных случаях используем предопределенный пресет
-    const preset = PANEL_PRESETS[panelMode];
-    
-    // Добавляем пользовательские секции, если они есть
-    return {
-      ...preset,
-      sections: customSections.length ? customSections : preset.sections
-    };
-  };
-
-  const config = getPanelConfig();
-
-  // Обработчик изменения конфигурации с поддержкой внешнего обработчика
-  const handleConfigChange = (key: string, value: boolean | string | number) => {
-    // Для всех типов настроек просто обновляем значение
-    updateMapConfig({ [key]: value });
-    
-    if (onConfigChange) {
-      onConfigChange(key, value);
-    }
-    
-    // Отмечаем, что были внесены изменения
-    setHasChanges(true);
-  };
-
-  // Проверяем, видим ли указанный слой
-  const isLayerVisible = (layerId: string) => mapConfig.visibleLayers.includes(layerId);
-
-  // Безопасное переключение слоя с проверкой
-  const handleToggleLayer = (layerId: string) => {
-    // Если слой уже выключен - его можно включить без проверок
-    if (!isLayerVisible(layerId)) {
-      toggleLayer(layerId);
-      return;
-    }
-    
-    // Если слой включен, проверяем, можно ли его выключить
-    if (mapConfig.visibleLayers.length > 1) {
-      toggleLayer(layerId);
-    } else {
-    }
-  };
-
-  // Обработчик сброса настроек
-  const handleResetConfig = () => {
-    resetMapConfig();
-    setHasChanges(false);
-  };
-
-  // Обработчик сохранения настроек
-  const handleSaveConfig = () => {
-    saveConfigToStorage();
-    setHasChanges(false);
-  };
+  // Используем хук для управления логикой панели
+  const {
+    isExpanded,
+    toggleExpand,
+    hasChanges,
+    panelConfig,
+    handleConfigChange,
+    handleResetConfig,
+    handleSaveConfig,
+    isLayerVisible,
+    handleToggleLayer
+  } = useMapControlPanel({
+    panelMode,
+    customConfig: {
+      showLayerSelector,
+      showModeToggle,
+      showTooltipToggle,
+      showLabelToggle,
+      showClusteringToggle,
+      showMarkerToggle,
+      showDrawingControls,
+      sections: customSections
+    },
+    onConfigChange,
+    configPreset
+  });
 
   // Современная стилизация с использованием стекломорфизма и глобальных стилей
   const panelStyles = `
@@ -220,108 +78,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
     ${animationClasses.transition}
     ${className}
   `;
-
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  // Создаем панель управления в соответствии с конфигурацией
-  const renderConfigPanelContent = () => {
-    return (
-      <div className="space-y-4">
-        {/* Секция слоев */}
-        {config.showLayerSelector && (
-          <LayerSelector 
-            layers={[
-              { id: MAP_LAYERS.REGIONS, label: 'Участки' },
-              { id: MAP_LAYERS.PLANTS, label: 'Растения' }
-            ]}
-            visibleLayers={mapConfig.visibleLayers}
-            onToggleLayer={handleToggleLayer}
-          />
-        )}
-
-        {/* Режим взаимодействия с картой */}
-        {config.showModeToggle && (
-          <ModeToggle />
-        )}
-
-        {/* Основные настройки карты */}
-        <div>
-          <h4 className={`${cardClasses.title} ${textClasses.secondary} mb-2`}>Настройки карты</h4>
-          <div className={`${cardClasses.flat} p-3 rounded-lg space-y-3`}>
-            {/* Настройки отображения */}
-            {config.showTooltipToggle && (
-              <Switch 
-                label="Показывать подсказки"
-                checked={mapConfig.showTooltips}
-                onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
-              />
-            )}
-
-            {/* Настройки для облегченной версии */}
-            {config.showClusteringToggle && (
-              <Switch 
-                label="Группировать маркеры"
-                checked={mapConfig.enableClustering}
-                onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Пользовательские секции */}
-        {config.sections && config.sections.length > 0 && (
-          <div className="space-y-4 mt-4">
-            {config.sections.map(section => (
-              <div key={section.id} className="mb-3">
-                {section.title && (
-                  <h4 className={`${textClasses.subheading} mb-2`}>{section.title}</h4>
-                )}
-                <div className={`${cardClasses.flat} p-3 rounded-lg`}>
-                  {section.content}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Дополнительный контент (если есть) */}
-        {children && (
-          <div className="mt-4">
-            {children}
-          </div>
-        )}
-
-        {/* Кнопки управления настройками */}
-        {hasChanges && panelMode === 'full' && (
-          <div className="flex justify-between mt-4">
-            <Button 
-              onClick={handleResetConfig} 
-              variant="neutral"
-              size="small"
-            >
-              Сбросить
-            </Button>
-            <Button 
-              onClick={handleSaveConfig} 
-              variant="success"
-              size="small"
-            >
-              Сохранить
-            </Button>
-          </div>
-        )}
-
-        {/* Футер панели */}
-        {footer && (
-          <div className="mt-4 pt-3 border-t border-gray-200/50">
-            {footer}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className={panelStyles}>
@@ -341,12 +97,65 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             </svg>
           )}
         </button>
-        <PanelHeader customHeader={header || <h3 className={`${textClasses.heading} text-gray-800`}>Настройки карты</h3>} onClose={onClose} />
+        <PanelHeader 
+          customHeader={header} 
+          onClose={onClose} 
+        />
       </div>
 
       {isExpanded && (
         <div className={cardClasses.content}>
-          {renderConfigPanelContent()}
+          <div className="space-y-4">
+            {/* Секция слоев */}
+            {panelConfig.showLayerSelector && (
+              <LayerSelector 
+                layers={[
+                  { id: MAP_LAYERS.REGIONS, label: 'Участки' },
+                  { id: MAP_LAYERS.PLANTS, label: 'Растения' }
+                ]}
+                visibleLayers={mapConfig.visibleLayers}
+                onToggleLayer={handleToggleLayer}
+              />
+            )}
+
+            {/* Режим взаимодействия с картой */}
+            {panelConfig.showModeToggle && (
+              <ModeToggle />
+            )}
+
+            {/* Основные настройки карты */}
+            <MapSettingsSection 
+              showTooltipToggle={panelConfig.showTooltipToggle}
+              showClusteringToggle={panelConfig.showClusteringToggle}
+              onConfigChange={handleConfigChange}
+            />
+
+            {/* Пользовательские секции */}
+            <CustomSections sections={panelConfig.sections} />
+
+            {/* Дополнительный контент (если есть) */}
+            {children && (
+              <div className="mt-4">
+                {children}
+              </div>
+            )}
+
+            {/* Кнопки управления настройками */}
+            {panelMode === 'full' && (
+              <ControlButtons 
+                hasChanges={hasChanges}
+                onReset={handleResetConfig}
+                onSave={handleSaveConfig}
+              />
+            )}
+
+            {/* Футер панели */}
+            {footer && (
+              <div className="mt-4 pt-3 border-t border-gray-200/50">
+                {footer}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
