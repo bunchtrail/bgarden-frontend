@@ -123,7 +123,6 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
       audio.volume = 0.3;
       audio.play().catch(e => console.log('Ошибка воспроизведения звука:', e));
     } catch (e) {
-      console.log('Звуковой эффект недоступен:', e);
     }
   }, [timeOfDay]);
 

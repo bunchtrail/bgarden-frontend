@@ -94,10 +94,6 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             value={String(formData.sectorType)}
             onChange={(e) => {
               const numericValue = Number(e.target.value);
-              console.log('Выбран сектор:', {
-                value: numericValue,
-                label: ['Дендрологический', 'Флора', 'Цветущий'][numericValue]
-              });
               onChange({
                 ...e,
                 target: {

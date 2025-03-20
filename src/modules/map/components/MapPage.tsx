@@ -231,8 +231,6 @@ const ImageBoundsCalculator: React.FC<ImageBoundsCalculatorProps> = ({
         img.onload = () => {
             const width = img.width;
             const height = img.height;
-            console.log(`Загружено изображение: ${width}x${height}`);
-            
             const calculatedBounds: L.LatLngBoundsExpression = [
                 [0, 0],
                 [height, width]

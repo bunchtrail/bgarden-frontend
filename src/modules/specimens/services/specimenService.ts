@@ -6,8 +6,6 @@ class SpecimenService {
     // Получить все образцы
     async getAllSpecimens(): Promise<Specimen[]> {
         try {
-            console.log('Запрос всех образцов');
-            
             // Используем httpClient вместо прямого fetch
             const data = await httpClient.get<Specimen[]>('Specimen/all', {
                 // Подавляем логирование ошибки 404 (Not Found)
@@ -16,7 +14,6 @@ class SpecimenService {
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
             if (!Array.isArray(data)) {
-                console.log('API вернуло один объект, преобразуем в массив');
                 return [data as Specimen];
             }
             
@@ -24,7 +21,6 @@ class SpecimenService {
         } catch (error: any) {
             // Если получили 404, просто возвращаем пустой массив без логирования ошибки
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
-                console.log('В базе данных нет образцов растений.');
                 return [];
             }
             
@@ -36,8 +32,6 @@ class SpecimenService {
     // Получить образцы по типу сектора
     async getSpecimensBySectorType(sectorType: SectorType): Promise<Specimen[]> {
         try {
-            console.log(`Запрос образцов для сектора типа: ${sectorType}`);
-            
             // Используем httpClient вместо прямого fetch
             const data = await httpClient.get<Specimen[]>(`Specimen/sector/${sectorType}`, {
                 // Устанавливаем необязательный timeout, чтобы запрос не висел слишком долго
@@ -48,7 +42,6 @@ class SpecimenService {
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
             if (!Array.isArray(data)) {
-                console.log('API вернуло один объект, преобразуем в массив');
                 return [data as Specimen];
             }
             
@@ -56,7 +49,6 @@ class SpecimenService {
         } catch (error: any) {
             // Если получили 404, просто возвращаем пустой массив без логирования ошибки
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
-                console.log(`В секторе типа ${sectorType} нет растений.`);
                 return [];
             }
             
@@ -81,13 +73,6 @@ class SpecimenService {
                 // Убеждаемся, что sectorType передается как число
                 sectorType: Number(specimen.sectorType)
             };
-            
-            console.log('Тип сектора перед отправкой:', {
-                originalValue: specimen.sectorType,
-                convertedValue: specimenData.sectorType,
-                type: typeof specimenData.sectorType
-            });
-            
             console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
             
             // Используем httpClient для отправки запроса

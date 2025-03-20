@@ -49,8 +49,22 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         )}
       </div>
       
-      <div>
-        {activeStep < totalSteps ? (
+      <div className="flex space-x-2">
+        {/* Кнопка "Сохранить" присутствует всегда */}
+        <Button 
+          variant="success" 
+          type="submit"
+          className="flex items-center"
+          disabled={isSubmitDisabled}
+        >
+          Сохранить
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </Button>
+        
+        {/* Кнопка "Далее" только если это не последний шаг */}
+        {activeStep < totalSteps && (
           <Button 
             variant="primary"
             onClick={(e) => {
@@ -65,19 +79,6 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             Далее
             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Button>
-        ) : (
-          <Button 
-            variant="success" 
-            type="submit"
-            className="flex items-center"
-            onClick={onSubmit}
-            disabled={isSubmitDisabled}
-          >
-            Сохранить
-            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </Button>
         )}

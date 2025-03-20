@@ -54,11 +54,9 @@ export const useSpecimens = () => {
 
         // Если указан тип сектора, то загружаем только образцы этого сектора
         if (filters.sectorType !== undefined) {
-          console.log(`Загрузка образцов для сектора типа: ${filters.sectorType}`);
           data = await specimenService.getSpecimensBySectorType(filters.sectorType);
         } else {
           // Загружаем все образцы
-          console.log('Загрузка всех образцов');
           data = await specimenService.getAllSpecimens();
         }
         

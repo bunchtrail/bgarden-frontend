@@ -32,9 +32,6 @@ export const createRegion = async (regionData: Omit<RegionData, 'id' | 'specimen
       ...processedData,
       specimensCount: 0 // Начальное количество экземпляров
     };
-    
-    console.log('Отправляем на сервер данные:', newRegion);
-    
     return await httpClient.post<RegionData>('/Region', newRegion);
   } catch (error) {
     logError('Ошибка при создании области:', error);
@@ -121,9 +118,6 @@ export const updateRegion = async (regionId: string, regionData: Omit<RegionData
       id: parseInt(regionId), // Преобразуем строковый ID в число
       ...processedData,
     };
-    
-    console.log('Отправляем на сервер обновленные данные:', updatedRegion);
-    
     return await httpClient.put<RegionData>(`/Region/${regionId}`, updatedRegion);
   } catch (error) {
     logError('Ошибка при обновлении области:', error);

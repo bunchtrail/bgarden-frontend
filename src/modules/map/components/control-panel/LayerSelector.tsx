@@ -64,7 +64,6 @@ const LayerSelector: React.FC<LayerSelectorProps> = ({
       toggleLayerFn(layerId);
     } else {
       // Можно добавить уведомление пользователю, что слой нельзя отключить
-      console.log('Невозможно отключить все слои карты. Хотя бы один слой должен быть активен.');
     }
   };
 

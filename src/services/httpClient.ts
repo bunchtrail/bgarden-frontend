@@ -197,8 +197,6 @@ async function request<T>(
     // Проверяем, нужно ли подавить ошибку с этим статус-кодом
     if (error instanceof ApiError && 
         suppressErrorsForStatus.includes(error.status)) {
-      console.log(`Подавлена ошибка ${error.status} для запроса ${endpoint}`);
-      
       // Вместо пробрасывания ошибки, возвращаем значение по умолчанию для GET запросов
       if (method === 'GET') {
         // Для GET запросов возвращаем пустой массив

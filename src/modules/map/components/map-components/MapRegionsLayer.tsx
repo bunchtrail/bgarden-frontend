@@ -22,7 +22,6 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
   const { setSelectedAreaId, selectedAreaId } = useMapHook();
 
   const handleRegionClick = (regionId: string | number) => {
-    console.log('Выбран регион:', regionId);
     setSelectedAreaId(`region-${regionId}`);
     if (onClick) onClick(String(regionId));
   };

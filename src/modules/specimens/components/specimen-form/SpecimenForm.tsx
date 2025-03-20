@@ -53,7 +53,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Инициализация дефолтных значений формы с учетом значения из URL
   const defaultFormData: SpecimenFormData = {
     inventoryNumber: '',
-    sectorType: sectorTypeFromUrl !== null ? sectorTypeFromUrl : 0,
+    sectorType: sectorTypeFromUrl !== null ? Number(sectorTypeFromUrl) : 0,
     latitude: 0,
     longitude: 0,
     regionId: 0,
@@ -120,13 +120,16 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Обновление формы при получении данных образца
   useEffect(() => {
     if (specimen) {
-      setFormData(specimen);
+      setFormData({
+        ...specimen,
+        sectorType: typeof specimen.sectorType === 'string' ? Number(specimen.sectorType) : specimen.sectorType
+      });
     }
     
     // Логируем значение sectorType при загрузке страницы
     console.log('Значение sectorType при загрузке страницы:', {
       sectorType: specimen?.sectorType ?? defaultFormData.sectorType,
-      sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][specimen?.sectorType ?? defaultFormData.sectorType],
+      sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(specimen?.sectorType ?? defaultFormData.sectorType)],
       url: window.location.href,
       sectorTypeFromUrl
     });
@@ -137,12 +140,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     e.preventDefault();
     
     // Проверка, вызван ли submit действительно через кнопку "Сохранить"
-    // Если мы просто переходим между шагами, не нужно отправлять форму
     const submitEvent = e.nativeEvent as SubmitEvent;
     const isRealSubmit = submitEvent.submitter?.getAttribute('type') === 'submit';
     
-    // Если это не реальный submit, а просто переход к следующему шагу - выходим
-    if (!isRealSubmit && activeStep < formSteps.length) {
+    // Если это не настоящий submit, то выходим (например, при клике на кнопку "Далее")
+    if (!isRealSubmit) {
       return;
     }
     
@@ -169,14 +171,21 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     if (isValid) {
       notification.info('Отправка данных образца...', { duration: 3000 });
       
+      // Проверяем и преобразуем sectorType в число, если это строка
+      const finalFormData = { 
+        ...formData,
+        // Преобразуем строковое значение sectorType в число
+        sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
+      };
+      
       // Логируем данные о типе сектора перед отправкой
       console.log('Отправка формы с данными о секторе:', {
-        sectorType: formData.sectorType,
-        type: typeof formData.sectorType,
-        sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(formData.sectorType)]
+        sectorType: finalFormData.sectorType,
+        type: typeof finalFormData.sectorType,
+        sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(finalFormData.sectorType)]
       });
       
-      onSubmit(formData);
+      onSubmit(finalFormData);
     } else {
       notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');
       

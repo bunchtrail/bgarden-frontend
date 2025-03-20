@@ -31,7 +31,6 @@ export const useTokenRefresh = (
         const needRefresh = isTokenExpiringSoon(token);
         
         if (needRefresh) {
-          console.log('Токен скоро истечет, обновляем...');
           await refreshCallback();
         }
       } catch (error) {

@@ -80,10 +80,6 @@ const SpecimenPage: React.FC = () => {
           // Создаем базовый образец с учетом типа сектора из URL
           if (sectorTypeParam) {
             const sectorType = Number(sectorTypeParam);
-            console.log('SpecimenPage - создание нового образца с сектором из URL:', {
-              sectorType,
-              url: window.location.href
-            });
             // Создаем пустой образец с указанным типом сектора
             setSpecimen(null);
           } else {
@@ -108,12 +104,6 @@ const SpecimenPage: React.FC = () => {
       setLoading(true);
       
       // Добавляем логирование сектора перед отправкой
-      console.log('SpecimenPage - sectorType перед сохранением:', {
-        value: updatedSpecimen.sectorType,
-        type: typeof updatedSpecimen.sectorType,
-        url: window.location.href
-      });
-      
       let result;
 
       if (id && id !== 'new') {

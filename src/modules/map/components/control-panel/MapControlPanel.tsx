@@ -188,7 +188,6 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
     if (mapConfig.visibleLayers.length > 1) {
       toggleLayer(layerId);
     } else {
-      console.log('Невозможно отключить все слои карты. Хотя бы один слой должен быть активен.');
     }
   };
 
