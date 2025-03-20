@@ -20,12 +20,6 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
     return touchedFields[fieldName] ? errors[fieldName] : '';
   };
 
-  // Вывод значения сектора в консоль при рендеринге компонента
-  console.log('BasicInfoSection - текущий сектор:', {
-    sectorType: formData.sectorType,
-    sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(formData.sectorType)]
-  });
-
   return (
     <div className="animate__animated animate__fadeIn">
       <h3 className="text-xl font-semibold mb-4 text-green-700 border-b pb-2">Основная информация</h3>

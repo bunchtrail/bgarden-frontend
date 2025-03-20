@@ -1,5 +1,6 @@
 import httpClient from '../../../services/httpClient';
 import { SectorType, Specimen } from '../types/index';
+import { updateSpecimensCount } from '../../map/services/regionService';
 
 // Интерфейс для работы с API образцов растений
 class SpecimenService {
@@ -73,10 +74,16 @@ class SpecimenService {
                 // Убеждаемся, что sectorType передается как число
                 sectorType: Number(specimen.sectorType)
             };
-            console.log('Отправляем данные в API:', JSON.stringify(specimenData, null, 2));
             
             // Используем httpClient для отправки запроса
-            return httpClient.post<Specimen>('Specimen', specimenData);
+            const createdSpecimen = await httpClient.post<Specimen>('Specimen', specimenData);
+            
+            // Обновляем счетчик образцов в области
+            if (createdSpecimen.regionId) {
+                await updateSpecimensCount(createdSpecimen.regionId, true);
+            }
+            
+            return createdSpecimen;
         } catch (error: any) {
             console.error('Ошибка при создании образца растения:', error);
             
@@ -102,8 +109,23 @@ class SpecimenService {
 
     // Удалить образец
     async deleteSpecimen(id: number): Promise<boolean> {
-        await httpClient.delete(`Specimen/${id}`);
-        return true;
+        try {
+            // Получаем информацию об образце перед удалением
+            const specimen = await this.getSpecimenById(id);
+            
+            // Удаляем образец
+            await httpClient.delete(`Specimen/${id}`);
+            
+            // Обновляем счетчик образцов в области
+            if (specimen.regionId) {
+                await updateSpecimensCount(specimen.regionId, false);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Ошибка при удалении образца:', error);
+            throw error;
+        }
     }
 }
 

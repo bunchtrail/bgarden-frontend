@@ -131,3 +131,17 @@ export const convertPointsToPolygonCoordinates = (points: [number, number][]): s
   // поэтому сохраняем формат как есть
   return JSON.stringify(points);
 };
+
+// Функция для обновления количества образцов в области
+export const updateSpecimensCount = async (regionId: number, increment: boolean = true): Promise<void> => {
+  try {
+    const endpoint = increment ? 
+      `/Region/${regionId}/increment-specimens` : 
+      `/Region/${regionId}/decrement-specimens`;
+    
+    await httpClient.put(endpoint);
+  } catch (error) {
+    logError('Ошибка при обновлении количества образцов в области:', error);
+    throw error;
+  }
+};

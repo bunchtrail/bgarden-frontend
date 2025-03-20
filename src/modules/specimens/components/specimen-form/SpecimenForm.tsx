@@ -125,15 +125,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         sectorType: typeof specimen.sectorType === 'string' ? Number(specimen.sectorType) : specimen.sectorType
       });
     }
-    
-    // Логируем значение sectorType при загрузке страницы
-    console.log('Значение sectorType при загрузке страницы:', {
-      sectorType: specimen?.sectorType ?? defaultFormData.sectorType,
-      sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(specimen?.sectorType ?? defaultFormData.sectorType)],
-      url: window.location.href,
-      sectorTypeFromUrl
-    });
-  }, [specimen, setFormData, sectorTypeFromUrl]);
+  }, [specimen, setFormData]);
 
   // Отправка формы
   const handleSubmit = (e: React.FormEvent) => {
@@ -177,13 +169,6 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         // Преобразуем строковое значение sectorType в число
         sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
       };
-      
-      // Логируем данные о типе сектора перед отправкой
-      console.log('Отправка формы с данными о секторе:', {
-        sectorType: finalFormData.sectorType,
-        type: typeof finalFormData.sectorType,
-        sectorLabel: ['Дендрологический', 'Флора', 'Цветущий'][Number(finalFormData.sectorType)]
-      });
       
       onSubmit(finalFormData);
     } else {
