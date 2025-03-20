@@ -62,4 +62,4 @@ export { default as MapContentStateRenderer } from './components/map-content/Map
 export { default as MapControlsRenderer } from './components/map-controls/MapControlsRenderer';
 
 // Компоненты информации о растениях
-export { PlantPopup, EnhancedPlantMarkersLayer } from './components/plant-info'; 
+export { EnhancedPlantMarkersLayer } from './components/plant-info'; 

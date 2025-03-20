@@ -6,7 +6,6 @@ import { Plant } from '../../contexts/MapContext';
 import { MapConfig, MAP_LAYERS } from '../../contexts/MapConfigContext';
 import { getAllSpecimens, convertSpecimensToPlants } from '../../services/plantService';
 import { MAP_COLORS } from '../../styles';
-import { PlantPopup } from './index';
 
 interface EnhancedPlantMarkersLayerProps {
   isVisible: boolean;
@@ -212,12 +211,7 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
 
   return (
     <>
-      {/* Модальное окно информации о растении */}
-      <PlantPopup
-        isOpen={isModalOpen}
-        onClose={closePlantInfo}
-        plant={selectedPlant}
-      />
+      {/* Маркеры добавляются через useEffect */}
     </>
   );
 });
