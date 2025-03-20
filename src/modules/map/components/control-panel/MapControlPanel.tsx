@@ -2,13 +2,20 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 import { 
   LayerSelector, 
-  ConfigCheckbox, 
   PanelHeader,
   ControlPanelSection,
   ModeToggle
 } from './index';
-import { animationClasses } from '../../../../styles/global-styles';
+import { 
+  animationClasses, 
+  cardClasses, 
+  textClasses, 
+  buttonClasses 
+} from '../../../../styles/global-styles';
 import { MAP_LAYERS } from '../../contexts/MapConfigContext';
+import { MAP_STYLES, MAP_COLORS } from '../../styles';
+import { Switch } from '../../../ui/components/Form';
+import Button from '../../../ui/components/Button';
 
 // Определяем типы режимов панели
 export type PanelMode = 'full' | 'light' | 'minimal' | 'geography' | 'custom';
@@ -203,16 +210,12 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
     setHasChanges(false);
   };
 
-  // Современная стилизация с использованием стекломорфизма
+  // Современная стилизация с использованием стекломорфизма и глобальных стилей
   const panelStyles = `
-    backdrop-blur-md bg-white/75
-    border border-white/20 
-    shadow-lg
-    rounded-2xl
+    ${cardClasses.elevated}
     absolute top-4 right-4 z-[1000] 
     max-w-xs w-full
     overflow-hidden
-    transition-all duration-300 ease-in-out
     ${isExpanded ? 'opacity-100' : 'opacity-90 hover:opacity-100'}
     ${animationClasses.transition}
     ${className}
@@ -245,11 +248,11 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
 
         {/* Основные настройки карты */}
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Настройки карты</h4>
-          <div className="bg-white/50 p-3 rounded-lg space-y-3">
+          <h4 className={`${cardClasses.title} ${textClasses.secondary} mb-2`}>Настройки карты</h4>
+          <div className={`${cardClasses.flat} p-3 rounded-lg space-y-3`}>
             {/* Настройки отображения */}
             {config.showTooltipToggle && (
-              <ConfigCheckbox 
+              <Switch 
                 label="Показывать подсказки"
                 checked={mapConfig.showTooltips}
                 onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
@@ -258,7 +261,7 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
 
             {/* Настройки для облегченной версии */}
             {config.showClusteringToggle && (
-              <ConfigCheckbox 
+              <Switch 
                 label="Группировать маркеры"
                 checked={mapConfig.enableClustering}
                 onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
@@ -273,9 +276,9 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             {config.sections.map(section => (
               <div key={section.id} className="mb-3">
                 {section.title && (
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">{section.title}</h4>
+                  <h4 className={`${textClasses.subheading} mb-2`}>{section.title}</h4>
                 )}
-                <div className="bg-white/50 p-3 rounded-lg">
+                <div className={`${cardClasses.flat} p-3 rounded-lg`}>
                   {section.content}
                 </div>
               </div>
@@ -293,18 +296,20 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
         {/* Кнопки управления настройками */}
         {hasChanges && panelMode === 'full' && (
           <div className="flex justify-between mt-4">
-            <button 
+            <Button 
               onClick={handleResetConfig} 
-              className="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition-colors"
+              variant="neutral"
+              size="small"
             >
               Сбросить
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={handleSaveConfig} 
-              className="text-xs px-2 py-1 rounded bg-green-100 hover:bg-green-200 transition-colors"
+              variant="success"
+              size="small"
             >
               Сохранить
-            </button>
+            </Button>
           </div>
         )}
 
@@ -320,10 +325,10 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
 
   return (
     <div className={panelStyles}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/50">
+      <div className={`flex items-center justify-between px-4 py-3 ${cardClasses.footer}`}>
         <button 
           onClick={toggleExpand}
-          className="mr-2 text-gray-500 hover:text-gray-700 transition-colors"
+          className={`mr-2 text-gray-500 hover:text-gray-700 ${animationClasses.transition}`}
           aria-label={isExpanded ? "Свернуть панель" : "Развернуть панель"}
         >
           {isExpanded ? (
@@ -336,11 +341,11 @@ const MapControlPanel: React.FC<MapControlPanelProps> = ({
             </svg>
           )}
         </button>
-        <PanelHeader customHeader={header || <h3 className="text-gray-800 font-medium">Настройки карты</h3>} onClose={onClose} />
+        <PanelHeader customHeader={header || <h3 className={`${textClasses.heading} text-gray-800`}>Настройки карты</h3>} onClose={onClose} />
       </div>
 
       {isExpanded && (
-        <div className="p-4">
+        <div className={cardClasses.content}>
           {renderConfigPanelContent()}
         </div>
       )}

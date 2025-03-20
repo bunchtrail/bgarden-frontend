@@ -1,17 +1,17 @@
 import React, { ReactNode } from 'react';
-import { LoadingView, ErrorView, EmptyMapView } from '../map-components';
+import { ErrorView, LoadingView } from '../map-components';
 
 interface MapContentStateRendererProps {
   loading: boolean;
-  error: string | null;
+  error: Error | null;
   mapImageUrl: string | null;
   handleRefresh: () => void;
   children: ReactNode;
 }
 
 /**
- * Компонент для отображения различных состояний контента карты
- * (загрузка, ошибка, пустое состояние, нормальное состояние)
+ * Компонент для отображения состояния содержимого карты
+ * Отображает загрузку, ошибку или содержимое в зависимости от состояния
  */
 const MapContentStateRenderer: React.FC<MapContentStateRendererProps> = ({
   loading,
@@ -20,22 +20,22 @@ const MapContentStateRenderer: React.FC<MapContentStateRendererProps> = ({
   handleRefresh,
   children
 }) => {
-  // При загрузке данных показываем индикатор загрузки
-  if (loading) {
-    return <LoadingView />;
+  // Если загрузка
+  if (loading && !mapImageUrl) {
+    return <LoadingView message="Загрузка карты..." />;
   }
 
-  // Если есть ошибка, показываем компонент ошибки
+  // Если ошибка
   if (error) {
-    return <ErrorView error={error} onRefresh={handleRefresh} />;
+    return <ErrorView error={error.message} onRefresh={handleRefresh} />;
   }
 
-  // Если нет URL изображения, показываем пустой компонент
-  if (!mapImageUrl) {
-    return <EmptyMapView onRefresh={handleRefresh} />;
+  // Если нет данных карты
+  if (!mapImageUrl && !loading) {
+    return <ErrorView error="Карта не найдена" onRefresh={handleRefresh} />;
   }
 
-  // В нормальном состоянии возвращаем дочерние элементы
+  // Отображаем содержимое карты
   return <>{children}</>;
 };
 

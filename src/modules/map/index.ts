@@ -42,13 +42,13 @@ export { MAP_STYLES } from './styles';
 export { 
   MapConfigProvider,
   MAP_LAYERS,
-  MAP_MODES
+  MAP_MODES,
+  DEFAULT_MAP_CONFIG
 } from './contexts/MapConfigContext';
 
 // Компоненты панели управления
 export {
   LayerSelector,
-  ConfigCheckbox,
   PanelHeader,
   ModeToggle
 } from './components/control-panel';

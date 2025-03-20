@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { MapLayerProps } from '../components/MapPage';
-import { RegionData } from '../types/mapTypes';
+import { MapLayerProps, RegionData } from '../types/mapTypes';
 import { MapConfig } from '../contexts/MapConfigContext';
 
 interface UseMapLayersProps {

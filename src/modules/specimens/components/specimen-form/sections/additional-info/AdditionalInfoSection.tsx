@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, CheckboxField, Textarea } from '@/modules/ui';
+import { Switch, TextField, Textarea } from '@/modules/ui';
 import { SpecimenFormData } from '../../../../types';
 
 interface AdditionalInfoSectionProps {
@@ -8,6 +8,21 @@ interface AdditionalInfoSectionProps {
 }
 
 export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({ formData, onChange }) => {
+  
+  const handleHerbariumChange = () => {
+    // Создаем синтетическое событие с нужными свойствами
+    const syntheticEvent = {
+      target: {
+        name: 'hasHerbarium',
+        type: 'checkbox',
+        checked: !formData.hasHerbarium,
+        value: (!formData.hasHerbarium).toString()
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    onChange(syntheticEvent);
+  };
+  
   return (
     <fieldset className="p-4 border rounded-md">
       <legend className="text-lg font-medium px-2">Дополнительная информация</legend>
@@ -50,12 +65,10 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({ fo
         </div>
         
         <div>
-          <CheckboxField
-            id="hasHerbarium"
-            name="hasHerbarium"
+          <Switch
             label="Есть гербарий"
             checked={formData.hasHerbarium}
-            onChange={onChange}
+            onChange={handleHerbariumChange}
           />
         </div>
         

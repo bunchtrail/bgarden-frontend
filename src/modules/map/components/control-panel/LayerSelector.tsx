@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
-import { ConfigCheckbox } from './index';
+import { Switch } from '../../../ui/components/Form';
 
 // Интерфейс для описания слоя карты
 export interface MapLayer {
@@ -72,7 +72,7 @@ const LayerSelector: React.FC<LayerSelectorProps> = ({
       <h3 className="font-medium text-gray-900 mb-1">Слои карты</h3>
       
       {layersToRender.map(layer => (
-        <ConfigCheckbox 
+        <Switch 
           key={layer.id}
           label={layer.label}
           checked={isLayerVisible(layer.id)}

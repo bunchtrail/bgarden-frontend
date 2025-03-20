@@ -1,50 +1,74 @@
-import React, { memo, ReactNode } from 'react';
-import { Button } from '@/modules/ui';
-import { MapControlPanel } from '../map-components';
+import React, { ReactNode } from 'react';
+import { MAP_STYLES } from '../../styles';
+import Button from '../../../ui/components/Button';
+import { cardClasses, textClasses } from '../../../../styles/global-styles';
 
 interface MapControlsRendererProps {
   showControls: boolean;
-  controlPanelStyles: string;
+  controlPanelStyles: Record<string, string>;
   toggleControlPanel: () => void;
   showControlPanel: boolean;
   extraControls?: ReactNode;
 }
 
 /**
- * Компонент для рендеринга элементов управления картой
+ * Компонент для отображения элементов управления картой
+ * Отвечает за отображение панели управления и дополнительных элементов управления
  */
-const MapControlsRenderer: React.FC<MapControlsRendererProps> = memo(({ 
-  showControls, 
-  controlPanelStyles, 
-  toggleControlPanel, 
+const MapControlsRenderer: React.FC<MapControlsRendererProps> = ({
+  showControls,
+  controlPanelStyles,
+  toggleControlPanel,
   showControlPanel,
-  extraControls 
+  extraControls
 }) => {
+  if (!showControls) return null;
+
   return (
-    <>
-      {showControls && (
-        <Button
-          variant="secondary"
+    <div className="absolute top-4 right-4 z-50">
+      <div className={controlPanelStyles.container}>
+        <Button 
+          variant="neutral"
           size="small"
-          className={controlPanelStyles}
+          className="w-10 h-10 flex items-center justify-center rounded-full"
           onClick={toggleControlPanel}
+          aria-label="Переключить панель управления"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-5 w-5" 
+            viewBox="0 0 20 20" 
+            fill="currentColor"
+          >
+            {showControlPanel ? (
+              <path 
+                fillRule="evenodd" 
+                clipRule="evenodd" 
+                d="M14.293 5.293a1 1 0 011.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L10 9.586l4.293-4.293z" 
+              />
+            ) : (
+              <path 
+                fillRule="evenodd" 
+                clipRule="evenodd" 
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+              />
+            )}
           </svg>
         </Button>
-      )}
-
-      {/* Дополнительные элементы управления */}
-      {extraControls}
-
-      {/* Панель управления картой */}
-      {showControlPanel && (
-        <MapControlPanel onClose={toggleControlPanel} />
-      )}
-    </>
+        
+        {showControlPanel && (
+          <div className={`${MAP_STYLES.controlPanel} mt-2`}>
+            {extraControls || (
+              <div className={`p-2 text-center`}>
+                <p className={`${textClasses.body} ${textClasses.secondary}`}>Панель управления картой</p>
+                <p className={`${textClasses.small} text-red-500 mt-1`}>Отсутствуют элементы управления</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
-});
+};
 
 export default MapControlsRenderer; 
