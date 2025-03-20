@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SpecimenFormData } from '../../../../types';
 import { ExpositionDto } from '../../../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
-import LightMapView from '@/modules/map/components/LightMapView';
+import MapPage from '@/modules/map/components/MapPage';
 import { MapData } from '@/modules/map/services/mapService';
 import { getActiveMap } from '@/modules/map/services/mapService';
 import { ControlPanelSection } from '@/modules/map/components/control-panel';
@@ -112,21 +112,22 @@ const RegionMapSelector: React.FC<{
 
   return (
     <div className="relative">
-      <LightMapView 
-        mapData={mapData}
-        regions={regions}
-        selectedRegionIds={selectedRegionIds}
+      <MapPage 
+        mode="light"
+        initialConfig={{
+          showControls: true,
+          controlPanelMode: 'geography',
+          aspectRatio: 'landscape'
+        }}
+        customLayers={[]}
+        plugins={
+          <MapMarker 
+            position={markerPosition}
+            onPositionChange={onCoordinatesChange}
+          />
+        }
         onRegionClick={onRegionClick}
-        loading={loading}
-        aspectRatio="landscape"
-        showControls={true}
-        controlPanelMode="geography"
-      >
-        <MapMarker 
-          position={markerPosition}
-          onPositionChange={onCoordinatesChange}
-        />
-      </LightMapView>
+      />
     </div>
   );
 };

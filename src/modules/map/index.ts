@@ -2,7 +2,6 @@
 
 // Основной компонент карты
 export { default as MapPage } from './components/MapPage';
-export { default as LightMapView } from './components/LightMapView';
 
 // Map Components
 export {
