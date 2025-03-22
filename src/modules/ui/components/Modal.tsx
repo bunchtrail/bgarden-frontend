@@ -104,9 +104,9 @@ const Modal: React.FC<ModalProps> = ({
   } else if (variant === 'filled') {
     variantClass = cardClasses.filled;
   } else if (variant === 'glass') {
-    variantClass = 'bg-white/60 backdrop-blur-xl border border-white/30 shadow-lg';
+    variantClass = 'bg-white/60 border border-white/30 shadow-lg';
   } else {
-    variantClass = 'bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-xl border border-white/30 shadow-lg';
+    variantClass = 'bg-gradient-to-b from-white/95 to-white/90 border border-white/30 shadow-lg';
   }
   
   // Определяем класс размера
@@ -212,7 +212,7 @@ const Modal: React.FC<ModalProps> = ({
   
   return (
     <div 
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 transition-all duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={handleOverlayClick}

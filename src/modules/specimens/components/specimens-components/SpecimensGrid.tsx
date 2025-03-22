@@ -2,6 +2,7 @@ import React from 'react';
 import { Specimen, SectorType } from '../../types';
 import { layoutClasses, animationClasses } from '../../../../styles/global-styles';
 import SpecimenCard from './SpecimenCard';
+import { useNavigate } from 'react-router-dom';
 
 interface SpecimensGridProps {
   specimens: Specimen[];
@@ -17,6 +18,8 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   getSectorTypeName,
   onDelete
 }) => {
+  const navigate = useNavigate();
+
   if (specimens.length === 0) {
     return (
       <div className="w-full py-12 flex items-center justify-center">
@@ -28,6 +31,10 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
     );
   }
 
+  const handleCardClick = (specimenId: number) => {
+    navigate(`/specimens/${specimenId}/edit`);
+  };
+
   return (
     <div className={`${layoutClasses.grid4.replace('gap-6', 'gap-8')} ${animationClasses.fadeIn}`}>
       {specimens.map((specimen) => (
@@ -36,6 +43,7 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
             specimen={specimen}
             getSectorTypeName={getSectorTypeName}
             onDelete={onDelete}
+            onClick={() => handleCardClick(specimen.id)}
           />
         </div>
       ))}
