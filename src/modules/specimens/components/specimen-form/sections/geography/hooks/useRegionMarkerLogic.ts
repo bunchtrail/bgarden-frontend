@@ -24,7 +24,7 @@ export function useRegionMarkerLogic(
         setMarkerPosition([lat, lng]);
       }
     }
-  }, []);
+  }, [formData.latitude, formData.longitude]);
 
   // Обновление выбранных регионов при изменении regionId
   useEffect(() => {
@@ -99,9 +99,6 @@ export function useRegionMarkerLogic(
             const polygonPoints = coordinates.map((coord: [number, number]) => 
               L.latLng(coord[0], coord[1])
             );
-            
-            // Создаем полигон
-            const polygon = L.polygon(polygonPoints);
             
             // Используем isMarkerInsidePolygon вместо getBounds().contains()
             // Это даст более точное определение для треугольной или другой сложной формы

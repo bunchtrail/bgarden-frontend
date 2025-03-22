@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { COLORS, cardClasses, textClasses, buttonClasses, animationClasses } from '../../../styles/global-styles';
+import { cardClasses } from '../../../styles/global-styles';
 
 export interface ModalProps {
   /**
