@@ -5,6 +5,7 @@ export interface TimeInfo {
   greeting: string;
   icon: ReactNode;
   textColor: string;
+  type: 'morning' | 'day' | 'evening' | 'night';
 }
 
 // ====== Иконки для разных периодов суток ======
@@ -198,5 +199,10 @@ export const getTimeBasedGreeting = (): TimeInfo => {
     }
   }
 
-  return { greeting: randomGreeting, textColor, icon };
+  return { 
+    greeting: randomGreeting, 
+    textColor, 
+    icon, 
+    type: timeOfDay as 'morning' | 'day' | 'evening' | 'night' 
+  };
 }; 

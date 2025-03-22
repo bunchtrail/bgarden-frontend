@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { COLORS } from '../../../../styles/global-styles';
 
 interface FloatingElementProps {
   timeOfDay: string;
@@ -13,23 +14,23 @@ const FloatingElements: React.FC<FloatingElementProps> = React.memo(({ timeOfDay
     switch (timeOfDay) {
       case 'morning':
         elementType = 'morning-particle';
-        baseColor = 'from-amber-200 to-amber-50';
+        baseColor = `from-[${COLORS.warning.light}] to-[${COLORS.neutral.light}]`;
         break;
       case 'day':
         elementType = 'day-particle';
-        baseColor = 'from-blue-200 to-white';
+        baseColor = `from-[${COLORS.primary.light}] to-white`;
         break;
       case 'evening':
         elementType = 'evening-particle';
-        baseColor = 'from-orange-200 to-pink-50';
+        baseColor = `from-[${COLORS.warning.light}] to-[${COLORS.neutral.light}]`;
         break;
       case 'night':
         elementType = 'night-particle';
-        baseColor = 'from-indigo-300 to-blue-100';
+        baseColor = `from-[${COLORS.secondary.light}] to-[${COLORS.primary.light}]`;
         break;
       default:
         elementType = 'day-particle';
-        baseColor = 'from-blue-200 to-white';
+        baseColor = `from-[${COLORS.primary.light}] to-white`;
     }
 
     return Array.from({ length: count }, (_, i) => {

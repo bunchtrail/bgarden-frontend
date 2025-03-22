@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { textClasses } from '../../../../styles/global-styles';
 
 interface AnimatedTextProps {
   text: string;
@@ -11,7 +12,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = React.memo(({ text, baseDelay,
   const words = useMemo(() => text.split(' '), [text]);
 
   return (
-    <span className="inline-flex flex-wrap">
+    <span className={`inline-flex flex-wrap ${textClasses.primary}`}>
       {words.map((word, wordIndex) => (
         <span key={wordIndex} className="inline-flex mr-[0.25em] last:mr-0">
           {word.split('').map((char, charIndex) => (

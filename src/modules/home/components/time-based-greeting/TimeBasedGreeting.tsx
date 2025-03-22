@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { textClasses } from '../../../../styles/global-styles';
+import { textClasses, layoutClasses, COLORS } from '../../../../styles/global-styles';
 
 // Импортируем наши утилиты и типы
 import {
@@ -25,15 +25,13 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
   const [transitionState, setTransitionState] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Определяем время суток на основе цвета текста
+  // Определяем время суток для выбора анимации
   const timeOfDay = useMemo(() => {
-    if (liveTimeInfo.textColor.includes('E97451')) {
-      return new Date().getHours() >= 17 ? 'evening' : 'morning';
-    }
-    if (liveTimeInfo.textColor.includes('3882F6')) return 'day';
-    if (liveTimeInfo.textColor.includes('6366F1')) return 'night';
+    if (liveTimeInfo.type === 'morning' || liveTimeInfo.type === 'evening') return liveTimeInfo.type;
+    if (liveTimeInfo.type === 'day') return 'day';
+    if (liveTimeInfo.type === 'night') return 'night';
     return 'day';
-  }, [liveTimeInfo.textColor]);
+  }, [liveTimeInfo.type]);
 
   // Запускаем начальную анимацию
   useEffect(() => {
@@ -52,12 +50,10 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
       const newTimeInfo = getTimeBasedGreeting();
       if (
         newTimeInfo.greeting !== liveTimeInfo.greeting ||
-        newTimeInfo.textColor !== liveTimeInfo.textColor
+        newTimeInfo.type !== liveTimeInfo.type
       ) {
-        // Сначала «плавно прячем» старое приветствие
         setTransitionState('fading');
         setTimeout(() => {
-          // После небольшой задержки обновляем
           setLiveTimeInfo(newTimeInfo);
           setTransitionState('appearing');
         }, 500);
@@ -67,29 +63,46 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
     return () => clearInterval(timer);
   }, [liveTimeInfo]);
 
-  // При ререндере компонента извне сразу устанавливаем новое приветствие
+  // При изменении timeInfo снаружи
   useEffect(() => {
     setLiveTimeInfo(timeInfo);
   }, [timeInfo]);
 
-  // Выбираем CSS-класс для свечения в зависимости от текущего цвета текста
-  const glowColor = useMemo(() => {
-    if (liveTimeInfo.textColor.includes('E97451')) return 'glow-orange';
-    if (liveTimeInfo.textColor.includes('3882F6')) return 'glow-blue';
-    if (liveTimeInfo.textColor.includes('6366F1')) return 'glow-indigo';
-    return '';
-  }, [liveTimeInfo.textColor]);
+  // Цвета и эффекты в зависимости от времени суток
+  const { textColor, glowEffect, iconAnimation } = useMemo(() => {
+    let textColor, glowEffect, iconAnimation;
+    
+    switch(liveTimeInfo.type) {
+      case 'morning':
+        textColor = COLORS.warning.main;
+        glowEffect = `drop-shadow(0 0 3px ${COLORS.warning.light})`;
+        iconAnimation = 'morning-animation';
+        break;
+      case 'day':
+        textColor = COLORS.primary.main;
+        glowEffect = `drop-shadow(0 0 3px ${COLORS.primary.light})`;
+        iconAnimation = 'day-animation';
+        break;
+      case 'evening':
+        textColor = COLORS.warning.main;
+        glowEffect = `drop-shadow(0 0 3px ${COLORS.warning.light})`;
+        iconAnimation = 'evening-animation';
+        break;
+      case 'night':
+        textColor = COLORS.secondary.main;
+        glowEffect = `drop-shadow(0 0 3px ${COLORS.secondary.light})`;
+        iconAnimation = 'night-animation';
+        break;
+      default:
+        textColor = COLORS.primary.main;
+        glowEffect = `drop-shadow(0 0 3px ${COLORS.primary.light})`;
+        iconAnimation = 'day-animation';
+    }
+    
+    return { textColor, glowEffect, iconAnimation };
+  }, [liveTimeInfo.type]);
 
-  // Определяем класс анимации иконки
-  const iconAnimationClass = useMemo(() => {
-    if (liveTimeInfo.icon === ICONS.morning) return 'morning-animation';
-    if (liveTimeInfo.icon === ICONS.day) return 'day-animation';
-    if (liveTimeInfo.icon === ICONS.evening) return 'evening-animation';
-    if (liveTimeInfo.icon === ICONS.night) return 'night-animation';
-    return '';
-  }, [liveTimeInfo.icon]);
-
-  // Обработчик движения мыши для 3D-эффекта
+  // Обработчики для 3D-эффекта
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -107,34 +120,27 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
     setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)');
   }, []);
 
-  // Простая демонстрация звукового эффекта
+  // Звуковой эффект
   const playSoundEffect = useCallback(() => {
     try {
       const audio = new Audio();
-      if (timeOfDay === 'morning') {
-        audio.src = '/sounds/morning.mp3';
-      } else if (timeOfDay === 'day') {
-        audio.src = '/sounds/day.mp3';
-      } else if (timeOfDay === 'evening') {
-        audio.src = '/sounds/evening.mp3';
-      } else if (timeOfDay === 'night') {
-        audio.src = '/sounds/night.mp3';
-      }
+      audio.src = `/sounds/${timeOfDay}.mp3`;
       audio.volume = 0.3;
-      audio.play().catch(e => {/* Ошибка воспроизведения звука */});
+      audio.play().catch(e => {/* Обработка ошибки */});
     } catch (e) {
+      // Тихая обработка ошибок
     }
   }, [timeOfDay]);
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className={`${layoutClasses.flexCenter} flex-col`}>
       {/* Контейнер для 3D-эффекта */}
       <div
         ref={containerRef}
         className={`
-          flex items-center justify-center mb-3 bg-white/70 backdrop-blur-sm px-5 py-3 
+          ${layoutClasses.flexCenter} mb-3 bg-white/70 backdrop-blur-sm px-5 py-3 
           rounded-xl shadow-sm border border-gray-100 transition-all duration-300 ease-out 
-          relative overflow-hidden 
+          relative overflow-hidden
           ${transitionState === 'fading' ? 'opacity-0 scale-95' : ''} 
           ${transitionState === 'appearing' ? 'opacity-100 scale-100' : ''}
           ${isHovered ? 'shadow-md border-gray-200 hover-active' : ''}
@@ -145,7 +151,7 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
         onMouseLeave={handleMouseLeave}
         onClick={playSoundEffect}
       >
-        {/* Плавающие элементы в фоне */}
+        {/* Фоновые элементы */}
         <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
           <FloatingElements timeOfDay={timeOfDay} count={7} />
         </div>
@@ -155,10 +161,10 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           className={`
             mr-3 transition-all duration-500 ease-out transform z-10 relative
             ${animationStage >= 1 ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'} 
-            ${glowColor}
-            ${animationStage >= 1 ? iconAnimationClass : ''}
+            ${animationStage >= 1 ? iconAnimation : ''}
             ${isHovered ? 'hover-pulse-effect scale-110' : ''}
           `}
+          style={{ color: textColor, filter: glowEffect }}
         >
           {liveTimeInfo.icon}
         </span>
@@ -166,11 +172,11 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
         {/* Заголовок приветствия */}
         <h1
           className={`
-            ${textClasses.heading} text-black text-2xl font-medium transition-all 
+            ${textClasses.heading} ${textClasses.primary} text-2xl font-medium transition-all 
             duration-500 ease-out z-10 relative
             ${animationStage >= 2 ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-10 opacity-0 scale-95'}
-            ${glowColor}
           `}
+          style={{ filter: glowEffect }}
         >
           <AnimatedText
             text={liveTimeInfo.greeting}
@@ -202,12 +208,8 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
         </h1>
       </div>
 
-      {/* Встроенные стили, при желании можно вынести в .css или .module.css */}
+      {/* Встроенные стили для анимаций */}
       <style>{`
-        .glow-orange { filter: drop-shadow(0 0 3px rgba(233, 116, 81, 0.3)); }
-        .glow-blue { filter: drop-shadow(0 0 3px rgba(56, 130, 246, 0.3)); }
-        .glow-indigo { filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.3)); }
-
         /* При наведении анимация частиц запускается */
         .hover-active .morning-particle,
         .hover-active .day-particle,
@@ -248,9 +250,13 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           100% { opacity: 0.2; }
         }
 
-        /* Волновая анимация символов текста при наведении */
-        .hover-active .hover-wave-text {
-          animation: wave-text 3s ease-in-out infinite;
+        /* Анимация волны для текста */
+        .hover-wave-text {
+          display: inline-block;
+          animation: none;
+        }
+        .hover-effect:hover .hover-wave-text {
+          animation: wave-text 2s infinite;
           animation-delay: calc(0.1s * var(--char-index));
         }
         @keyframes wave-text {
@@ -261,77 +267,39 @@ const TimeBasedGreeting: React.FC<TimeBasedGreetingProps> = ({ timeInfo, userNam
           100% { transform: translateY(0); }
         }
 
-        /* Анимации для иконок утра, дня, вечера, ночи */
+        /* Анимации для иконок разного времени суток */
         .morning-animation {
-          animation: morning-appear 1s ease-out forwards, morning-shine 4s ease-in-out 1s infinite;
+          animation: morning-animation 15s infinite ease-in-out;
         }
-        @keyframes morning-appear {
-          0% { transform: translateY(10px) scale(0.5); opacity: 0; }
-          60% { transform: translateY(-3px) scale(1.1); opacity: 0.9; }
-          100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        @keyframes morning-shine {
-          0% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.4)); }
-          50% { filter: drop-shadow(0 0 6px rgba(233, 116, 81, 0.7)); }
-          100% { filter: drop-shadow(0 0 2px rgba(233, 116, 81, 0.4)); }
-        }
-
         .day-animation {
-          animation: day-appear 0.8s ease-out forwards, day-rotate 8s ease-in-out 0.8s infinite;
+          animation: day-animation 15s infinite ease-in-out;
         }
-        @keyframes day-appear {
-          0% { transform: scale(0.1) rotate(180deg); opacity: 0; }
-          50% { transform: scale(1.2) rotate(-20deg); opacity: 0.5; }
-          100% { transform: scale(1) rotate(0); opacity: 1; }
-        }
-        @keyframes day-rotate {
-          0% { transform: rotate(0); filter: brightness(1); }
-          25% { transform: rotate(5deg) scale(1.02); filter: brightness(1.1); }
-          50% { transform: rotate(0) scale(1); filter: brightness(1); }
-          75% { transform: rotate(-5deg) scale(1.02); filter: brightness(1.1); }
-          100% { transform: rotate(0) scale(1); filter: brightness(1); }
-        }
-
         .evening-animation {
-          animation: evening-appear 0.9s ease-out forwards, evening-wave 5s ease-in-out 0.9s infinite;
+          animation: evening-animation 15s infinite ease-in-out;
         }
-        @keyframes evening-appear {
-          0% { transform: translateX(-15px) scale(0.8); opacity: 0; }
-          70% { transform: translateX(3px) scale(1); opacity: 0.8; }
-          100% { transform: translateX(0) scale(1); opacity: 1; }
-        }
-        @keyframes evening-wave {
-          0% { transform: translateX(0); filter: saturate(1); }
-          25% { transform: translateX(-2px) rotate(-3deg); filter: saturate(1.2); }
-          50% { transform: translateX(0) rotate(0); filter: saturate(1); }
-          75% { transform: translateX(2px) rotate(3deg); filter: saturate(1.2); }
-          100% { transform: translateX(0) rotate(0); filter: saturate(1); }
-        }
-
         .night-animation {
-          animation: night-appear 1.2s ease-out forwards, night-twinkle 4s ease-in-out 1.2s infinite;
-        }
-        @keyframes night-appear {
-          0% { transform: scale(0.4) rotate(-30deg); opacity: 0; }
-          40% { transform: scale(1.1) rotate(10deg); opacity: 0.6; }
-          70% { transform: scale(0.9) rotate(-5deg); opacity: 0.9; }
-          100% { transform: scale(1) rotate(0); opacity: 1; }
-        }
-        @keyframes night-twinkle {
-          0% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.4)); }
-          25% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)); transform: scale(1.02); }
-          50% { filter: drop-shadow(0 0 7px rgba(99, 102, 241, 0.8)); transform: scale(1); }
-          75% { filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)); transform: scale(0.99); }
-          100% { filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.4)); transform: scale(1); }
+          animation: night-animation 15s infinite ease-in-out;
         }
 
-        .hover-effect {
-          transition: all 0.2s ease;
-          position: relative;
+        @keyframes morning-animation {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(10deg) scale(1.05); }
+          75% { transform: rotate(-5deg) scale(0.98); }
         }
-        .hover-effect:hover {
-          transform: translateY(-2px);
-          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        @keyframes day-animation {
+          0%, 100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
+          33% { transform: rotate(8deg) scale(1.08); filter: brightness(1.15); }
+          66% { transform: rotate(-8deg) scale(0.95); filter: brightness(0.92); }
+        }
+        @keyframes evening-animation {
+          0%, 100% { transform: rotate(0deg) translateX(0); }
+          33% { transform: rotate(-5deg) translateX(-2px); }
+          66% { transform: rotate(5deg) translateX(2px); }
+        }
+        @keyframes night-animation {
+          0%, 100% { transform: scale(1) rotate(0); opacity: 1; }
+          25% { transform: scale(1.1) rotate(5deg); opacity: 0.8; }
+          75% { transform: scale(0.9) rotate(-5deg); opacity: 0.9; }
         }
       `}</style>
     </div>

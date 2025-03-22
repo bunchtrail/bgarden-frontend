@@ -109,6 +109,50 @@ export const animationClasses = {
   shake: 'animate-shake',
 };
 
+// Стили для компонента приветствия TimeBasedGreeting
+export const greetingStyles = {
+  animations: `
+    @keyframes float-animation {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(120vh) rotate(360deg); }
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.2; }
+      50% { opacity: 0.7; }
+      100% { opacity: 0.2; }
+    }
+    
+    @keyframes wave-text {
+      0% { transform: translateY(0); }
+      25% { transform: translateY(-2px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(2px); }
+      100% { transform: translateY(0); }
+    }
+    
+    @keyframes pulse-animation {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.05); filter: brightness(1.1); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+  `,
+  
+  classes: {
+    iconBase: 'w-8 h-8 transition-all',
+    iconMorning: `text-[${COLORS.warning.main}]`,
+    iconDay: `text-[${COLORS.primary.main}]`,
+    iconEvening: `text-[${COLORS.warning.main}]`,
+    iconNight: `text-[${COLORS.secondary.main}]`,
+    
+    particle: 'animation: float-animation linear infinite paused',
+    particleActive: 'animation-play-state: running',
+    
+    hoverEffects: 'hover-effect hover-wave-text',
+    hoverPulse: 'hover-pulse-effect'
+  }
+};
+
 // Общий объект стилей приложения
 export const appStyles = {
   COLORS,
@@ -118,4 +162,5 @@ export const appStyles = {
   chipClasses,
   layoutClasses,
   animationClasses,
+  greetingStyles,
 }; 
