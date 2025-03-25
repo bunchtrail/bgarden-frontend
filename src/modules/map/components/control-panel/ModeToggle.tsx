@@ -44,7 +44,19 @@ const ModeToggle: React.FC<ModeToggleProps> = ({ className = '' }) => {
             onChange={() => handleModeChange(MAP_MODES.DRAW)}
             className="mr-2"
           />
-          <span className="text-sm text-gray-700">Рисование областей</span>
+          <span className="text-sm text-gray-700">Создание областей</span>
+        </label>
+        
+        <label className="flex items-center p-1 cursor-pointer hover:bg-white/30 rounded transition-colors">
+          <input
+            type="radio"
+            name="mapMode"
+            value={MAP_MODES.EDIT}
+            checked={mapConfig.interactionMode === MAP_MODES.EDIT}
+            onChange={() => handleModeChange(MAP_MODES.EDIT)}
+            className="mr-2"
+          />
+          <span className="text-sm text-gray-700">Редактирование областей</span>
         </label>
       </div>
     </div>

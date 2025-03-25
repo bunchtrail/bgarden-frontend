@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { LatLngExpression, LatLngBoundsExpression, ControlPosition } from 'leaflet';
 
 // Доступные слои карты
@@ -39,6 +39,8 @@ export interface MapConfig {
   // Настройки режима взаимодействия с картой
   interactionMode: string; // Режим взаимодействия с картой (просмотр, рисование, редактирование)
   drawingEnabled: boolean; // Включен ли режим рисования областей
+  // Режим редактирования
+  editMode: boolean;
 }
 
 // Настройки по умолчанию для стандартной карты
@@ -51,9 +53,9 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   maxBoundsViscosity: 1.0,
   zoomControlPosition: 'bottomright' as ControlPosition,
   // Дополнительные настройки
-  lightMode: true,
+  lightMode: false,
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
-  showTooltips: false,
+  showTooltips: true,
   zoomLevel: 1,
   availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showControls: true,
@@ -62,6 +64,7 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   // Настройки режима взаимодействия с картой
   interactionMode: MAP_MODES.VIEW,
   drawingEnabled: false,
+  editMode: false
 };
 
 interface MapConfigContextProps {

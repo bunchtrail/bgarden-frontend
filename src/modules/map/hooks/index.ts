@@ -3,5 +3,6 @@
 export { useMap } from './useMap';
 export { useMapData } from './useMapData';
 export { useMapLayers } from './useMapLayers';
-export { useControlPanel } from './useControlPanel';
+
+// Предпочтительный хук для панели управления
 export { default as useMapControlPanel } from './useMapControlPanel'; 

@@ -17,7 +17,8 @@ export const FormStepper: React.FC<FormStepperProps> = ({ activeStep, goToStep }
     { id: 1, title: 'Основная информация' },
     { id: 2, title: 'Таксономия' },
     { id: 3, title: 'География' },
-    { id: 4, title: 'Дополнительно' }
+    { id: 4, title: 'Дополнительно' },
+    { id: 5, title: 'Изображения' }
   ];
 
   return (

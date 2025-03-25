@@ -19,11 +19,21 @@ export const useMapData = (options?: {
   
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [regions, setRegions] = useState<RegionData[]>([]);
+  const [plants, setPlants] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(autoLoad);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
   
   const { setAreas } = useMap();
+
+  // Проверка, пуста ли карта (нет растений и регионов)
+  const checkIfEmpty = useCallback((regionsData: RegionData[] = [], plantsData: any[] = []) => {
+    const hasRegions = regionsData && Array.isArray(regionsData) && regionsData.length > 0;
+    const hasPlants = plantsData && Array.isArray(plantsData) && plantsData.length > 0;
+    
+    return !hasRegions && !hasPlants;
+  }, []);
 
   // Мемоизированная функция получения данных карты
   const fetchMapData = useCallback(async (forceUpdate = false) => {
@@ -42,13 +52,37 @@ export const useMapData = (options?: {
       setMapData(currentMapData);
       
       // Получаем регионы карты
-      const regionsData = await getAllRegions();
-      setRegions(regionsData);
+      let regionsData: RegionData[] = [];
+      try {
+        regionsData = await getAllRegions();
+        setRegions(regionsData);
+      } catch (regionsError) {
+        regionsData = [];
+        setRegions([]);
+      }
+      
+      // Получаем данные о растениях (пытаемся, но не блокируем выполнение)
+      let plantsData: any[] = [];
+      try {
+        // Здесь можно добавить получение данных о растениях,
+        // но не блокируем загрузку карты если API растений недоступно
+        // Кодом не реализуем, т.к. это будет обрабатываться в EnhancedPlantMarkersLayer
+      } catch (plantError) {
+        plantsData = [];
+      }
+      setPlants(plantsData);
+      
+      // Проверяем, пуста ли карта
+      const mapIsEmpty = checkIfEmpty(regionsData, plantsData);
+      setIsEmpty(mapIsEmpty);
       
       // Преобразуем данные регионов для MapContext
-      if (regionsData && regionsData.length > 0) {
+      if (regionsData && Array.isArray(regionsData) && regionsData.length > 0) {
         const areasData = convertRegionsToAreas(regionsData);
         setAreas(areasData);
+      } else {
+        // Если регионов нет, устанавливаем пустой массив
+        setAreas([]);
       }
       
       setLastUpdated(new Date());
@@ -72,7 +106,7 @@ export const useMapData = (options?: {
       
       throw err;
     }
-  }, [mapData, regions, lastUpdated, cacheResults, setAreas, onDataLoaded, onError]);
+  }, [mapData, regions, lastUpdated, cacheResults, setAreas, onDataLoaded, onError, checkIfEmpty]);
 
   // Эффект для автоматической загрузки данных при монтировании
   useEffect(() => {
@@ -88,14 +122,37 @@ export const useMapData = (options?: {
   // Освежение данных карты
   const refreshMapData = () => fetchMapData(true);
 
+  // Обновляем локальное состояние и отправляем событие при изменении данных
+  useEffect(() => {
+    // Обновляем значение isEmpty
+    const hasNoData = !mapImageUrl || !regions || regions.length === 0;
+    
+    setIsEmpty(hasNoData);
+    
+    // Если ошибка, выход
+    if (error) return;
+    
+    // Удалено логирование состояния данных карты
+    
+    // Вызываем колбэк, если передан
+    if (onDataLoaded && !loading && !error) {
+      onDataLoaded({
+        mapData,
+        regions
+      });
+    }
+  }, [loading, error, mapData, regions, plants, mapImageUrl, onDataLoaded]);
+
   return {
     mapData,
     regions,
+    plants,
     loading,
     error,
     mapImageUrl,
     fetchMapData,
     refreshMapData,
-    lastUpdated
+    lastUpdated,
+    isEmpty
   };
 }; 

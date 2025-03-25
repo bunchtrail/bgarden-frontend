@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useMapConfig } from '../contexts/MapConfigContext';
-import { useMapData, useControlPanel } from '../hooks';
+import { useMapData, useMapControlPanel } from '../hooks';
 import MapCard from './map-card/MapCard';
 import MapContentController from './map-content/MapContentController';
-import { MapPageContentProps } from '../types/mapTypes';
+import { MapPageContentProps, MapLayerProps } from '../types/mapTypes';
 import L from 'leaflet';
+import MapDrawingLayer from './map-layers/MapDrawingLayer';
 
 /**
  * Компонент содержимого страницы карты
@@ -26,13 +27,13 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   const [imageBoundsCalculated, setImageBoundsCalculated] = useState(false);
   
   // Хуки для данных и управления
-  const { mapData, regions, loading, error, mapImageUrl, refreshMapData } = useMapData({
+  const { mapData, regions, loading, error, mapImageUrl, refreshMapData, isEmpty } = useMapData({
     autoLoad: true, 
     onDataLoaded, 
     onError
   });
   
-  const { showControlPanel, toggleControlPanel, controlPanelStyles } = useControlPanel({
+  const { showControlPanel, toggleControlPanel, controlPanelStyles } = useMapControlPanel({
     controlPanelPosition
   });
   
@@ -55,6 +56,25 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
     if (!error) return null;
     return new Error(error);
   }, [error]);
+  
+  // Добавляем слой для рисования областей
+  const enhancedLayers = useMemo(() => {
+    // Если включен режим рисования, добавляем слой для рисования
+    const drawingLayer: MapLayerProps = {
+      layerId: 'drawing-layer',
+      order: 1000, // Высокий приоритет, чтобы рисовать поверх других слоев
+      isVisible: mapConfig.drawingEnabled,
+      component: MapDrawingLayer,
+      config: {
+        color: '#3B82F6',
+        fillColor: '#60A5FA',
+        fillOpacity: 0.3,
+        weight: 2
+      }
+    };
+    
+    return [...customLayers, drawingLayer];
+  }, [customLayers, mapConfig.drawingEnabled]);
     
   return (
     <div className="w-full h-full">
@@ -77,10 +97,11 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
           toggleControlPanel={toggleControlPanel}
           showControlPanel={showControlPanel}
           extraControls={extraControls}
-          customLayers={customLayers}
+          customLayers={enhancedLayers}
           onRegionClick={onRegionClick}
           onMapReady={onMapReady}
           plugins={plugins}
+          isEmpty={isEmpty}
         />
       </MapCard>
     </div>

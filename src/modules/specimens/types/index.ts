@@ -5,6 +5,9 @@ export interface Specimen {
   latitude: number;
   longitude: number;
   locationWkt?: string;
+  mapId?: number | null;
+  mapX: number;
+  mapY: number;
   regionId?: number | null;
   regionName?: string | null;
   familyId: number;

@@ -4,6 +4,7 @@ export { default as ModeToggle } from './ModeToggle';
 export { default as MapSettingsSection } from './MapSettingsSection';
 export { default as ControlButtons } from './ControlButtons';
 export { default as CustomSections } from './CustomSections';
+export { default as UnifiedControlPanel } from './UnifiedControlPanel';
 
 // Экспорт типов
 export * from './types';

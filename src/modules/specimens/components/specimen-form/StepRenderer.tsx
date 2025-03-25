@@ -8,7 +8,7 @@ import { FamilyDto } from '../../services/familyService';
 import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 
-interface StepRendererProps {
+export interface StepRendererProps {
   activeStep: number;
   formData: SpecimenFormData;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -17,6 +17,9 @@ interface StepRendererProps {
   families: FamilyDto[];
   regions: RegionData[];
   expositions: ExpositionDto[];
+  slideDirection?: 'left' | 'right';
+  // Шаг с загрузкой изображений
+  imagesStep?: React.ReactNode;
 }
 
 /**
@@ -30,7 +33,8 @@ const StepRenderer: React.FC<StepRendererProps> = ({
   touchedFields = {},
   families,
   regions,
-  expositions
+  expositions,
+  imagesStep
 }) => {
   switch (activeStep) {
     case 1:
@@ -66,6 +70,9 @@ const StepRenderer: React.FC<StepRendererProps> = ({
           onChange={onChange}
         />
       );
+    case 5:
+      // Шаг с загрузкой изображений
+      return <>{imagesStep}</> || null;
     default:
       return null;
   }

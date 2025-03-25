@@ -41,17 +41,23 @@ export interface SpecimenData {
   illustration: string | null;
   notes: string | null;
   filledBy: string | null;
+  mapX: number;
+  mapY: number;
 }
 
 // Функция для получения всех растений с сервера
 export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
   try {
     // Используем httpClient вместо прямого fetch
-    const data = await httpClient.get<SpecimenData[]>('/Specimen/all');
+    // Добавляем suppressErrorsForStatus: [404] чтобы подавить ошибки 404
+    const data = await httpClient.get<SpecimenData[]>('/Specimen/all', {
+      suppressErrorsForStatus: [404]
+    });
     return data;
   } catch (error) {
     logError('Ошибка при получении растений:', error);
-    throw error;
+    // Возвращаем пустой массив вместо выброса исключения
+    return [];
   }
 };
 
@@ -60,26 +66,42 @@ export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => 
   // Создаем Set для отслеживания уже использованных ID, чтобы избежать дублирования
   const usedIds = new Set<string>();
   
-  return specimens.map(specimen => {
-    // Создаем базовый ID
-    let plantId = `specimen-${specimen.id}`;
-    
-    // Если ID уже используется, добавляем уникальный суффикс
-    if (usedIds.has(plantId)) {
-      plantId = `specimen-${specimen.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-    }
-    
-    // Добавляем ID в набор использованных
-    usedIds.add(plantId);
-    
-    return {
-      id: plantId,
-      name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
-      position: [specimen.latitude, specimen.longitude] as [number, number],
-      description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
-      latinName: specimen.latinName
-    };
-  });
+  return specimens
+    .filter(specimen => {
+      // Отфильтровываем образцы без координат
+      const hasMapCoords = specimen.mapX !== undefined && specimen.mapY !== undefined;
+      const hasLatLng = specimen.latitude !== undefined && specimen.longitude !== undefined;
+      return hasMapCoords || hasLatLng;
+    })
+    .map(specimen => {
+      // Создаем базовый ID
+      let plantId = `specimen-${specimen.id}`;
+      
+      // Если ID уже используется, добавляем уникальный суффикс
+      if (usedIds.has(plantId)) {
+        plantId = `specimen-${specimen.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      }
+      
+      // Добавляем ID в набор использованных
+      usedIds.add(plantId);
+      
+      // Определяем координаты: предпочитаем mapX/mapY, но если их нет, используем latitude/longitude
+      const x = specimen.mapX !== undefined ? specimen.mapX : specimen.latitude;
+      const y = specimen.mapY !== undefined ? specimen.mapY : specimen.longitude;
+      
+      // Проверяем, что координаты действительно существуют и не null
+      if (x === undefined || y === undefined || x === null || y === null) {
+        console.warn(`Отсутствуют координаты для растения с ID ${specimen.id}`);
+      }
+      
+      return {
+        id: plantId,
+        name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
+        position: [x, y] as [number, number],
+        description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
+        latinName: specimen.latinName
+      };
+    });
 };
 
 // Функция для удаления растения с сервера по ID

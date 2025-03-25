@@ -6,6 +6,7 @@ import { cardClasses, textClasses } from '../../../../styles/global-styles';
 interface MapSettingsSectionProps {
   showTooltipToggle?: boolean;
   showClusteringToggle?: boolean;
+  showDrawingToggle?: boolean;
   onConfigChange: (key: string, value: boolean | string | number) => void;
 }
 
@@ -15,6 +16,7 @@ interface MapSettingsSectionProps {
 const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
   showTooltipToggle = true,
   showClusteringToggle = true,
+  showDrawingToggle = true,
   onConfigChange
 }) => {
   const { mapConfig } = useMapConfig();
@@ -36,6 +38,14 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
             label="Группировать маркеры"
             checked={mapConfig.enableClustering}
             onChange={() => onConfigChange('enableClustering', !mapConfig.enableClustering)}
+          />
+        )}
+        
+        {showDrawingToggle && (
+          <Switch 
+            label="Создание областей"
+            checked={mapConfig.drawingEnabled}
+            onChange={() => onConfigChange('drawingEnabled', !mapConfig.drawingEnabled)}
           />
         )}
       </div>

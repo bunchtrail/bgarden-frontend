@@ -77,8 +77,8 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
 
           {/* Координаты */}
           <CoordinatesInput 
-            latitude={formData.latitude}
-            longitude={formData.longitude}
+            mapX={formData.mapX}
+            mapY={formData.mapY}
             onChange={onChange}
           />
           

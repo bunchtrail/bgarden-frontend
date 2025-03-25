@@ -20,7 +20,6 @@ const MapImageLayer: React.FC<MapImageLayerProps> = ({
   zIndex = 10
 }) => {
   if (!bounds || !imageUrl) {
-    console.warn('MapImageLayer: missing required props bounds or imageUrl');
     return null;
   }
   

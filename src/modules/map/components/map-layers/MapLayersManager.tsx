@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, ReactNode } from 'react';
+import React, { memo, useEffect, useState, ReactNode, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster'; // Убедитесь, что этот пакет установлен
 import { RegionData } from '../../types/mapTypes';
@@ -14,6 +14,7 @@ import { MAP_COLORS } from '../../styles';
 // Импортируем компонент напрямую, а не через индексный файл
 import MapDrawingLayer from './MapDrawingLayer';
 import { EnhancedPlantMarkersLayer } from '../plant-info';
+import { useMapConfig } from '../../contexts/MapConfigContext';
 
 
 // Интерфейс для пользовательских слоёв
@@ -41,6 +42,7 @@ interface MapLayersManagerProps {
   selectedRegionIds?: string[];
   highlightSelected?: boolean;
   children?: ReactNode;
+  onPlantsLoaded?: (plants: Plant[]) => void;
 }
 
 /**
@@ -56,8 +58,12 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
   mapConfig,
   onRegionClick,
   selectedRegionIds = [],
-  highlightSelected = true
+  highlightSelected = true,
+  onPlantsLoaded
 }) => {
+  const map = useMap();
+  const { mapConfig: mapConfigContext } = useMapConfig();
+  
   // Используем расширенный хук для управления слоями
   const {
     isLayerVisible,
@@ -70,8 +76,16 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
     regions,
     customLayers,
     mapImageUrl,
-    config: mapConfig
+    config: mapConfigContext
   });
+
+  // Обработчик загрузки данных о растениях
+  const handlePlantsLoaded = useCallback((plantsData: Plant[]) => {
+    // Передаем данные в родительский компонент
+    if (onPlantsLoaded) {
+      onPlantsLoaded(plantsData);
+    }
+  }, [onPlantsLoaded]);
 
   // Проверяем, что мы находимся внутри контекста Leaflet
   const renderLayers = () => {
@@ -92,7 +106,7 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           regions={filteredRegions}
           onClick={onRegionClick}
           highlightSelected={highlightSelected}
-          showTooltips={mapConfig.showTooltips}
+          showTooltips={mapConfigContext.showTooltips}
         />
       ),
       
@@ -101,12 +115,13 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
         <EnhancedPlantMarkersLayer 
           key="map-plants"
           isVisible={true}
-          mapConfig={mapConfig}
+          mapConfig={mapConfigContext}
+          onPlantsLoaded={handlePlantsLoaded}
         />
       ),
       
       // Слой рисования (всегда последний)
-      mapConfig.drawingEnabled && (
+      mapConfigContext.drawingEnabled && (
         <MapDrawingLayer
           key="map-drawing"
           isVisible={true}

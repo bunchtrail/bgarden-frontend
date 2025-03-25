@@ -80,4 +80,7 @@ export default {
   familyService,
   regionService,
   expositionService,
-}; 
+};
+
+// Компоненты для работы с изображениями
+export { default as ImageUploader } from './components/specimen-form/ImageUploader'; 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useMapConfig } from '../contexts/MapConfigContext';
 import { PanelConfigPreset, PanelMode, PANEL_PRESETS } from '../components/control-panel/types';
 
@@ -7,6 +7,7 @@ interface UseMapControlPanelProps {
   customConfig?: Partial<PanelConfigPreset>;
   onConfigChange?: (key: string, value: boolean | string | number) => void;
   configPreset?: PanelConfigPreset;
+  controlPanelPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 }
 
 interface UseMapControlPanelReturn {
@@ -21,6 +22,10 @@ interface UseMapControlPanelReturn {
   handleSaveConfig: () => void;
   isLayerVisible: (layerId: string) => boolean;
   handleToggleLayer: (layerId: string) => void;
+  // Для совместимости
+  showControlPanel: boolean;
+  toggleControlPanel: () => void;
+  controlPanelStyles: Record<string, string>;
 }
 
 /**
@@ -30,7 +35,8 @@ export const useMapControlPanel = ({
   panelMode = 'full',
   customConfig = {},
   onConfigChange,
-  configPreset
+  configPreset,
+  controlPanelPosition = 'topRight'
 }: UseMapControlPanelProps): UseMapControlPanelReturn => {
   const { 
     mapConfig, 
@@ -43,6 +49,32 @@ export const useMapControlPanel = ({
   // Состояние для анимации и отслеживания изменений
   const [isExpanded, setIsExpanded] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // Для совместимости с существующим кодом
+  const [showControlPanel, setShowControlPanel] = useState<boolean>(true);
+  
+  const toggleControlPanel = useCallback(() => {
+    setShowControlPanel(prev => !prev);
+  }, []);
+
+  // Расчет стилей панели для совместимости
+  const controlPanelStyles = useMemo(() => {
+    const baseStyles = 'absolute z-[999]';
+    const containerStyle = (() => {
+      switch(controlPanelPosition) {
+        case 'topLeft': return `${baseStyles} top-4 left-4`;
+        case 'bottomLeft': return `${baseStyles} bottom-4 left-4`;
+        case 'bottomRight': return `${baseStyles} bottom-4 right-4`;
+        case 'topRight': 
+        default: return `${baseStyles} top-4 right-4`;
+      }
+    })();
+    
+    return {
+      container: containerStyle,
+      panel: 'bg-white rounded-lg shadow-lg p-4 mt-2'
+    };
+  }, [controlPanelPosition]);
 
   // Эффект для обнаружения изменений в конфигурации
   useEffect(() => {
@@ -66,6 +98,7 @@ export const useMapControlPanel = ({
         showClusteringToggle: customConfig.showClusteringToggle ?? false,
         showMarkerToggle: customConfig.showMarkerToggle ?? false,
         showDrawingControls: customConfig.showDrawingControls ?? false,
+        showDrawingToggle: customConfig.showDrawingToggle ?? false,
         sections: customConfig.sections
       };
     }
@@ -139,7 +172,11 @@ export const useMapControlPanel = ({
     handleResetConfig,
     handleSaveConfig,
     isLayerVisible,
-    handleToggleLayer
+    handleToggleLayer,
+    // Для совместимости
+    showControlPanel,
+    toggleControlPanel,
+    controlPanelStyles
   };
 };
 

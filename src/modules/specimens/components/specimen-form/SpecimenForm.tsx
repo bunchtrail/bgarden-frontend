@@ -1,24 +1,24 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
 import { cardClasses } from '@/styles/global-styles';
 import { useNotification } from '@/modules/notifications';
-import { useLocation } from 'react-router-dom';
-
-// Импортируем компоненты
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/modules/auth/hooks';
+import { useFormValidation } from './hooks/useFormValidation';
+import { useFormChanges } from './hooks/useFormChanges';
+import { useFormNavigation } from './hooks/useFormNavigation';
 import FormStepper from './form-stepper/FormStepper';
 import FormProgress from './form-progress/FormProgress';
 import { calculateFormProgress } from './utils/calculateFormProgress';
 import StepContainer from './StepContainer';
 import StepRenderer from './StepRenderer';
 import NavigationButtons from './NavigationButtons';
-
-// Импортируем хуки
-import { useFormNavigation } from './hooks/useFormNavigation';
-import { useFormValidation } from './hooks/useFormValidation';
-import { useFormChanges } from './hooks/useFormChanges';
+import ImageUploader from './ImageUploader';
+import { SectorType } from '@/modules/specimens/types';
 import { FamilyDto } from '../../services/familyService';
 import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
+import { createSpecimenWithImages } from '../../services/specimenService';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -39,6 +39,7 @@ interface SpecimenFormProps {
  */
 const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCancel, families, expositions, regions }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Получаем тип сектора из URL, если он там есть
   const getSectorTypeFromUrl = (): number | null => {
@@ -50,13 +51,15 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Получаем тип сектора из URL
   const sectorTypeFromUrl = getSectorTypeFromUrl();
   
-  // Инициализация дефолтных значений формы с учетом значения из URL
-  const defaultFormData: SpecimenFormData = {
+  // Начальное состояние формы
+  const initialFormState: SpecimenFormData = {
     inventoryNumber: '',
-    sectorType: sectorTypeFromUrl !== null ? Number(sectorTypeFromUrl) : 0,
+    sectorType: SectorType.Dendrology,
     latitude: 0,
     longitude: 0,
-    regionId: 0,
+    mapX: 0,
+    mapY: 0,
+    regionId: null,
     regionName: '',
     familyId: 0,
     familyName: '',
@@ -101,14 +104,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     validateField,
     validateCurrentStep,
     setTouchedFields
-  } = useFormValidation(specimen || defaultFormData);
+  } = useFormValidation(specimen || initialFormState);
 
   // Используем новый хук для управления изменениями формы
   const {
     formData,
     setFormData,
     handleChange
-  } = useFormChanges(specimen || defaultFormData, (name, value) => {
+  } = useFormChanges(specimen || initialFormState, (name, value) => {
     // Помечаем поле как затронутое и валидируем его
     setTouchedFields(prev => ({ ...prev, [name]: true }));
     validateField(name, value);
@@ -116,6 +119,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Инициализация уведомлений
   const notification = useNotification();
+
+  // Добавляем состояние для хранения выбранных изображений
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   // Обновление формы при получении данных образца
   useEffect(() => {
@@ -127,8 +135,18 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     }
   }, [specimen, setFormData]);
 
+  // Обработчик выбора изображений
+  const handleImagesChange = (files: File[]) => {
+    setSelectedImages(files);
+  };
+
+  // Обработчик ошибок загрузки изображений
+  const handleImageError = (message: string) => {
+    notification.error(message);
+  };
+
   // Отправка формы
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Проверка, вызван ли submit действительно через кнопку "Сохранить"
@@ -170,7 +188,40 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
       };
       
-      onSubmit(finalFormData);
+      // Если есть изображения, используем метод createSpecimenWithImages
+      if (selectedImages.length > 0) {
+        try {
+          setIsUploading(true);
+          
+          // Отладочный вывод
+          console.log('Отправляемые данные образца:', finalFormData);
+          console.log('Отправляемые изображения:', selectedImages.map(img => ({
+            name: img.name,
+            type: img.type,
+            size: img.size
+          })));
+          
+          const result = await createSpecimenWithImages(
+            finalFormData, 
+            selectedImages,
+            (progress) => {
+              console.log(`Прогресс загрузки: ${progress}%`);
+              setUploadProgress(progress);
+            }
+          );
+          
+          notification.success('Образец успешно создан с изображениями', { duration: 5000 });
+          navigate(`/specimens/${result.specimen.id}`);
+        } catch (error: any) {
+          console.error('Подробная ошибка:', error);
+          notification.error(`Ошибка при создании образца: ${error.message || 'Неизвестная ошибка'}`);
+        } finally {
+          setIsUploading(false);
+        }
+      } else {
+        // Если изображения не выбраны, используем стандартный метод создания образца
+        onSubmit(finalFormData);
+      }
     } else {
       notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');
       
@@ -198,7 +249,8 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     { id: 1, title: 'Основная информация' },
     { id: 2, title: 'Таксономия' },
     { id: 3, title: 'География' },
-    { id: 4, title: 'Дополнительно' }
+    { id: 4, title: 'Дополнительно' },
+    { id: 5, title: 'Изображения' },
   ];
 
   // Функция для проверки валидности шага без побочных эффектов
@@ -244,6 +296,35 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     return [1, 2, 3, 4].every(step => checkStepValidity(step));
   }, [formData]);
 
+  // Рендер шага с загрузкой изображений
+  const renderImagesStep = () => (
+    <div className="py-4">
+      <h3 className="text-xl font-semibold mb-4">Загрузка изображений</h3>
+      <p className="text-gray-600 mb-4">
+        Загрузите изображения образца. Первое изображение будет использоваться как основное.
+      </p>
+      
+      <ImageUploader
+        value={selectedImages}
+        onChange={handleImagesChange}
+        onError={handleImageError}
+        maxImages={5}
+      />
+      
+      {isUploading && (
+        <div className="mt-4">
+          <p className="text-sm font-medium mb-2">Прогресс загрузки: {uploadProgress}%</p>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div>
       <FormStepper 
@@ -264,6 +345,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
             families={families}
             regions={regions}
             expositions={expositions}
+            imagesStep={renderImagesStep()}
           />
         </StepContainer>
         

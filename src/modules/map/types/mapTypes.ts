@@ -98,6 +98,11 @@ export interface MapViewContainerProps {
   onRegionClick?: (regionId: string) => void;
   onMapReady?: (map: L.Map) => void;
   plugins?: ReactNode;
+  onDataStateChange?: (state: { 
+    hasPlants: boolean; 
+    hasRegions: boolean; 
+    isEmpty: boolean;
+  }) => void;
 }
 
 // Интерфейс для контроллера содержимого карты
@@ -120,4 +125,5 @@ export interface MapContentControllerProps {
   onRegionClick?: (regionId: string) => void;
   onMapReady?: (map: L.Map) => void;
   plugins?: ReactNode;
+  isEmpty?: boolean; // Флаг, указывающий, что на карте нет ни растений, ни областей
 } 

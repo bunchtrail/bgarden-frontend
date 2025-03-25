@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import MapContentStateRenderer from './MapContentStateRenderer';
-import MapControlsRenderer from '../map-controls/MapControlsRenderer';
+import { UnifiedControlPanel, PanelSection } from '../../components/control-panel';
 import MapViewContainer from '../map-view/MapViewContainer';
 import ImageBoundsCalculator from '../map-view/ImageBoundsCalculator';
 import { MapContentControllerProps } from '../../types/mapTypes';
@@ -28,23 +28,50 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
   customLayers,
   onRegionClick,
   onMapReady,
-  plugins
+  plugins,
+  isEmpty = false
 }) => {
+  // Локальное состояние пустоты данных, которое может обновляться из детей
+  const [localIsEmpty, setLocalIsEmpty] = useState<boolean>(isEmpty);
+  
+  // Обновляем состояние пустоты данных
+  const handleDataStateChange = useCallback((state: { 
+    hasPlants: boolean; 
+    hasRegions: boolean; 
+    isEmpty: boolean; 
+  }) => {
+    setLocalIsEmpty(state.isEmpty);
+  }, []);
+
+  // Используем значение пустоты данных, либо переданное извне, либо локальное
+  const effectiveIsEmpty = isEmpty || localIsEmpty;
+  
   return (
     <MapContentStateRenderer
       loading={loading}
       error={error}
       mapImageUrl={mapImageUrl}
       handleRefresh={refreshMapData}
+      isEmpty={effectiveIsEmpty}
     >
       {/* Элементы управления картой */}
-      <MapControlsRenderer
-        showControls={showControls}
-        controlPanelStyles={controlPanelStyles}
-        toggleControlPanel={toggleControlPanel}
-        showControlPanel={showControlPanel}
-        extraControls={extraControls}
-      />
+      {showControls && showControlPanel && (
+        <UnifiedControlPanel
+          pageType="map"
+          className={controlPanelStyles?.container}
+          onClose={toggleControlPanel}
+          customSections={extraControls}
+          panelId="main-map-control-panel"
+          config={{
+            mode: 'full',
+            visibleSections: [
+              PanelSection.LAYERS,
+              PanelSection.MODE,
+              PanelSection.SETTINGS
+            ]
+          }}
+        />
+      )}
       
       {/* Компонент для расчета границ */}
       <ImageBoundsCalculator
@@ -65,6 +92,7 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
         onRegionClick={onRegionClick}
         onMapReady={onMapReady}
         plugins={plugins}
+        onDataStateChange={handleDataStateChange}
       />
     </MapContentStateRenderer>
   );

@@ -8,10 +8,13 @@ import { logError, logWarning } from '@/utils/logger';
 // Функция для получения всех областей (регионов) с сервера
 export const getAllRegions = async (): Promise<RegionData[]> => {
   try {
-    return await httpClient.get<RegionData[]>('/Region');
+    return await httpClient.get<RegionData[]>('/Region', {
+      suppressErrorsForStatus: [404] // Подавляем ошибки 404 и получаем пустой массив
+    });
   } catch (error) {
     logError('Ошибка при получении областей:', error);
-    throw error;
+    // Возвращаем пустой массив вместо выброса исключения
+    return [];
   }
 };
 
