@@ -1,6 +1,7 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useRef, useCallback } from 'react';
 import { ErrorView, LoadingView } from '../map-components';
 import { MAP_STYLES, MAP_COLORS } from '../../styles';
+import useNotification from '../../../notifications/hooks/useNotification';
 
 interface MapContentStateRendererProps {
   loading: boolean;
@@ -23,6 +24,29 @@ const MapContentStateRenderer: React.FC<MapContentStateRendererProps> = ({
   handleRefresh,
   children
 }) => {
+  const { info } = useNotification();
+  // Добавляем ref для отслеживания показа уведомления
+  const notificationShown = useRef(false);
+  
+  // Мемоизируем функцию для показа уведомления, чтобы избежать лишних зависимостей
+  const showEmptyMapNotification = useCallback(() => {
+    if (!notificationShown.current) {
+      info('Карта отображается, но на ней нет данных о растениях и областях', {
+        duration: 10000, // Увеличенное время показа
+        dismissible: true
+      });
+      notificationShown.current = true;
+    }
+  }, [info]);
+  
+  // Эффект для показа уведомления при пустой карте
+  useEffect(() => {
+    // Показываем уведомление только если карта пуста, не в процессе загрузки и есть изображение карты
+    if (isEmpty && !loading && mapImageUrl) {
+      showEmptyMapNotification();
+    }
+  }, [isEmpty, loading, mapImageUrl, showEmptyMapNotification]); 
+  
   // Если загрузка
   if (loading && !mapImageUrl) {
     return <LoadingView message="Загрузка карты..." />;
@@ -42,32 +66,6 @@ const MapContentStateRenderer: React.FC<MapContentStateRendererProps> = ({
   // даже если данные о растениях и областях отсутствуют
   return (
     <>
-      {/* Добавляем информационное сообщение если карта пуста, но не блокируем доступ к карте */}
-      {isEmpty && !loading && (
-        <div 
-          className="absolute top-20 right-4 z-40 p-3 rounded-md shadow-md max-w-xs border border-neutral-dark/20"
-          style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-            backdropFilter: 'blur(4px)',
-            animation: 'fadeIn 0.3s ease-in-out'
-          }}
-        >
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-2" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke={MAP_COLORS.secondary}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-text-secondary">
-              Карта отображается, но на ней нет данных о растениях и областях
-            </p>
-          </div>
-        </div>
-      )}
-      
       {/* Всегда отображаем содержимое карты, независимо от наличия данных */}
       {children}
     </>
