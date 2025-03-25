@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState, useRef } from 'react';
 import 'leaflet.markercluster';
 import { useMap } from 'react-leaflet';
-import { Plant } from '../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import { MapConfig } from '../../contexts/MapConfigContext';
 import { PlantDataService } from './services/PlantDataService';
 import { useMarkers } from './hooks/useMarkers';

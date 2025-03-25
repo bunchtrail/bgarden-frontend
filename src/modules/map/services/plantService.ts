@@ -1,7 +1,7 @@
 // Сервис CRUD растений на карте 
 // Форма добавления растения 
 
-import { Plant } from '../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import httpClient from '@/services/httpClient';
 import { logError } from '@/utils/logger';
 
@@ -126,4 +126,5 @@ export const getSpecimenById = async (id: number): Promise<SpecimenData> => {
 };
 
 export { };
+
 

@@ -5,14 +5,22 @@ import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { useMapConfig, MAP_MODES } from '../../contexts/MapConfigContext';
 import { useMap as useMapContext } from '../../hooks';
-import { Area } from '../../contexts/MapContext';
+import { Area } from '@/services/regions/types';
 import { COLORS } from '../../../../styles/global-styles';
 import { logError } from '@/utils/logger';
-import { RegionData, SectorType } from '../../types/mapTypes';
+import { SectorType } from '../../types/mapTypes';
 import { Button } from '../../../../modules/ui';
 import Modal from '../../../../modules/ui/components/Modal';
 import { TextField } from '../../../../modules/ui/components/Form';
-import { PolygonFactory, createRegion, updateRegion, convertPointsToPolygonCoordinates } from '@/services/regions';
+import { 
+  PolygonFactory, 
+  createRegion, 
+  updateRegion,
+  parseCoordinates,
+  convertPointsToPolygonCoordinates,
+  calculatePolygonCenter
+} from '@/services/regions';
+import regionBridge from '@/services/regions/RegionBridge';
 
 // Дополняем типы Leaflet для устаревшего метода _flat
 declare module 'leaflet' {
@@ -130,29 +138,17 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
     points: [number, number][];
   } | null>(null);
 
+  const [selectedArea, setSelectedArea] = useState<{
+    id: string;
+    name: string;
+    description: string;
+    points: [number, number][];
+  } | null>(null);
+
   // Обновляем ссылку на текущие области
   useEffect(() => {
     areasRef.current = areas;
   }, [areas]);
-
-  // Вычисляем центр полигона
-  const calculatePolygonCenter = useCallback((points: [number, number][]): [number, number] => {
-    if (!points || points.length === 0) return [0, 0];
-    
-    const totalPoints = points.length;
-    let sumLat = 0;
-    let sumLng = 0;
-    
-    points.forEach(point => {
-      sumLat += point[0];
-      sumLng += point[1];
-    });
-    
-    return [
-      parseFloat((sumLat / totalPoints).toFixed(6)),
-      parseFloat((sumLng / totalPoints).toFixed(6))
-    ];
-  }, []);
 
   // Функция для сохранения области на сервере
   const saveAreaToServer = useCallback((
@@ -161,33 +157,27 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
     areaDescription: string, 
     points: [number, number][]
   ) => {
-    // Рассчитываем центр области
-    const [centerLat, centerLng] = calculatePolygonCenter(points);
+    // Рассчитываем центр области с помощью унифицированной функции
     
-    // Отправляем новую область на сервер
-    const polygonCoordinates = convertPointsToPolygonCoordinates(points);
-    
-    // Создаем объект с данными для API
-    const regionData: Omit<RegionData, 'id' | 'specimensCount'> = {
+    // Создаем объект Area для преобразования
+    const area: Area = {
+      id: areaId,
       name: areaName,
-      description: areaDescription || '',
-      polygonCoordinates: polygonCoordinates,
-      strokeColor: config?.color || COLORS.primary.main,
-      fillColor: config?.fillColor || COLORS.primary.light,
-      fillOpacity: config?.fillOpacity || 0.3,
-      latitude: centerLat, 
-      longitude: centerLng,
-      radius: 0,
-      boundaryWkt: '',
-      sectorType: SectorType.UNDEFINED
+      description: areaDescription,
+      points,
+      fillColor: config?.fillColor || '#60A5FA',
+      strokeColor: config?.color || '#3B82F6',
+      fillOpacity: config?.fillOpacity || 0.3
     };
     
-    // Проверяем, редактируем ли мы существующую область или создаем новую
+    // Преобразуем в RegionData с помощью моста
+    const regionData = regionBridge.toRegionData(area);
+    
     const isEditingExistingRegion = areaId.startsWith('region-');
     
     if (isEditingExistingRegion) {
-      // Получаем ID региона из ID области (убираем префикс 'region-')
-      const regionId = areaId.replace('region-', '');
+      // Получаем ID региона из ID области с помощью моста
+      const regionId = regionBridge.areaIdToRegionId(areaId);
       
       // Обновляем существующий регион
       updateRegion(regionId, regionData).then(() => {
@@ -206,7 +196,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       // Создаем новый регион
       createRegion(regionData).then(response => {
         // Сохраняем новый ID, который мы получили от сервера
-        const newRegionId = `region-${response.id}`;
+        const newRegionId = regionBridge.regionIdToAreaId(response.id);
         
         // Обновляем ID области в локальном хранилище
         const updatedAreas = areasRef.current.map(area => 
@@ -231,7 +221,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
         logError('Ошибка при сохранении области:', error);
       });
     }
-  }, [calculatePolygonCenter, config, setAreas]);
+  }, [config, setAreas]);
 
   // Функция для добавления возможности перетаскивания полигона
   const makePolygonDraggable = useCallback((polygon: L.Polygon | L.Rectangle) => {

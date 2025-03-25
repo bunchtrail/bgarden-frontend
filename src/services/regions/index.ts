@@ -1,29 +1,127 @@
 /**
  * Унифицированный модуль для работы с регионами карты
  * Консолидирует все функции и компоненты для работы с регионами
- * в рамках этапа 3 рефакторинга.
+ * 
+ * Этап 2: Консолидация базовых утилит и создание единого API для работы с координатами
+ * Этап 3: Унификация типов и интерфейсов
+ * Этап 4: Переработка `PolygonFactory` (Q2 2025)
+ *   - Используются единые утилиты из RegionUtils
+ *   - Улучшена обработка ошибок
+ *   - Оптимизировано создание полигонов
+ *   - Добавлено кэширование для повышения производительности
  */
 
-// Сначала экспортируем основные сервисы, чтобы их функции переопределили функции из утилит
-export * from './RegionService';
-export * from './PolygonFactory';
-
-// Теперь экспортируем только уникальные функции из RegionUtils
-// для предотвращения конфликтов с уже экспортированными функциями 
-export { 
-  REGION_COLORS,
+import RegionService, { 
+  RegionDto, 
+  createRegion, 
+  updateRegion,
+  deleteRegion,
+  getAllRegions,
+  getRegionById,
+  getSpecimensInRegion,
+  updateSpecimensCount,
+  getDefaultRegions,
+  getSectorRegionMapping,
+  Specimen
+} from './RegionService';
+import RegionUtils, {
+  parseCoordinates,
+  getDefaultCoordinates,
   calculatePolygonCenter,
+  calculatePolygonArea,
+  calculatePolygonPerimeter,
+  REGION_COLORS,
   isPointInPolygon,
+  isValidPolygon,
   formatCoordinates,
-  convertRegionToArea
+  CoordinateFormat,
+  simplifyPolygon,
+  convertPointsToPolygonCoordinates,
+  convertPointsToWKT,
+  parseWKT,
+  pointToObject,
+  objectToPoint,
+  pointsToObjects,
+  objectsToPoints,
+  tryParseCoordinateString,
+  CoordinatePoint,
+  CoordinateObject
 } from './RegionUtils';
 
-// Экспортируем классы для удобного импорта
-export { default as RegionService } from './RegionService';
-export { PolygonFactory } from './PolygonFactory';
-export { default as RegionUtils } from './RegionUtils';
+import { PolygonFactory, PolygonOptions, PolygonStyles } from './PolygonFactory';
+import {
+  RegionBase,
+  Area,
+  RegionData,
+  RegionBridge,
+  RegionFilterType,
+  Plant
+} from './types';
 
-// Экспортируем основные типы для работы с регионами
-// (в будущем можно создать отдельный types.ts файл для всех типов)
-export type { RegionDto } from './RegionService';
-export type { PolygonOptions, PolygonStyles } from './PolygonFactory'; 
+import regionBridge from './RegionBridge';
+
+// Экспортируем все из модуля
+export {
+  // Сервисы
+  RegionService,
+  regionBridge,
+  RegionUtils,
+  PolygonFactory,
+  
+  // API-функции для работы с регионами на сервере
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getAllRegions,
+  getRegionById,
+  getSpecimensInRegion,
+  updateSpecimensCount,
+  getDefaultRegions,
+  getSectorRegionMapping,
+  
+  // Константы и перечисления
+  REGION_COLORS,
+  CoordinateFormat,
+  RegionFilterType,
+  
+  // Функции для работы с координатами
+  parseCoordinates,
+  getDefaultCoordinates,
+  calculatePolygonCenter,
+  calculatePolygonArea,
+  calculatePolygonPerimeter,
+  isPointInPolygon,
+  isValidPolygon,
+  formatCoordinates,
+  
+  // Функции преобразования форматов
+  convertPointsToWKT,
+  parseWKT,
+  pointToObject,
+  objectToPoint,
+  pointsToObjects,
+  objectsToPoints,
+  tryParseCoordinateString,
+  convertPointsToPolygonCoordinates,
+  
+  // Оптимизация полигонов
+  simplifyPolygon
+};
+
+// Экспортируем типы отдельно с использованием 'export type'
+export type {
+  // Типы регионов
+  RegionBase,
+  Area, 
+  RegionData,
+  RegionBridge,
+  Plant,
+  
+  // Типы координат и опций
+  RegionDto,
+  CoordinatePoint,
+  CoordinateObject,
+  PolygonOptions,
+  PolygonStyles,
+  Specimen
+}; 

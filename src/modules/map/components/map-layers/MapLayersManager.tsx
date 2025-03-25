@@ -1,14 +1,14 @@
 import React, { memo, useEffect, useState, ReactNode, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster'; // Убедитесь, что этот пакет установлен
-import { RegionData } from '../../types/mapTypes';
+import { RegionData } from '@/services/regions/types';
 // Убираем импорт и используем локальное объявление
 // import { MapLayerProps } from '../MapPage';
 import { MapImageLayer, MapRegionsLayer } from '../map-components';
 import { useMapLayers } from '../../hooks/useMapLayers';
 import { MapConfig, MAP_LAYERS } from '../../contexts/MapConfigContext';
 import { getAllSpecimens, convertSpecimensToPlants } from '../../services/plantService';
-import { Plant } from '../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import { useMap } from 'react-leaflet';
 import { MAP_COLORS } from '../../styles';
 // Импортируем компонент напрямую, а не через индексный файл

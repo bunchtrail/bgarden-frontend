@@ -1,15 +1,10 @@
 - **bgarden-frontend** `(d:\Projects\BotanicalGardenApp\bgarden-frontend)`
   - `craco.config.js` (538.0 B)
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
-    - `refactoring-map-module.md` (6.2 KB)
-    - `refactoring-report-stage1.md` (7.5 KB)
-    - `refactoring-report-stage2.md` (6.2 KB)
-    - `refactoring-report-stage3.md` (10.0 KB)
-    - `refactoring-report-stage4.md` (6.3 KB)
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Рефакторинг_logic_areas_карты.md` (4.2 KB)
-    - `Структура_bgarden-frontend_от_25-03-2025.md` (22.4 KB)
+    - `Структура_bgarden-frontend_от_25-03-2025.md` (22.7 KB)
+  - **logs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\logs)`
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
   - `postcss.config.js` (82.0 B)
@@ -27,7 +22,6 @@
     - `manifest.json` (517.0 B)
     - `mockServiceWorker.js` (8.0 KB)
     - `robots.txt` (70.0 B)
-  - `README.md` (5.0 KB)
   - **scripts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\scripts)`
   - **src** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src)`
     - `App.css` (602.0 B)
@@ -121,7 +115,7 @@
           - **map-image-layer** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-image-layer)`
           - **map-layers** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers)`
             - `index.ts` (66.0 B)
-            - `MapDrawingLayer.tsx` (43.2 KB)
+            - `MapDrawingLayer.tsx` (42.6 KB)
             - `MapLayersManager.tsx` (5.0 KB)
           - **map-submodules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-submodules)`
             - `index.ts` (250.0 B)
@@ -143,7 +137,7 @@
               - `MarkerIconFactory.ts` (3.5 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\contexts)`
           - `MapConfigContext.tsx` (6.5 KB)
-          - `MapContext.tsx` (1.8 KB)
+          - `MapContext.tsx` (1.3 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\docs)`
           - `README.md` (2.1 KB)
           - `Структура_map_от_20-03-2025.md` (4.4 KB)
@@ -153,8 +147,7 @@
           - `useMapControlPanel.ts` (6.4 KB)
           - `useMapData.ts` (6.5 KB)
           - `useMapLayers.ts` (2.0 KB)
-        - `index.ts` (2.6 KB)
-        - `README.md` (3.4 KB)
+        - `index.ts` (2.5 KB)
         - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\services)`
           - `index.ts` (148.0 B)
           - `mapService.ts` (1.6 KB)
@@ -163,7 +156,7 @@
           - `index.ts` (4.4 KB)
           - `leaflet-overrides.css` (5.8 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\types)`
-          - `mapTypes.ts` (4.7 KB)
+          - `mapTypes.ts` (3.8 KB)
       - **navigation** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\navigation)`
         - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\navigation\components)`
           - **configs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\navigation\components\configs)`
@@ -241,13 +234,13 @@
                   - `index.ts` (405.0 B)
                   - `LocationDescriptionInput.tsx` (1016.0 B)
                   - `MapMarker.tsx` (1.8 KB)
-                  - `RegionMapSelector.tsx` (4.6 KB)
+                  - `RegionMapSelector.tsx` (3.8 KB)
                   - `RegionSelector.tsx` (1.2 KB)
                 - `GeographySection.tsx` (3.1 KB)
                 - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\sections\geography\hooks)`
                   - `index.ts` (107.0 B)
                   - `useMapData.ts` (714.0 B)
-                  - `useRegionMarkerLogic.ts` (6.9 KB)
+                  - `useRegionMarkerLogic.ts` (5.5 KB)
                 - `index.ts` (55.0 B)
               - **taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\sections\taxonomy)`
                 - `index.ts` (53.0 B)
@@ -356,10 +349,12 @@
     - **services** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services)`
       - `httpClient.ts` (13.5 KB)
       - **regions** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\services\regions)`
-        - `index.ts` (1.5 KB)
-        - `PolygonFactory.ts` (10.5 KB)
-        - `RegionService.ts` (11.7 KB)
-        - `RegionUtils.ts` (5.7 KB)
+        - `index.ts` (3.3 KB)
+        - `PolygonFactory.ts` (19.9 KB)
+        - `RegionBridge.ts` (3.6 KB)
+        - `RegionService.ts` (11.0 KB)
+        - `RegionUtils.ts` (15.9 KB)
+        - `types.ts` (3.0 KB)
     - `setupTests.ts` (241.0 B)
     - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\styles)`
       - `animations.css` (1.9 KB)

@@ -9,7 +9,7 @@
 import httpClient from '@/services/httpClient';
 import { logError, logWarning } from '@/utils/logger';
 import { RegionData, SectorType } from '@/modules/map/types/mapTypes';
-import { Area } from '@/modules/map/contexts/MapContext';
+import { Area } from './types';
 
 // Интерфейс для образца растения (для специализированных запросов)
 export interface Specimen {
@@ -256,26 +256,6 @@ export const getDefaultRegions = (): RegionData[] => {
 };
 
 /**
- * Функция для преобразования данных с сервера в формат Area
- */
-export const convertRegionsToAreas = (regions: RegionData[]): Area[] => {
-  return regions.map(region => {
-    // Парсим координаты из строки JSON
-    const points = parseCoordinates(region.polygonCoordinates);
-    
-    return {
-      id: `region-${region.id}`,
-      name: region.name || 'Неизвестная область',
-      points: points,
-      description: region.description || '',
-      fillColor: region.fillColor,
-      strokeColor: region.strokeColor,
-      fillOpacity: region.fillOpacity
-    };
-  });
-};
-
-/**
  * Функция для сопоставления секторов с регионами
  */
 export const getSectorRegionMapping = (sectorData: any[]): Record<number, RegionData> => {
@@ -318,7 +298,6 @@ const RegionService = {
   parseCoordinates,
   getDefaultCoordinates,
   getDefaultRegions,
-  convertRegionsToAreas,
   getSectorRegionMapping
 };
 

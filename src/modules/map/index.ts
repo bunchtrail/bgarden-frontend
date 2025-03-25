@@ -10,8 +10,6 @@ export { default as MapPage } from './components/MapPage';
 export { 
   MapProvider, 
   useMapContext,
-  type Area,
-  type Plant
 } from './contexts/MapContext';
 
 export { 
@@ -56,7 +54,6 @@ export {
   parseCoordinates,
   getDefaultCoordinates,
   getDefaultRegions,
-  convertRegionsToAreas,
   getSectorRegionMapping
 } from '@/services/regions';
 

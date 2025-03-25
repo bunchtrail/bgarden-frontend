@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
-import { getAllRegions, convertRegionsToAreas } from '@/services/regions';
-import { RegionData } from '../types/mapTypes';
+import { getAllRegions, RegionData } from '@/services/regions';
+import regionBridge from '@/services/regions/RegionBridge';
 import { useMap } from './useMap';
 import { logError } from '@/utils/logger';
 
@@ -78,7 +78,7 @@ export const useMapData = (options?: {
       
       // Преобразуем данные регионов для MapContext
       if (regionsData && Array.isArray(regionsData) && regionsData.length > 0) {
-        const areasData = convertRegionsToAreas(regionsData);
+        const areasData = regionBridge.regionsToAreas(regionsData);
         setAreas(areasData);
       } else {
         // Если регионов нет, устанавливаем пустой массив

@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { Plant } from '../../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import { MAP_COLORS } from '../../../styles';
 
 /**
