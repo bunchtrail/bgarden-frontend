@@ -4,7 +4,6 @@ export { expositionService } from './expositionService';
 export { familyService } from './familyService';
 export { phenologyService } from './phenologyService';
 export { 
-  regionService,
   getAllRegions,
   getRegionById,
   getSpecimensInRegion,
@@ -13,6 +12,6 @@ export {
   updateRegion,
   deleteRegion,
   getDefaultRegions
-} from './regionService';
+} from '@/services/regions';
 export { specimenService } from './specimenService';
 

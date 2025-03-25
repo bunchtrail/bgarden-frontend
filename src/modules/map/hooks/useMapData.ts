@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getActiveMap, getMapImageUrl, MapData } from '../services/mapService';
-import { getAllRegions, convertRegionsToAreas } from '../services/regionService';
+import { getAllRegions, convertRegionsToAreas } from '@/services/regions';
 import { RegionData } from '../types/mapTypes';
 import { useMap } from './useMap';
 import { logError } from '@/utils/logger';

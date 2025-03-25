@@ -7,7 +7,7 @@
 import L from 'leaflet';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { Area } from '@/modules/map/contexts/MapContext';
-import { parseCoordinates, calculatePolygonCenter, REGION_COLORS, isPointInPolygon } from '@/utils/regionUtils';
+import { parseCoordinates, calculatePolygonCenter, REGION_COLORS, isPointInPolygon } from './RegionUtils';
 import { COLORS } from '@/styles/global-styles';
 
 // Расширяем интерфейс Polygon для добавления кастомных свойств

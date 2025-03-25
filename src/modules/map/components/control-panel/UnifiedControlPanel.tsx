@@ -2,9 +2,7 @@ import React, { ReactNode, useCallback, useRef, useEffect, useState } from 'reac
 import { 
   useMapConfig, 
   MAP_LAYERS, 
-  MAP_MODES, 
-  DEFAULT_MAP_CONFIG 
-} from '../../contexts/MapConfigContext';
+  MAP_MODES} from '../../contexts/MapConfigContext';
 import { 
   PanelSection, 
   UnifiedPanelConfig, 
@@ -14,16 +12,10 @@ import { Switch } from '../../../ui/components/Form';
 import { 
   animationClasses, 
   cardClasses,
-  buttonClasses,
   textClasses
 } from '../../../../styles/global-styles';
-import { createRegion, updateRegion } from '../../services/regionService';
 import PanelHeader from './PanelHeader';
-import LayerSelector from './LayerSelector';
-import ModeToggle from './ModeToggle';
-import MapSettingsSection from './MapSettingsSection';
 import ControlButtons from './ControlButtons';
-import CustomSections from './CustomSections';
 
 // Глобальный реестр отрисованных панелей
 const renderedPanels = new Set<string>();

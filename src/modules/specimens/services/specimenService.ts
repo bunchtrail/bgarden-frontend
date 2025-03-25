@@ -1,6 +1,6 @@
 import httpClient from '../../../services/httpClient';
 import { SectorType, Specimen } from '../types/index';
-import { updateSpecimensCount } from '../../map/services/regionService';
+import { updateSpecimensCount } from '@/services/regions';
 
 // Интерфейс для данных изображения образца
 interface SpecimenImage {

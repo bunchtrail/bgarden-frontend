@@ -44,12 +44,21 @@ export {
   getActiveMap 
 } from './services/mapService';
 
-export { 
-  getAllRegions, 
-  convertRegionsToAreas, 
-  parseCoordinates, 
-  updateRegion 
-} from './services/regionService';
+export {
+  getAllRegions,
+  getRegionById,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getSpecimensInRegion,
+  updateSpecimensCount,
+  convertPointsToPolygonCoordinates,
+  parseCoordinates,
+  getDefaultCoordinates,
+  getDefaultRegions,
+  convertRegionsToAreas,
+  getSectorRegionMapping
+} from '@/services/regions';
 
 // Стили
 export { MAP_STYLES } from './styles';

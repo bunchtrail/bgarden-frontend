@@ -12,7 +12,7 @@ import { RegionData, SectorType } from '@/modules/map/types/mapTypes';
 import { Area } from '@/modules/map/contexts/MapContext';
 
 // Интерфейс для образца растения (для специализированных запросов)
-interface Specimen {
+export interface Specimen {
   id: number;
   name: string;
   latinName?: string;
@@ -305,8 +305,8 @@ export const getSectorRegionMapping = (sectorData: any[]): Record<number, Region
   return mapping;
 };
 
-// Экспортируем все функции для использования в других модулях
-export default {
+// Объект для обратной совместимости с импортами по умолчанию
+const RegionService = {
   getAllRegions,
   getRegionById,
   createRegion,
@@ -320,4 +320,6 @@ export default {
   getDefaultRegions,
   convertRegionsToAreas,
   getSectorRegionMapping
-}; 
+};
+
+export default RegionService; 
