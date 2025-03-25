@@ -120,12 +120,11 @@
                 - `AreaCreationModal.tsx` (1.6 KB)
                 - `AreaEditModal.tsx` (1.6 KB)
               - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer\hooks)`
-                - `useLeafletEvents.tsx` (8.6 KB)
-              - `index.ts` (199.0 B)
-              - `MapDrawingLayer.tsx` (13.9 KB)
+                - `useLeafletEvents.tsx` (8.3 KB)
               - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer\utils)`
-                - `cloneLayers.ts` (1.4 KB)
-            - `MapDrawingLayer.tsx` (42.6 KB)
+                - `cloneLayers.ts` (1.1 KB)
+                - `logDebug.ts` (587.0 B)
+            - `MapDrawingLayer.tsx` (13.8 KB)
             - `MapLayersManager.tsx` (5.0 KB)
           - **map-submodules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-submodules)`
             - `index.ts` (250.0 B)

@@ -1,16 +1,6 @@
 // MapDrawingLayer/utils/cloneLayer.ts
 import L from 'leaflet';
-
-// Добавим функцию для логирования в консоль
-const logDebug = (message: string, data?: any) => {
-  if (process.env.NODE_ENV !== 'production') {
-    if (data) {
-      console.log(`[MapDrawingLayer] ${message}`, data);
-    } else {
-      console.log(`[MapDrawingLayer] ${message}`);
-    }
-  }
-};
+import { logDebug } from './logDebug';
 
 export default function cloneLayer(originalLayer: any): L.Layer {
   let clonedLayer: L.Layer;
@@ -24,7 +14,7 @@ export default function cloneLayer(originalLayer: any): L.Layer {
     const bounds = originalLayer.getBounds();
     const options = { ...originalLayer.options };
     clonedLayer = new L.Rectangle(bounds, options);
-    logDebug('Клонирован прямоугольник', { originalId: (originalLayer as any)._leaflet_id, bounds: bounds });
+    logDebug('Клонирован прямоугольник', { originalId: (originalLayer as any)._leaflet_id, bounds });
   } else {
     clonedLayer = originalLayer;
     logDebug('Копирован другой тип слоя', {
@@ -35,4 +25,3 @@ export default function cloneLayer(originalLayer: any): L.Layer {
 
   return clonedLayer;
 }
-

@@ -1,20 +1,10 @@
 // MapDrawingLayer/hooks/useLeafletEvents.ts
 import { useEffect } from 'react';
 import L from 'leaflet';
+import { logDebug } from '../utils/logDebug';
 import cloneLayer from '../utils/cloneLayers';
 import { Area } from '@/services/regions/types';
 import { COLORS } from '@/styles/global-styles';
-
-// Добавим функцию для логирования в консоль
-const logDebug = (message: string, data?: any) => {
-  if (process.env.NODE_ENV !== 'production') {
-    if (data) {
-      console.log(`[MapDrawingLayer] ${message}`, data);
-    } else {
-      console.log(`[MapDrawingLayer] ${message}`);
-    }
-  }
-};
 
 interface UseLeafletEventsProps {
   map: L.Map;
