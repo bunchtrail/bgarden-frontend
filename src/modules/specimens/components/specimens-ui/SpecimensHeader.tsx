@@ -29,6 +29,15 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
     navigate(`/specimens?sectorType=${sectorType}`);
   };
 
+  // Обработчик нажатия на кнопку добавления образца
+  const handleAddSpecimen = () => {
+    const targetUrl = activeSectorType !== null 
+      ? `/specimens/new?sectorType=${activeSectorType}` 
+      : '/specimens/new';
+      
+    navigate(targetUrl);
+  };
+
   return (
     <div className={`${cardClasses.outlined} rounded-xl p-6 bg-white mb-8`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -95,10 +104,7 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
           </Button>
           <Button 
             variant="success"
-            onClick={() => navigate(activeSectorType !== null 
-              ? `/specimens/new?sectorType=${activeSectorType}` 
-              : '/specimens/new'
-            )}
+            onClick={handleAddSpecimen}
             className={`flex items-center ${animationClasses.springHover}`}
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
