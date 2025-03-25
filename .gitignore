@@ -22,7 +22,6 @@ bgarden-frontend.rar
 
 # testing
 /coverage
-/docs
 # production
 /build
 /.cursor
