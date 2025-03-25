@@ -63,33 +63,35 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   }, [customLayers]);
     
   return (
-    <div className="w-full h-full">
-      <MapCard 
-        title={mapTitle}
-        loading={loading}
-      >
-        <MapContentController
+    <div className="w-full h-full flex justify-center items-center pt-16 mt-10">
+      <div className="w-full max-w-6xl">
+        <MapCard 
+          title={mapTitle}
           loading={loading}
-          error={errorObj}
-          mapImageUrl={mapImageUrl}
-          regions={regions}
-          imageBounds={imageBounds}
-          imageBoundsCalculated={imageBoundsCalculated}
-          setImageBounds={setImageBounds}
-          setImageBoundsCalculated={setImageBoundsCalculated}
-          refreshMapData={handleRefresh}
-          showControls={showControls}
-          controlPanelStyles={controlPanelStyles}
-          toggleControlPanel={toggleControlPanel}
-          showControlPanel={showControlPanel}
-          extraControls={extraControls}
-          customLayers={enhancedLayers}
-          onRegionClick={onRegionClick}
-          onMapReady={onMapReady}
-          plugins={plugins}
-          isEmpty={isEmpty}
-        />
-      </MapCard>
+        >
+          <MapContentController
+            loading={loading}
+            error={errorObj}
+            mapImageUrl={mapImageUrl}
+            regions={regions}
+            imageBounds={imageBounds}
+            imageBoundsCalculated={imageBoundsCalculated}
+            setImageBounds={setImageBounds}
+            setImageBoundsCalculated={setImageBoundsCalculated}
+            refreshMapData={handleRefresh}
+            showControls={showControls}
+            controlPanelStyles={controlPanelStyles}
+            toggleControlPanel={toggleControlPanel}
+            showControlPanel={showControlPanel}
+            extraControls={extraControls}
+            customLayers={enhancedLayers}
+            onRegionClick={onRegionClick}
+            onMapReady={onMapReady}
+            plugins={plugins}
+            isEmpty={isEmpty}
+          />
+        </MapCard>
+      </div>
     </div>
   );
 };
