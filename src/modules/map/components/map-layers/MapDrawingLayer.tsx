@@ -75,12 +75,38 @@ interface MapDrawingLayerProps {
   };
 }
 
+// Добавим функцию для логирования в консоль
+const logDebug = (message: string, data?: any) => {
+  if (process.env.NODE_ENV !== 'production') {
+    if (data) {
+      console.log(`[MapDrawingLayer] ${message}`, data);
+    } else {
+      console.log(`[MapDrawingLayer] ${message}`);
+    }
+  }
+};
+
+// Отслеживаем все события Leaflet для отладки
+const trackLeafletEvents = (map: L.Map) => {
+  const events = [
+    'draw:created', 'draw:edited', 'draw:drawstart', 'draw:drawstop', 
+    'draw:deletestart', 'draw:deletestop', 'draw:toolbaropened', 'draw:toolbarclosed',
+    'layeradd', 'layerremove'
+  ];
+  
+  events.forEach(event => {
+    map.on(event, (e: any) => {
+      logDebug(`Event: ${event}`, e);
+    });
+  });
+};
+
 /**
  * Компонент для рисования и редактирования областей на карте
  */
 const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) => {
   const map = useMap();
-  const { mapConfig } = useMapConfig();
+  const { mapConfig, updateMapConfig } = useMapConfig();
   const { areas, setAreas } = useMapContext();
   const [drawControl, setDrawControl] = useState<L.Control.Draw | null>(null);
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null);
@@ -88,6 +114,9 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   const areasRef = useRef<Area[]>(areas);
   const isDrawingMode = mapConfig.interactionMode === MAP_MODES.DRAW;
   const isEditMode = mapConfig.interactionMode === MAP_MODES.EDIT;
+  
+  // Добавляем состояние для отслеживания завершения рисования полигона
+  const [hasCompletedDrawing, setHasCompletedDrawing] = useState<boolean>(false);
   
   // Состояние для модального окна
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,8 +266,12 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
 
     // Инициализация drawnItems если еще не создана
     if (!drawnItemsRef.current) {
+      logDebug('Инициализация группы drawnItems');
       drawnItemsRef.current = new L.FeatureGroup();
       map.addLayer(drawnItemsRef.current);
+      
+      // Отслеживаем все события для отладки
+      trackLeafletEvents(map);
 
       // Создаем новый экземпляр контрола для рисования
       const drawingControl = new L.Control.Draw({
@@ -276,49 +309,134 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
 
       setDrawControl(drawingControl);
 
+      // Добавляем отслеживание начала рисования
+      map.on(L.Draw.Event.DRAWSTART, (event: any) => {
+        logDebug('Событие DRAWSTART: Начало рисования', event);
+        // Сбрасываем флаг завершения рисования при начале нового рисования
+        setHasCompletedDrawing(false);
+      });
+
+      // Добавляем отслеживание остановки рисования
+      map.on(L.Draw.Event.DRAWSTOP, (event: any) => {
+        logDebug('Событие DRAWSTOP: Остановка рисования', event);
+        // Проверим, сколько слоев осталось в drawnItems после DRAWSTOP
+        if (drawnItemsRef.current) {
+          const layers = drawnItemsRef.current.getLayers();
+          logDebug('Слои в drawnItems после DRAWSTOP', {
+            count: layers.length,
+            ids: layers.map((l: any) => l._leaflet_id)
+          });
+        }
+      });
+
+      // Обрабатываем дополнительные события для отладки уровня drawing
+      const drawingTypes = ['polyline', 'polygon', 'rectangle', 'circle', 'marker'];
+      drawingTypes.forEach(type => {
+        map.on(`draw:${type}created` as any, (e: any) => {
+          logDebug(`Событие draw:${type}created`, e);
+        });
+      });
+
       // Обработчики событий при рисовании
       map.on(L.Draw.Event.CREATED, (event: any) => {
-        const layer = event.layer;
+        const { layer } = event;
+        
         if (drawnItemsRef.current) {
+          logDebug('Создан новый слой', { layerId: (layer as any)._leaflet_id, type: event.layerType });
+          
           // Создаем ID для новой области
           const newAreaId = `area-${Date.now()}`;
+          logDebug(`Создан новый ID для области: ${newAreaId}`);
           
-          // Устанавливаем ID области в свойствах слоя
-          layer.options.areaId = newAreaId;
-          
-          // Добавляем слой в группу нарисованных объектов
-          drawnItemsRef.current.addLayer(layer);
-          
-          // Добавляем возможность перетаскивать полигон
-          if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-            // Делаем полигон перетаскиваемым
-            makePolygonDraggable(layer);
-          }
-          
-          // Подготавливаем данные для новой области
-          let points: [number, number][] = [];
-          
-          if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-            const coords = layer.getLatLngs()[0];
-            if (Array.isArray(coords)) {
-              // Приводим координаты к нужному формату
-              points = coords.map((coord: any) => 
-                [coord.lat, coord.lng] as [number, number]
-              );
-              
-              // Сохраняем временные данные новой области
-              setTempAreaData({
-                newAreaId,
-                layer,
-                points
-              });
-              
-              // Открываем модальное окно для ввода имени области
-              setNewAreaName(`Новая область ${areasRef.current.length + 1}`);
-              setNewAreaDescription('');
-              setIsModalOpen(true);
+          try {
+            // Устанавливаем ID области в свойствах слоя
+            layer.options.areaId = newAreaId;
+            
+            // Добавляем слой в drawnItems напрямую, без клонирования
+            // и сразу добавляем его в группу отображаемых объектов
+            drawnItemsRef.current.addLayer(layer);
+            logDebug('Слой добавлен в группу drawnItems', { 
+              layerId: (layer as any)._leaflet_id,
+              layerCount: drawnItemsRef.current.getLayers().length 
+            });
+            
+            // Добавляем возможность перетаскивать полигон
+            if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+              // Делаем полигон перетаскиваемым
+              makePolygonDraggable(layer);
+              logDebug('Слой сделан перетаскиваемым');
             }
+            
+            // Подготавливаем данные для новой области
+            let points: [number, number][] = [];
+            
+            if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+              const coords = layer.getLatLngs()[0];
+              logDebug('Получены координаты полигона', coords);
+              
+              if (Array.isArray(coords)) {
+                // Приводим координаты к нужному формату
+                points = coords.map((coord: any) => 
+                  [coord.lat, coord.lng] as [number, number]
+                );
+                
+                logDebug('Точки полигона преобразованы', points);
+                
+                // Создаем новую область сразу и добавляем ее во временное состояние areas
+                // с базовым именем, чтобы не терять нарисованный полигон
+                const newArea: Area = {
+                  id: newAreaId,
+                  name: `Новая область ${areasRef.current.length + 1}`,
+                  description: '',
+                  points: points,
+                  strokeColor: config?.color || COLORS.primary.main,
+                  fillColor: config?.fillColor || COLORS.primary.light,
+                  fillOpacity: config?.fillOpacity || 0.3
+                };
+                
+                // Обновляем массив областей, чтобы сохранить нарисованный полигон
+                const updatedAreas = [...areasRef.current, newArea];
+                setAreas(updatedAreas);
+                logDebug('Область временно добавлена в состояние', newArea);
+                
+                // Сохраняем временные данные новой области со слоем
+                setTempAreaData({
+                  newAreaId,
+                  layer,
+                  points
+                });
+                
+                logDebug('Временные данные области сохранены', {
+                  newAreaId,
+                  pointsCount: points.length,
+                  layerId: (layer as any)._leaflet_id
+                });
+                
+                // Открываем модальное окно для ввода имени области
+                setNewAreaName(`Новая область ${areasRef.current.length + 1}`);
+                setNewAreaDescription('');
+                setIsModalOpen(true);
+                logDebug('Открыто модальное окно для ввода имени области');
+                
+                // Проверяем состояние drawnItems после всех операций
+                if (drawnItemsRef.current) {
+                  const currentLayers = drawnItemsRef.current.getLayers();
+                  logDebug('Текущие слои в drawnItems после создания', {
+                    count: currentLayers.length,
+                    ids: currentLayers.map((l: any) => l._leaflet_id)
+                  });
+                }
+                
+                // Устанавливаем флаг завершения рисования в true при создании полигона
+                setHasCompletedDrawing(true);
+                logDebug('Установлен флаг hasCompletedDrawing = true');
+              }
+            }
+          } catch (error) {
+            logDebug('Ошибка при обработке созданного полигона', error);
           }
+        } else {
+          logDebug('Ошибка: drawnItemsRef.current не существует!');
         }
       });
 
@@ -452,11 +570,163 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
 
     return () => {
       // Очистка событий при размонтировании компонента
+      map.off(L.Draw.Event.DRAWSTART);
+      map.off(L.Draw.Event.DRAWSTOP);
       map.off(L.Draw.Event.CREATED);
       map.off(L.Draw.Event.EDITED);
       map.off(L.Draw.Event.DELETED);
+      
+      // Удаляем отслеживание дополнительных событий
+      const drawingTypes = ['polyline', 'polygon', 'rectangle', 'circle', 'marker'];
+      drawingTypes.forEach(type => {
+        map.off(`draw:${type}created` as any);
+      });
+      
+      // Удаляем отслеживание всех общих событий
+      const events = [
+        'draw:created', 'draw:edited', 'draw:drawstart', 'draw:drawstop', 
+        'draw:deletestart', 'draw:deletestop', 'draw:toolbaropened', 'draw:toolbarclosed',
+        'layeradd', 'layerremove'
+      ];
+      events.forEach(event => map.off(event));
     };
   }, [map, isVisible, config, calculatePolygonCenter, areas, saveAreaToServer, isEditMode, makePolygonDraggable]);
+
+  // Подписываемся на события Leaflet, чтобы отловить момент удаления слоя
+  useEffect(() => {
+    if (!map || !isVisible) return;
+    
+    // Функция для обработки событий layeradd и layerremove
+    const handleLayerEvent = (event: any) => {
+      // Определяем тип слоя и его свойства для более детального логирования
+      const layerType = 
+        event.layer instanceof L.Polygon ? 'Polygon' :
+        event.layer instanceof L.Rectangle ? 'Rectangle' :
+        event.layer instanceof L.Marker ? 'Marker' :
+        event.layer instanceof L.Circle ? 'Circle' :
+        event.layer instanceof L.CircleMarker ? 'CircleMarker' :
+        event.layer instanceof L.Polyline ? 'Polyline' : 
+        'Unknown';
+        
+      logDebug(`Событие ${event.type}`, {
+        layer: event.layer,
+        layerId: event.layer._leaflet_id,
+        layerType,
+        hasOptions: !!event.layer.options,
+        areaId: event.layer.options?.areaId
+      });
+      
+      // Если слой удаляется, проверяем его на принадлежность к отрисованным фигурам
+      if (event.type === 'layerremove') {
+        // Если слой был частью создаваемой области, нужно попытаться его сохранить
+        if (event.layer instanceof L.Polygon || event.layer instanceof L.Rectangle) {
+          logDebug('Удаляется полигон или прямоугольник', {
+            layerId: event.layer._leaflet_id,
+            coords: event.layer.getLatLngs()
+          });
+          
+          // Проверяем, есть ли у нас временные данные и относятся ли они к удаляемому слою
+          if (tempAreaData && tempAreaData.layer) {
+            const tempLayerId = (tempAreaData.layer as any)._leaflet_id;
+            logDebug('Сравнение с временным слоем', { 
+              eventLayerId: event.layer._leaflet_id, 
+              tempLayerId 
+            });
+          }
+          
+          // Если это не наш клонированный слой (не имеет areaId), клонируем его немедленно
+          if (!event.layer.options?.areaId && isDrawingMode && !tempAreaData) {
+            try {
+              // Клонируем слой перед удалением
+              const clonedLayer = cloneLayer(event.layer);
+              const newAreaId = `area-temp-${Date.now()}`;
+              (clonedLayer as any).options.areaId = newAreaId;
+              
+              if (drawnItemsRef.current) {
+                drawnItemsRef.current.addLayer(clonedLayer);
+                
+                logDebug('Предотвращено удаление слоя - создан клон', {
+                  originalId: event.layer._leaflet_id,
+                  cloneId: (clonedLayer as any)._leaflet_id,
+                  newAreaId
+                });
+                
+                // Получаем координаты из удаляемого слоя
+                let points: [number, number][] = [];
+                if (event.layer instanceof L.Polygon || event.layer instanceof L.Rectangle) {
+                  const coords = event.layer.getLatLngs()[0];
+                  if (Array.isArray(coords)) {
+                    points = coords.map((coord: any) => 
+                      [coord.lat, coord.lng] as [number, number]
+                    );
+                    
+                    // Сохраняем временные данные для использования позже
+                    setTempAreaData({
+                      newAreaId,
+                      layer: clonedLayer,
+                      points
+                    });
+                    
+                    // Устанавливаем флаг завершения рисования
+                    setHasCompletedDrawing(true);
+                    
+                    logDebug('Клонированный слой сохранен во временных данных', {
+                      newAreaId,
+                      points
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              logDebug('Ошибка при клонировании удаляемого слоя', error);
+            }
+          }
+        }
+      }
+      
+      // Если у нас есть временные данные и слой совпадает с временным
+      if (tempAreaData && event.layer._leaflet_id === (tempAreaData.layer as any)._leaflet_id) {
+        logDebug(`Событие ${event.type} затронуло текущий редактируемый слой!`, {
+          tempLayer: tempAreaData.layer,
+          eventLayer: event.layer
+        });
+      }
+    };
+    
+    // Подписываемся на события добавления и удаления слоев на карте
+    map.on('layeradd', handleLayerEvent);
+    map.on('layerremove', handleLayerEvent);
+    
+    return () => {
+      map.off('layeradd', handleLayerEvent);
+      map.off('layerremove', handleLayerEvent);
+    };
+  }, [map, isVisible, tempAreaData, isDrawingMode]);
+  
+  // Функция для клонирования слоя
+  const cloneLayer = (originalLayer: any): L.Layer => {
+    let clonedLayer: L.Layer;
+    
+    if (originalLayer instanceof L.Polygon) {
+      // Клонируем полигон
+      const latlngs = originalLayer.getLatLngs();
+      const options = { ...originalLayer.options };
+      clonedLayer = new L.Polygon(latlngs, options);
+      logDebug('Клонирован полигон', { originalId: (originalLayer as any)._leaflet_id, latlngs });
+    } else if (originalLayer instanceof L.Rectangle) {
+      // Клонируем прямоугольник
+      const bounds = originalLayer.getBounds();
+      const options = { ...originalLayer.options };
+      clonedLayer = new L.Rectangle(bounds, options);
+      logDebug('Клонирован прямоугольник', { originalId: (originalLayer as any)._leaflet_id, bounds });
+    } else {
+      // Для других типов (на всякий случай)
+      clonedLayer = originalLayer;
+      logDebug('Копирован другой тип слоя', { originalId: (originalLayer as any)._leaflet_id, type: originalLayer.constructor.name });
+    }
+    
+    return clonedLayer;
+  };
 
   // Обновляем слои при изменении областей - синхронизация состояния
   useEffect(() => {
@@ -509,9 +779,30 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
     };
   }, [map, isVisible, isDrawingMode, isEditMode, drawControl]);
 
+  // Эффект для сброса флага завершения рисования при изменении режима
+  useEffect(() => {
+    if (!isDrawingMode) {
+      setHasCompletedDrawing(false);
+      logDebug('Сброшен флаг hasCompletedDrawing из-за изменения режима');
+    }
+  }, [isDrawingMode]);
+
+  // Экспортируем состояние завершения рисования в родительский контекст
+  useEffect(() => {
+    // Если есть функция для обновления глобального состояния, вызываем ее
+    if (updateMapConfig && isDrawingMode) {
+      updateMapConfig({ hasCompletedDrawing });
+      logDebug(`Обновлен глобальный флаг hasCompletedDrawing = ${hasCompletedDrawing}`);
+    }
+  }, [hasCompletedDrawing, isDrawingMode, updateMapConfig]);
+
   // Обработчик сохранения имени области из модального окна
   const handleSaveAreaName = () => {
-    if (!tempAreaData) return;
+    logDebug('Вызван обработчик сохранения имени области');
+    if (!tempAreaData) {
+      logDebug('Ошибка: tempAreaData отсутствует');
+      return;
+    }
     
     const { newAreaId, points } = tempAreaData;
     
@@ -523,28 +814,70 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       points: points
     };
     
+    logDebug('Создана новая область', newArea);
+    
+    // Проверяем состояние drawnItems перед обновлением
+    if (drawnItemsRef.current) {
+      const currentLayers = drawnItemsRef.current.getLayers();
+      logDebug('Слои в drawnItems перед добавлением области', {
+        count: currentLayers.length,
+        ids: currentLayers.map((l: any) => l._leaflet_id)
+      });
+    }
+    
     // Обновляем состояние областей
     const updatedAreas = [...areasRef.current, newArea];
     setAreas(updatedAreas);
+    logDebug('Обновлен массив областей', { count: updatedAreas.length });
     
     // Сохраняем на сервере
     saveAreaToServer(newAreaId, newArea.name, newArea.description || '', points);
+    logDebug('Отправлен запрос на сохранение области на сервере');
     
-    // Закрываем модальное окно и очищаем временные данные
-    setIsModalOpen(false);
-    setTempAreaData(null);
-  };
-
-  // Обработчик отмены создания области
-  const handleCancelAreaCreation = () => {
-    if (tempAreaData && drawnItemsRef.current) {
-      // Удаляем нарисованную область с карты
-      drawnItemsRef.current.removeLayer(tempAreaData.layer);
+    // Проверяем, сохранился ли слой в drawnItems
+    if (drawnItemsRef.current) {
+      const hasLayer = drawnItemsRef.current.getLayers().some(
+        (l: any) => l.options?.areaId === newAreaId
+      );
+      logDebug(`Слой ${newAreaId} присутствует в drawnItems: ${hasLayer}`);
     }
     
     // Закрываем модальное окно и очищаем временные данные
     setIsModalOpen(false);
     setTempAreaData(null);
+    logDebug('Модальное окно закрыто, временные данные очищены');
+    
+    // Устанавливаем флаг завершения рисования в true
+    setHasCompletedDrawing(true);
+    logDebug('Установлен флаг hasCompletedDrawing = true');
+  };
+
+  // Обработчик отмены создания области
+  const handleCancelAreaCreation = () => {
+    logDebug('Вызван обработчик отмены создания области');
+    if (tempAreaData && drawnItemsRef.current) {
+      // Удаляем нарисованную область с карты
+      logDebug('Удаление слоя с карты', {
+        layerId: (tempAreaData.layer as any)._leaflet_id
+      });
+      drawnItemsRef.current.removeLayer(tempAreaData.layer);
+      
+      // Проверяем, действительно ли слой удален
+      const remainingLayers = drawnItemsRef.current.getLayers();
+      logDebug('Оставшиеся слои после удаления', {
+        count: remainingLayers.length,
+        ids: remainingLayers.map((l: any) => l._leaflet_id)
+      });
+    }
+    
+    // Закрываем модальное окно и очищаем временные данные
+    setIsModalOpen(false);
+    setTempAreaData(null);
+    logDebug('Модальное окно закрыто, временные данные очищены');
+    
+    // Сбрасываем флаг завершения рисования
+    setHasCompletedDrawing(false);
+    logDebug('Сброшен флаг hasCompletedDrawing');
   };
 
   // Обработчик сохранения изменений области

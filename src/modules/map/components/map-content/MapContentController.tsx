@@ -54,8 +54,8 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
       handleRefresh={refreshMapData}
       isEmpty={effectiveIsEmpty}
     >
-      {/* Элементы управления картой */}
-      {showControls && showControlPanel && (
+      {/* Элементы управления картой - теперь внутренняя логика видимости панели */}
+      {showControls && (
         <UnifiedControlPanel
           pageType="map"
           className={controlPanelStyles?.container}

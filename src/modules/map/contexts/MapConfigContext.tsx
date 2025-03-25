@@ -41,6 +41,8 @@ export interface MapConfig {
   drawingEnabled: boolean; // Включен ли режим рисования областей
   // Режим редактирования
   editMode: boolean;
+  // Флаг завершения рисования полигона
+  hasCompletedDrawing: boolean;
 }
 
 // Настройки по умолчанию для стандартной карты
@@ -64,7 +66,8 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   // Настройки режима взаимодействия с картой
   interactionMode: MAP_MODES.VIEW,
   drawingEnabled: false,
-  editMode: false
+  editMode: false,
+  hasCompletedDrawing: false
 };
 
 interface MapConfigContextProps {
