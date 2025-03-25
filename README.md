@@ -1,46 +1,88 @@
-# Getting Started with Create React App
+# Роадмап рефакторинга Botanical Garden App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Выявленные проблемы
 
-## Available Scripts
+В ходе анализа кодовой базы приложения были выявлены следующие проблемы:
 
-In the project directory, you can run:
+1. **Дублирование сервисов для работы с регионами:**
+   - Основной сервис `src/services/regions/RegionService.ts`
+   - Устаревший сервис в `src/modules/map/services/regionService.ts`
+   - Ещё один сервис в `src/modules/specimens/services/regionService.ts`
 
-### `npm start`
+2. **Дублирование функций преобразования регионов:**
+   - `convertRegionsToAreas` в `src/services/regions/RegionService.ts`
+   - Аналогичная функция в `src/utils/regionUtils.ts`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+3. **Множественные фабрики для создания полигонов:**
+   - Основная `PolygonFactory` в `src/services/regions/PolygonFactory.ts`
+   - Устаревшая `MapPolygonFactory` в `src/services/MapPolygonFactory.ts`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+4. **Дублирование утилитарных функций:**
+   - `parseCoordinates` в разных модулях
+   - `getDefaultCoordinates` в разных местах
 
-### `npm test`
+## План рефакторинга
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Этап 1: Подготовка (1-2 дня)
+- [x] Создать ветку `refactor/region-services`
+- [x] Провести полный аудит импортов классов `RegionService` и `PolygonFactory`
+- [x] Убедиться, что тесты покрывают все критические функции
+- [x] Задокументировать результаты в `docs/refactoring-report-stage1.md`
 
-### `npm run build`
+### Этап 2: Консолидация утилитарных функций (2-3 дня)
+- [ ] Перенести все утилитарные функции из `regionUtils.ts` в унифицированный модуль `services/regions`
+- [ ] Обеспечить обратную совместимость через реэкспорты
+- [ ] Создать единую точку входа для всех функций через `index.ts`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Этап 3: Объединение сервисов (3-4 дня)
+- [ ] Расширить основной `RegionService` функциональностью из модульных сервисов
+- [ ] Создать новые типы и интерфейсы для универсальной работы с регионами
+- [ ] Обновить зависимости во всех компонентах, использующих сервисы регионов
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Этап 4: Унификация фабрик (2-3 дня)
+- [ ] Доработать `PolygonFactory` всеми необходимыми методами
+- [ ] Удалить `MapPolygonFactory` после переноса всех функций
+- [ ] Обновить импорты во всех компонентах, использующих фабрики
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Этап 5: Очистка кода (1-2 дня)
+- [ ] Удалить устаревшие файлы и модули после успешного тестирования
+- [ ] Добавить предупреждения о депрекации (`@deprecated`) к реэкспортам
+- [ ] Проверить возможные регрессии и производительность
 
-### `npm run eject`
+### Этап 6: Тестирование и документация (2-3 дня)
+- [ ] Провести полное тестирование модуля карты
+- [ ] Обновить документацию по модулям
+- [ ] Создать схему зависимостей для обновлённой структуры
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Приоритетные задачи
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Высокий приоритет:**
+   - Унификация `PolygonFactory` и `RegionService`
+   - Исправление функции `convertRegionsToAreas`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+2. **Средний приоритет:**
+   - Удаление устаревших сервисов
+   - Рефакторинг компонента `MapRegionsLayer`
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+3. **Низкий приоритет:**
+   - Улучшение типизации
+   - Оптимизация производительности рендеринга регионов
 
-## Learn More
+## Технические примечания
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Использовать абсолютные импорты (`@/services/regions`)
+- Следовать правилам модульной структуры
+- Обеспечить обратную совместимость на переходном этапе
+- Обновлять тесты параллельно с изменениями в коде
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Ожидаемые результаты
+
+После завершения рефакторинга:
+1. Единый модуль `services/regions` для всей логики работы с регионами
+2. Отсутствие дублирования кода
+3. Улучшенная поддержка и расширяемость
+4. Упрощённая структура зависимостей
+
+## Текущий статус
+- Завершен этап 1 (25.03.2025): создана ветка, проведен аудит импортов, подготовлен отчет
+- Следующий этап: консолидация утилитарных функций

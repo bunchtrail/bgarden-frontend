@@ -1,10 +1,10 @@
 import React from 'react';
 import { Polygon, Tooltip } from 'react-leaflet';
 import { RegionData } from '../../types/mapTypes';
-import { parseCoordinates } from '../../services/regionService';
 import { useMap as useMapHook } from '../../hooks';
 import { MAP_STYLES } from '../../styles';
-import { COLORS, textClasses } from '../../../../styles/global-styles';
+import { COLORS, textClasses } from '@/styles/global-styles';
+import { parseCoordinates, PolygonFactory } from '@/services/regions';
 
 interface MapRegionsLayerProps {
   regions: RegionData[];
@@ -22,8 +22,9 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
   const { setSelectedAreaId, selectedAreaId } = useMapHook();
 
   const handleRegionClick = (regionId: string | number) => {
-    setSelectedAreaId(`region-${regionId}`);
-    if (onClick) onClick(String(regionId));
+    const id = typeof regionId === 'number' ? `region-${regionId}` : regionId;
+    setSelectedAreaId(id);
+    if (onClick) onClick(typeof regionId === 'number' ? String(regionId) : regionId);
   };
   
   return (
@@ -34,34 +35,29 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
         
         const isSelected = highlightSelected && selectedAreaId === `region-${region.id}`;
         
+        // Используем унифицированную фабрику для создания стилей полигонов
+        const pathOptions = PolygonFactory.createStyles({ 
+          isSelected, 
+          strokeColor: region.strokeColor,
+          fillColor: region.fillColor,
+          fillOpacity: region.fillOpacity
+        });
+        
+        // Используем унифицированную фабрику для создания обработчиков событий
+        const eventHandlers = PolygonFactory.createEventHandlers(
+          { 
+            isSelected, 
+            onClick: handleRegionClick 
+          }, 
+          region
+        );
+        
         return (
           <Polygon
             key={`region-${region.id}`}
             positions={coordinates}
-            pathOptions={{
-              fillColor: isSelected ? COLORS.primary.main : (region.fillColor || COLORS.text.secondary),
-              color: isSelected ? COLORS.primary.dark : (region.strokeColor || COLORS.text.primary),
-              fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-              weight: isSelected ? 3 : 2,
-              opacity: 0.8
-            }}
-            eventHandlers={{
-              click: () => handleRegionClick(region.id),
-              mouseover: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: 0.5,
-                  weight: isSelected ? 3 : 2.5,
-                });
-              },
-              mouseout: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-                  weight: isSelected ? 3 : 2,
-                });
-              }
-            }}
+            pathOptions={pathOptions}
+            eventHandlers={eventHandlers}
           >
             {showTooltips && (
               <Tooltip sticky>

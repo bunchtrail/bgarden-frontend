@@ -1,5 +1,5 @@
 // Экспорт стилей модуля карты
-import { COLORS, layoutClasses, animationClasses } from '@/styles/global-styles';
+import { COLORS } from '@/styles/global-styles';
 
 // Импорт переопределений стилей Leaflet
 import './leaflet-overrides.css';
@@ -46,9 +46,9 @@ export const MAP_STYLES = {
   // Анимации
   animation: {
     fadeIn: 'animate-fadeIn',
-    slideInRight: animationClasses.transition + ' translate-x-0 opacity-100',
-    slideOutRight: animationClasses.transition + ' translate-x-full opacity-0',
-    springHover: animationClasses.springHover,
+    slideInRight: 'transition-all duration-300 ease-in-out translate-x-0 opacity-100',
+    slideOutRight: 'transition-all duration-300 ease-in-out translate-x-full opacity-0',
+    springHover: 'hover:scale-105 transition-transform duration-200',
   },
   
   // Стили карты Leaflet (переопределение стилей библиотеки)

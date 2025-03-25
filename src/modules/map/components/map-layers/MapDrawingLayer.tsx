@@ -7,12 +7,12 @@ import { useMapConfig, MAP_MODES } from '../../contexts/MapConfigContext';
 import { useMap as useMapContext } from '../../hooks';
 import { Area } from '../../contexts/MapContext';
 import { COLORS } from '../../../../styles/global-styles';
-import { createRegion, updateRegion, convertPointsToPolygonCoordinates } from '../../services/regionService';
 import { logError } from '@/utils/logger';
 import { RegionData, SectorType } from '../../types/mapTypes';
 import { Button } from '../../../../modules/ui';
 import Modal from '../../../../modules/ui/components/Modal';
 import { TextField } from '../../../../modules/ui/components/Form';
+import { PolygonFactory, createRegion, updateRegion, convertPointsToPolygonCoordinates } from '@/services/regions';
 
 // Дополняем типы Leaflet для устаревшего метода _flat
 declare module 'leaflet' {
@@ -552,16 +552,15 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       // Отображаем только те области, которые еще не на карте
       areas.forEach(area => {
         if (area.points.length > 2 && !displayedAreaIds.includes(area.id)) {
-          const polygon = L.polygon(area.points, {
-            color: area.strokeColor || config?.color || COLORS.primary.main,
+          // Используем фабрику для создания полигона
+          const polygon = PolygonFactory.createFromPoints(area.points, {
+            areaId: area.id,
+            strokeColor: area.strokeColor || config?.color || COLORS.primary.main,
             fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
             fillOpacity: area.fillOpacity || config?.fillOpacity || 0.3,
             weight: config?.weight || 2,
-            areaId: area.id // Сохраняем ID области для редактирования
+            isDraggable: true
           });
-          
-          // Делаем полигон перетаскиваемым
-          makePolygonDraggable(polygon);
           
           drawnItemsRef.current?.addLayer(polygon);
         }
@@ -738,21 +737,20 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
     // Добавляем все области заново
     areas.forEach(area => {
       if (area.points.length > 2) {
-        const polygon = L.polygon(area.points, {
-          color: area.strokeColor || config?.color || COLORS.primary.main,
+        // Используем фабрику для создания полигона
+        const polygon = PolygonFactory.createFromPoints(area.points, {
+          areaId: area.id,
+          strokeColor: area.strokeColor || config?.color || COLORS.primary.main,
           fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
           fillOpacity: area.fillOpacity || config?.fillOpacity || 0.3,
           weight: config?.weight || 2,
-          areaId: area.id
+          isDraggable: true
         });
-        
-        // Делаем полигон перетаскиваемым
-        makePolygonDraggable(polygon);
         
         drawnItemsRef.current?.addLayer(polygon);
       }
     });
-  }, [areas, isVisible, config, isEditMode, makePolygonDraggable]);
+  }, [areas, isVisible, config, isEditMode]);
 
   // Управление видимостью controls в зависимости от режима
   useEffect(() => {
@@ -917,6 +915,31 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   const handleCancelAreaEdit = () => {
     setIsEditModalOpen(false);
     setEditingAreaId(null);
+  };
+
+  // Перерисовываем все области заново при редактировании
+  const redrawAllAreas = (updatedAreas: Area[]) => {
+    if (!drawnItemsRef.current) return;
+    
+    // Очищаем все слои
+    drawnItemsRef.current.clearLayers();
+    
+    // Добавляем все области заново
+    updatedAreas.forEach(area => {
+      if (area.points.length > 2) {
+        // Используем фабрику для создания полигона
+        const polygon = PolygonFactory.createFromPoints(area.points, {
+          areaId: area.id,
+          strokeColor: area.strokeColor || config?.color || COLORS.primary.main,
+          fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
+          fillOpacity: area.fillOpacity || config?.fillOpacity || 0.3,
+          weight: config?.weight || 2,
+          isDraggable: true
+        });
+        
+        drawnItemsRef.current?.addLayer(polygon);
+      }
+    });
   };
 
   return (

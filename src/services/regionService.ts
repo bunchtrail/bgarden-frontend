@@ -4,7 +4,7 @@
  * import { ... } from '@/services/regions';
  */
 
-import * as RegionService from '@/services/regions/RegionService';
+import * as RegionService from './regions/RegionService';
 
 // Реэкспортируем все функции для обратной совместимости
 export const {
@@ -23,4 +23,4 @@ export const {
   getSectorRegionMapping
 } = RegionService;
 
-export default RegionService.default;
+export default RegionService.default; 
