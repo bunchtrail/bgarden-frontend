@@ -3,7 +3,7 @@
   - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\docs)`
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Структура_bgarden-frontend_от_25-03-2025.md` (22.7 KB)
+    - `Структура_bgarden-frontend_от_25-03-2025.md` (23.5 KB)
   - **logs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\logs)`
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
@@ -115,6 +115,16 @@
           - **map-image-layer** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-image-layer)`
           - **map-layers** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers)`
             - `index.ts` (66.0 B)
+            - **MapDrawingLayer** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer)`
+              - **components** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer\components)`
+                - `AreaCreationModal.tsx` (1.6 KB)
+                - `AreaEditModal.tsx` (1.6 KB)
+              - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer\hooks)`
+                - `useLeafletEvents.tsx` (8.6 KB)
+              - `index.ts` (199.0 B)
+              - `MapDrawingLayer.tsx` (13.9 KB)
+              - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-layers\MapDrawingLayer\utils)`
+                - `cloneLayers.ts` (1.4 KB)
             - `MapDrawingLayer.tsx` (42.6 KB)
             - `MapLayersManager.tsx` (5.0 KB)
           - **map-submodules** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-submodules)`
