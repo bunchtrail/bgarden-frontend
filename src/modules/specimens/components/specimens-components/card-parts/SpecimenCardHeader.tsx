@@ -24,7 +24,7 @@ export const getSpecimenCardHeader = (props: SpecimenCardHeaderProps): SpecimenC
   
   const headerAction = (
     <span 
-      className="text-xs text-[#86868B] font-medium bg-white/70 backdrop-blur-sm rounded-full 
+      className="text-xs text-[#86868B] font-medium bg-white/70 rounded-full 
         px-2.5 py-1.5 shadow-sm"
       aria-label={`Идентификатор образца: ${id}`}
     >

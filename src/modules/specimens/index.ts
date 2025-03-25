@@ -20,6 +20,7 @@ import SpecimensTable from './components/specimens-components/SpecimensTable';
 import SpecimensGrid from './components/specimens-components/SpecimensGrid';
 import SpecimenRow from './components/specimens-components/SpecimenRow';
 import SpecimenCard from './components/specimens-components/SpecimenCard';
+import SpecimenModal from './components/specimens-components/SpecimenModal';
 
 // Сервисы
 import { specimenService } from './services/specimenService';
@@ -64,6 +65,7 @@ export {
   SpecimensGrid,
   SpecimenRow,
   SpecimenCard,
+  SpecimenModal,
   
   // Сервисы
   specimenService,

@@ -40,7 +40,7 @@ export const COLORS = {
 export const cardClasses = {
   base: 'rounded-xl overflow-hidden',
   
-  elevated: 'bg-white/80 backdrop-blur-lg border border-[#E5E5EA]/80 shadow-md',
+  elevated: 'bg-white/80 border border-[#E5E5EA]/80 shadow-md',
   outlined: 'bg-white border border-[#E5E5EA]',
   filled: 'bg-[#F5F5F7]',
   

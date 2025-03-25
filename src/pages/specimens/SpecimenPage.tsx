@@ -4,12 +4,13 @@ import { specimenService } from '../../modules/specimens/services/specimenServic
 import { familyService, FamilyDto } from '../../modules/specimens/services/familyService';
 import { expositionService, ExpositionDto } from '../../modules/specimens/services/expositionService';
 import { getAllRegions } from '../../modules/specimens/services/regionService';
-import { Specimen, SpecimenFormData } from '../../modules/specimens/types';
+import { Specimen, SpecimenFormData, SectorType } from '../../modules/specimens/types';
 import { RegionData } from '../../modules/map/types/mapTypes';
 import LoadingSpinner from '../../modules/ui/components/LoadingSpinner';
 import Button from '../../modules/ui/components/Button';
 import Card from '../../modules/ui/components/Card';
 import SpecimenForm from '../../modules/specimens/components/specimen-form';
+import { cardClasses, textClasses, buttonClasses, layoutClasses, chipClasses, animationClasses } from '../../styles/global-styles';
 
 /**
  * Страница детального просмотра и редактирования образца растения
@@ -17,7 +18,7 @@ import SpecimenForm from '../../modules/specimens/components/specimen-form';
 const SpecimenPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation(); // Получаем текущий URL
+  const location = useLocation();
   const [specimen, setSpecimen] = useState<Specimen | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,10 +142,24 @@ const SpecimenPage: React.FC = () => {
     }
   };
 
+  // Получение названия сектора
+  const getSectorTypeName = (sectorType: SectorType): string => {
+    switch (sectorType) {
+      case SectorType.Dendrology:
+        return 'Дендрология';
+      case SectorType.Flora:
+        return 'Флора';
+      case SectorType.Flowering:
+        return 'Цветение';
+      default:
+        return 'Неизвестный сектор';
+    }
+  };
+
   // Рендеринг в зависимости от состояния
   if (loading || referencesLoading) {
     return (
-      <div className="flex justify-center items-center p-10 mt-16">
+      <div className={`${layoutClasses.flexCenter} p-10 mt-16`}>
         <LoadingSpinner />
       </div>
     );
@@ -152,12 +167,12 @@ const SpecimenPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 text-red-700 p-4 rounded-md mt-16">
-        <h2 className="text-lg font-bold">Ошибка</h2>
-        <p>{error}</p>
+      <div className="bg-red-100 text-red-700 p-6 rounded-xl mt-16 shadow-sm">
+        <h2 className={`${textClasses.heading} text-lg mb-2`}>Ошибка</h2>
+        <p className={textClasses.body}>{error}</p>
         <Button 
           variant="danger"
-          className="mt-2"
+          className="mt-4"
           onClick={() => navigate('/specimens')}
         >
           Вернуться к списку
@@ -167,16 +182,33 @@ const SpecimenPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 mt-16">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">
-          {id === 'new' 
-            ? 'Добавление нового образца' 
-            : `Образец: ${specimen?.russianName || specimen?.latinName || 'Без названия'}`}
-        </h1>
+    <div className={`${layoutClasses.container} mt-16 pb-16`}>
+      <div className={`${layoutClasses.flexBetween} mb-6`}>
+        <div>
+          <h1 className={`${textClasses.heading} text-2xl sm:text-3xl`}>
+            {id === 'new' 
+              ? 'Добавление нового образца' 
+              : `Образец: ${specimen?.russianName || specimen?.latinName || 'Без названия'}`}
+          </h1>
+          {specimen && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className={`${chipClasses.base} ${chipClasses.primary}`}>
+                № {specimen.inventoryNumber}
+              </span>
+              <span className={`${chipClasses.base} ${chipClasses.secondary}`}>
+                {getSectorTypeName(specimen.sectorType as SectorType)}
+              </span>
+              {specimen.hasHerbarium && (
+                <span className={`${chipClasses.base} ${chipClasses.warning}`}>
+                  Имеется гербарий
+                </span>
+              )}
+            </div>
+          )}
+        </div>
         
         <div className="flex gap-2">
-          {!isEditing && (
+          {!isEditing && id !== 'new' && (
             <Button 
               variant="primary"
               onClick={() => setIsEditing(true)}
@@ -195,7 +227,7 @@ const SpecimenPage: React.FC = () => {
       </div>
 
       {isEditing ? (
-        <Card variant="outlined">
+        <Card className={cardClasses.elevated}>
           <SpecimenForm
             specimen={specimen || undefined}
             onSubmit={handleSave}
@@ -206,75 +238,175 @@ const SpecimenPage: React.FC = () => {
           />
         </Card>
       ) : (
-        <Card variant="outlined">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Основная информация</h2>
+        <div className={`${layoutClasses.grid2} gap-6`}>
+          <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
+            <div className={cardClasses.header}>
+              <h2 className={cardClasses.title}>Основная информация</h2>
+            </div>
+            <div className={cardClasses.content}>
               {specimen && (
-                <div className="space-y-3">
-                  <div>
-                    <span className="font-medium text-gray-700">Инвентарный номер:</span>
-                    <p>{specimen.inventoryNumber}</p>
+                <div className={`space-y-4`}>
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Инвентарный номер</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.inventoryNumber}</div>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Русское название:</span>
-                    <p>{specimen.russianName}</p>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Русское название</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.russianName}</div>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Латинское название:</span>
-                    <p>{specimen.latinName}</p>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Латинское название</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.latinName}</div>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Семейство:</span>
-                    <p>{specimen.familyName}</p>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Семейство</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.familyName}</div>
                   </div>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Род</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.genus}</div>
+                  </div>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Вид</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.species}</div>
+                  </div>
+                  
+                  {specimen.determinedBy && (
+                    <div className="border-b border-gray-100 pb-3">
+                      <div className={`${textClasses.small} ${textClasses.secondary}`}>Определил</div>
+                      <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.determinedBy}</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-            
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Географические данные</h2>
-              {specimen && (
-                <div className="space-y-3">
-                  <div>
-                    <span className="font-medium text-gray-700">Регион:</span>
-                    <p>{specimen.regionName}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Координаты:</span>
-                    <p>
-                      {specimen.latitude.toFixed(6)}, {specimen.longitude.toFixed(6)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Экспозиция:</span>
-                    <p>{specimen.expositionName}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          </Card>
           
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Дополнительная информация</h2>
-            {specimen && (
-              <div className="space-y-3">
-                <div>
-                  <span className="font-medium text-gray-700">Год посадки:</span>
-                  <p>{specimen.plantingYear}</p>
+          <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
+            <div className={cardClasses.header}>
+              <h2 className={cardClasses.title}>Географические данные</h2>
+            </div>
+            <div className={cardClasses.content}>
+              {specimen && (
+                <div className={`space-y-4`}>
+                  {specimen.regionName && (
+                    <div className="border-b border-gray-100 pb-3">
+                      <div className={`${textClasses.small} ${textClasses.secondary}`}>Регион</div>
+                      <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.regionName}</div>
+                    </div>
+                  )}
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Координаты</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>
+                      {`${specimen.latitude.toFixed(6)}, ${specimen.longitude.toFixed(6)}`}
+                    </div>
+                  </div>
+                  
+                  <div className="border-b border-gray-100 pb-3">
+                    <div className={`${textClasses.small} ${textClasses.secondary}`}>Экспозиция</div>
+                    <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.expositionName}</div>
+                  </div>
+                  
+                  {specimen.sampleOrigin && (
+                    <div className="border-b border-gray-100 pb-3">
+                      <div className={`${textClasses.small} ${textClasses.secondary}`}>Происхождение образца</div>
+                      <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.sampleOrigin}</div>
+                    </div>
+                  )}
+                  
+                  {specimen.country && (
+                    <div className="border-b border-gray-100 pb-3">
+                      <div className={`${textClasses.small} ${textClasses.secondary}`}>Страна</div>
+                      <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.country}</div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Происхождение образца:</span>
-                  <p>{specimen.sampleOrigin}</p>
+              )}
+            </div>
+          </Card>
+          
+          {specimen && (
+            <>
+              <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
+                <div className={cardClasses.header}>
+                  <h2 className={cardClasses.title}>Время и развитие</h2>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Примечания:</span>
-                  <p>{specimen.notes || "Нет примечаний"}</p>
+                <div className={cardClasses.content}>
+                  <div className="space-y-4">
+                    <div className="border-b border-gray-100 pb-3">
+                      <div className={`${textClasses.small} ${textClasses.secondary}`}>Год посадки</div>
+                      <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.plantingYear}</div>
+                    </div>
+                    
+                    {specimen.originalYear && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Год селекции</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.originalYear}</div>
+                      </div>
+                    )}
+                    
+                    {specimen.originalBreeder && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Селекционер</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.originalBreeder}</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </Card>
+              </Card>
+              
+              <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
+                <div className={cardClasses.header}>
+                  <h2 className={cardClasses.title}>Дополнительная информация</h2>
+                </div>
+                <div className={cardClasses.content}>
+                  <div className={`space-y-4`}>
+                    {specimen.conservationStatus && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Статус сохранения</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.conservationStatus}</div>
+                      </div>
+                    )}
+                    
+                    {specimen.naturalRange && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Естественный ареал</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.naturalRange}</div>
+                      </div>
+                    )}
+                    
+                    {specimen.ecologyAndBiology && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Экология и биология</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.ecologyAndBiology}</div>
+                      </div>
+                    )}
+                    
+                    {specimen.economicUse && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Экономическое использование</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.economicUse}</div>
+                      </div>
+                    )}
+                    
+                    {specimen.notes && (
+                      <div className="border-b border-gray-100 pb-3">
+                        <div className={`${textClasses.small} ${textClasses.secondary}`}>Примечания</div>
+                        <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.notes}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
+        </div>
       )}
     </div>
   );

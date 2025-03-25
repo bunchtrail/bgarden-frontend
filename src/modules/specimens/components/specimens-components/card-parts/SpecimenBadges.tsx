@@ -19,7 +19,7 @@ export const SpecimenBadges: React.FC<SpecimenBadgesProps> = ({
     <div className="flex items-center justify-between mb-4">
       {/* Сектор */}
       <span 
-        className={`text-xs font-medium px-2.5 py-1.5 bg-white/70 backdrop-blur-sm 
+        className={`text-xs font-medium px-2.5 py-1.5 bg-white/70 
           rounded-full shadow-sm flex items-center space-x-1 ${sectorColor.text} font-semibold`}
         aria-label={`Сектор: ${getSectorTypeName(sectorType)}`}
       >

@@ -23,7 +23,7 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   if (specimens.length === 0) {
     return (
       <div className="w-full py-12 flex items-center justify-center">
-        <div className="text-center px-4 py-8 rounded-xl bg-white/80 backdrop-blur-md border border-[#E5E5EA]/60 shadow-sm">
+        <div className="text-center px-4 py-8 rounded-xl bg-white/80 border border-[#E5E5EA]/60 shadow-sm">
           <p className="text-[#86868B] mb-2">Нет доступных образцов</p>
           <p className="text-xs text-[#AEAEB2]">Добавьте новый образец, чтобы увидеть его здесь</p>
         </div>
@@ -32,7 +32,7 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   }
 
   const handleCardClick = (specimenId: number) => {
-    navigate(`/specimens/${specimenId}/edit`);
+    navigate(`/specimens/${specimenId}`);
   };
 
   return (

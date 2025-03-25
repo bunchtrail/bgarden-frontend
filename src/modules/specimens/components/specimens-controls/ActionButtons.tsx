@@ -19,6 +19,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   variant = 'card'
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
   
   // В режиме строки таблицы показываем только иконки без текста
   const showText = variant === 'card';
@@ -37,9 +38,26 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     setIsDeleteModalOpen(false);
   };
   
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Останавливаем всплытие события
+    navigate(`/specimens/${specimenId}/edit`);
+  };
+  
   return (
     <>
       <div className={`flex ${variant === 'card' ? 'flex-wrap gap-3' : 'justify-end items-center space-x-1'}`}>
+        <Button
+          variant="neutral"
+          size="small"
+          onClick={handleEditClick}
+          className={`flex items-center ${variant === 'card' ? '!px-3 py-1.5' : '!p-1.5'} rounded-md shadow-sm hover:shadow-md group ${animationClasses.transition}`}
+        >
+          <svg className="w-4 h-4 mr-1.5 text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          {showText && <span className="whitespace-nowrap text-gray-700 font-medium group-hover:text-blue-600">Редактировать</span>}
+        </Button>
+        
         <Button
           variant="neutral"
           size="small"

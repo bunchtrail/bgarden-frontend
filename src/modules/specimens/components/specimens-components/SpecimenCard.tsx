@@ -9,6 +9,7 @@ import {
   SpecimenCardFooter 
 } from './card-parts';
 import SpecimenModal from './SpecimenModal';
+import { useNavigate } from 'react-router-dom';
 
 interface SpecimenCardProps {
   specimen: Specimen;
@@ -29,6 +30,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   isClickable = true
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const sectorType = specimen.sectorType as SectorType;
   
   // Получаем пропсы для заголовка
@@ -43,7 +45,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
     if (onClick) {
       onClick();
     } else if (isClickable) {
-      setIsModalOpen(true);
+      navigate(`/specimens/${specimen.id}`);
     }
   };
   
@@ -83,7 +85,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         />
       </Card>
       
-      {/* Модальное окно с детальной информацией */}
+      {/* Модальное окно с детальной информацией - больше не используется при клике на карточку */}
       <SpecimenModal
         specimen={specimen}
         isOpen={isModalOpen}
