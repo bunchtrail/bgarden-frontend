@@ -33,6 +33,7 @@ export interface Specimen {
   illustration?: string | null;
   notes?: string | null;
   filledBy?: string | null;
+  imageUrl?: string | null;
 }
 
 export enum SectorType {

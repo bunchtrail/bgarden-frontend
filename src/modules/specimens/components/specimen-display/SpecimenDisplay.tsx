@@ -4,6 +4,7 @@ import BasicInfoCard from './BasicInfoCard';
 import GeographicInfoCard from './GeographicInfoCard';
 import TimelineInfoCard from './TimelineInfoCard';
 import AdditionalInfoCard from './AdditionalInfoCard';
+import SpecimenImageCard from './SpecimenImageCard';
 import { layoutClasses } from '../../../../styles/global-styles';
 
 interface SpecimenDisplayProps {
@@ -22,6 +23,7 @@ const SpecimenDisplay: React.FC<SpecimenDisplayProps> = ({ specimen }) => {
   return (
     <div className={`${layoutClasses.grid2} gap-6`}>
       <BasicInfoCard specimen={specimen} />
+      <SpecimenImageCard specimen={specimen} />
       <GeographicInfoCard specimen={specimen} />
       <TimelineInfoCard specimen={specimen} />
       <AdditionalInfoCard specimen={specimen} />

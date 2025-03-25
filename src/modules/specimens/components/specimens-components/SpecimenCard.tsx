@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Card from '../../../ui/components/Card';
+import Modal from '../../../ui/components/Modal';
+import Button from '../../../ui/components/Button';
 import { Specimen, SectorType } from '../../types';
 import { animationClasses } from '../../../../styles/global-styles';
-import { Card } from '../../../ui';
 import { 
   getSpecimenCardHeader, 
   SpecimenBadges, 
@@ -9,7 +12,6 @@ import {
   SpecimenCardFooter 
 } from './card-parts';
 import SpecimenModal from './SpecimenModal';
-import { useNavigate } from 'react-router-dom';
 
 interface SpecimenCardProps {
   specimen: Specimen;
@@ -30,6 +32,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   isClickable = true
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const navigate = useNavigate();
   const sectorType = specimen.sectorType as SectorType;
   
@@ -52,6 +55,19 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  const handleOpenImageModal = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Предотвращаем срабатывание onClick всей карточки
+    setIsImageModalOpen(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setIsImageModalOpen(false);
+  };
+  
+  // Временное изображение-заполнитель
+  const placeholderImage = '/images/specimens/placeholder.jpg';
+  const imageSrc = specimen.imageUrl || placeholderImage;
   
   return (
     <>
@@ -63,10 +79,23 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         subtitle={headerProps.subtitle}
         headerAction={headerProps.headerAction}
         footer={
-          <SpecimenCardFooter 
-            specimenId={specimen.id} 
-            onDelete={onDelete} 
-          />
+          <div className="flex justify-between items-center w-full">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={handleOpenImageModal}
+              className="text-xs flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Изображение
+            </Button>
+            <SpecimenCardFooter 
+              specimenId={specimen.id} 
+              onDelete={onDelete} 
+            />
+          </div>
         }
         onClick={isClickable ? handleCardClick : undefined}
       >
@@ -85,7 +114,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         />
       </Card>
       
-      {/* Модальное окно с детальной информацией - больше не используется при клике на карточку */}
+      {/* Модальное окно с детальной информацией */}
       <SpecimenModal
         specimen={specimen}
         isOpen={isModalOpen}
@@ -94,6 +123,38 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         onDelete={onDelete}
         size="large"
       />
+
+      {/* Модальное окно с изображением */}
+      <Modal
+        isOpen={isImageModalOpen}
+        onClose={handleCloseImageModal}
+        title={`Изображение: ${specimen.russianName}`}
+        size="medium"
+        variant="elevated"
+        animation="fade"
+        blockScroll={true}
+      >
+        <div className="flex flex-col items-center p-2">
+          <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
+            <img 
+              src={imageSrc} 
+              alt={`${specimen.russianName} (${specimen.latinName})`}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Если изображение не загрузилось, используем заполнитель
+                const target = e.target as HTMLImageElement;
+                target.src = placeholderImage;
+              }}
+            />
+          </div>
+          <div className="text-center mt-4 w-full">
+            <p className="text-sm text-gray-700 italic">{specimen.latinName}</p>
+            {specimen.expositionName && (
+              <p className="text-xs text-gray-500 mt-1">Экспозиция: {specimen.expositionName}</p>
+            )}
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
