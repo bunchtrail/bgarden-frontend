@@ -2,6 +2,17 @@ import httpClient from '../../../services/httpClient';
 import { SectorType, Specimen } from '../types/index';
 import { updateSpecimensCount } from '../../map/services/regionService';
 
+// Интерфейс для данных изображения образца
+interface SpecimenImage {
+    id: number;
+    specimenId: number;
+    imageDataBase64: string;
+    contentType: string;
+    description: string;
+    isMain: boolean;
+    uploadedAt: string;
+}
+
 // Интерфейс для работы с API образцов растений
 class SpecimenService {
     // Получить все образцы
@@ -105,6 +116,16 @@ class SpecimenService {
     // Обновить существующий образец
     async updateSpecimen(id: number, specimen: Specimen): Promise<Specimen> {
         return httpClient.put<Specimen>(`Specimen/${id}`, specimen);
+    }
+
+    // Получить основное изображение образца по ID
+    async getSpecimenMainImage(specimenId: number): Promise<SpecimenImage | null> {
+        try {
+            return await httpClient.get<SpecimenImage>(`v1/specimen-images/by-specimen/${specimenId}/main`);
+        } catch (error) {
+            console.error(`Ошибка при получении изображения для образца с ID ${specimenId}:`, error);
+            return null;
+        }
     }
 
     // Удалить образец
