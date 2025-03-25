@@ -101,4 +101,45 @@ export const MAP_CARDS = {
     dataValue: 'font-medium text-text-primary',
     footer: 'mt-3 pt-2 border-t border-neutral-dark/20 flex justify-end',
   }
-}; 
+};
+
+// Добавляем стили для улучшения взаимодействия с картой
+export const CUSTOM_STYLES = `
+  /* Улучшение взаимодействия с полигонами регионов */
+  .region-polygon {
+    cursor: pointer;
+    pointer-events: auto !important;
+  }
+  
+  /* Стиль выделения при наведении на регион */
+  .region-polygon.region-hover {
+    stroke-width: 3px;
+    stroke-opacity: 0.8;
+  }
+  
+  /* Указываем, что все элементы на карте должны быть интерактивными */
+  .leaflet-interactive {
+    pointer-events: auto !important;
+  }
+  
+  /* Стиль для маркера растения */
+  .custom-plant-marker {
+    z-index: 1000 !important;
+  }
+
+  /* Исправляем порядок слоев, чтобы маркер был поверх регионов */
+  .leaflet-marker-pane {
+    z-index: 650 !important;
+  }
+  
+  .leaflet-overlay-pane {
+    z-index: 640 !important;
+  }
+`;
+
+// Добавляем CSS в документ при импорте этого файла
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.innerHTML = CUSTOM_STYLES;
+  document.head.appendChild(style);
+} 

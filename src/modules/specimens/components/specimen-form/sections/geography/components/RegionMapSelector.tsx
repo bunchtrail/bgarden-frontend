@@ -32,6 +32,7 @@ export interface RegionMapSelectorProps {
   onRegionClick: (regionId: string) => void;
   onCoordinatesChange: (lat: number, lng: number) => void;
   markerPosition: [number, number] | null;
+  showTooltips?: boolean;
 }
 
 export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({ 
@@ -39,7 +40,8 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   selectedRegionIds, 
   onRegionClick, 
   onCoordinatesChange, 
-  markerPosition 
+  markerPosition,
+  showTooltips = false
 }) => {
   const { mapData, loading } = useMapData();
   
@@ -71,14 +73,16 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
     controlPanelMode: 'geography' as 'geography',
     aspectRatio: 'landscape' as 'landscape',
     enableClustering: true,
-    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
+    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],  // Убираем PLANTS слой для уменьшения конфликтов
     showLayerSelector: true,
     showClusteringToggle: true,
-    showTooltips: true,
+    showTooltips: showTooltips,
     maxZoom: 2,
     minZoom: -1,
-    selectedAreaIds // Передаем выбранные области
-  }), [selectedAreaIds]);
+    selectedAreaIds, // Передаем выбранные области
+    drawingEnabled: false, // Отключаем рисование
+    mapInteractionPriority: 'marker' // Указываем, что маркер имеет приоритет над другими слоями
+  }), [selectedAreaIds, showTooltips]);
   
   return (
     <div className="relative">
@@ -101,6 +105,13 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
       <small className="block mt-2 text-gray-500">
         Выберите участок сада, нажав на него на карте. Для установки точного местоположения растения кликните на карту или перетащите маркер.
       </small>
+      <div className="bg-amber-50 p-3 rounded mt-2 text-xs text-amber-700 border border-amber-200">
+        <p className="font-bold mb-1">Если маркер не устанавливается при клике:</p>
+        <ol className="list-decimal pl-4 space-y-1">
+          <li>Попробуйте кликнуть рядом с границей выбранной области</li>
+          <li>Или выберите регион через выпадающий список, а затем кликните на карте</li>
+        </ol>
+      </div>
     </div>
   );
 };

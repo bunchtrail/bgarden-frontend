@@ -107,7 +107,7 @@
             - `MapBoundsHandler.tsx` (706.0 B)
             - `MapImageLayer.tsx` (794.0 B)
             - `MapReadyHandler.tsx` (754.0 B)
-            - `MapRegionsLayer.tsx` (3.0 KB)
+            - `MapRegionsLayer.tsx` (6.7 KB)
           - **map-content** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\map-content)`
             - `index.ts` (80.0 B)
             - `MapContentController.tsx` (3.3 KB)
@@ -162,8 +162,8 @@
           - `mapService.ts` (1.6 KB)
           - `plantService.ts` (5.0 KB)
         - **styles** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\styles)`
-          - `index.ts` (4.4 KB)
-          - `leaflet-overrides.css` (5.8 KB)
+          - `index.ts` (5.7 KB)
+          - `leaflet-overrides.css` (8.8 KB)
         - **types** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\types)`
           - `mapTypes.ts` (3.8 KB)
       - **navigation** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\navigation)`
@@ -242,14 +242,14 @@
                   - `ExpositionSelector.tsx` (1.2 KB)
                   - `index.ts` (405.0 B)
                   - `LocationDescriptionInput.tsx` (1016.0 B)
-                  - `MapMarker.tsx` (1.8 KB)
-                  - `RegionMapSelector.tsx` (3.8 KB)
+                  - `MapMarker.tsx` (7.6 KB)
+                  - `RegionMapSelector.tsx` (4.7 KB)
                   - `RegionSelector.tsx` (1.2 KB)
-                - `GeographySection.tsx` (3.1 KB)
+                - `GeographySection.tsx` (4.9 KB)
                 - **hooks** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\sections\geography\hooks)`
                   - `index.ts` (107.0 B)
                   - `useMapData.ts` (714.0 B)
-                  - `useRegionMarkerLogic.ts` (5.5 KB)
+                  - `useRegionMarkerLogic.ts` (6.2 KB)
                 - `index.ts` (55.0 B)
               - **taxonomy** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\specimens\components\specimen-form\sections\taxonomy)`
                 - `index.ts` (53.0 B)

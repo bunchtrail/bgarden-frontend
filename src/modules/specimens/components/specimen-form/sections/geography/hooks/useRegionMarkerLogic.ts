@@ -15,6 +15,7 @@ export function useRegionMarkerLogic(
 ) {
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
   const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+  const [showTooltips, setShowTooltips] = useState<boolean>(false);
   
   // Инициализация маркера из координат formData
   useEffect(() => {
@@ -51,14 +52,15 @@ export function useRegionMarkerLogic(
       // Приводим к нужному типу
       onChange(mockEvent as unknown as React.ChangeEvent<HTMLSelectElement>);
       
-      // Находим центр выбранного региона для установки маркера, если координаты еще не заданы
-      const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
-      if (selectedRegion && (!formData.latitude || !formData.longitude)) {
-        // Преобразуем числовые координаты в строковые для handleCoordinatesChange
-        const lat = Number(selectedRegion.latitude);
-        const lng = Number(selectedRegion.longitude);
-        handleCoordinatesChange(lat, lng);
-      }
+      // Комментируем автоматическую установку маркера в центр региона, 
+      // чтобы пользователь мог сам выбрать любое место
+      // const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
+      // if (selectedRegion && (!formData.latitude || !formData.longitude)) {
+      //   // Преобразуем числовые координаты в строковые для handleCoordinatesChange
+      //   const lat = Number(selectedRegion.latitude);
+      //   const lng = Number(selectedRegion.longitude);
+      //   handleCoordinatesChange(lat, lng);
+      // }
     }
   };
 
@@ -74,6 +76,15 @@ export function useRegionMarkerLogic(
     
     onChange({
       target: { name: 'longitude', value: lng.toString() }
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
+    // Обновляем поля mapX и mapY для координат на карте
+    onChange({
+      target: { name: 'mapX', value: lng.toString() }
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
+    onChange({
+      target: { name: 'mapY', value: lat.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
     
     // Если точка находится внутри какого-то региона, выбираем этот регион
@@ -124,11 +135,18 @@ export function useRegionMarkerLogic(
     return id.toString();
   };
 
+  // Обработчик переключения отображения подсказок при наведении
+  const toggleTooltips = () => {
+    setShowTooltips(prev => !prev);
+  };
+
   return {
     selectedRegionIds,
     markerPosition,
     handleRegionClick,
     handleCoordinatesChange,
-    getRegionIdString
+    getRegionIdString,
+    showTooltips,
+    toggleTooltips
   };
 } 
