@@ -145,7 +145,7 @@
             - **utils** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\components\plant-info\utils)`
               - `MarkerIconFactory.ts` (3.5 KB)
         - **contexts** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\contexts)`
-          - `MapConfigContext.tsx` (6.5 KB)
+          - `MapConfigContext.tsx` (6.9 KB)
           - `MapContext.tsx` (1.3 KB)
         - **docs** `(d:\Projects\BotanicalGardenApp\bgarden-frontend\src\modules\map\docs)`
           - `README.md` (2.1 KB)

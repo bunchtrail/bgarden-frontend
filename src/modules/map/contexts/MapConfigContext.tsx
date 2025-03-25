@@ -118,6 +118,17 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
       console.error('Ошибка при загрузке конфигурации карты:', error);
     }
   }, [initialConfig]);
+  
+  // Логирование включения режима рисования
+  useEffect(() => {
+    if (mapConfig.drawingEnabled) {
+      console.log('[MapConfig] Режим рисования включен', {
+        timestamp: new Date().toISOString(),
+        interactionMode: mapConfig.interactionMode,
+        drawingEnabled: mapConfig.drawingEnabled
+      });
+    }
+  }, [mapConfig.drawingEnabled]);
 
   // Функция для обновления конфигурации
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {

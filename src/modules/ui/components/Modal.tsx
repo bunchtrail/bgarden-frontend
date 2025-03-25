@@ -218,7 +218,6 @@ const Modal: React.FC<ModalProps> = ({
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"
-      aria-hidden={!isOpen}
       style={{ pointerEvents: 'all' }}
     >
       <div 
