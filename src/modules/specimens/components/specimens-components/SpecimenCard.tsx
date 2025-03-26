@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../../ui/components/Card';
 import Modal from '../../../ui/components/Modal';
 import Button from '../../../ui/components/Button';
 import { Specimen, SectorType } from '../../types';
-import { specimenService } from '../../services/specimenService';
 import { animationClasses } from '../../../../styles/global-styles';
 import { 
   getSpecimenCardHeader, 
@@ -13,6 +12,7 @@ import {
   SpecimenCardFooter 
 } from './card-parts';
 import SpecimenModal from './SpecimenModal';
+import { useSpecimenImage } from '../../hooks';
 
 interface SpecimenCardProps {
   specimen: Specimen;
@@ -34,8 +34,6 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [specimenImage, setSpecimenImage] = useState<string | null>(null);
-  const [isImageLoading, setIsImageLoading] = useState(false);
   const navigate = useNavigate();
   const sectorType = specimen.sectorType as SectorType;
   
@@ -47,34 +45,18 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
     sectorType
   });
   
-  // Временное изображение-заполнитель
-  const placeholderImage = '/images/specimens/placeholder.jpg';
+  // Используем хук для загрузки изображения, только когда открыто модальное окно
+  const { imageSrc, isLoading, fetchImage, handleImageError } = useSpecimenImage(
+    specimen.id, 
+    specimen.imageUrl,
+    false // не загружать автоматически при монтировании
+  );
   
-  // Загрузка изображения при открытии модального окна
-  useEffect(() => {
-    if (isImageModalOpen && !specimenImage) {
-      const fetchSpecimenImage = async () => {
-        try {
-          setIsImageLoading(true);
-          const imageData = await specimenService.getSpecimenMainImage(specimen.id);
-          
-          if (imageData && imageData.imageDataBase64) {
-            setSpecimenImage(`data:${imageData.contentType};base64,${imageData.imageDataBase64}`);
-          } else {
-            setSpecimenImage(specimen.imageUrl || placeholderImage);
-          }
-        } catch (error) {
-          console.error('Ошибка при загрузке изображения образца:', error);
-          setSpecimenImage(specimen.imageUrl || placeholderImage);
-        } finally {
-          setIsImageLoading(false);
-        }
-      };
-
-      fetchSpecimenImage();
-    }
-  }, [isImageModalOpen, specimen.id, specimen.imageUrl, specimenImage]);
-
+  // Загружаем изображение при открытии модального окна
+  if (isImageModalOpen && !imageSrc) {
+    fetchImage();
+  }
+  
   const handleCardClick = () => {
     if (onClick) {
       onClick();
@@ -163,20 +145,16 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
       >
         <div className="flex flex-col items-center p-2">
           <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
-            {isImageLoading ? (
+            {isLoading ? (
               <div className="w-full h-64 flex items-center justify-center bg-gray-100">
                 <span className="text-gray-500">Загрузка изображения...</span>
               </div>
             ) : (
               <img 
-                src={specimenImage || placeholderImage} 
+                src={imageSrc || ''} 
                 alt={`${specimen.russianName} (${specimen.latinName})`}
                 className="w-full h-full object-contain"
-                onError={(e) => {
-                  // Если изображение не загрузилось, используем заполнитель
-                  const target = e.target as HTMLImageElement;
-                  target.src = placeholderImage;
-                }}
+                onError={() => handleImageError()}
               />
             )}
           </div>

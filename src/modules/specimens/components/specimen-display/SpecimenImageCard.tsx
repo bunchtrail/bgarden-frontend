@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Card from '../../../../modules/ui/components/Card';
 import { Specimen } from '../../types';
 import { cardClasses, textClasses, animationClasses } from '../../../../styles/global-styles';
-import { specimenService } from '../../services/specimenService';
+import { useSpecimenImage } from '../../hooks';
 
 interface SpecimenImageCardProps {
   specimen: Specimen;
@@ -12,32 +12,12 @@ interface SpecimenImageCardProps {
  * Компонент для отображения фотографии образца
  */
 const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const placeholderImage = '/images/specimens/placeholder.jpg';
+  // Используем новый хук вместо дублирования логики
+  const { imageSrc, isLoading, handleImageError } = useSpecimenImage(
+    specimen.id,
+    specimen.imageUrl
+  );
   
-  useEffect(() => {
-    const fetchSpecimenImage = async () => {
-      try {
-        setIsLoading(true);
-        const imageData = await specimenService.getSpecimenMainImage(specimen.id);
-        
-        if (imageData && imageData.imageDataBase64) {
-          setImageSrc(`data:${imageData.contentType};base64,${imageData.imageDataBase64}`);
-        } else {
-          setImageSrc(specimen.imageUrl || placeholderImage);
-        }
-      } catch (error) {
-        console.error('Ошибка при загрузке изображения образца:', error);
-        setImageSrc(specimen.imageUrl || placeholderImage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSpecimenImage();
-  }, [specimen.id, specimen.imageUrl]);
-
   return (
     <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
       <div className={cardClasses.header}>
@@ -52,14 +32,10 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
               </div>
             ) : (
               <img 
-                src={imageSrc || placeholderImage} 
+                src={imageSrc || ''} 
                 alt={`${specimen.russianName} (${specimen.latinName})`}
                 className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                onError={(e) => {
-                  // Если изображение не загрузилось, используем заполнитель
-                  const target = e.target as HTMLImageElement;
-                  target.src = placeholderImage;
-                }}
+                onError={() => handleImageError()}
               />
             )}
           </div>

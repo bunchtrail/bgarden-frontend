@@ -94,6 +94,9 @@ export default {
 // Компоненты для работы с изображениями
 export { default as ImageUploader } from './components/specimen-form/ImageUploader';
 
+// Хуки
+export { useSpecimenImage } from './hooks';
+
 // Для совместимости создаем объект regionService
 const regionService = {
   getAllRegions,

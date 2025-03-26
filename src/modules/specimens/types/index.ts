@@ -129,4 +129,24 @@ export interface Region {
   name: string;
   description?: string;
   climate?: string;
+}
+
+// Интерфейс для данных изображения образца
+export interface SpecimenImage {
+  id: number;
+  specimenId: number;
+  imageDataBase64: string;
+  contentType: string;
+  description: string;
+  isMain: boolean;
+  uploadedAt: string;
+}
+
+// Интерфейс для результатов загрузки изображений
+export interface BatchImageUploadResult {
+  specimenId: number;
+  successCount: number;
+  errorCount: number;
+  uploadedImageIds: number[];
+  errorMessages: string[];
 } 

@@ -10,8 +10,9 @@ import httpClient from '@/services/httpClient';
 import { logError, logWarning } from '@/utils/logger';
 import { RegionData, SectorType } from '@/modules/map/types/mapTypes';
 import { Area } from './types';
+import { Specimen as FullSpecimen } from '@/modules/specimens/types';
 
-// Интерфейс для образца растения (для специализированных запросов)
+// Упрощенный интерфейс для образца растения (для специализированных запросов)
 export interface Specimen {
   id: number;
   name: string;
