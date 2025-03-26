@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../../ui/components/Card';
 import Modal from '../../../ui/components/Modal';
@@ -52,10 +52,12 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
     false // не загружать автоматически при монтировании
   );
   
-  // Загружаем изображение при открытии модального окна
-  if (isImageModalOpen && !imageSrc) {
-    fetchImage();
-  }
+  // Используем useEffect для загрузки изображения при открытии модального окна
+  useEffect(() => {
+    if (isImageModalOpen && !imageSrc) {
+      fetchImage();
+    }
+  }, [isImageModalOpen, imageSrc, fetchImage]);
   
   const handleCardClick = () => {
     if (onClick) {

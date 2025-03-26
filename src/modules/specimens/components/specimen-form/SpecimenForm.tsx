@@ -20,6 +20,7 @@ import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { useSpecimenImage } from '../../hooks';
 import { specimenService } from '../../services/specimenService';
+import httpClient from '@/services/httpClient';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -125,11 +126,13 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Добавляем состояние для хранения выбранных изображений
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   
+  // Добавляем локальное состояние для отслеживания прогресса загрузки
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  
   // Используем обновленный хук для работы с изображениями
   const { 
-    uploadImage, 
-    isUploading, 
-    uploadProgress 
+    uploadImage 
   } = useSpecimenImage(
     specimen?.id || 0, 
     null, 
@@ -250,14 +253,40 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
           // Сначала создаем образец без изображений
           const createdSpecimen = await specimenService.createSpecimen(finalFormData);
           
-          // Затем загружаем изображения используя хук
-          await uploadImage(selectedImages, { 
-            isMain: true, // первое изображение будет основным 
+          // Используем FormData для отправки изображений напрямую
+          const formData = new FormData();
+          formData.append('SpecimenId', createdSpecimen.id.toString());
+          formData.append('IsMain', 'true');
+          
+          // Добавляем файлы в FormData
+          selectedImages.forEach(file => {
+            formData.append('Files', file, file.name);
           });
           
+          console.log(`Загрузка изображений для образца ID=${createdSpecimen.id}`);
+          
+          // Устанавливаем состояние загрузки
+          setIsUploading(true);
+          
+          // Отправляем запрос напрямую, не используя хук
+          await httpClient.post(
+            'v1/specimen-images/batch-upload',
+            formData,
+            {
+              onUploadProgress: (progressEvent: any) => {
+                if (progressEvent.total) {
+                  const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                  setUploadProgress(percentCompleted);
+                }
+              }
+            }
+          );
+          
+          setIsUploading(false);
           notification.success('Образец успешно создан с изображениями', { duration: 5000 });
           navigate(`/specimens/${createdSpecimen.id}`);
         } catch (error: any) {
+          setIsUploading(false);
           console.error('Подробная ошибка:', error);
           notification.error(`Ошибка при создании образца: ${error.message || 'Неизвестная ошибка'}`);
         }
