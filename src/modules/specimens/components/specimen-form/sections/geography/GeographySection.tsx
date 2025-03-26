@@ -7,7 +7,6 @@ import { cardClasses, textClasses } from '@/styles/global-styles';
 import { 
   RegionSelector, 
   ExpositionSelector, 
-  CoordinatesInput, 
   LocationDescriptionInput,
   RegionMapSelector 
 } from './components';
@@ -70,19 +69,7 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
               markerPosition={markerPosition}
               showTooltips={showTooltips}
             />
-            <small className="block mt-1 text-gray-500">
-              Текущие координаты на карте: X:{formData.mapX || '-'}, Y:{formData.mapY || '-'}
-            </small>
-            <div className="bg-blue-50 p-3 rounded mt-2 text-xs text-blue-700 border border-blue-200">
-              <p className="font-medium mb-2">Инструкция по размещению маркера:</p>
-              <ul className="list-disc pl-4 space-y-1.5">
-                <li className="font-medium">Чтобы установить маркер, просто кликните в <strong>любое место</strong> на карте</li>
-                <li>Сначала выберите область через клик на карте или через выпадающий список</li>
-                <li>Затем кликните внутрь выбранной области для установки точного местоположения</li>
-                <li>Вы можете перетаскивать уже установленный маркер для уточнения позиции</li>
-                <li className="text-red-600">Важно: если клик внутри области не срабатывает, попробуйте кликнуть еще раз или по краю области</li>
-              </ul>
-            </div>
+           
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,17 +89,6 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
             />
           </div>
 
-          {/* Координаты */}
-          <CoordinatesInput 
-            locationType={formData.locationType || LocationType.SchematicMap}
-            onTypeChange={onChange}
-            mapX={formData.mapX}
-            mapY={formData.mapY}
-            latitude={formData.latitude}
-            longitude={formData.longitude}
-            onChange={onChange}
-          />
-          
           {/* Дополнительная информация о местоположении */}
           <LocationDescriptionInput 
             value={formData.locationDescription}

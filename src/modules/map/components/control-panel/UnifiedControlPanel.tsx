@@ -53,13 +53,8 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   
   // Проверяем и регистрируем панель при монтировании
   useEffect(() => {
-    // Если панель с таким ID уже отрисована, выводим предупреждение только один раз
-    if (renderedPanels.has(panelId) && process.env.NODE_ENV === 'development') {
-      // Удалено логирование предупреждения о дублировании
-    } else {
-      // Добавляем ID в реестр отрисованных панелей
-      renderedPanels.add(panelId);
-    }
+    // Добавляем ID в реестр отрисованных панелей
+    renderedPanels.add(panelId);
     
     // Очищаем реестр при размонтировании компонента
     return () => {
@@ -152,27 +147,20 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     return panelConfig.visibleSections.includes(section);
   };
   
-  // Не отображаем компонент, если это второй экземпляр панели
-  // и первый уже зарегистрирован, и это не текущий экземпляр
-  const isFirstInRegistry = renderedPanels.has(panelId) && 
-    renderedPanels.size === 1 || instanceRef.current === Array.from(renderedPanels)[0];
-  
-  if (!isFirstInRegistry) {
-    return null;
+  // Если панель скрыта, показываем только кнопку повторного открытия
+  if (!isPanelVisible) {
+    return (
+      <div className="absolute top-4 right-4 z-[1000]">
+        <button 
+          onClick={handleReopenPanel}
+          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
+          aria-label="Открыть панель управления"
+        >
+          <span className="text-xl">⚙️</span>
+        </button>
+      </div>
+    );
   }
-  
-  // Стили панели в стиле Apple с эффектом стекла
-  const panelStyles = `
-    absolute top-4 right-4 z-[1000] 
-    max-w-xs w-full
-    overflow-hidden
-    ${cardClasses.base}
-    bg-white/85 backdrop-blur-md 
-    shadow-[0_0_10px_rgba(0,0,0,0.08)]
-    ${isExpanded ? 'opacity-100' : 'opacity-95 hover:opacity-100'}
-    ${animationClasses.transition}
-    ${className}
-  `;
   
   // Рендеринг секции режима карты
   const renderModeSection = () => {
@@ -289,20 +277,18 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     );
   };
   
-  // Если панель скрыта, показываем только кнопку повторного открытия
-  if (!isPanelVisible) {
-    return (
-      <div className="absolute top-4 right-4 z-[1000]">
-        <button 
-          onClick={handleReopenPanel}
-          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
-          aria-label="Открыть панель управления"
-        >
-          <span className="text-xl">⚙️</span>
-        </button>
-      </div>
-    );
-  }
+  // Стили панели в стиле Apple с эффектом стекла
+  const panelStyles = `
+    absolute top-4 right-4 z-[1000] 
+    max-w-xs w-full
+    overflow-hidden
+    ${cardClasses.base}
+    bg-white/85 backdrop-blur-md 
+    shadow-[0_0_10px_rgba(0,0,0,0.08)]
+    ${isExpanded ? 'opacity-100' : 'opacity-95 hover:opacity-100'}
+    ${animationClasses.transition}
+    ${className}
+  `;
   
   return (
     <div className={panelStyles} data-panel-id={panelId}>
@@ -324,5 +310,8 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     </div>
   );
 };
+
+// Добавляем отображаемое имя компонента для легкого определения типа
+UnifiedControlPanel.displayName = 'UnifiedControlPanel';
 
 export default UnifiedControlPanel; 

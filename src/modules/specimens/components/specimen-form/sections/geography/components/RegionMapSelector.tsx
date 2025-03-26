@@ -5,6 +5,7 @@ import { RegionData } from '@/modules/map/types/mapTypes';
 import { MapMarker } from './MapMarker';
 import { useMapData } from '../hooks';
 import regionBridge from '@/services/regions/RegionBridge';
+import { UnifiedControlPanel } from '@/modules/map/components/control-panel';
 
 // Константы для типов слоев на карте
 export const MAP_LAYERS = {
@@ -12,18 +13,6 @@ export const MAP_LAYERS = {
   REGIONS: 'regions',
   PLANTS: 'plants',
   GRID: 'grid'
-};
-
-// Дополнительные контролы для карты в форме
-const MapControls = () => {
-  return (
-    <div className="bg-white rounded shadow-sm p-3 mt-3">
-      <h3 className="text-md font-medium mb-2">Местоположение образца</h3>
-      <p className="text-sm text-gray-600">
-        Выберите географический регион и точное местоположение образца на карте.
-      </p>
-    </div>
-  );
 };
 
 export interface RegionMapSelectorProps {
@@ -66,22 +55,24 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
     onCoordinatesChange(lat, lng);
   };
   
+  // Используем стандартную панель управления с типом "specimen"
+  const mapControlPanel = useMemo(() => (
+    <UnifiedControlPanel 
+      pageType="specimen"
+      panelId="geography-map-controls"
+    />
+  ), []);
+  
   // Формируем начальную конфигурацию для карты
   const initialMapConfig = useMemo(() => ({
     lightMode: true,
-    showControls: true,
-    controlPanelMode: 'geography' as 'geography',
-    aspectRatio: 'landscape' as 'landscape',
-    enableClustering: true,
-    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],  // Убираем PLANTS слой для уменьшения конфликтов
-    showLayerSelector: true,
-    showClusteringToggle: true,
+    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
     showTooltips: showTooltips,
     maxZoom: 2,
     minZoom: -1,
-    selectedAreaIds, // Передаем выбранные области
-    drawingEnabled: false, // Отключаем рисование
-    mapInteractionPriority: 'marker' // Указываем, что маркер имеет приоритет над другими слоями
+    selectedAreaIds,
+    enableClustering: true,
+    mapInteractionPriority: 'marker',
   }), [selectedAreaIds, showTooltips]);
   
   return (
@@ -98,20 +89,9 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
             />
           }
           onRegionClick={handleRegionClick}
-          extraControls={<MapControls />}
+          extraControls={mapControlPanel}
         />
       </MapProvider>
-      
-      <small className="block mt-2 text-gray-500">
-        Выберите участок сада, нажав на него на карте. Для установки точного местоположения растения кликните на карту или перетащите маркер.
-      </small>
-      <div className="bg-amber-50 p-3 rounded mt-2 text-xs text-amber-700 border border-amber-200">
-        <p className="font-bold mb-1">Если маркер не устанавливается при клике:</p>
-        <ol className="list-decimal pl-4 space-y-1">
-          <li>Попробуйте кликнуть рядом с границей выбранной области</li>
-          <li>Или выберите регион через выпадающий список, а затем кликните на карте</li>
-        </ol>
-      </div>
     </div>
   );
 };

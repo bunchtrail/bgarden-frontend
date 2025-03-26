@@ -121,8 +121,17 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
   'specimen': {
     mode: 'minimal',
     visibleSections: [
-      PanelSection.LAYERS
-    ]
+      PanelSection.LAYERS,
+      PanelSection.SETTINGS
+    ],
+    // Настройки для секций при работе со страницей растения
+    sectionConfig: {
+      [PanelSection.SETTINGS]: {
+        showClusteringToggle: true,
+        showTooltipToggle: false,
+        showDrawingToggle: false
+      }
+    }
   }
 };
 
