@@ -13,6 +13,16 @@ interface SpecimenImage {
     uploadedAt: string;
 }
 
+// Интерфейс для обновления местоположения
+export interface LocationUpdateDto {
+    locationType: number;
+    latitude?: number | null;
+    longitude?: number | null;
+    mapId?: number | null;
+    mapX?: number | null;
+    mapY?: number | null;
+}
+
 // Интерфейс для работы с API образцов растений
 class SpecimenService {
     // Получить все образцы
@@ -86,8 +96,16 @@ class SpecimenService {
                 sectorType: Number(specimen.sectorType)
             };
             
+            console.log('Отправка запроса на создание образца:', {
+                url: 'Specimen',
+                method: 'POST',
+                data: JSON.stringify(specimenData, null, 2)
+            });
+            
             // Используем httpClient для отправки запроса
             const createdSpecimen = await httpClient.post<Specimen>('Specimen', specimenData);
+            
+            console.log('Ответ сервера после создания образца:', JSON.stringify(createdSpecimen, null, 2));
             
             // Обновляем счетчик образцов в области
             if (createdSpecimen.regionId) {
@@ -145,6 +163,26 @@ class SpecimenService {
             return true;
         } catch (error) {
             console.error('Ошибка при удалении образца:', error);
+            throw error;
+        }
+    }
+
+    // Обновить местоположение образца
+    async updateSpecimenLocation(id: number, locationData: LocationUpdateDto): Promise<Specimen> {
+        try {
+            console.log('Отправка запроса на обновление местоположения образца:', {
+                url: `Specimen/${id}/location`,
+                method: 'PUT',
+                data: JSON.stringify(locationData, null, 2)
+            });
+            
+            const result = await httpClient.put<Specimen>(`Specimen/${id}/location`, locationData);
+            
+            console.log('Ответ сервера после обновления местоположения:', JSON.stringify(result, null, 2));
+            
+            return result;
+        } catch (error) {
+            console.error('Ошибка при обновлении местоположения образца:', error);
             throw error;
         }
     }

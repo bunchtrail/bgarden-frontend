@@ -4,12 +4,14 @@
 import { Plant } from '@/services/regions/types';
 import httpClient from '@/services/httpClient';
 import { logError } from '@/utils/logger';
+import { LocationType } from '@/modules/specimens/types';
 
 // Тип данных растения, который приходит с сервера
 export interface SpecimenData {
   id: number;
   inventoryNumber: string;
   sectorType: number;
+  locationType?: number;
   latitude: number;
   longitude: number;
   locationWkt: string;
@@ -68,10 +70,23 @@ export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => 
   
   return specimens
     .filter(specimen => {
-      // Отфильтровываем образцы без координат
-      const hasMapCoords = specimen.mapX !== undefined && specimen.mapY !== undefined;
-      const hasLatLng = specimen.latitude !== undefined && specimen.longitude !== undefined;
-      return hasMapCoords || hasLatLng;
+      // Определяем, какие координаты использовать в зависимости от типа локации
+      if (specimen.locationType === LocationType.Geographic) {
+        // Для географических координат
+        return specimen.latitude !== undefined && specimen.latitude !== null && 
+               specimen.longitude !== undefined && specimen.longitude !== null;
+      } else if (specimen.locationType === LocationType.SchematicMap) {
+        // Для координат на схеме
+        return specimen.mapX !== undefined && specimen.mapX !== null && 
+               specimen.mapY !== undefined && specimen.mapY !== null;
+      } else {
+        // Если тип локации не определен, проверяем оба типа координат
+        const hasMapCoords = specimen.mapX !== undefined && specimen.mapX !== null &&
+                            specimen.mapY !== undefined && specimen.mapY !== null;
+        const hasLatLng = specimen.latitude !== undefined && specimen.latitude !== null &&
+                          specimen.longitude !== undefined && specimen.longitude !== null;
+        return hasMapCoords || hasLatLng;
+      }
     })
     .map(specimen => {
       // Создаем базовый ID
@@ -85,13 +100,21 @@ export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => 
       // Добавляем ID в набор использованных
       usedIds.add(plantId);
       
-      // Определяем координаты: предпочитаем mapX/mapY, но если их нет, используем latitude/longitude
-      const x = specimen.mapX !== undefined ? specimen.mapX : specimen.latitude;
-      const y = specimen.mapY !== undefined ? specimen.mapY : specimen.longitude;
+      // Определяем координаты в зависимости от типа локации
+      let x: number, y: number;
       
-      // Проверяем, что координаты действительно существуют и не null
-      if (x === undefined || y === undefined || x === null || y === null) {
-        console.warn(`Отсутствуют координаты для растения с ID ${specimen.id}`);
+      if (specimen.locationType === LocationType.Geographic) {
+        // Для географических координат
+        x = specimen.latitude;
+        y = specimen.longitude;
+      } else if (specimen.locationType === LocationType.SchematicMap) {
+        // Для координат на схеме
+        x = specimen.mapX;
+        y = specimen.mapY;
+      } else {
+        // Если тип локации не определен, предпочитаем mapX/mapY, но если их нет, используем latitude/longitude
+        x = (specimen.mapX !== undefined && specimen.mapX !== null) ? specimen.mapX : specimen.latitude;
+        y = (specimen.mapY !== undefined && specimen.mapY !== null) ? specimen.mapY : specimen.longitude;
       }
       
       return {

@@ -14,7 +14,7 @@ import StepContainer from './StepContainer';
 import StepRenderer from './StepRenderer';
 import NavigationButtons from './NavigationButtons';
 import ImageUploader from './ImageUploader';
-import { SectorType } from '@/modules/specimens/types';
+import { SectorType, LocationType } from '@/modules/specimens/types';
 import { FamilyDto } from '../../services/familyService';
 import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
@@ -55,6 +55,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const initialFormState: SpecimenFormData = {
     inventoryNumber: '',
     sectorType: SectorType.Dendrology,
+    locationType: LocationType.SchematicMap,
     latitude: 0,
     longitude: 0,
     mapX: 0,
@@ -158,10 +159,12 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       return;
     }
     
+    console.log('Отправка формы образца...');
+    
     // Проверяем все поля перед отправкой
     const allFields = [
       'inventoryNumber', 'russianName', 'latinName', 'genus', 'species',
-      'familyId', 'familyName', 'latitude', 'longitude', 'regionId'
+      'familyId', 'familyName', 'regionId'
     ];
     
     // Помечаем все обязательные поля как затронутые
@@ -187,6 +190,42 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         // Преобразуем строковое значение sectorType в число
         sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
       };
+      
+      // Корректируем данные в зависимости от типа локации
+      if (finalFormData.locationType === LocationType.SchematicMap) {
+        // Для схематических координат убираем географические
+        finalFormData.latitude = null as unknown as number;
+        finalFormData.longitude = null as unknown as number;
+      } else if (finalFormData.locationType === LocationType.Geographic) {
+        // Для географических координат убираем схематические
+        finalFormData.mapId = null as unknown as number;
+        finalFormData.mapX = null as unknown as number;
+        finalFormData.mapY = null as unknown as number;
+      }
+      
+      console.log('Детальные данные формы перед отправкой в SpecimenForm:', {
+        locationType: finalFormData.locationType,
+        coordinates: {
+          latitude: finalFormData.latitude,
+          longitude: finalFormData.longitude,
+          mapX: finalFormData.mapX,
+          mapY: finalFormData.mapY,
+          mapId: finalFormData.mapId
+        },
+        taxonomy: {
+          russianName: finalFormData.russianName,
+          latinName: finalFormData.latinName,
+          genus: finalFormData.genus,
+          species: finalFormData.species,
+          familyId: finalFormData.familyId
+        },
+        inventoryData: {
+          inventoryNumber: finalFormData.inventoryNumber,
+          sectorType: finalFormData.sectorType,
+          plantingYear: finalFormData.plantingYear,
+          expositionId: finalFormData.expositionId
+        }
+      });
       
       // Если есть изображения, используем метод createSpecimenWithImages
       if (selectedImages.length > 0) {
@@ -229,7 +268,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       const fieldsToValidate: Record<number, string[]> = {
         1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
         2: ['familyId', 'familyName'],
-        3: ['latitude', 'longitude', 'regionId'],
+        3: ['regionId'],
         4: []
       };
       
@@ -258,7 +297,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     const fieldsToValidate: Record<number, string[]> = {
       1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
       2: ['familyId', 'familyName'],
-      3: ['latitude', 'longitude', 'regionId'],
+      3: ['regionId'],
       4: []
     };
     

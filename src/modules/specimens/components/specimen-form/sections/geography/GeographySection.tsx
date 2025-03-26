@@ -1,5 +1,5 @@
 import React from 'react';
-import { SpecimenFormData } from '../../../../types';
+import { SpecimenFormData, LocationType } from '../../../../types';
 import { ExpositionDto } from '../../../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { cardClasses, textClasses } from '@/styles/global-styles';
@@ -17,6 +17,7 @@ import Switch from '@/modules/ui/components/Form/Switch';
 // Расширяем интерфейс SpecimenFormData для дополнительных полей
 interface ExtendedSpecimenFormData extends SpecimenFormData {
   locationDescription?: string;
+  locationType?: number;
 }
 
 interface GeographySectionProps {
@@ -103,8 +104,12 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
 
           {/* Координаты */}
           <CoordinatesInput 
+            locationType={formData.locationType || LocationType.SchematicMap}
+            onTypeChange={onChange}
             mapX={formData.mapX}
             mapY={formData.mapY}
+            latitude={formData.latitude}
+            longitude={formData.longitude}
             onChange={onChange}
           />
           

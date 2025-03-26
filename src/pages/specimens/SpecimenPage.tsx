@@ -40,16 +40,103 @@ const SpecimenPage: React.FC = () => {
   // Обработчик сохранения образца
   const handleSave = async (updatedSpecimen: SpecimenFormData) => {
     try {
+      // Корректируем данные в зависимости от типа локации
+      const correctedSpecimen = { ...updatedSpecimen };
+      if (correctedSpecimen.locationType === 2) { // SchematicMap
+        // Для схематических координат убираем географические
+        correctedSpecimen.latitude = null as unknown as number;
+        correctedSpecimen.longitude = null as unknown as number;
+      } else if (correctedSpecimen.locationType === 1) { // Geographic
+        // Для географических координат убираем схематические
+        correctedSpecimen.mapId = null as unknown as number;
+        correctedSpecimen.mapX = null as unknown as number;
+        correctedSpecimen.mapY = null as unknown as number;
+      }
+      
+      // Логируем данные формы перед отправкой
+      console.log('Отправляемые данные формы (после корректировки):', JSON.stringify(correctedSpecimen, null, 2));
+      
       let result;
       
       if (id && !isNewSpecimen) {
         // Обновление существующего
-        result = await specimenService.updateSpecimen(Number(id), updatedSpecimen as unknown as Specimen);
+        console.log('Обновление существующего образца с ID:', id);
+        result = await specimenService.updateSpecimen(Number(id), correctedSpecimen as unknown as Specimen);
+        
+        // Дополнительно обновляем местоположение с использованием нового контроллера
+        if (correctedSpecimen.locationType) {
+          let locationData = {
+            locationType: correctedSpecimen.locationType,
+            latitude: null as number | null,
+            longitude: null as number | null,
+            mapId: null as number | null,
+            mapX: null as number | null,
+            mapY: null as number | null
+          };
+          
+          // Устанавливаем только те поля, которые нужны для данного типа локации
+          if (correctedSpecimen.locationType === 2) { // SchematicMap
+            locationData = {
+              ...locationData,
+              mapId: correctedSpecimen.mapId ?? null,
+              mapX: correctedSpecimen.mapX ?? null,
+              mapY: correctedSpecimen.mapY ?? null
+            };
+          } else if (correctedSpecimen.locationType === 1) { // Geographic
+            locationData = {
+              ...locationData,
+              latitude: correctedSpecimen.latitude ?? null,
+              longitude: correctedSpecimen.longitude ?? null
+            };
+          }
+          
+          console.log('Обновление местоположения образца:', JSON.stringify(locationData, null, 2));
+          
+          // Обновляем местоположение через новый контроллер
+          await specimenService.updateSpecimenLocation(Number(id), locationData);
+        }
       } else {
-        // Создание нового
-        result = await specimenService.createSpecimen(updatedSpecimen as unknown as Specimen);
+        // Создание нового образца
+        console.log('Создание нового образца...');
+        result = await specimenService.createSpecimen(correctedSpecimen as unknown as Specimen);
+        console.log('Образец успешно создан с ID:', result.id);
+        
+        // После создания образца обновляем его местоположение с типом локации
+        if (result && result.id && correctedSpecimen.locationType) {
+          let locationData = {
+            locationType: correctedSpecimen.locationType,
+            latitude: null as number | null,
+            longitude: null as number | null,
+            mapId: null as number | null,
+            mapX: null as number | null,
+            mapY: null as number | null
+          };
+          
+          // Устанавливаем только те поля, которые нужны для данного типа локации
+          if (correctedSpecimen.locationType === 2) { // SchematicMap
+            locationData = {
+              ...locationData,
+              mapId: correctedSpecimen.mapId ?? null,
+              mapX: correctedSpecimen.mapX ?? null,
+              mapY: correctedSpecimen.mapY ?? null
+            };
+          } else if (correctedSpecimen.locationType === 1) { // Geographic
+            locationData = {
+              ...locationData,
+              latitude: correctedSpecimen.latitude ?? null,
+              longitude: correctedSpecimen.longitude ?? null
+            };
+          }
+          
+          console.log('Обновление местоположения нового образца:', JSON.stringify(locationData, null, 2));
+          
+          // Обновляем местоположение через новый контроллер
+          await specimenService.updateSpecimenLocation(result.id, locationData);
+          console.log('Местоположение образца успешно обновлено');
+        }
       }
 
+      console.log('Результат сохранения образца:', JSON.stringify(result, null, 2));
       setSpecimen(result);
       setIsEditing(false);
       

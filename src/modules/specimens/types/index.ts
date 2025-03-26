@@ -2,6 +2,7 @@ export interface Specimen {
   id: number;
   inventoryNumber: string;
   sectorType: number;
+  locationType?: number;
   latitude: number;
   longitude: number;
   locationWkt?: string;
@@ -43,6 +44,12 @@ export enum SectorType {
   Dendrology = 0,
   Flora = 1,
   Flowering = 2
+}
+
+export enum LocationType {
+  None = 0,
+  Geographic = 1,
+  SchematicMap = 2
 }
 
 export enum UserRole {

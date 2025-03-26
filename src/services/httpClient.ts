@@ -344,12 +344,23 @@ async function sendWithProgress(
 // Удобные обёртки для стандартных методов
 const httpClient = {
   get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+    console.log(`[HTTP] GET запрос: ${endpoint}`);
     return request<T>(endpoint, 'GET', options);
   },
   post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+    console.log(`[HTTP] POST запрос: ${endpoint}`, {
+      contentType: body instanceof FormData ? undefined : 'application/json',
+      dataType: body instanceof FormData ? 'FormData' : 'JSON',
+      dataSize: body instanceof FormData ? 'FormData (размер не отображается)' : JSON.stringify(body).length + ' байт'
+    });
     return request<T>(endpoint, 'POST', { ...options, body });
   },
   put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+    console.log(`[HTTP] PUT запрос: ${endpoint}`, {
+      contentType: body instanceof FormData ? undefined : 'application/json',
+      dataType: body instanceof FormData ? 'FormData' : 'JSON',
+      dataSize: body instanceof FormData ? 'FormData (размер не отображается)' : JSON.stringify(body).length + ' байт'
+    });
     return request<T>(endpoint, 'PUT', { ...options, body });
   },
   patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
