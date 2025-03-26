@@ -17,7 +17,7 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   onRegionClick,
   onMapReady,
   controlPanelPosition = 'topRight',
-  showControls = true,
+  showControls,
   onDataLoaded,
   onError
 }) => {
@@ -37,6 +37,9 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   });
   
   const { mapConfig } = useMapConfig();
+  
+  // Используем showControls из параметров, если передан, иначе из mapConfig
+  const effectiveShowControls = showControls !== undefined ? showControls : mapConfig.showControls;
   
   // Заголовок карты
   const mapTitle = useMemo(() => {
@@ -79,7 +82,7 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
             setImageBounds={setImageBounds}
             setImageBoundsCalculated={setImageBoundsCalculated}
             refreshMapData={handleRefresh}
-            showControls={showControls}
+            showControls={effectiveShowControls}
             controlPanelStyles={controlPanelStyles}
             toggleControlPanel={toggleControlPanel}
             showControlPanel={showControlPanel}

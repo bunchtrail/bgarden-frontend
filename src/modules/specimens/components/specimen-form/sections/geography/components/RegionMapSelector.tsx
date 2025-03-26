@@ -73,6 +73,7 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
     selectedAreaIds,
     enableClustering: true,
     mapInteractionPriority: 'marker',
+    showControls: false,
   }), [selectedAreaIds, showTooltips]);
   
   return (
@@ -81,6 +82,7 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
         <MapPage 
           mode="light"
           initialConfig={initialMapConfig}
+          showControls={true}
           customLayers={[]}
           plugins={
             <MapMarker 

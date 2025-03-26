@@ -60,7 +60,7 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   showTooltips: true,
   zoomLevel: 1,
   availableLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
-  showControls: true,
+  showControls: false,
   debug: false,
   enableClustering: true,
   // Настройки режима взаимодействия с картой

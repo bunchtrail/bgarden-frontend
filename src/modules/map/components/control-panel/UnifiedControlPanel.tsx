@@ -69,7 +69,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(true);
   
   // Состояние для отслеживания видимости панели
-  const [isPanelVisible, setIsPanelVisible] = useState(true);
+  const [isPanelVisible, setIsPanelVisible] = useState(mapConfig.showControls);
   
   // Состояние для отслеживания изменений настроек карты
   const [hasChanges, setHasChanges] = useState(false);
