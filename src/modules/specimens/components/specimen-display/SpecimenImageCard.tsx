@@ -19,8 +19,6 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
   // Состояния для управления модальным окном и изображениями
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  // Новое состояние для отслеживания открытия изображения на весь экран
-  const [isFullscreenMode, setIsFullscreenMode] = useState(false);
   
   // Используем сервис уведомлений
   const notification = useNotification();
@@ -57,19 +55,6 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
   // Обработчик открытия модального окна
   const handleOpenModal = () => {
     setIsModalOpen(true);
-  };
-  
-  // Обработчик для открытия изображения на весь экран
-  const openFullscreenImage = () => {
-    // Открываем изображение только если оно существует
-    if (imageSrc && imageSrc !== '/images/specimens/placeholder.jpg') {
-      setIsFullscreenMode(true);
-    }
-  };
-  
-  // Обработчик для закрытия полноэкранного режима
-  const closeFullscreenImage = () => {
-    setIsFullscreenMode(false);
   };
   
   // Обработчик сохранения изображений
@@ -132,9 +117,8 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
               <img 
                 src={imageSrc || ''} 
                 alt={`${specimen.russianName} (${specimen.latinName})`}
-                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 onError={handleImageError}
-                onClick={openFullscreenImage}
               />
             )}
           </div>
@@ -195,37 +179,8 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
           )}
         </div>
       </Modal>
-      
-      {/* Модальное окно для просмотра изображения на весь экран */}
-      <Modal
-        isOpen={isFullscreenMode}
-        onClose={closeFullscreenImage}
-        size="fullscreen"
-        animation="fade"
-        variant="filled"
-        blockScroll={true}
-        contentClassName="flex items-center justify-center p-0"
-        className="bg-black/95 p-0"
-      >
-        <div className="relative w-full h-full flex items-center justify-center">
-          <img 
-            src={imageSrc || ''} 
-            alt={`${specimen.russianName} (${specimen.latinName})`}
-            className="max-w-full max-h-full object-contain"
-          />
-          
-          <button 
-            className="absolute top-4 right-4 text-white bg-black/30 hover:bg-black/50 rounded-full p-2 transition-all duration-300"
-            onClick={closeFullscreenImage}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-      </Modal>
     </Card>
   );
 };
 
-export default SpecimenImageCard;
+export default SpecimenImageCard; 
