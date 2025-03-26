@@ -46,9 +46,12 @@ export const useSpecimenImage = (
       if (imageData && imageData.imageDataBase64) {
         setImageSrc(`data:${imageData.contentType};base64,${imageData.imageDataBase64}`);
       } else {
+        // Явное указание, что используется плейсхолдер
+        console.log(`Для образца ID=${specimenId} используется изображение по умолчанию`);
         setImageSrc(imageUrl || placeholderImage);
       }
     } catch (error) {
+      // Это сообщение будет выводиться только для неожиданных ошибок, а не 404
       console.error(`Ошибка при загрузке изображения образца ID=${specimenId}:`, error);
       setImageSrc(imageUrl || placeholderImage);
     } finally {

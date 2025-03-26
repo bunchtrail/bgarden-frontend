@@ -146,8 +146,15 @@ class SpecimenService {
     // Получить основное изображение образца по ID
     async getSpecimenMainImage(specimenId: number): Promise<SpecimenImage | null> {
         try {
-            return await httpClient.get<SpecimenImage>(`v1/specimen-images/by-specimen/${specimenId}/main`);
+            return await httpClient.get<SpecimenImage>(
+                `v1/specimen-images/by-specimen/${specimenId}/main`,
+                { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
+            );
         } catch (error) {
+            // Для 404 не выводим ошибку в консоль
+            if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+                return null;
+            }
             console.error(`Ошибка при получении изображения для образца с ID ${specimenId}:`, error);
             return null;
         }
@@ -157,9 +164,14 @@ class SpecimenService {
     async getSpecimenImages(specimenId: number, includeImageData: boolean = false): Promise<SpecimenImage[]> {
         try {
             return await httpClient.get<SpecimenImage[]>(
-                `v1/specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`
+                `v1/specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`,
+                { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
             );
         } catch (error) {
+            // Для 404 не выводим ошибку в консоль
+            if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+                return [];
+            }
             console.error(`Ошибка при получении изображений образца с ID ${specimenId}:`, error);
             return [];
         }
