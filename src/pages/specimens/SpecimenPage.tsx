@@ -105,6 +105,7 @@ const SpecimenPage: React.FC = () => {
       } else {
         // Создание нового образца
         console.log('Создание нового образца...');
+        
         result = await specimenService.createSpecimen(correctedSpecimen as unknown as Specimen);
         console.log('Образец успешно создан с ID:', result.id);
         

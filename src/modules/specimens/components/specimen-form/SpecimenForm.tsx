@@ -18,7 +18,8 @@ import { SectorType, LocationType } from '@/modules/specimens/types';
 import { FamilyDto } from '../../services/familyService';
 import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
-import { createSpecimenWithImages } from '../../services/specimenService';
+import { useSpecimenImage } from '../../hooks';
+import { specimenService } from '../../services/specimenService';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -123,8 +124,17 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Добавляем состояние для хранения выбранных изображений
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  
+  // Используем обновленный хук для работы с изображениями
+  const { 
+    uploadImage, 
+    isUploading, 
+    uploadProgress 
+  } = useSpecimenImage(
+    specimen?.id || 0, 
+    null, 
+    false // не загружать изображение автоматически
+  );
 
   // Обновление формы при получении данных образца
   useEffect(() => {
@@ -227,12 +237,9 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         }
       });
       
-      // Если есть изображения, используем метод createSpecimenWithImages
+      // Если есть изображения, используем обновленный метод работы с изображениями
       if (selectedImages.length > 0) {
         try {
-          setIsUploading(true);
-          
-          // Отладочный вывод
           console.log('Отправляемые данные образца:', finalFormData);
           console.log('Отправляемые изображения:', selectedImages.map(img => ({
             name: img.name,
@@ -240,22 +247,19 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
             size: img.size
           })));
           
-          const result = await createSpecimenWithImages(
-            finalFormData, 
-            selectedImages,
-            (progress) => {
-              console.log(`Прогресс загрузки: ${progress}%`);
-              setUploadProgress(progress);
-            }
-          );
+          // Сначала создаем образец без изображений
+          const createdSpecimen = await specimenService.createSpecimen(finalFormData);
+          
+          // Затем загружаем изображения используя хук
+          await uploadImage(selectedImages, { 
+            isMain: true, // первое изображение будет основным 
+          });
           
           notification.success('Образец успешно создан с изображениями', { duration: 5000 });
-          navigate(`/specimens/${result.specimen.id}`);
+          navigate(`/specimens/${createdSpecimen.id}`);
         } catch (error: any) {
           console.error('Подробная ошибка:', error);
           notification.error(`Ошибка при создании образца: ${error.message || 'Неизвестная ошибка'}`);
-        } finally {
-          setIsUploading(false);
         }
       } else {
         // Если изображения не выбраны, используем стандартный метод создания образца
@@ -337,28 +341,25 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Рендер шага с загрузкой изображений
   const renderImagesStep = () => (
-    <div className="py-4">
-      <h3 className="text-xl font-semibold mb-4">Загрузка изображений</h3>
-      <p className="text-gray-600 mb-4">
-        Загрузите изображения образца. Первое изображение будет использоваться как основное.
-      </p>
+    <div className="flex flex-col space-y-4">
+      <h3 className="text-xl font-semibold">Загрузка изображений</h3>
       
       <ImageUploader
-        value={selectedImages}
         onChange={handleImagesChange}
+        value={selectedImages}
         onError={handleImageError}
         maxImages={5}
       />
       
       {isUploading && (
-        <div className="mt-4">
-          <p className="text-sm font-medium mb-2">Прогресс загрузки: {uploadProgress}%</p>
+        <div className="mt-2">
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div 
-              className="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
+              className="bg-green-600 h-2.5 rounded-full" 
               style={{ width: `${uploadProgress}%` }}
-            />
+            ></div>
           </div>
+          <p className="text-sm text-gray-600 mt-1">Загрузка: {uploadProgress}%</p>
         </div>
       )}
     </div>
