@@ -8,7 +8,8 @@ import {
   RegionSelector, 
   ExpositionSelector, 
   LocationDescriptionInput,
-  RegionMapSelector 
+  RegionMapSelector,
+  CoordinatesInput 
 } from './components';
 import { useRegionMarkerLogic } from './hooks';
 import Switch from '@/modules/ui/components/Form/Switch';
@@ -45,6 +46,11 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
   // Подготовленное значение для select, проверяем что regionId не null и не undefined
   const regionIdValue = getRegionIdString(formData.regionId);
 
+  // Обработчик изменения типа локации
+  const handleLocationTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange(e);
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className={`border p-4 rounded-md ${cardClasses.elevated}`}>
@@ -70,6 +76,19 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
               showTooltips={showTooltips}
             />
            
+          </div>
+          
+          {/* Добавляем компонент для ввода координат */}
+          <div className="mb-4">
+            <CoordinatesInput 
+              latitude={formData.latitude}
+              longitude={formData.longitude}
+              mapX={formData.mapX}
+              mapY={formData.mapY}
+              locationType={formData.locationType || LocationType.None}
+              onTypeChange={handleLocationTypeChange}
+              onChange={onChange}
+            />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
