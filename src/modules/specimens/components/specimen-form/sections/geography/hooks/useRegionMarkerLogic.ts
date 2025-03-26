@@ -80,11 +80,11 @@ export function useRegionMarkerLogic(
     
     // Обновляем поля mapX и mapY для координат на карте
     onChange({
-      target: { name: 'mapX', value: lng.toString() }
+      target: { name: 'mapX', value: lat.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
     
     onChange({
-      target: { name: 'mapY', value: lat.toString() }
+      target: { name: 'mapY', value: lng.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
     
     // Если точка находится внутри какого-то региона, выбираем этот регион

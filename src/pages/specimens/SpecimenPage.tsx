@@ -10,6 +10,7 @@ import { SpecimenHeader, SpecimenDisplay } from '../../modules/specimens/compone
 import { useSpecimenData } from '../../modules/specimens/hooks/useSpecimenData';
 import { useReferenceData } from '../../modules/specimens/hooks/useReferenceData';
 import { cardClasses, textClasses, layoutClasses } from '../../styles/global-styles';
+import { getActiveMap } from '../../modules/map/services/mapService';
 
 /**
  * Страница детального просмотра и редактирования образца растения
@@ -40,12 +41,18 @@ const SpecimenPage: React.FC = () => {
   // Обработчик сохранения образца
   const handleSave = async (updatedSpecimen: SpecimenFormData) => {
     try {
+      // Получаем активную карту для использования её ID
+      const activeMaps = await getActiveMap();
+      const activeMapId = activeMaps && activeMaps.length > 0 ? activeMaps[0].id : 1; // Используем ID 1 как запасной вариант
+      
       // Корректируем данные в зависимости от типа локации
       const correctedSpecimen = { ...updatedSpecimen };
       if (correctedSpecimen.locationType === 2) { // SchematicMap
         // Для схематических координат убираем географические
         correctedSpecimen.latitude = null as unknown as number;
         correctedSpecimen.longitude = null as unknown as number;
+        // Устанавливаем ID активной карты
+        correctedSpecimen.mapId = activeMapId;
       } else if (correctedSpecimen.locationType === 1) { // Geographic
         // Для географических координат убираем схематические
         correctedSpecimen.mapId = null as unknown as number;
@@ -78,7 +85,7 @@ const SpecimenPage: React.FC = () => {
           if (correctedSpecimen.locationType === 2) { // SchematicMap
             locationData = {
               ...locationData,
-              mapId: correctedSpecimen.mapId ?? null,
+              mapId: activeMapId, // Всегда устанавливаем ID активной карты
               mapX: correctedSpecimen.mapX ?? null,
               mapY: correctedSpecimen.mapY ?? null
             };
@@ -116,7 +123,7 @@ const SpecimenPage: React.FC = () => {
           if (correctedSpecimen.locationType === 2) { // SchematicMap
             locationData = {
               ...locationData,
-              mapId: correctedSpecimen.mapId ?? null,
+              mapId: activeMapId, // Всегда устанавливаем ID активной карты
               mapX: correctedSpecimen.mapX ?? null,
               mapY: correctedSpecimen.mapY ?? null
             };
