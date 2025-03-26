@@ -25,8 +25,19 @@ import SpecimenModal from './components/specimens-components/SpecimenModal';
 // Сервисы
 import { specimenService } from './services/specimenService';
 import { familyService } from './services/familyService';
-import { regionService } from './services/regionService';
 import { expositionService } from './services/expositionService';
+
+// регионы
+import { 
+  getAllRegions,
+  getRegionById,
+  getSpecimensInRegion,
+  getSectorRegionMapping,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getDefaultRegions 
+} from '@/services/regions';
 
 // Типы
 export * from './types';
@@ -70,7 +81,6 @@ export {
   // Сервисы
   specimenService,
   familyService,
-  regionService,
   expositionService,
 };
 
@@ -78,9 +88,34 @@ export {
 export default {
   specimenService,
   familyService,
-  regionService,
   expositionService,
 };
 
 // Компоненты для работы с изображениями
-export { default as ImageUploader } from './components/specimen-form/ImageUploader'; 
+export { default as ImageUploader } from './components/specimen-form/ImageUploader';
+
+// Хуки
+export { useSpecimenImage } from './hooks';
+
+// Для совместимости создаем объект regionService
+const regionService = {
+  getAllRegions,
+  getRegionById,
+  getSpecimensInRegion,
+  getSectorRegionMapping,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getDefaultRegions
+};
+
+// API сервисы
+export const services = {
+  specimenService,
+  familyService,
+  expositionService,
+  regionService
+};
+
+// Экспортируем regionService для обратной совместимости
+export { regionService }; 

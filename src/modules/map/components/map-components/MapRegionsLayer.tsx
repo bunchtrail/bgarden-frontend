@@ -1,12 +1,14 @@
 import React from 'react';
-import { Polygon, Tooltip } from 'react-leaflet';
-import { RegionData } from '../../types/mapTypes';
-import { parseCoordinates } from '../../services/regionService';
-import { useMap as useMapHook } from '../../hooks';
+import { Polygon, Tooltip, useMap as useLeafletMap } from 'react-leaflet';
+import { RegionData } from '@/modules/map/types/mapTypes';
+import { PolygonFactory } from '@/services/regions/PolygonFactory';
+import { parseCoordinates } from '@/services/regions/RegionUtils';
+import { useMap } from '@/modules/map/hooks';
+import regionBridge from '@/services/regions/RegionBridge';
 import { MAP_STYLES } from '../../styles';
-import { COLORS, textClasses } from '../../../../styles/global-styles';
+import { COLORS, textClasses } from '@/styles/global-styles';
 
-interface MapRegionsLayerProps {
+export interface MapRegionsLayerProps {
   regions: RegionData[];
   highlightSelected?: boolean;
   showTooltips?: boolean;
@@ -19,59 +21,124 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
   showTooltips = true,
   onClick
 }) => {
-  const { setSelectedAreaId, selectedAreaId } = useMapHook();
+  const { setSelectedAreaId, selectedAreaId } = useMap();
+  const leafletMap = useLeafletMap();
 
-  const handleRegionClick = (regionId: string | number) => {
-    setSelectedAreaId(`region-${regionId}`);
-    if (onClick) onClick(String(regionId));
+  const handleRegionClick = (regionId: string | number, e?: L.LeafletMouseEvent) => {
+    // Преобразование ID региона
+    const id = typeof regionId === 'number' ? regionBridge.regionIdToAreaId(regionId) : regionId;
+    
+    // Устанавливаем выбранный регион
+    setSelectedAreaId(id);
+    
+    // Вызываем обработчик onClick, если он передан в пропсы
+    if (onClick) {
+      onClick(typeof regionId === 'number' ? String(regionId) : regionId);
+    }
+    
+    // Важно: не останавливаем распространение события, чтобы оно дошло до карты
+    // и можно было установить маркер при клике на область
   };
+  
+  // Добавляем обработчик для перехвата клика по всей карте с низким приоритетом
+  React.useEffect(() => {
+    if (!leafletMap) return;
+    
+    // Получаем контейнер карты
+    const mapContainer = leafletMap.getContainer();
+    
+    // Функция обработки клика по карте (запасной вариант)
+    const handleMapContainerClick = (e: MouseEvent) => {
+      // Если клик был по полигону, но не обработан маркером
+      if ((e.target as HTMLElement).closest('.leaflet-overlay-pane')) {
+        console.log('Запасной обработчик клика по контейнеру карты');
+        // Не останавливаем распространение события здесь
+        // и не предотвращаем дальнейшую обработку
+      }
+    };
+    
+    // Используем фазу перехвата (true) с самым низким приоритетом
+    // чтобы обработчики MapMarker имели возможность обработать событие первыми
+    mapContainer.addEventListener('click', handleMapContainerClick, true);
+    
+    return () => {
+      mapContainer.removeEventListener('click', handleMapContainerClick, true);
+    };
+  }, [leafletMap]);
   
   return (
     <>
       {regions.map((region) => {
-        const coordinates = parseCoordinates(region.polygonCoordinates);
-        if (coordinates.length < 3) return null; // Полигон должен иметь как минимум 3 точки
+        // Используем RegionBridge для преобразования RegionData в Area и получения points
+        const area = regionBridge.toArea(region);
+        if (area.points.length < 3) return null; // Полигон должен иметь как минимум 3 точки
         
-        const isSelected = highlightSelected && selectedAreaId === `region-${region.id}`;
+        const isSelected = highlightSelected && selectedAreaId === area.id;
+        
+        // Используем унифицированную фабрику для создания стилей полигонов
+        const pathOptions = PolygonFactory.createStyles({ 
+          isSelected, 
+          strokeColor: region.strokeColor,
+          fillColor: region.fillColor,
+          fillOpacity: region.fillOpacity
+        });
+        
+        // Добавляем дополнительные стили для улучшения обработки кликов
+        pathOptions.className = 'region-polygon clickable-region'; // Добавляем классы для CSS
+        
+        // Используем унифицированную фабрику для создания обработчиков событий
+        const eventHandlers = PolygonFactory.createEventHandlers(
+          { 
+            isSelected, 
+            onClick: handleRegionClick 
+          }, 
+          region
+        );
+        
+        // Заменяем обработчик клика для прозрачности полигона для событий
+        eventHandlers.click = (e) => {
+          // Вызываем основной обработчик
+          handleRegionClick(region.id, e);
+          
+          // Не останавливаем событие, чтобы оно дошло до карты
+          // e.originalEvent.stopPropagation();
+        };
+        
+        // Обработчики наведения для визуальной обратной связи
+        eventHandlers.mouseover = () => {
+          const polygonElement = document.querySelector(`[data-region-id="${region.id}"]`);
+          if (polygonElement) {
+            polygonElement.classList.add('region-hover');
+          }
+        };
+        
+        eventHandlers.mouseout = () => {
+          const polygonElement = document.querySelector(`[data-region-id="${region.id}"]`);
+          if (polygonElement) {
+            polygonElement.classList.remove('region-hover');
+          }
+        };
         
         return (
           <Polygon
             key={`region-${region.id}`}
-            positions={coordinates}
-            pathOptions={{
-              fillColor: isSelected ? COLORS.primary.main : (region.fillColor || COLORS.text.secondary),
-              color: isSelected ? COLORS.primary.dark : (region.strokeColor || COLORS.text.primary),
-              fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-              weight: isSelected ? 3 : 2,
-              opacity: 0.8
-            }}
-            eventHandlers={{
-              click: () => handleRegionClick(region.id),
-              mouseover: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: 0.5,
-                  weight: isSelected ? 3 : 2.5,
-                });
-              },
-              mouseout: (e) => {
-                const layer = e.target;
-                layer.setStyle({
-                  fillOpacity: isSelected ? 0.4 : (region.fillOpacity || 0.3),
-                  weight: isSelected ? 3 : 2,
-                });
-              }
-            }}
+            positions={area.points}
+            pathOptions={pathOptions}
+            eventHandlers={eventHandlers}
+            data-region-id={region.id} // Добавляем data-атрибут для идентификации
+            bubblingMouseEvents={true} // ВАЖНО: Разрешаем "всплытие" событий мыши для проброса клика
+            interactive={true} // Явно указываем, что элемент интерактивный
           >
             {showTooltips && (
-              <Tooltip sticky>
-                <div className={MAP_STYLES.regionTooltip}>
-                  <strong className={textClasses.subheading}>{region.name}</strong>
-                  {region.description && <p className={textClasses.secondary}>{region.description}</p>}
-                  <p className={`${textClasses.body} ${MAP_STYLES.regionInfo}`}>
-                    Экземпляров: <span className={MAP_STYLES.regionCount} style={{color: COLORS.primary.main}}>{region.specimensCount}</span>
-                  </p>
+              <Tooltip direction="center" opacity={0.9} permanent={false}>
+                <div className="font-medium text-sm">
+                  {region.name || 'Unnamed Region'}
                 </div>
+                {region.description && (
+                  <div className="text-xs mt-1 text-gray-600">
+                    {region.description}
+                  </div>
+                )}
               </Tooltip>
             )}
           </Polygon>

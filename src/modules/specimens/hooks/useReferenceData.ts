@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { familyService, FamilyDto } from '../services/familyService';
 import { expositionService, ExpositionDto } from '../services/expositionService';
-import { getAllRegions } from '../services/regionService';
+import { getAllRegions } from '@/services/regions';
 import { RegionData } from '../../map/types/mapTypes';
 
 /**

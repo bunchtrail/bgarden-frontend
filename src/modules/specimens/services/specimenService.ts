@@ -1,16 +1,33 @@
 import httpClient from '../../../services/httpClient';
-import { SectorType, Specimen } from '../types/index';
-import { updateSpecimensCount } from '../../map/services/regionService';
+import { SectorType, Specimen, SpecimenImage, BatchImageUploadResult } from '../types/index';
+import { updateSpecimensCount } from '@/services/regions';
 
-// Интерфейс для данных изображения образца
-interface SpecimenImage {
-    id: number;
+
+
+// Интерфейс для результатов массовой загрузки изображений
+export interface BatchSpecimenImageResultDto {
     specimenId: number;
-    imageDataBase64: string;
-    contentType: string;
-    description: string;
-    isMain: boolean;
-    uploadedAt: string;
+    successCount: number;
+    errorCount: number;
+    uploadedImageIds: number[];
+    errorMessages: string[];
+}
+
+// Интерфейс для обновления местоположения
+export interface LocationUpdateDto {
+    locationType: number;
+    latitude?: number | null;
+    longitude?: number | null;
+    mapId?: number | null;
+    mapX?: number | null;
+    mapY?: number | null;
+}
+
+// Новый интерфейс для объединенной загрузки изображений
+export interface UploadImageOptions {
+  isMain?: boolean;
+  description?: string;
+  onProgress?: (progress: number) => void;
 }
 
 // Интерфейс для работы с API образцов растений
@@ -86,8 +103,16 @@ class SpecimenService {
                 sectorType: Number(specimen.sectorType)
             };
             
+            console.log('Отправка запроса на создание образца:', {
+                url: 'Specimen',
+                method: 'POST',
+                data: JSON.stringify(specimenData, null, 2)
+            });
+            
             // Используем httpClient для отправки запроса
             const createdSpecimen = await httpClient.post<Specimen>('Specimen', specimenData);
+            
+            console.log('Ответ сервера после создания образца:', JSON.stringify(createdSpecimen, null, 2));
             
             // Обновляем счетчик образцов в области
             if (createdSpecimen.regionId) {
@@ -121,13 +146,59 @@ class SpecimenService {
     // Получить основное изображение образца по ID
     async getSpecimenMainImage(specimenId: number): Promise<SpecimenImage | null> {
         try {
-            return await httpClient.get<SpecimenImage>(`v1/specimen-images/by-specimen/${specimenId}/main`);
+            return await httpClient.get<SpecimenImage>(
+                `v1/specimen-images/by-specimen/${specimenId}/main`,
+                { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
+            );
         } catch (error) {
+            // Для 404 не выводим ошибку в консоль
+            if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+                return null;
+            }
             console.error(`Ошибка при получении изображения для образца с ID ${specimenId}:`, error);
             return null;
         }
     }
 
+    // Получить все изображения образца
+    async getSpecimenImages(specimenId: number, includeImageData: boolean = false): Promise<SpecimenImage[]> {
+        try {
+            return await httpClient.get<SpecimenImage[]>(
+                `v1/specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`,
+                { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
+            );
+        } catch (error) {
+            // Для 404 не выводим ошибку в консоль
+            if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+                return [];
+            }
+            console.error(`Ошибка при получении изображений образца с ID ${specimenId}:`, error);
+            return [];
+        }
+    }
+    
+    // Получить изображение по ID
+    async getSpecimenImageById(imageId: number): Promise<SpecimenImage | null> {
+        try {
+            return await httpClient.get<SpecimenImage>(`v1/specimen-images/${imageId}`);
+        } catch (error) {
+            console.error(`Ошибка при получении изображения с ID ${imageId}:`, error);
+            return null;
+        }
+    }
+    
+    // Удалить изображение
+    async deleteSpecimenImage(id: number): Promise<boolean> {
+        try {
+            await httpClient.delete(`v1/specimen-images/${id}`);
+            console.log(`Изображение с ID ${id} успешно удалено`);
+            return true;
+        } catch (error) {
+            console.error(`Ошибка при удалении изображения с ID ${id}:`, error);
+            return false;
+        }
+    }
+    
     // Удалить образец
     async deleteSpecimen(id: number): Promise<boolean> {
         try {
@@ -148,141 +219,27 @@ class SpecimenService {
             throw error;
         }
     }
+
+    // Обновить местоположение образца
+    async updateSpecimenLocation(id: number, locationData: LocationUpdateDto): Promise<Specimen> {
+        try {
+            console.log('Отправка запроса на обновление местоположения образца:', {
+                url: `Specimen/${id}/location`,
+                method: 'PUT',
+                data: JSON.stringify(locationData, null, 2)
+            });
+            
+            const result = await httpClient.put<Specimen>(`Specimen/${id}/location`, locationData);
+            
+            console.log('Ответ сервера после обновления местоположения:', JSON.stringify(result, null, 2));
+            
+            return result;
+        } catch (error) {
+            console.error('Ошибка при обновлении местоположения образца:', error);
+            throw error;
+        }
+    }
 }
 
 // Экспортируем экземпляр сервиса для использования в приложении
-export const specimenService = new SpecimenService();
-
-// Метод для создания образца с изображениями (multipart/form-data)
-export const createSpecimenWithImages = async (
-  specimenData: Omit<Specimen, 'id'>, 
-  images: File[],
-  onProgress?: (progress: number) => void
-): Promise<{ specimen: Specimen, imageIds: number[] }> => {
-  try {
-    // Создаем FormData для отправки в multipart/form-data формате
-    const formData = new FormData();
-    
-    // Используем корректный путь API
-    // Вначале без префикса api/, т.к. httpClient уже добавляет базовый URL с префиксом
-    const apiEndpoint = 'Specimen/with-images';
-    console.log(`Используем API эндпоинт: ${apiEndpoint}`);
-    
-    // Список обязательных полей, которые должны быть в запросе
-    const requiredFields = [
-      'Id', 'InventoryNumber', 'SectorType', 'MapX', 'MapY',
-      'FamilyId', 'RussianName', 'LatinName', 'Genus', 'Species',
-      'PlantingYear', 'ExpositionId', 'HasHerbarium'
-    ];
-    
-    // Подготавливаем данные образца в соответствии с форматом ожидаемым сервером
-    // ID должен быть 0 для новых записей
-    const preparedData = {
-      id: 0,
-      ...specimenData,
-      // Подготовка числовых полей
-      sectorType: typeof specimenData.sectorType === 'string' ? 
-        Number(specimenData.sectorType) : specimenData.sectorType,
-      familyId: typeof specimenData.familyId === 'string' ? 
-        Number(specimenData.familyId) : specimenData.familyId,
-      expositionId: typeof specimenData.expositionId === 'string' ? 
-        Number(specimenData.expositionId) : specimenData.expositionId,
-      // Преобразуем координаты карты в числа
-      mapX: typeof specimenData.mapX === 'string' ? 
-        Number(specimenData.mapX) : specimenData.mapX,
-      mapY: typeof specimenData.mapY === 'string' ? 
-        Number(specimenData.mapY) : specimenData.mapY,
-      // Убедимся, что regionId тоже числовой
-      regionId: typeof specimenData.regionId === 'string' ? 
-        Number(specimenData.regionId) : specimenData.regionId,
-      // Убедимся, что sampleOrigin всегда строка
-      sampleOrigin: specimenData.sampleOrigin ? String(specimenData.sampleOrigin) : specimenData.sampleOrigin,
-      // Убедимся, что hasHerbarium всегда определено
-      hasHerbarium: specimenData.hasHerbarium !== undefined ? specimenData.hasHerbarium : false
-    };
-    
-    // Проверяем наличие всех обязательных полей
-    let missingFields: string[] = [];
-    requiredFields.forEach(field => {
-      const lowerField = field.charAt(0).toLowerCase() + field.slice(1);
-      if (preparedData[lowerField as keyof typeof preparedData] === undefined) {
-        missingFields.push(field);
-      }
-    });
-    
-    if (missingFields.length > 0) {
-      console.warn(`Отсутствуют обязательные поля: ${missingFields.join(', ')}`);
-    }
-    
-    // Добавляем данные образца как отдельные поля, а не как JSON-объект
-    // Сервер ожидает именно такой формат для multipart/form-data
-    Object.entries(preparedData).forEach(([key, value]) => {
-      // Пропускаем пустые значения, но добавляем нулевые значения
-      if (value !== undefined && value !== null && value !== '') {
-        // Преобразуем первую букву ключа в заглавную для соответствия API
-        const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
-        formData.append(pascalCaseKey, value.toString());
-      }
-    });
-    
-    // Обязательно добавляем LocationWkt если есть, или пустую строку
-    formData.append('LocationWkt', preparedData.locationWkt || '');
-    
-    // Обязательно добавляем HasHerbarium даже если это false
-    formData.append('HasHerbarium', preparedData.hasHerbarium.toString());
-    
-    console.log('Добавлены данные образца:', JSON.stringify(preparedData));
-    
-    // Добавляем изображения
-    images.forEach((image) => {
-      formData.append('Images', image, image.name);
-      console.log(`Добавлено изображение: ${image.name}, ${image.type}, ${image.size} байт`);
-    });
-    
-    // Отображаем данные формы для детальной отладки
-    console.log('FormData содержит следующие поля:');
-    formData.forEach((value, key) => {
-      if (value instanceof File) {
-        console.log(`${key}: File (${value.name}, ${value.type}, ${value.size} байт)`);
-      } else {
-        console.log(`${key}: ${value} (тип: ${typeof value})`);
-      }
-    });
-    
-    // Отправляем запрос
-    const response = await httpClient.post<{ specimen: Specimen, imageIds: number[] }>(
-      apiEndpoint,
-      formData,
-      {
-        onUploadProgress: (progressEvent) => {
-          if (onProgress && progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percentCompleted);
-          }
-        }
-      }
-    );
-    
-    // Обновляем счетчик образцов в области после успешного создания
-    if (response.specimen.regionId) {
-      await updateSpecimensCount(response.specimen.regionId, true);
-    }
-    
-    return response;
-  } catch (error: any) {
-    console.error('Ошибка при создании образца с изображениями:', error);
-    
-    // Расширенное логирование ошибок
-    if (error.status) {
-      console.error('Детали ошибки от сервера:', {
-        status: error.status,
-        message: error.message,
-        data: error.data
-      });
-    } else {
-      console.error('Ошибка запроса:', error.message || 'Неизвестная ошибка');
-    }
-    
-    throw error;
-  }
-}; 
+export const specimenService = new SpecimenService(); 

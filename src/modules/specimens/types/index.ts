@@ -2,6 +2,7 @@ export interface Specimen {
   id: number;
   inventoryNumber: string;
   sectorType: number;
+  locationType?: number;
   latitude: number;
   longitude: number;
   locationWkt?: string;
@@ -43,6 +44,12 @@ export enum SectorType {
   Dendrology = 0,
   Flora = 1,
   Flowering = 2
+}
+
+export enum LocationType {
+  None = 0,
+  Geographic = 1,
+  SchematicMap = 2
 }
 
 export enum UserRole {
@@ -122,4 +129,24 @@ export interface Region {
   name: string;
   description?: string;
   climate?: string;
+}
+
+// Интерфейс для данных изображения образца
+export interface SpecimenImage {
+  id: number;
+  specimenId: number;
+  imageDataBase64: string;
+  contentType: string;
+  description: string;
+  isMain: boolean;
+  uploadedAt: string;
+}
+
+// Интерфейс для результатов загрузки изображений
+export interface BatchImageUploadResult {
+  specimenId: number;
+  successCount: number;
+  errorCount: number;
+  uploadedImageIds: number[];
+  errorMessages: string[];
 } 

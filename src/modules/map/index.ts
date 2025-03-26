@@ -10,8 +10,6 @@ export { default as MapPage } from './components/MapPage';
 export { 
   MapProvider, 
   useMapContext,
-  type Area,
-  type Plant
 } from './contexts/MapContext';
 
 export { 
@@ -44,12 +42,20 @@ export {
   getActiveMap 
 } from './services/mapService';
 
-export { 
-  getAllRegions, 
-  convertRegionsToAreas, 
-  parseCoordinates, 
-  updateRegion 
-} from './services/regionService';
+export {
+  getAllRegions,
+  getRegionById,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+  getSpecimensInRegion,
+  updateSpecimensCount,
+  convertPointsToPolygonCoordinates,
+  parseCoordinates,
+  getDefaultCoordinates,
+  getDefaultRegions,
+  getSectorRegionMapping
+} from '@/services/regions';
 
 // Стили
 export { MAP_STYLES } from './styles';

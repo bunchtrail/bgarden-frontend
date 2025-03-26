@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { RegionData } from '@/modules/map/types/mapTypes';
+import { RegionData } from '@/services/regions/types';
 import { SpecimenFormData } from '@/modules/specimens/types';
 import L from 'leaflet';
+import { isPointInPolygon, parseCoordinates, pointToObject } from '@/services/regions';
 
 interface ExtendedSpecimenFormData extends SpecimenFormData {
   locationDescription?: string;
@@ -14,6 +15,7 @@ export function useRegionMarkerLogic(
 ) {
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
   const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+  const [showTooltips, setShowTooltips] = useState<boolean>(false);
   
   // Инициализация маркера из координат formData
   useEffect(() => {
@@ -50,14 +52,15 @@ export function useRegionMarkerLogic(
       // Приводим к нужному типу
       onChange(mockEvent as unknown as React.ChangeEvent<HTMLSelectElement>);
       
-      // Находим центр выбранного региона для установки маркера, если координаты еще не заданы
-      const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
-      if (selectedRegion && (!formData.latitude || !formData.longitude)) {
-        // Преобразуем числовые координаты в строковые для handleCoordinatesChange
-        const lat = Number(selectedRegion.latitude);
-        const lng = Number(selectedRegion.longitude);
-        handleCoordinatesChange(lat, lng);
-      }
+      // Комментируем автоматическую установку маркера в центр региона, 
+      // чтобы пользователь мог сам выбрать любое место
+      // const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
+      // if (selectedRegion && (!formData.latitude || !formData.longitude)) {
+      //   // Преобразуем числовые координаты в строковые для handleCoordinatesChange
+      //   const lat = Number(selectedRegion.latitude);
+      //   const lng = Number(selectedRegion.longitude);
+      //   handleCoordinatesChange(lat, lng);
+      // }
     }
   };
 
@@ -75,6 +78,15 @@ export function useRegionMarkerLogic(
       target: { name: 'longitude', value: lng.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
     
+    // Обновляем поля mapX и mapY для координат на карте
+    onChange({
+      target: { name: 'mapX', value: lat.toString() }
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
+    onChange({
+      target: { name: 'mapY', value: lng.toString() }
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
     // Если точка находится внутри какого-то региона, выбираем этот регион
     const containingRegion = findRegionContainingPoint(regions, lat, lng);
     
@@ -87,22 +99,16 @@ export function useRegionMarkerLogic(
   
   // Функция для определения региона, в котором находится точка
   const findRegionContainingPoint = (regions: RegionData[], lat: number, lng: number): RegionData | undefined => {
-    // Сначала проверяем через polygonCoordinates, если доступно
+    // Сначала проверяем через polygonCoordinates
     for (const region of regions) {
       if (region.polygonCoordinates) {
         try {
-          // Парсим координаты из JSON строки
-          const coordinates = JSON.parse(region.polygonCoordinates);
+          // Используем унифицированную функцию parseCoordinates
+          const coordinates = parseCoordinates(region.polygonCoordinates);
           
-          if (Array.isArray(coordinates) && coordinates.length > 0) {
-            // Создаем полигон и проверяем, содержит ли он точку
-            const polygonPoints = coordinates.map((coord: [number, number]) => 
-              L.latLng(coord[0], coord[1])
-            );
-            
-            // Используем isMarkerInsidePolygon вместо getBounds().contains()
-            // Это даст более точное определение для треугольной или другой сложной формы
-            if (isPointInsidePolygon(L.latLng(lat, lng), polygonPoints)) {
+          if (coordinates.length > 0) {
+            // Используем унифицированную функцию isPointInPolygon
+            if (isPointInPolygon([lat, lng], coordinates)) {
               return region;
             }
           }
@@ -123,36 +129,15 @@ export function useRegionMarkerLogic(
     return undefined;
   };
 
-  /**
-   * Точно определяет, находится ли точка внутри полигона, используя алгоритм Ray Casting
-   * Работает корректно с любыми сложными формами (треугольники, многоугольники и т.д.)
-   */
-  const isPointInsidePolygon = (point: L.LatLng, polygon: L.LatLng[]): boolean => {
-    // Если менее 3 точек, то это не полигон
-    if (polygon.length < 3) return false;
-    
-    let inside = false;
-    
-    // Проходим через каждую грань полигона
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].lat;
-      const yi = polygon[i].lng;
-      const xj = polygon[j].lat;
-      const yj = polygon[j].lng;
-      
-      const intersect = ((yi > point.lng) !== (yj > point.lng)) && 
-        (point.lat < (xj - xi) * (point.lng - yi) / (yj - yi) + xi);
-      
-      if (intersect) inside = !inside;
-    }
-    
-    return inside;
-  };
-
   // Получение строкового представления regionId
   const getRegionIdString = (id: number | null | undefined): string => {
     if (id === null || id === undefined) return '';
     return id.toString();
+  };
+
+  // Обработчик переключения отображения подсказок при наведении
+  const toggleTooltips = () => {
+    setShowTooltips(prev => !prev);
   };
 
   return {
@@ -160,6 +145,8 @@ export function useRegionMarkerLogic(
     markerPosition,
     handleRegionClick,
     handleCoordinatesChange,
-    getRegionIdString
+    getRegionIdString,
+    showTooltips,
+    toggleTooltips
   };
 } 

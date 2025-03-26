@@ -3,7 +3,7 @@ import { useMapConfig } from '../../contexts/MapConfigContext';
 import { BaseMapContainer, MapBoundsHandler, MapReadyHandler } from '../map-components';
 import MapLayersManager from '../map-layers/MapLayersManager';
 import { MapViewContainerProps } from '../../types/mapTypes';
-import { Plant } from '../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 
 /**
  * Компонент контейнера вида карты

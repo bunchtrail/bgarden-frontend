@@ -1,24 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-// Тип для области на карте
-export interface Area {
-  id: string;
-  name: string;
-  points: [number, number][];
-  description?: string;
-  fillColor?: string;
-  strokeColor?: string;
-  fillOpacity?: number;
-}
-
-// Тип для растения на карте
-export interface Plant {
-  id: string;
-  name: string;
-  latinName?: string;
-  description?: string;
-  position: [number, number]; // [x, y] координаты на карте
-}
+import { Area, Plant } from '@/services/regions/types';
 
 // Тип для контекста карты
 interface MapContextType {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Card from '../../../../modules/ui/components/Card';
-import { Specimen } from '../../types';
+import { Specimen, LocationType } from '../../types';
 import { cardClasses, textClasses, animationClasses } from '../../../../styles/global-styles';
 
 interface GeographicInfoCardProps {
@@ -25,12 +25,22 @@ const GeographicInfoCard: React.FC<GeographicInfoCardProps> = ({ specimen }) => 
             </div>
           )}
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Координаты</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>
-              {`${specimen.latitude.toFixed(6)}, ${specimen.longitude.toFixed(6)}`}
+          {/* Показываем разные типы координат в зависимости от типа локации */}
+          {specimen.locationType === LocationType.Geographic && specimen.latitude !== null && specimen.longitude !== null ? (
+            <div className="border-b border-gray-100 pb-3">
+              <div className={`${textClasses.small} ${textClasses.secondary}`}>Географические координаты</div>
+              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>
+                {`${specimen.latitude.toFixed(6)}, ${specimen.longitude.toFixed(6)}`}
+              </div>
             </div>
-          </div>
+          ) : specimen.locationType === LocationType.SchematicMap && specimen.mapX !== null && specimen.mapY !== null ? (
+            <div className="border-b border-gray-100 pb-3">
+              <div className={`${textClasses.small} ${textClasses.secondary}`}>Координаты на схеме</div>
+              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>
+                {`X: ${specimen.mapX}, Y: ${specimen.mapY}`}
+              </div>
+            </div>
+          ) : null}
           
           {specimen.locationWkt && (
             <div className="border-b border-gray-100 pb-3">

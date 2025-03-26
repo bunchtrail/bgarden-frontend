@@ -1,5 +1,5 @@
 // Экспорт стилей модуля карты
-import { COLORS, layoutClasses, animationClasses } from '@/styles/global-styles';
+import { COLORS } from '@/styles/global-styles';
 
 // Импорт переопределений стилей Leaflet
 import './leaflet-overrides.css';
@@ -12,7 +12,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 export const MAP_STYLES = {
   // Tailwind классы для карты
   mapContainer: 'w-full h-full flex flex-col shadow-lg rounded-lg overflow-hidden bg-white',
-  mapContent: 'w-full h-[600px] relative rounded-b-lg overflow-hidden backdrop-blur-md',
+  mapContent: 'w-full h-[810px] relative rounded-b-lg overflow-hidden backdrop-blur-md',
   
   // Классы для панели управления
   controlPanel: 'p-4 bg-white/95 backdrop-blur rounded-t-lg border-b border-neutral-dark/20 shadow-sm',
@@ -46,9 +46,9 @@ export const MAP_STYLES = {
   // Анимации
   animation: {
     fadeIn: 'animate-fadeIn',
-    slideInRight: animationClasses.transition + ' translate-x-0 opacity-100',
-    slideOutRight: animationClasses.transition + ' translate-x-full opacity-0',
-    springHover: animationClasses.springHover,
+    slideInRight: 'transition-all duration-300 ease-in-out translate-x-0 opacity-100',
+    slideOutRight: 'transition-all duration-300 ease-in-out translate-x-full opacity-0',
+    springHover: 'hover:scale-105 transition-transform duration-200',
   },
   
   // Стили карты Leaflet (переопределение стилей библиотеки)
@@ -101,4 +101,45 @@ export const MAP_CARDS = {
     dataValue: 'font-medium text-text-primary',
     footer: 'mt-3 pt-2 border-t border-neutral-dark/20 flex justify-end',
   }
-}; 
+};
+
+// Добавляем стили для улучшения взаимодействия с картой
+export const CUSTOM_STYLES = `
+  /* Улучшение взаимодействия с полигонами регионов */
+  .region-polygon {
+    cursor: pointer;
+    pointer-events: auto !important;
+  }
+  
+  /* Стиль выделения при наведении на регион */
+  .region-polygon.region-hover {
+    stroke-width: 3px;
+    stroke-opacity: 0.8;
+  }
+  
+  /* Указываем, что все элементы на карте должны быть интерактивными */
+  .leaflet-interactive {
+    pointer-events: auto !important;
+  }
+  
+  /* Стиль для маркера растения */
+  .custom-plant-marker {
+    z-index: 1000 !important;
+  }
+
+  /* Исправляем порядок слоев, чтобы маркер был поверх регионов */
+  .leaflet-marker-pane {
+    z-index: 650 !important;
+  }
+  
+  .leaflet-overlay-pane {
+    z-index: 640 !important;
+  }
+`;
+
+// Добавляем CSS в документ при импорте этого файла
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.innerHTML = CUSTOM_STYLES;
+  document.head.appendChild(style);
+} 

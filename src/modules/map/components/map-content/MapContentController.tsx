@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, ReactElement, isValidElement } from 'react';
 import MapContentStateRenderer from './MapContentStateRenderer';
 import { UnifiedControlPanel, PanelSection } from '../../components/control-panel';
 import MapViewContainer from '../map-view/MapViewContainer';
@@ -46,6 +46,17 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
   // Используем значение пустоты данных, либо переданное извне, либо локальное
   const effectiveIsEmpty = isEmpty || localIsEmpty;
   
+  /**
+   * Более простой и надежный способ проверки, является ли элемент панелью управления -
+   * просто проверяем наличие свойства pageType у props
+   */
+  const isControlPanel = 
+    extraControls && 
+    isValidElement(extraControls) && 
+    typeof extraControls.props === 'object' && 
+    extraControls.props !== null &&
+    'pageType' in extraControls.props;
+  
   return (
     <MapContentStateRenderer
       loading={loading}
@@ -54,23 +65,21 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
       handleRefresh={refreshMapData}
       isEmpty={effectiveIsEmpty}
     >
-      {/* Элементы управления картой */}
-      {showControls && showControlPanel && (
-        <UnifiedControlPanel
-          pageType="map"
-          className={controlPanelStyles?.container}
-          onClose={toggleControlPanel}
-          customSections={extraControls}
-          panelId="main-map-control-panel"
-          config={{
-            mode: 'full',
-            visibleSections: [
-              PanelSection.LAYERS,
-              PanelSection.MODE,
-              PanelSection.SETTINGS
-            ]
-          }}
-        />
+      {/* Рендерим элементы управления картой */}
+      {showControls && (
+        <>
+          {/* Если передана панель управления через extraControls, используем её */}
+          {isControlPanel ? extraControls : (
+            /* Иначе создаем стандартную и используем extraControls как customSections */
+            <UnifiedControlPanel
+              pageType="map"
+              className={controlPanelStyles?.container}
+              onClose={toggleControlPanel}
+              customSections={extraControls}
+              panelId="main-map-control-panel"
+            />
+          )}
+        </>
       )}
       
       {/* Компонент для расчета границ */}

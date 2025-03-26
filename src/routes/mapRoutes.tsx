@@ -42,18 +42,7 @@ export const mapRoutes: RouteObject[] = [
           <MapProvider>
             <MapPage 
               showControls={true}
-              extraControls={
-                <UnifiedControlPanel 
-                  pageType="sector" 
-                  config={{
-                    mode: 'geography',
-                    visibleSections: [
-                      PanelSection.LAYERS,
-                      PanelSection.SETTINGS
-                    ]
-                  }}
-                />
-              }
+              extraControls={<UnifiedControlPanel pageType="sector" />}
             />
           </MapProvider>
         </MainLayout>

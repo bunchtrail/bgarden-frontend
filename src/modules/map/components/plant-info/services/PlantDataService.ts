@@ -1,4 +1,4 @@
-import { Plant } from '../../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import { getAllSpecimens, convertSpecimensToPlants } from '../../../services/plantService';
 
 // Кэширование данных

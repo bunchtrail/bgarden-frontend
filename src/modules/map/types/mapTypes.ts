@@ -2,6 +2,7 @@
 import { ReactNode } from 'react';
 import L from 'leaflet';
 import { MapData } from '../services/mapService';
+import { RegionData } from '@/services/regions/types';
 
 // Тип для SectorType (соответствует бэкенду)
 export enum SectorType {
@@ -13,22 +14,8 @@ export enum SectorType {
   OTHER = 5
 }
 
-// Тип данных для региона (области) карты
-export interface RegionData {
-  id: number;
-  name: string;
-  description?: string;
-  latitude: number; // Координаты центра области (широта)
-  longitude: number; // Координаты центра области (долгота)
-  radius?: number; // Радиус области в метрах (если область приблизительно круглая)
-  boundaryWkt?: string; // Многоугольник, описывающий границы области (в формате Well-known text)
-  polygonCoordinates: string; // Координаты в формате JSON строки
-  strokeColor?: string; // Цвет границы области
-  fillColor?: string; // Цвет заливки области
-  fillOpacity?: number; // Прозрачность заливки (0-1)
-  sectorType: SectorType; // Тип сектора, к которому относится область
-  specimensCount: number; // Количество экземпляров растений в регионе
-}
+// Переэкспортируем RegionData для обратной совместимости
+export type { RegionData };
 
 // Тип данных для точки на карте
 export interface MapPoint {

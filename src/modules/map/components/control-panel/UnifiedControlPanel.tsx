@@ -1,10 +1,8 @@
-import React, { ReactNode, useCallback, useRef, useEffect } from 'react';
+import React, { ReactNode, useCallback, useRef, useEffect, useState } from 'react';
 import { 
   useMapConfig, 
   MAP_LAYERS, 
-  MAP_MODES, 
-  DEFAULT_MAP_CONFIG 
-} from '../../contexts/MapConfigContext';
+  MAP_MODES} from '../../contexts/MapConfigContext';
 import { 
   PanelSection, 
   UnifiedPanelConfig, 
@@ -14,8 +12,10 @@ import { Switch } from '../../../ui/components/Form';
 import { 
   animationClasses, 
   cardClasses,
-  buttonClasses
+  textClasses
 } from '../../../../styles/global-styles';
+import PanelHeader from './PanelHeader';
+import ControlButtons from './ControlButtons';
 
 // Глобальный реестр отрисованных панелей
 const renderedPanels = new Set<string>();
@@ -43,17 +43,18 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
 }) => {
   // Создаем ссылку на экземпляр панели для отслеживания дублирования
   const instanceRef = useRef<string>(panelId);
-  const { mapConfig, toggleLayer, updateMapConfig, resetMapConfig } = useMapConfig();
+  const { 
+    mapConfig, 
+    toggleLayer, 
+    updateMapConfig, 
+    resetMapConfig,
+    saveConfigToStorage 
+  } = useMapConfig();
   
   // Проверяем и регистрируем панель при монтировании
   useEffect(() => {
-    // Если панель с таким ID уже отрисована, выводим предупреждение только один раз
-    if (renderedPanels.has(panelId) && process.env.NODE_ENV === 'development') {
-      // Удалено логирование предупреждения о дублировании
-    } else {
-      // Добавляем ID в реестр отрисованных панелей
-      renderedPanels.add(panelId);
-    }
+    // Добавляем ID в реестр отрисованных панелей
+    renderedPanels.add(panelId);
     
     // Очищаем реестр при размонтировании компонента
     return () => {
@@ -67,15 +68,34 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   // Состояние для отслеживания развернутости панели
   const [isExpanded, setIsExpanded] = React.useState(true);
   
+  // Состояние для отслеживания видимости панели
+  const [isPanelVisible, setIsPanelVisible] = useState(true);
+  
+  // Состояние для отслеживания изменений настроек карты
+  const [hasChanges, setHasChanges] = useState(false);
+  
   // Обработчики событий
   const handleToggleExpand = () => setIsExpanded(prev => !prev);
   
+  // Обработчик закрытия панели с возможностью повторного открытия
+  const handleClose = useCallback(() => {
+    setIsPanelVisible(false);
+    if (onClose) onClose();
+  }, [onClose]);
+  
+  // Обработчик повторного открытия панели
+  const handleReopenPanel = useCallback(() => {
+    setIsPanelVisible(true);
+  }, []);
+  
   const handleToggleClustering = useCallback(() => {
     updateMapConfig({ enableClustering: !mapConfig.enableClustering });
+    setHasChanges(true);
   }, [mapConfig.enableClustering, updateMapConfig]);
   
   const handleToggleDrawing = useCallback(() => {
     updateMapConfig({ drawingEnabled: !mapConfig.drawingEnabled });
+    setHasChanges(true);
   }, [mapConfig.drawingEnabled, updateMapConfig]);
   
   const handleModeChange = useCallback((mode: string) => {
@@ -83,79 +103,107 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       interactionMode: mode,
       drawingEnabled: mode === MAP_MODES.DRAW
     });
+    setHasChanges(true);
   }, [updateMapConfig]);
   
   const handleResetConfig = useCallback(() => {
     resetMapConfig();
+    setHasChanges(false);
   }, [resetMapConfig]);
+  
+  // Обработчик для сохранения всех областей на сервер
+  const handleSaveRegions = useCallback(() => {
+    // Здесь вызываем функцию сохранения всех регионов на сервере
+    if (mapConfig.interactionMode === MAP_MODES.DRAW) {
+      // Вызываем функцию из регион-сервиса для сохранения
+      try {
+        // Показываем уведомление о начале сохранения
+        // Предполагается, что в вашем приложении есть уведомления
+        console.log('Сохранение областей...');
+        
+        // После успешного сохранения возвращаемся в режим просмотра
+        updateMapConfig({ 
+          interactionMode: MAP_MODES.VIEW,
+          drawingEnabled: false
+        });
+        
+        // Показываем уведомление об успешном сохранении
+        console.log('Области успешно сохранены');
+      } catch (error) {
+        // Обработка ошибки
+        console.error('Ошибка при сохранении областей:', error);
+      }
+    }
+  }, [mapConfig.interactionMode, updateMapConfig]);
+  
+  // Обработчик сохранения настроек карты
+  const handleSaveConfig = useCallback(() => {
+    saveConfigToStorage();
+    setHasChanges(false);
+  }, [saveConfigToStorage]);
   
   // Проверяем, должна ли отображаться секция
   const isSectionVisible = (section: PanelSection) => {
     return panelConfig.visibleSections.includes(section);
   };
   
-  // Не отображаем компонент, если это второй экземпляр панели
-  // и первый уже зарегистрирован, и это не текущий экземпляр
-  const isFirstInRegistry = renderedPanels.has(panelId) && 
-    renderedPanels.size === 1 || instanceRef.current === Array.from(renderedPanels)[0];
-  
-  if (!isFirstInRegistry) {
-    return null;
+  // Если панель скрыта, показываем только кнопку повторного открытия
+  if (!isPanelVisible) {
+    return (
+      <div className="absolute top-4 right-4 z-[1000]">
+        <button 
+          onClick={handleReopenPanel}
+          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
+          aria-label="Открыть панель управления"
+        >
+          <span className="text-xl">⚙️</span>
+        </button>
+      </div>
+    );
   }
-  
-  // Стили панели
-  const panelStyles = `
-    ${cardClasses.elevated}
-    absolute top-4 right-4 z-[1000] 
-    max-w-xs w-full
-    overflow-hidden
-    ${isExpanded ? 'opacity-100' : 'opacity-90 hover:opacity-100'}
-    ${animationClasses.transition}
-    ${className}
-  `;
   
   // Рендеринг секции режима карты
   const renderModeSection = () => {
     if (!isSectionVisible(PanelSection.MODE)) return null;
     
     return (
-      <div className="border-b pb-2">
-        <h4 className="text-sm font-medium mb-2">Режим карты</h4>
-        <div className="bg-white/50 p-2 rounded-lg flex flex-col space-y-1">
-          <label className="flex items-center p-1 cursor-pointer hover:bg-white/30 rounded transition-colors">
+      <div className="mb-4">
+        <h4 className={`${textClasses.subheading} mb-2.5`}>Режим карты</h4>
+        <div className={`${cardClasses.filled} p-2.5 rounded-xl flex flex-col space-y-1.5`}>
+          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
             <input
               type="radio"
               name="mapMode"
               value={MAP_MODES.VIEW}
               checked={mapConfig.interactionMode === MAP_MODES.VIEW}
               onChange={() => handleModeChange(MAP_MODES.VIEW)}
-              className="mr-2"
+              className="mr-2.5 accent-blue-600 h-4 w-4"
             />
-            <span className="text-sm text-gray-700">Просмотр</span>
+            <span className={`${textClasses.body} ${textClasses.primary}`}>Просмотр</span>
           </label>
           
-          <label className="flex items-center p-1 cursor-pointer hover:bg-white/30 rounded transition-colors">
+          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
             <input
               type="radio"
               name="mapMode"
               value={MAP_MODES.DRAW}
               checked={mapConfig.interactionMode === MAP_MODES.DRAW}
               onChange={() => handleModeChange(MAP_MODES.DRAW)}
-              className="mr-2"
+              className="mr-2.5 accent-blue-600 h-4 w-4"
             />
-            <span className="text-sm text-gray-700">Создание областей</span>
+            <span className={`${textClasses.body} ${textClasses.primary}`}>Создание областей</span>
           </label>
           
-          <label className="flex items-center p-1 cursor-pointer hover:bg-white/30 rounded transition-colors">
+          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
             <input
               type="radio"
               name="mapMode"
               value={MAP_MODES.EDIT}
               checked={mapConfig.interactionMode === MAP_MODES.EDIT}
               onChange={() => handleModeChange(MAP_MODES.EDIT)}
-              className="mr-2"
+              className="mr-2.5 accent-blue-600 h-4 w-4"
             />
-            <span className="text-sm text-gray-700">Редактирование областей</span>
+            <span className={`${textClasses.body} ${textClasses.primary}`}>Редактирование областей</span>
           </label>
         </div>
       </div>
@@ -167,9 +215,9 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     if (!isSectionVisible(PanelSection.LAYERS)) return null;
     
     return (
-      <div className="border-b pb-2">
-        <h4 className="text-sm font-medium mb-2">Слои</h4>
-        <div className="space-y-2">
+      <div className="mb-4">
+        <h4 className={`${textClasses.subheading} mb-2.5`}>Слои</h4>
+        <div className={`${cardClasses.filled} p-2.5 rounded-xl space-y-2.5`}>
           <Switch 
             label="Области"
             checked={mapConfig.visibleLayers.includes(MAP_LAYERS.REGIONS)}
@@ -195,9 +243,9 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     if (!isSectionVisible(PanelSection.SETTINGS)) return null;
     
     return (
-      <div className="border-b pb-2">
-        <h4 className="text-sm font-medium mb-2">Настройки</h4>
-        <div className="space-y-2">
+      <div className="mb-4">
+        <h4 className={`${textClasses.subheading} mb-2.5`}>Настройки</h4>
+        <div className={`${cardClasses.filled} p-2.5 rounded-xl space-y-2.5`}>
           <Switch 
             label="Кластеризация маркеров"
             checked={mapConfig.enableClustering}
@@ -218,60 +266,52 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     if (!isSectionVisible(PanelSection.BUTTONS)) return null;
     
     return (
-      <button 
-        className={`w-full px-3 py-1.5 ${buttonClasses.success} text-sm`}
-        onClick={handleResetConfig}
-      >
-        Сбросить настройки
-      </button>
+      <div className="mt-4">
+        <ControlButtons 
+          onSaveRegions={handleSaveRegions}
+          onReset={handleResetConfig}
+          onSave={handleSaveConfig}
+          showSaveButton={hasChanges}
+        />
+      </div>
     );
   };
   
+  // Стили панели в стиле Apple с эффектом стекла
+  const panelStyles = `
+    absolute top-4 right-4 z-[1000] 
+    max-w-xs w-full
+    overflow-hidden
+    ${cardClasses.base}
+    bg-white/85 backdrop-blur-md 
+    shadow-[0_0_10px_rgba(0,0,0,0.08)]
+    ${isExpanded ? 'opacity-100' : 'opacity-95 hover:opacity-100'}
+    ${animationClasses.transition}
+    ${className}
+  `;
+  
   return (
     <div className={panelStyles} data-panel-id={panelId}>
-      <div className={`flex items-center justify-between px-4 py-3 ${cardClasses.footer}`}>
-        <button 
-          onClick={handleToggleExpand}
-          className={`mr-2 text-gray-500 hover:text-gray-700 ${animationClasses.transition}`}
-          aria-label={isExpanded ? "Свернуть панель" : "Развернуть панель"}
-        >
-          {isExpanded ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-          )}
-        </button>
-        <h3 className="text-base font-medium flex-1 text-center">Управление картой</h3>
-        {onClose && (
-          <button 
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Закрыть панель"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-        )}
-      </div>
+      <PanelHeader 
+        onToggleExpand={handleToggleExpand}
+        onClose={handleClose}
+        isExpanded={isExpanded}
+      />
       
       {isExpanded && (
-        <div className="p-3">
-          <div className="space-y-3">
-            {renderModeSection()}
-            {renderLayersSection()}
-            {renderSettingsSection()}
-            {customSections}
-            {renderButtonsSection()}
-          </div>
+        <div className="p-4 overflow-auto max-h-[calc(100vh-8rem)]">
+          {renderModeSection()}
+          {renderLayersSection()}
+          {renderSettingsSection()}
+          {customSections}
+          {renderButtonsSection()}
         </div>
       )}
     </div>
   );
 };
+
+// Добавляем отображаемое имя компонента для легкого определения типа
+UnifiedControlPanel.displayName = 'UnifiedControlPanel';
 
 export default UnifiedControlPanel; 

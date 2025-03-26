@@ -1,94 +1,27 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { RegionData } from '@/modules/map/types/mapTypes';
-import MapPage from '@/modules/map/components/MapPage';
-import { useMapData } from '../hooks/useMapData';
-import { MapMarker } from './MapMarker';
-import { MAP_LAYERS, useMapConfig } from '@/modules/map/contexts/MapConfigContext';
-import { Switch } from '@/modules/ui/components/Form';
+import React, { useMemo } from 'react';
 import { MapProvider } from '@/modules/map/contexts/MapContext';
+import MapPage from '@/modules/map/components/MapPage';
+import { RegionData } from '@/modules/map/types/mapTypes';
+import { MapMarker } from './MapMarker';
+import { useMapData } from '../hooks';
+import regionBridge from '@/services/regions/RegionBridge';
+import { UnifiedControlPanel } from '@/modules/map/components/control-panel';
 
-// Тип для слоев карты
-type MapLayerType = typeof MAP_LAYERS[keyof typeof MAP_LAYERS];
-
-interface MapLayer {
-  id: MapLayerType;
-  label: string;
-}
-
-interface SimpleLayerSelectorProps {
-  className?: string;
-  layers: MapLayer[];
-  visibleLayers: MapLayerType[];
-  onToggleLayer: (layerId: MapLayerType) => void;
-}
-
-// Простой селектор слоев без зависимости от контекста
-const SimpleLayerSelector: React.FC<SimpleLayerSelectorProps> = ({
-  className,
-  layers,
-  visibleLayers,
-  onToggleLayer
-}) => {
-  // Проверяем, видим ли указанный слой
-  const isLayerVisible = (layerId: MapLayerType) => visibleLayers.includes(layerId);
-
-  return (
-    <div className={`flex flex-col gap-2 ${className || ''}`}>
-      <h3 className="font-medium text-gray-900 mb-1">Слои карты</h3>
-      
-      {layers.map(layer => (
-        <Switch 
-          key={layer.id}
-          label={layer.label}
-          checked={isLayerVisible(layer.id)}
-          onChange={() => onToggleLayer(layer.id)}
-        />
-      ))}
-    </div>
-  );
+// Константы для типов слоев на карте
+export const MAP_LAYERS = {
+  IMAGERY: 'imagery',
+  REGIONS: 'regions',
+  PLANTS: 'plants',
+  GRID: 'grid'
 };
 
-// Компонент панели управления картой
-const MapControls: React.FC = () => {
-  const { mapConfig, updateMapConfig, toggleLayer } = useMapConfig();
-  
-  // Слои для отображения в селекторе
-  const availableLayers: MapLayer[] = useMemo(() => [
-    { id: MAP_LAYERS.REGIONS, label: 'Участки' },
-    { id: MAP_LAYERS.PLANTS, label: 'Растения' }
-  ], []);
-  
-  // Обработчик переключения кластеризации
-  const handleToggleClustering = useCallback(() => {
-    updateMapConfig({ enableClustering: !mapConfig.enableClustering });
-  }, [mapConfig.enableClustering, updateMapConfig]);
-  
-  return (
-    <div className="space-y-4">
-      <div>
-        <SimpleLayerSelector
-          layers={availableLayers}
-          visibleLayers={mapConfig.visibleLayers as MapLayerType[]}
-          onToggleLayer={toggleLayer}
-        />
-      </div>
-      <div className="mt-3">
-        <Switch 
-          label="Группировать маркеры растений"
-          checked={mapConfig.enableClustering}
-          onChange={handleToggleClustering}
-        />
-      </div>
-    </div>
-  );
-};
-
-interface RegionMapSelectorProps {
+export interface RegionMapSelectorProps {
   regions: RegionData[];
   selectedRegionIds: string[];
   onRegionClick: (regionId: string) => void;
   onCoordinatesChange: (lat: number, lng: number) => void;
   markerPosition: [number, number] | null;
+  showTooltips?: boolean;
 }
 
 export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({ 
@@ -96,24 +29,51 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   selectedRegionIds, 
   onRegionClick, 
   onCoordinatesChange, 
-  markerPosition 
+  markerPosition,
+  showTooltips = false
 }) => {
   const { mapData, loading } = useMapData();
+  
+  // Преобразуем ID регионов в ID областей для карты
+  const selectedAreaIds = useMemo(() => {
+    return selectedRegionIds.map(id => regionBridge.regionIdToAreaId(Number(id)));
+  }, [selectedRegionIds]);
+  
+  // Обработчик клика по региону
+  const handleRegionClick = (regionId: string) => {
+    // Извлекаем числовой ID региона из ID области
+    if (regionId.startsWith('region-')) {
+      const numericId = regionBridge.areaIdToRegionId(regionId);
+      onRegionClick(String(numericId));
+    } else {
+      onRegionClick(regionId);
+    }
+  };
+  
+  // Адаптер для преобразования координат
+  const handleCoordinatesChange = (lat: number, lng: number) => {
+    onCoordinatesChange(lat, lng);
+  };
+  
+  // Используем стандартную панель управления с типом "specimen"
+  const mapControlPanel = useMemo(() => (
+    <UnifiedControlPanel 
+      pageType="specimen"
+      panelId="geography-map-controls"
+    />
+  ), []);
   
   // Формируем начальную конфигурацию для карты
   const initialMapConfig = useMemo(() => ({
     lightMode: true,
-    showControls: true,
-    controlPanelMode: 'geography' as 'geography',
-    aspectRatio: 'landscape' as 'landscape',
-    enableClustering: true,
     visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
-    showLayerSelector: true,
-    showClusteringToggle: true,
-    showTooltips: true,
+    showTooltips: showTooltips,
     maxZoom: 2,
-    minZoom: -1
-  }), []);
+    minZoom: -1,
+    selectedAreaIds,
+    enableClustering: true,
+    mapInteractionPriority: 'marker',
+  }), [selectedAreaIds, showTooltips]);
   
   return (
     <div className="relative">
@@ -125,17 +85,13 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
           plugins={
             <MapMarker 
               position={markerPosition}
-              onPositionChange={onCoordinatesChange}
+              onPositionChange={handleCoordinatesChange}
             />
           }
-          onRegionClick={onRegionClick}
-          extraControls={<MapControls />}
+          onRegionClick={handleRegionClick}
+          extraControls={mapControlPanel}
         />
       </MapProvider>
-      
-      <small className="block mt-2 text-gray-500">
-        Выберите участок сада, нажав на него на карте. Для установки точного местоположения растения кликните на карту или перетащите маркер.
-      </small>
     </div>
   );
 };

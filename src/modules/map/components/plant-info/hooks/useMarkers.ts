@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import L from 'leaflet';
-import { Plant } from '../../../contexts/MapContext';
+import { Plant } from '@/services/regions/types';
 import { MarkerClusterManager } from '../managers/MarkerClusterManager';
 
 /**
