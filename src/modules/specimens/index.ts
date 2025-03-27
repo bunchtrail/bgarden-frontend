@@ -22,6 +22,9 @@ import SpecimenRow from './components/specimens-components/SpecimenRow';
 import SpecimenCard from './components/specimens-components/SpecimenCard';
 import SpecimenModal from './components/specimens-components/SpecimenModal';
 
+// Импорт компонента галереи
+import { SpecimenGallery } from './components/specimen-gallery';
+
 // Сервисы
 import { specimenService } from './services/specimenService';
 import { familyService } from './services/familyService';
@@ -77,6 +80,9 @@ export {
   SpecimenRow,
   SpecimenCard,
   SpecimenModal,
+  
+  // Компонент галереи
+  SpecimenGallery,
   
   // Сервисы
   specimenService,

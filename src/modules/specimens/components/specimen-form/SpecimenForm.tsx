@@ -370,27 +370,20 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Рендер шага с загрузкой изображений
   const renderImagesStep = () => (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-6">
       <h3 className="text-xl font-semibold">Загрузка изображений</h3>
       
-      <ImageUploader
-        onChange={handleImagesChange}
-        value={selectedImages}
-        onError={handleImageError}
-        maxImages={5}
-      />
-      
-      {isUploading && (
-        <div className="mt-2">
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-green-600 h-2.5 rounded-full" 
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
+      {/* Отображаем галерею только для существующих образцов */}
+      {specimen && specimen.id ? (
+        <div className="mb-4">
+          <h4 className="text-lg mb-3">Существующие изображения</h4>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            {React.createElement(require('../specimen-gallery').SpecimenGallery, { specimen })}
           </div>
-          <p className="text-sm text-gray-600 mt-1">Загрузка: {uploadProgress}%</p>
         </div>
-      )}
+      ) : null}
+      
+     
     </div>
   );
 
