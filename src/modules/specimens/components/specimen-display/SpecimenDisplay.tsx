@@ -4,7 +4,7 @@ import BasicInfoCard from './BasicInfoCard';
 import GeographicInfoCard from './GeographicInfoCard';
 import TimelineInfoCard from './TimelineInfoCard';
 import AdditionalInfoCard from './AdditionalInfoCard';
-import { SpecimenGallery } from '../specimen-gallery';
+import SpecimenGallery from '../specimen-gallery/SpecimenGallery';
 import { layoutClasses } from '../../../../styles/global-styles';
 
 interface SpecimenDisplayProps {

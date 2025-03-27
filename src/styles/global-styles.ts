@@ -105,7 +105,7 @@ export const animationClasses = {
   fadeIn: 'animate-fadeIn',
   transition: 'transition-all duration-300',
   hover: 'hover:scale-105',
-  springHover: 'transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]',
+  springHover: 'transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99]',
   shake: 'animate-shake',
 };
 

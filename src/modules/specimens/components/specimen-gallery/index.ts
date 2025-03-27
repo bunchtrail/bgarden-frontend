@@ -1,1 +1,1 @@
-export { default as SpecimenGallery } from './SpecimenGallery'; 
+export { default } from './SpecimenGallery'; 

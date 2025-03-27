@@ -3,7 +3,7 @@
   - **docs**
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Структура_bgarden-frontend_от_27-03-2025.md` (12.8 KB)
+    - `Структура_bgarden-frontend_от_27-03-2025.md` (13.4 KB)
   - **logs**
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
@@ -258,9 +258,22 @@
             - **utils**
               - `calculateFormProgress.ts` (1.9 KB)
           - **specimen-gallery**
-            - `index.ts` (64.0 B)
+            - **components**
+              - `ErrorState.tsx` (1.1 KB)
+              - `GalleryHeader.tsx` (984.0 B)
+              - `ImageCounter.tsx` (535.0 B)
+              - `ImageUploadModal.tsx` (2.0 KB)
+              - `ImageViewModal.tsx` (2.3 KB)
+              - `index.ts` (505.0 B)
+              - `MainImageDisplay.tsx` (3.7 KB)
+              - `SpecimenInfoFooter.tsx` (530.0 B)
+              - `ThumbnailsList.tsx` (1.8 KB)
+            - **hooks**
+              - `index.ts` (55.0 B)
+              - `useGalleryImages.ts` (8.5 KB)
+            - `index.ts` (45.0 B)
             - `README.md` (1.9 KB)
-            - `SpecimenGallery.tsx` (17.3 KB)
+            - `SpecimenGallery.tsx` (3.9 KB)
           - **specimens-components**
             - **card-parts**
               - `DetailItem.tsx` (800.0 B)
@@ -307,7 +320,8 @@
           - `phenologyService.ts` (1.9 KB)
           - `specimenService.ts` (11.0 KB)
         - **styles**
-          - `index.ts` (2.8 KB)
+          - `index.ts` (3.4 KB)
+          - `specimen-gallery-styles.ts` (4.8 KB)
         - **types**
           - `index.ts` (3.6 KB)
         - **utils**

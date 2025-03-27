@@ -2,6 +2,19 @@
  * Общие стили для модуля образцов
  */
 
+// Импортируем стили галереи
+import galleryStyles, {
+  galleryContainerStyles,
+  galleryHeaderStyles,
+  mainImageStyles,
+  imageCounterStyles,
+  thumbnailStyles,
+  specimenInfoStyles,
+  imageViewModalStyles,
+  imageUploadModalStyles,
+  errorStateStyles
+} from './specimen-gallery-styles';
+
 // Цвета для типов секторов
 export const sectorTypeColors = {
   // Дендрология (деревья и кустарники) - зеленые оттенки
@@ -72,9 +85,23 @@ export const buttonStyles = {
   success: 'px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
 };
 
+// Реэкспортируем стили галереи
+export { 
+  galleryContainerStyles,
+  galleryHeaderStyles, 
+  mainImageStyles,
+  imageCounterStyles,
+  thumbnailStyles,
+  specimenInfoStyles,
+  imageViewModalStyles,
+  imageUploadModalStyles,
+  errorStateStyles
+};
+
 export default {
   sectorTypeColors,
   statusColors,
   formStyles,
   buttonStyles,
+  gallery: galleryStyles,
 }; 

@@ -23,7 +23,7 @@ import SpecimenCard from './components/specimens-components/SpecimenCard';
 import SpecimenModal from './components/specimens-components/SpecimenModal';
 
 // Импорт компонента галереи
-import { SpecimenGallery } from './components/specimen-gallery';
+import SpecimenGallery from './components/specimen-gallery/SpecimenGallery';
 
 // Сервисы
 import { specimenService } from './services/specimenService';
