@@ -66,7 +66,7 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   // Формируем начальную конфигурацию для карты
   const initialMapConfig = useMemo(() => ({
     lightMode: true,
-    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
+    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],
     showTooltips: showTooltips,
     maxZoom: 2,
     minZoom: -1,

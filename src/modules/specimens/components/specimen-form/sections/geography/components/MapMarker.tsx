@@ -167,6 +167,7 @@ export const MapMarker: React.FC<MapMarkerProps> = ({ position, onPositionChange
   
   return (
     <Marker 
+      key={`plant-marker-${position[0]}-${position[1]}`}
       position={position}
       draggable={true}
       icon={greenMarkerIcon}

@@ -3,7 +3,7 @@
   - **docs**
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Структура_bgarden-frontend_от_26-03-2025.md` (12.7 KB)
+    - `Структура_bgarden-frontend_от_27-03-2025.md` (12.8 KB)
   - **logs**
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
@@ -89,8 +89,8 @@
             - `MapSettingsSection.tsx` (1.8 KB)
             - `ModeToggle.tsx` (2.4 KB)
             - `PanelHeader.tsx` (2.6 KB)
-            - `types.ts` (4.4 KB)
-            - `UnifiedControlPanel.tsx` (12.3 KB)
+            - `types.ts` (4.8 KB)
+            - `UnifiedControlPanel.tsx` (12.1 KB)
           - **drawing**
           - `index.ts` (588.0 B)
           - **map-card**
@@ -108,7 +108,7 @@
             - `MapRegionsLayer.tsx` (6.7 KB)
           - **map-content**
             - `index.ts` (80.0 B)
-            - `MapContentController.tsx` (3.3 KB)
+            - `MapContentController.tsx` (3.9 KB)
             - `MapContentStateRenderer.tsx` (2.9 KB)
           - **map-image-layer**
           - **map-layers**
@@ -123,14 +123,14 @@
                 - `cloneLayers.ts` (1.1 KB)
                 - `logDebug.ts` (587.0 B)
             - `MapDrawingLayer.tsx` (13.8 KB)
-            - `MapLayersManager.tsx` (5.0 KB)
+            - `MapLayersManager.tsx` (5.2 KB)
           - **map-submodules**
             - `index.ts` (250.0 B)
           - **map-view**
             - `ImageBoundsCalculator.tsx` (1.1 KB)
             - `MapViewContainer.tsx` (3.0 KB)
           - `MapPage.tsx` (1.7 KB)
-          - `MapPageContent.tsx` (3.6 KB)
+          - `MapPageContent.tsx` (3.8 KB)
           - **plant-info**
             - `EnhancedPlantMarkersLayer.tsx` (5.1 KB)
             - **hooks**
@@ -143,7 +143,7 @@
             - **utils**
               - `MarkerIconFactory.ts` (3.5 KB)
         - **contexts**
-          - `MapConfigContext.tsx` (6.9 KB)
+          - `MapConfigContext.tsx` (7.1 KB)
           - `MapContext.tsx` (1.3 KB)
         - **docs**
           - `README.md` (2.1 KB)
@@ -158,7 +158,7 @@
         - **services**
           - `index.ts` (148.0 B)
           - `mapService.ts` (1.6 KB)
-          - `plantService.ts` (6.1 KB)
+          - `plantService.ts` (6.3 KB)
         - **styles**
           - `index.ts` (5.7 KB)
           - `leaflet-overrides.css` (8.8 KB)
@@ -202,11 +202,11 @@
           - **specimen-display**
             - `AdditionalInfoCard.tsx` (3.9 KB)
             - `BasicInfoCard.tsx` (4.0 KB)
-            - `GeographicInfoCard.tsx` (3.8 KB)
+            - `GeographicInfoCard.tsx` (3.9 KB)
             - `index.ts` (610.0 B)
             - `SpecimenDisplay.tsx` (1.1 KB)
             - `SpecimenHeader.tsx` (2.3 KB)
-            - `SpecimenImageCard.tsx` (2.2 KB)
+            - `SpecimenImageCard.tsx` (7.5 KB)
             - `TimelineInfoCard.tsx` (2.3 KB)
           - **specimen-form**
             - **form-progress**
@@ -240,24 +240,27 @@
                   - `ExpositionSelector.tsx` (1.2 KB)
                   - `index.ts` (405.0 B)
                   - `LocationDescriptionInput.tsx` (1016.0 B)
-                  - `MapMarker.tsx` (7.6 KB)
-                  - `RegionMapSelector.tsx` (4.7 KB)
+                  - `MapMarker.tsx` (7.7 KB)
+                  - `RegionMapSelector.tsx` (3.2 KB)
                   - `RegionSelector.tsx` (1.2 KB)
-                - `GeographySection.tsx` (5.1 KB)
+                - `GeographySection.tsx` (4.1 KB)
                 - **hooks**
                   - `index.ts` (107.0 B)
                   - `useMapData.ts` (714.0 B)
-                  - `useRegionMarkerLogic.ts` (6.2 KB)
+                  - `useRegionMarkerLogic.ts` (6.1 KB)
                 - `index.ts` (55.0 B)
               - **taxonomy**
                 - `index.ts` (53.0 B)
                 - `TaxonomySection.tsx` (2.3 KB)
-            - `SpecimenForm.tsx` (17.2 KB)
+            - `SpecimenForm.tsx` (19.0 KB)
             - `StepContainer.tsx` (864.0 B)
             - `StepRenderer.tsx` (2.2 KB)
             - **utils**
               - `calculateFormProgress.ts` (1.9 KB)
           - **specimen-gallery**
+            - `index.ts` (64.0 B)
+            - `README.md` (1.9 KB)
+            - `SpecimenGallery.tsx` (17.3 KB)
           - **specimens-components**
             - **card-parts**
               - `DetailItem.tsx` (800.0 B)
@@ -266,7 +269,7 @@
               - `SpecimenCardFooter.tsx` (516.0 B)
               - `SpecimenCardHeader.tsx` (1.1 KB)
               - `SpecimenDetails.tsx` (1.0 KB)
-            - `SpecimenCard.tsx` (6.1 KB)
+            - `SpecimenCard.tsx` (6.2 KB)
             - `SpecimenModal.tsx` (4.4 KB)
             - `SpecimenRow.tsx` (2.6 KB)
             - `SpecimensGrid.tsx` (1.8 KB)
@@ -293,16 +296,16 @@
           - `index.ts` (285.0 B)
           - `useReferenceData.ts` (1.7 KB)
           - `useSpecimenData.ts` (1.4 KB)
-          - `useSpecimenImage.ts` (5.7 KB)
+          - `useSpecimenImage.ts` (10.3 KB)
           - `useSpecimens.ts` (7.2 KB)
-        - `index.ts` (3.7 KB)
+        - `index.ts` (3.9 KB)
         - **services**
           - `biometryService.ts` (1.9 KB)
           - `expositionService.ts` (1.8 KB)
           - `familyService.ts` (1.7 KB)
           - `index.ts` (511.0 B)
           - `phenologyService.ts` (1.9 KB)
-          - `specimenService.ts` (20.1 KB)
+          - `specimenService.ts` (11.0 KB)
         - **styles**
           - `index.ts` (2.8 KB)
         - **types**
@@ -344,7 +347,7 @@
       - `NotFound.tsx` (261.0 B)
       - **sector**
       - **specimens**
-        - `SpecimenPage.tsx` (10.2 KB)
+        - `SpecimenPage.tsx` (10.4 KB)
         - `SpecimensListPage.tsx` (6.6 KB)
       - **user**
     - `react-app-env.d.ts` (41.0 B)
@@ -353,10 +356,10 @@
       - `authRoutes.tsx` (620.0 B)
       - `expositionRoutes.tsx` (662.0 B)
       - `index.tsx` (882.0 B)
-      - `mapRoutes.tsx` (1.8 KB)
+      - `mapRoutes.tsx` (1.5 KB)
       - `specimenRoutes.tsx` (1.1 KB)
     - **services**
-      - `httpClient.ts` (13.9 KB)
+      - `httpClient.ts` (14.2 KB)
       - **regions**
         - `index.ts` (3.3 KB)
         - `PolygonFactory.ts` (19.9 KB)

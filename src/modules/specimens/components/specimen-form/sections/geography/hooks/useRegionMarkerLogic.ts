@@ -23,7 +23,11 @@ export function useRegionMarkerLogic(
       const lat = parseFloat(formData.latitude.toString());
       const lng = parseFloat(formData.longitude.toString());
       if (!isNaN(lat) && !isNaN(lng)) {
-        setMarkerPosition([lat, lng]);
+        // Устанавливаем позицию только если она изменилась, чтобы избежать излишних ререндеров
+        const newPosition: [number, number] = [lat, lng];
+        if (!markerPosition || markerPosition[0] !== lat || markerPosition[1] !== lng) {
+          setMarkerPosition(newPosition);
+        }
       }
     }
   }, [formData.latitude, formData.longitude]);
@@ -51,23 +55,19 @@ export function useRegionMarkerLogic(
       
       // Приводим к нужному типу
       onChange(mockEvent as unknown as React.ChangeEvent<HTMLSelectElement>);
-      
-      // Комментируем автоматическую установку маркера в центр региона, 
-      // чтобы пользователь мог сам выбрать любое место
-      // const selectedRegion = regions.find(region => region.id.toString() === numericId.toString());
-      // if (selectedRegion && (!formData.latitude || !formData.longitude)) {
-      //   // Преобразуем числовые координаты в строковые для handleCoordinatesChange
-      //   const lat = Number(selectedRegion.latitude);
-      //   const lng = Number(selectedRegion.longitude);
-      //   handleCoordinatesChange(lat, lng);
-      // }
     }
   };
 
   // Обработчик изменения координат
   const handleCoordinatesChange = (lat: number, lng: number) => {
-    // Обновляем положение маркера
-    setMarkerPosition([lat, lng]);
+    // Очищаем предыдущий маркер, устанавливая null перед обновлением
+    setMarkerPosition(null);
+    
+    // Устанавливаем новую позицию маркера с небольшой задержкой,
+    // чтобы React успел удалить старый маркер
+    setTimeout(() => {
+      setMarkerPosition([lat, lng]);
+    }, 10);
     
     // Обновляем поля широты и долготы
     onChange({

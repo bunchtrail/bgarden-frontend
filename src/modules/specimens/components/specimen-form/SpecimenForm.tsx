@@ -383,7 +383,32 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         </div>
       ) : null}
       
-     
+      {/* Компонент загрузки новых изображений - всегда отображается */}
+      <div className="mb-4">
+        <h4 className="text-lg mb-3">Добавить изображения</h4>
+        <ImageUploader
+          value={selectedImages}
+          onChange={handleImagesChange}
+          onError={handleImageError}
+          maxImages={5}
+        />
+      </div>
+      
+      {/* Индикатор загрузки */}
+      {isUploading && (
+        <div className="mt-4">
+          <div className="flex justify-between mb-1 text-sm">
+            <span>Загрузка изображений:</span>
+            <span className="font-medium">{uploadProgress}%</span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-green-500 transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
