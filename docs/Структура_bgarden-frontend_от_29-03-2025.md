@@ -89,8 +89,8 @@
             - `MapSettingsSection.tsx` (2.1 KB)
             - `ModeToggle.tsx` (2.4 KB)
             - `PanelHeader.tsx` (2.6 KB)
-            - `types.ts` (5.1 KB)
-            - `UnifiedControlPanel.tsx` (12.7 KB)
+            - `types.ts` (4.9 KB)
+            - `UnifiedControlPanel.tsx` (12.3 KB)
           - **drawing**
           - `index.ts` (588.0 B)
           - **map-card**
@@ -134,16 +134,16 @@
           - **plant-info**
             - `EnhancedPlantMarkersLayer.tsx` (5.1 KB)
             - **hooks**
-              - `useMarkers.ts` (2.0 KB)
+              - `useMarkers.ts` (2.5 KB)
             - `index.ts` (344.0 B)
             - **managers**
-              - `MarkerClusterManager.ts` (2.4 KB)
+              - `MarkerClusterManager.ts` (7.6 KB)
             - **services**
               - `PlantDataService.ts` (2.0 KB)
             - **utils**
               - `MarkerIconFactory.ts` (3.5 KB)
         - **contexts**
-          - `MapConfigContext.tsx` (7.2 KB)
+          - `MapConfigContext.tsx` (7.0 KB)
           - `MapContext.tsx` (1.3 KB)
         - **docs**
           - `README.md` (2.1 KB)
@@ -161,7 +161,7 @@
           - `plantService.ts` (6.3 KB)
         - **styles**
           - `index.ts` (5.7 KB)
-          - `leaflet-overrides.css` (8.8 KB)
+          - `leaflet-overrides.css` (10.4 KB)
         - **types**
           - `mapTypes.ts` (3.8 KB)
       - **navigation**
@@ -241,7 +241,7 @@
                   - `index.ts` (405.0 B)
                   - `LocationDescriptionInput.tsx` (1016.0 B)
                   - `MapMarker.tsx` (7.7 KB)
-                  - `RegionMapSelector.tsx` (3.2 KB)
+                  - `RegionMapSelector.tsx` (3.1 KB)
                   - `RegionSelector.tsx` (1.2 KB)
                 - `GeographySection.tsx` (4.1 KB)
                 - **hooks**

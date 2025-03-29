@@ -9,20 +9,22 @@ import { MarkerClusterManager } from '../managers/MarkerClusterManager';
  * @param plants Массив растений для отображения
  * @param isVisible Флаг видимости слоя
  * @param enableClustering Флаг включения кластеризации
+ * @param showPopupOnClick Флаг, указывающий, нужно ли показывать попап при клике на маркер
  * @returns Объект с функцией для очистки маркеров
  */
 export const useMarkers = (
   map: L.Map | null,
   plants: Plant[],
   isVisible: boolean,
-  enableClustering: boolean
+  enableClustering: boolean,
+  showPopupOnClick: boolean = true
 ) => {
   const [manager, setManager] = useState<MarkerClusterManager | null>(null);
 
   // Инициализация менеджера при монтировании или изменении карты
   useEffect(() => {
     if (map) {
-      setManager(new MarkerClusterManager(map));
+      setManager(new MarkerClusterManager(map, showPopupOnClick));
     }
     
     return () => {
@@ -30,7 +32,14 @@ export const useMarkers = (
         manager.clearAllMarkers();
       }
     };
-  }, [map]);
+  }, [map, showPopupOnClick]);
+
+  // Обновляем настройку при её изменении
+  useEffect(() => {
+    if (manager) {
+      manager.setShowPopupOnClick(showPopupOnClick);
+    }
+  }, [manager, showPopupOnClick]);
 
   // Обновление маркеров при изменении данных или настроек
   useEffect(() => {

@@ -30,7 +30,13 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const map = useMap();
-  const { clearMarkers } = useMarkers(map, plants, isVisible, mapConfig.enableClustering);
+  const { clearMarkers } = useMarkers(
+    map, 
+    plants, 
+    isVisible, 
+    mapConfig.enableClustering,
+    mapConfig.showPopupOnClick
+  );
   const { warning } = useNotification();
   
   // Используем ref для отслеживания изменений isVisible, чтобы избежать повторных запросов

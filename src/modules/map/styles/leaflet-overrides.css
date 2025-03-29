@@ -296,4 +296,69 @@
 
 .leaflet-pane {
   pointer-events: auto !important;
+}
+
+/* Стили для попапа растения */
+.plant-popup-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.plant-popup-container .leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.plant-popup-container .leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.plant-popup-container .leaflet-popup-tip {
+  background-color: white !important;
+}
+
+.plant-popup-loading {
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748B;
+}
+
+.plant-popup-error {
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #EF4444;
+}
+
+/* Анимация для появления попапа */
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.leaflet-popup {
+  animation: popupFadeIn 0.3s ease-out;
+}
+
+/* Стили для маркеров с отключенными попапами */
+.popup-disabled {
+  opacity: 0.7 !important;
+  cursor: default !important;
+}
+
+.popup-disabled:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Стилизуем кастомные маркеры, чтобы было понятно, что на них нельзя кликнуть */
+.custom-plant-marker.popup-disabled div:hover {
+  transform: none !important;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15)) !important;
+  cursor: default !important;
 } 
