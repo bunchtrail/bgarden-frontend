@@ -378,7 +378,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         <div className="mb-4">
           <h4 className="text-lg mb-3">Существующие изображения</h4>
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            {React.createElement(require('../specimen-gallery').SpecimenGallery, { specimen })}
+            {React.createElement(require('../specimen-gallery').default, { specimen })}
           </div>
         </div>
       ) : null}

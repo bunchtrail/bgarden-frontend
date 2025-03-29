@@ -7,6 +7,7 @@ interface MapSettingsSectionProps {
   showTooltipToggle?: boolean;
   showClusteringToggle?: boolean;
   showDrawingToggle?: boolean;
+  showPopupToggle?: boolean;
   onConfigChange: (key: string, value: boolean | string | number) => void;
 }
 
@@ -17,6 +18,7 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
   showTooltipToggle = true,
   showClusteringToggle = true,
   showDrawingToggle = true,
+  showPopupToggle = true,
   onConfigChange
 }) => {
   const { mapConfig } = useMapConfig();
@@ -38,6 +40,14 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
             label="Группировать маркеры"
             checked={mapConfig.enableClustering}
             onChange={() => onConfigChange('enableClustering', !mapConfig.enableClustering)}
+          />
+        )}
+        
+        {showPopupToggle && (
+          <Switch 
+            label="Информация по клику"
+            checked={mapConfig.showPopupOnClick}
+            onChange={() => onConfigChange('showPopupOnClick', !mapConfig.showPopupOnClick)}
           />
         )}
         

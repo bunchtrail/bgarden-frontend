@@ -183,11 +183,11 @@ export const useSpecimenImage = (
       setIsLoading(true);
       console.log(`Установка изображения ID=${imageId} как основного`);
       
-      const updateData = {
-        isMain: true
-      };
-      
-      const result = await httpClient.put<SpecimenImage>(`v1/specimen-images/${imageId}`, updateData);
+      // Используем PATCH запрос к эндпоинту /api/v1/specimen-images/{id}/set-as-main
+      const result = await httpClient.patch<SpecimenImage>(
+        `v1/specimen-images/${imageId}/set-as-main`, 
+        {}
+      );
       
       // Обновляем отображаемое изображение
       fetchSpecimenImage();

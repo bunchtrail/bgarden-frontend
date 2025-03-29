@@ -36,6 +36,7 @@ export interface MapConfig {
   showControls: boolean;
   debug: boolean;
   enableClustering: boolean; // Включить/выключить кластеризацию маркеров
+  showPopupOnClick: boolean; // Показывать всплывающее окно при нажатии на маркер
   // Настройки режима взаимодействия с картой
   interactionMode: string; // Режим взаимодействия с картой (просмотр, рисование, редактирование)
   drawingEnabled: boolean; // Включен ли режим рисования областей
@@ -63,6 +64,7 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   showControls: false,
   debug: false,
   enableClustering: true,
+  showPopupOnClick: true,
   // Настройки режима взаимодействия с картой
   interactionMode: MAP_MODES.VIEW,
   drawingEnabled: false,

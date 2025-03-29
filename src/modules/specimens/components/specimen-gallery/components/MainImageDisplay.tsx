@@ -54,6 +54,17 @@ const MainImageDisplay: React.FC<MainImageDisplayProps> = ({
 
   return (
     <div className="relative h-full flex items-center justify-center">
+      {currentImage && currentImage.isMain && (
+        <div className={mainImageStyles.mainImageBadge}>
+          <span className="flex items-center">
+            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Основное фото
+          </span>
+        </div>
+      )}
+      
       <img 
         src={currentImageSrc} 
         alt={`${specimenName} (${latinName})`}

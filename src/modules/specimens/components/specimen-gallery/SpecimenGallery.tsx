@@ -107,6 +107,7 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
           images={allImages}
           currentIndex={currentImageIndex}
           onThumbnailClick={setCurrentImageIndex}
+          onSetMainImage={handleSetMainImage}
         />
         
         <SpecimenInfoFooter 

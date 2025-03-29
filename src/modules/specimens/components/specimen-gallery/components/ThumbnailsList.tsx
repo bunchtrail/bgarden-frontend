@@ -1,42 +1,80 @@
 import React from 'react';
 import { SpecimenImage } from '../../../types';
+import { thumbnailStyles } from '../../../styles';
 
 interface ThumbnailsListProps {
   images: SpecimenImage[];
   currentIndex: number;
   onThumbnailClick: (index: number) => void;
+  onSetMainImage?: (imageId: number) => void;
 }
 
 const ThumbnailsList: React.FC<ThumbnailsListProps> = ({ 
   images, 
   currentIndex, 
-  onThumbnailClick 
+  onThumbnailClick,
+  onSetMainImage
 }) => {
   if (images.length <= 1) return null;
   
+  const handleSetAsMain = (e: React.MouseEvent, imageId: number) => {
+    e.stopPropagation(); // Остановка всплытия события, чтобы не выбрать миниатюру
+    if (onSetMainImage) {
+      onSetMainImage(imageId);
+    }
+  };
+  
   return (
-    <div className="flex overflow-x-auto space-x-3 mt-3 pb-2 px-1 max-w-full scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+    <div className={thumbnailStyles.container}>
       {images.map((image, index) => (
         <div 
           key={image.id} 
-          className={`relative flex-shrink-0 w-20 h-20 cursor-pointer rounded-lg overflow-hidden transition-all duration-300 transform 
-            ${currentIndex === index 
-              ? 'ring-2 ring-green-500 scale-[1.05] shadow-md z-10' 
-              : 'filter brightness-90 hover:brightness-100 hover:scale-[1.03]'}`}
+          className={`${thumbnailStyles.thumbnailWrapper} ${
+            currentIndex === index ? thumbnailStyles.activeThumbnail : ''
+          } ${image.isMain ? thumbnailStyles.mainThumbnail : ''}`}
           onClick={() => onThumbnailClick(index)}
         >
           <img 
             src={`data:${image.contentType};base64,${image.imageDataBase64}`} 
             alt={`Миниатюра ${index + 1}`}
-            className="w-full h-full object-cover transition-transform duration-300"
+            className={thumbnailStyles.thumbnail}
           />
+          
+          {/* Наложение при наведении */}
+          <div className={thumbnailStyles.thumbnailOverlay}></div>
+          
+          {/* Индикатор основного изображения */}
           {image.isMain && (
-            <div className="absolute top-1 right-1 bg-green-500 rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className={thumbnailStyles.indicator} title="Основное изображение">
+              <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
           )}
+          
+          {/* Кнопка для установки основного изображения */}
+          {!image.isMain && onSetMainImage && (
+            <div 
+              className={thumbnailStyles.setMainButton}
+              title="Сделать основным изображением"
+              onClick={(e) => handleSetAsMain(e, image.id)}
+            >
+              <svg 
+                className={thumbnailStyles.setMainButtonIcon} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+          )}
+          
+          {/* Номер изображения */}
+          <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs rounded px-1 opacity-70">
+            {index + 1}
+          </div>
         </div>
       ))}
     </div>

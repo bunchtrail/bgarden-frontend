@@ -242,6 +242,9 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   const renderSettingsSection = () => {
     if (!isSectionVisible(PanelSection.SETTINGS)) return null;
     
+    // Используем настройки секции, если они есть
+    const settingsConfig = panelConfig.sectionConfig?.[PanelSection.SETTINGS] || {};
+    
     return (
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Настройки</h4>
@@ -251,6 +254,18 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             checked={mapConfig.enableClustering}
             onChange={handleToggleClustering}
           />
+          
+          {(settingsConfig.showPopupToggle !== false) && (
+            <Switch 
+              label="Информация по клику"
+              checked={mapConfig.showPopupOnClick}
+              onChange={() => {
+                updateMapConfig({ showPopupOnClick: !mapConfig.showPopupOnClick });
+                setHasChanges(true);
+              }}
+            />
+          )}
+          
           <Switch 
             label="Создание областей"
             checked={mapConfig.drawingEnabled}

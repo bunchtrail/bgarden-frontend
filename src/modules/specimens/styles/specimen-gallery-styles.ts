@@ -25,6 +25,7 @@ export const mainImageStyles = {
   navigationButton: 'p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-100 transition-all transform hover:scale-110',
   errorContainer: 'w-full h-full flex flex-col items-center justify-center bg-red-50 rounded-xl text-red-500',
   loaderContainer: 'w-full h-full flex items-center justify-center bg-gray-50',
+  mainImageBadge: 'absolute top-3 left-3 bg-green-500 text-white text-xs px-2 py-1 rounded-md font-medium z-10 shadow-sm',
 };
 
 // Стили для счетчика изображений
@@ -35,11 +36,15 @@ export const imageCounterStyles = {
 
 // Стили для списка миниатюр
 export const thumbnailStyles = {
-  container: 'flex items-center justify-center gap-2 flex-wrap mb-3 overflow-x-auto',
-  thumbnail: 'w-14 h-14 rounded-md object-cover cursor-pointer border-2 border-transparent transition-all',
+  container: 'flex items-center justify-center gap-3 flex-wrap mb-3 overflow-x-auto py-2',
+  thumbnail: 'w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition-all',
   activeThumbnail: 'border-blue-500 shadow-md',
-  thumbnailWrapper: 'relative',
-  indicator: 'absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs',
+  thumbnailWrapper: 'relative w-16 h-16 group cursor-pointer overflow-hidden rounded-md',
+  indicator: 'absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white text-xs shadow-sm z-10',
+  mainThumbnail: 'ring-2 ring-green-500 ring-offset-1',
+  setMainButton: 'absolute top-1 right-1 bg-blue-500 bg-opacity-80 hover:bg-green-500 rounded-full w-6 h-6 flex items-center justify-center shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-10',
+  setMainButtonIcon: 'w-3.5 h-3.5 text-white',
+  thumbnailOverlay: 'absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all',
 };
 
 // Стили для подвала с информацией об образце
@@ -59,6 +64,7 @@ export const imageViewModalStyles = {
   actionButton: 'flex items-center gap-1 px-3 py-1.5 rounded-md text-sm',
   primaryButton: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
   dangerButton: 'bg-red-50 text-red-600 hover:bg-red-100',
+  mainImageBadge: 'bg-green-500 text-white text-xs px-2 py-1 rounded-md font-medium mb-2 inline-block',
 };
 
 // Стили для модального окна загрузки изображений

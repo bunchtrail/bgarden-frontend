@@ -42,6 +42,7 @@ export interface UnifiedPanelConfig {
       showTooltipToggle?: boolean;
       showClusteringToggle?: boolean;
       showDrawingToggle?: boolean;
+      showPopupToggle?: boolean;
     };
     [PanelSection.MODE]?: {
       modes: Array<{ id: string, label: string }>;
@@ -109,14 +110,24 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
       PanelSection.LAYERS,
       PanelSection.SETTINGS,
       PanelSection.BUTTONS
-    ]
+    ],
+    sectionConfig: {
+      [PanelSection.SETTINGS]: {
+        showPopupToggle: true
+      }
+    }
   },
   'sector': {
     mode: 'geography',
     visibleSections: [
       PanelSection.LAYERS,
       PanelSection.SETTINGS
-    ]
+    ],
+    sectionConfig: {
+      [PanelSection.SETTINGS]: {
+        showPopupToggle: true
+      }
+    }
   },
   'specimen': {
     mode: 'minimal',
@@ -129,7 +140,8 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
       [PanelSection.SETTINGS]: {
         showClusteringToggle: true,
         showTooltipToggle: false,
-        showDrawingToggle: false
+        showDrawingToggle: false,
+        showPopupToggle: false
       }
     }
   }

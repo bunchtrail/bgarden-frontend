@@ -3,7 +3,7 @@
   - **docs**
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Структура_bgarden-frontend_от_27-03-2025.md` (13.4 KB)
+    - `Структура_bgarden-frontend_от_29-03-2025.md` (13.4 KB)
   - **logs**
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
@@ -86,11 +86,11 @@
             - `CustomSections.tsx` (967.0 B)
             - `index.ts` (737.0 B)
             - `LayerSelector.tsx` (3.2 KB)
-            - `MapSettingsSection.tsx` (1.8 KB)
+            - `MapSettingsSection.tsx` (2.1 KB)
             - `ModeToggle.tsx` (2.4 KB)
             - `PanelHeader.tsx` (2.6 KB)
-            - `types.ts` (4.8 KB)
-            - `UnifiedControlPanel.tsx` (12.1 KB)
+            - `types.ts` (5.1 KB)
+            - `UnifiedControlPanel.tsx` (12.7 KB)
           - **drawing**
           - `index.ts` (588.0 B)
           - **map-card**
@@ -143,7 +143,7 @@
             - **utils**
               - `MarkerIconFactory.ts` (3.5 KB)
         - **contexts**
-          - `MapConfigContext.tsx` (7.1 KB)
+          - `MapConfigContext.tsx` (7.2 KB)
           - `MapContext.tsx` (1.3 KB)
         - **docs**
           - `README.md` (2.1 KB)
@@ -252,7 +252,7 @@
               - **taxonomy**
                 - `index.ts` (53.0 B)
                 - `TaxonomySection.tsx` (2.3 KB)
-            - `SpecimenForm.tsx` (19.0 KB)
+            - `SpecimenForm.tsx` (18.5 KB)
             - `StepContainer.tsx` (864.0 B)
             - `StepRenderer.tsx` (2.2 KB)
             - **utils**
@@ -263,17 +263,17 @@
               - `GalleryHeader.tsx` (984.0 B)
               - `ImageCounter.tsx` (535.0 B)
               - `ImageUploadModal.tsx` (2.0 KB)
-              - `ImageViewModal.tsx` (2.3 KB)
+              - `ImageViewModal.tsx` (3.6 KB)
               - `index.ts` (505.0 B)
-              - `MainImageDisplay.tsx` (3.7 KB)
+              - `MainImageDisplay.tsx` (4.2 KB)
               - `SpecimenInfoFooter.tsx` (530.0 B)
-              - `ThumbnailsList.tsx` (1.8 KB)
+              - `ThumbnailsList.tsx` (3.1 KB)
             - **hooks**
               - `index.ts` (55.0 B)
               - `useGalleryImages.ts` (8.5 KB)
             - `index.ts` (45.0 B)
             - `README.md` (1.9 KB)
-            - `SpecimenGallery.tsx` (3.9 KB)
+            - `SpecimenGallery.tsx` (4.0 KB)
           - **specimens-components**
             - **card-parts**
               - `DetailItem.tsx` (800.0 B)
@@ -321,7 +321,7 @@
           - `specimenService.ts` (11.0 KB)
         - **styles**
           - `index.ts` (3.4 KB)
-          - `specimen-gallery-styles.ts` (4.8 KB)
+          - `specimen-gallery-styles.ts` (5.5 KB)
         - **types**
           - `index.ts` (3.6 KB)
         - **utils**
