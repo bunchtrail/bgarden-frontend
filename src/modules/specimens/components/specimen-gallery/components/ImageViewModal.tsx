@@ -3,6 +3,7 @@ import Button from '../../../../../modules/ui/components/Button';
 import Modal from '../../../../../modules/ui/components/Modal';
 import { SpecimenImage } from '../../../types';
 import { imageViewModalStyles } from '../../../styles';
+import { animationClasses } from '../../../../../styles/global-styles';
 
 interface ImageViewModalProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ const ImageViewModal: React.FC<ImageViewModalProps> = ({
 }) => {
   if (!currentImage) return null;
   
+  // Базовые классы для кнопок
+  const baseButtonClasses = `flex items-center py-1.5 ${animationClasses.transition}`;
+  
   return (
     <Modal
       isOpen={isOpen}
@@ -40,11 +44,13 @@ const ImageViewModal: React.FC<ImageViewModalProps> = ({
               variant="danger" 
               size="small"
               onClick={() => onDelete(currentImage.id)}
-              className="flex items-center gap-1"
+              className={baseButtonClasses}
+              leftIcon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              }
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
               Удалить
             </Button>
             {!currentImage.isMain && (
@@ -52,16 +58,22 @@ const ImageViewModal: React.FC<ImageViewModalProps> = ({
                 variant="primary" 
                 size="small"
                 onClick={() => onSetMain(currentImage.id)}
-                className="flex items-center gap-1"
+                className={baseButtonClasses}
+                leftIcon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                }
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
                 Сделать основным
               </Button>
             )}
           </div>
-          <Button variant="neutral" onClick={onClose}>
+          <Button 
+            variant="neutral" 
+            onClick={onClose}
+            className={baseButtonClasses}
+          >
             Закрыть
           </Button>
         </div>

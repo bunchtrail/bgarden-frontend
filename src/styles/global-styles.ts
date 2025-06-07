@@ -76,6 +76,18 @@ export const buttonClasses = {
   warning: 'bg-gradient-to-r from-[#FF9F0A] to-[#FF8A00] text-white hover:shadow-lg',
   success: 'bg-gradient-to-r from-[#30D158] to-[#28BD4C] text-white hover:shadow-lg',
   disabled: 'opacity-60 cursor-not-allowed bg-gray-200 text-gray-500 hover:shadow-none',
+  
+  // Унифицированные стили для кнопок в карточках
+  unified: {
+    base: 'flex items-center py-1.5 transition-all duration-300',
+    card: 'py-1.5 flex-1',
+    row: '!p-1.5',
+  }
+};
+
+// Хелпер для получения унифицированных классов кнопок
+export const getUnifiedButtonClasses = (variant: 'card' | 'row' = 'card') => {
+  return `${buttonClasses.unified.base} ${buttonClasses.unified[variant]}`;
 };
 
 // Стили для чипов/тегов
@@ -169,4 +181,5 @@ export const appStyles = {
   layoutClasses,
   animationClasses,
   greetingStyles,
+  getUnifiedButtonClasses,
 }; 

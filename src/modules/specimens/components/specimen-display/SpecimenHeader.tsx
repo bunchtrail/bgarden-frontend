@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '../../../../modules/ui/components/Button';
 import { Specimen, SectorType } from '../../types';
-import { textClasses, layoutClasses, chipClasses } from '../../../../styles/global-styles';
+import { textClasses, layoutClasses, chipClasses, animationClasses } from '../../../../styles/global-styles';
 
 interface SpecimenHeaderProps {
   specimen: Specimen | null;
@@ -29,6 +29,9 @@ const SpecimenHeader: React.FC<SpecimenHeaderProps> = ({
       default: return 'Неизвестный сектор';
     }
   };
+
+  // Базовые классы для кнопок
+  const baseButtonClasses = `flex items-center py-1.5 ${animationClasses.transition}`;
 
   return (
     <div className={`${layoutClasses.flexBetween} mb-6`}>
@@ -60,6 +63,12 @@ const SpecimenHeader: React.FC<SpecimenHeaderProps> = ({
           <Button 
             variant="primary"
             onClick={onEdit}
+            className={baseButtonClasses}
+            leftIcon={
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            }
           >
             Редактировать
           </Button>
@@ -68,6 +77,12 @@ const SpecimenHeader: React.FC<SpecimenHeaderProps> = ({
         <Button 
           variant="neutral"
           onClick={onBack}
+          className={baseButtonClasses}
+          leftIcon={
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          }
         >
           Назад к списку
         </Button>
