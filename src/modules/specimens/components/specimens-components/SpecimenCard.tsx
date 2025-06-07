@@ -148,8 +148,9 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         title={`Изображение: ${specimen.russianName}`}
         size="medium"
         variant="elevated"
-        animation="fade"
+        animation="spring"
         blockScroll={false}
+        usePortal={false}
       >
         <div className="flex flex-col items-center p-2">
           <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">

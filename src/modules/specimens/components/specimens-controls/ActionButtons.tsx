@@ -114,7 +114,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         size="small"
         blockScroll={false}
         variant="elevated"
-        animation="fade"
+        animation="spring"
+        usePortal={false}
         footer={
           <div className="flex justify-end space-x-3">
             <Button 
