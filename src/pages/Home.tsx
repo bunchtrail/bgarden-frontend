@@ -31,7 +31,7 @@ const Home: React.FC = () => {
     id: String(user.id), // Преобразуем числовой id в строку
     email: user.email,
     role: user.role,
-    name: user.fullName || user.username // Используем fullName или username как name
+    name: user.fullName ? user.fullName.split(' ')[0] : user.username // Имя без фамилии
   } : null;
 
   // Показываем загрузчик, пока проверяется аутентификация
