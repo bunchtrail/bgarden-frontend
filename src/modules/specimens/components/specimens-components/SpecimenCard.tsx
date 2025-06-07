@@ -46,8 +46,8 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   });
   
   // Используем хук для загрузки изображения, только когда открыто модальное окно
-  const { imageSrc, isLoading, fetchImage, handleImageError } = useSpecimenImage(
-    specimen.id, 
+  const { imageSrc, isLoading, fetchImage, handleImageError, placeholderImage } = useSpecimenImage(
+    specimen.id,
     specimen.imageUrl,
     false // не загружать автоматически при монтировании
   );
@@ -150,7 +150,6 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         variant="elevated"
         animation="fade"
         blockScroll={false}
-        usePortal={false}
       >
         <div className="flex flex-col items-center p-2">
           <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
@@ -159,8 +158,8 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
                 <span className="text-gray-500">Загрузка изображения...</span>
               </div>
             ) : (
-              <img 
-                src={imageSrc || ''} 
+              <img
+                src={imageSrc || placeholderImage}
                 alt={`${specimen.russianName} (${specimen.latinName})`}
                 className="w-full h-full object-contain"
                 onError={() => handleImageError()}

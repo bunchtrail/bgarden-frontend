@@ -138,6 +138,25 @@ class SpecimenService {
         }
     }
 
+    async createSpecimenWithImages(specimen: Omit<Specimen, 'id'>, images: File[]): Promise<{ specimen: Specimen; imageIds: number[] }> {
+        const specimenData = {
+            id: 0,
+            ...specimen,
+            sectorType: Number(specimen.sectorType)
+        } as Record<string, any>;
+        const formData = new FormData();
+        for (const [key, value] of Object.entries(specimenData)) {
+            if (value !== undefined && value !== null) {
+                formData.append(key, String(value));
+            }
+        }
+        images.forEach(img => formData.append('images', img, img.name));
+        const result = await httpClient.post<{ specimen: Specimen; imageIds: number[] }>('Specimen/with-images', formData);
+        if (result.specimen.regionId) {
+            await updateSpecimensCount(result.specimen.regionId, true);
+        }
+        return result;
+    }
     // Обновить существующий образец
     async updateSpecimen(id: number, specimen: Specimen): Promise<Specimen> {
         return httpClient.put<Specimen>(`Specimen/${id}`, specimen);
@@ -147,7 +166,7 @@ class SpecimenService {
     async getSpecimenMainImage(specimenId: number): Promise<SpecimenImage | null> {
         try {
             return await httpClient.get<SpecimenImage>(
-                `v1/specimen-images/by-specimen/${specimenId}/main`,
+                `specimen-images/by-specimen/${specimenId}/main`,
                 { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
             );
         } catch (error) {
@@ -164,7 +183,7 @@ class SpecimenService {
     async getSpecimenImages(specimenId: number, includeImageData: boolean = false): Promise<SpecimenImage[]> {
         try {
             return await httpClient.get<SpecimenImage[]>(
-                `v1/specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`,
+                `specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`,
                 { suppressErrorsForStatus: [404] } // Подавляем ошибку 404
             );
         } catch (error) {
@@ -180,7 +199,7 @@ class SpecimenService {
     // Получить изображение по ID
     async getSpecimenImageById(imageId: number): Promise<SpecimenImage | null> {
         try {
-            return await httpClient.get<SpecimenImage>(`v1/specimen-images/${imageId}`);
+            return await httpClient.get<SpecimenImage>(`specimen-images/${imageId}`);
         } catch (error) {
             console.error(`Ошибка при получении изображения с ID ${imageId}:`, error);
             return null;
@@ -190,7 +209,7 @@ class SpecimenService {
     // Удалить изображение
     async deleteSpecimenImage(id: number): Promise<boolean> {
         try {
-            await httpClient.delete(`v1/specimen-images/${id}`);
+            await httpClient.delete(`specimen-images/${id}`);
             console.log(`Изображение с ID ${id} успешно удалено`);
             return true;
         } catch (error) {

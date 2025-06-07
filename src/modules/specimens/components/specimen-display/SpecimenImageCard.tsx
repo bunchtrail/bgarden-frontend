@@ -30,7 +30,8 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
     handleImageError, 
     uploadImage, 
     isUploading, 
-    uploadProgress
+    uploadProgress,
+    placeholderImage,
   } = useSpecimenImage(
     specimen.id,
     specimen.imageUrl
@@ -114,8 +115,8 @@ const SpecimenImageCard: React.FC<SpecimenImageCardProps> = ({ specimen }) => {
                 <p className="text-xs text-gray-400 mt-1">Добавьте изображение растения, нажав на кнопку "Изменить фото"</p>
               </div>
             ) : (
-              <img 
-                src={imageSrc || ''} 
+              <img
+                src={imageSrc || placeholderImage}
                 alt={`${specimen.russianName} (${specimen.latinName})`}
                 className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 onError={handleImageError}

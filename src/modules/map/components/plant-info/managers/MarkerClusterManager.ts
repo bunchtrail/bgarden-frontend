@@ -53,9 +53,9 @@ export class MarkerClusterManager {
           // Получаем изображение растения
           const image = await specimenService.getSpecimenMainImage(specimenId);
           
-          if (image && image.imageDataBase64) {
-            // Преобразуем base64 в URL изображения
-            imageUrl = `data:${image.contentType};base64,${image.imageDataBase64}`;
+          if (image && image.imageUrl) {
+            // Используем полученный URL
+            imageUrl = image.imageUrl;
             // Сохраняем в кэш
             this.popupImageCache.set(plant.id, imageUrl);
           }

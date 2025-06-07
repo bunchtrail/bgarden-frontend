@@ -135,8 +135,7 @@ export interface Region {
 export interface SpecimenImage {
   id: number;
   specimenId: number;
-  imageDataBase64: string;
-  contentType: string;
+  imageUrl: string;
   description: string;
   isMain: boolean;
   uploadedAt: string;
