@@ -17,7 +17,7 @@ export const SpecimenDetails: React.FC<SpecimenDetailsProps> = ({
   expositionName
 }) => {
   return (
-    <div className="space-y-3 mb-4">
+    <div className="space-y-3 mb-4 min-h-40">
       <DetailItem 
         label="Инв. номер" 
         value={inventoryNumber} 
