@@ -43,9 +43,14 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     navigate(`/specimens/${specimenId}/edit`);
   };
   
+  const containerClass =
+    variant === 'card'
+      ? 'items-center space-x-3'
+      : 'justify-end items-center space-x-1';
+
   return (
     <>
-      <div className={`flex ${variant === 'card' ? 'flex-wrap gap-3' : 'justify-end items-center space-x-1'}`}>
+      <div className={`flex ${containerClass}`}>
         <Button
           variant="neutral"
           size="small"

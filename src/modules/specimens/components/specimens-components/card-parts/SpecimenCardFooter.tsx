@@ -11,8 +11,8 @@ export const SpecimenCardFooter: React.FC<SpecimenCardFooterProps> = ({
   onDelete 
 }) => {
   return (
-    <div className="flex justify-end opacity-90 hover:opacity-100 transition-opacity">
+    <div className="flex justify-end items-center opacity-90 hover:opacity-100 transition-opacity">
       <ActionButtons specimenId={specimenId} onDelete={onDelete} variant="card" />
     </div>
   );
-}; 
+};
