@@ -84,7 +84,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const buttonClass = getUnifiedButtonClasses('card');
   
   return (
-    <div className="relative">
+    <div className="relative h-full">
       <Card
         className={`flex flex-col h-full ${animationClasses.transition} group overflow-hidden
           hover:shadow-lg ${isClickable ? 'cursor-pointer' : ''}`}
