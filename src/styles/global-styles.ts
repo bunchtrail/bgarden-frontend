@@ -88,6 +88,11 @@ export const chipClasses = {
   neutral: 'bg-[#F5F5F7] text-[#86868B]',
 };
 
+// Стили для контейнеров
+export const containerClasses = {
+  base: 'flex flex-col items-center justify-center min-h-[50vh] p-4'
+};
+
 // Стили для макетов
 export const layoutClasses = {
   container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8',
@@ -159,6 +164,7 @@ export const appStyles = {
   cardClasses,
   textClasses,
   buttonClasses,
+  containerClasses,
   chipClasses,
   layoutClasses,
   animationClasses,

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import { LoadingSpinner } from '../../../modules/ui';
+import { containerClasses, textClasses, buttonClasses } from '@/styles/global-styles';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,22 +17,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectPath = '/'
 }) => {
   const { isAuthenticated, user, loading, error } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      const timer = setTimeout(() => navigate('/login'), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, user, navigate]);
 
   if (loading) {
-    return <LoadingSpinner message="Проверка авторизации..." />;
+    return <LoadingSpinner message="Проверка доступа..." />;
   }
 
   if (!isAuthenticated || !user) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-[50vh] p-4'>
-        <h2 className='text-xl font-semibold mb-2'>Требуется авторизация</h2>
-        <p className='text-gray-600 mb-4'>
-          {error || 'Для доступа к этой странице необходимо войти в систему.'}
+      <div className={containerClasses.base}>
+        <h2 className={`${textClasses.heading} mb-2`}>Требуется авторизация</h2>
+        <p className={`${textClasses.body} mb-4`}>
+          {error || 'Для доступа к этой странице необходимо войти. Вы будете автоматически перенаправлены.'}
         </p>
         <Link to='/login'>
-          <button className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2'>
-            Перейти на страницу входа
-          </button>
+          <button className={`${buttonClasses.base} ${buttonClasses.primary}`}>Перейти на страницу входа</button>
         </Link>
       </div>
     );
