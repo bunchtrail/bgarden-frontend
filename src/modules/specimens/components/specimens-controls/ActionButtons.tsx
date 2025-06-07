@@ -45,7 +45,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   
   const containerClass =
     variant === 'card'
-      ? 'items-center space-x-3'
+      ? 'justify-end items-center flex-wrap gap-x-3 gap-y-2'
       : 'justify-end items-center space-x-1';
 
   return (

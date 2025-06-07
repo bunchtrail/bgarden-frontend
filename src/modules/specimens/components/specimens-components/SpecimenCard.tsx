@@ -91,7 +91,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         subtitle={headerProps.subtitle}
         headerAction={headerProps.headerAction}
         footer={
-          <div className="flex justify-between items-center w-full gap-2">
+          <div className="flex flex-wrap justify-between items-center w-full gap-2">
             <Button
               variant="secondary"
               size="small"
