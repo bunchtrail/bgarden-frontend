@@ -83,8 +83,9 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   return (
     <>
       <Card
-        className={`${animationClasses.transition} group overflow-hidden 
+        className={`flex flex-col h-full ${animationClasses.transition} group overflow-hidden
           hover:shadow-lg hover:border-[#0A84FF]/20 ${isClickable ? 'cursor-pointer' : ''}`}
+        contentClassName="flex-grow"
         headerClassName={headerProps.headerClassName}
         title={headerProps.title}
         subtitle={headerProps.subtitle}
