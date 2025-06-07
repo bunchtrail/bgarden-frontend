@@ -127,7 +127,7 @@ const SpecimensListPage: React.FC = () => {
 
           {/* Индикатор загрузки */}
           {loading && sortedAndFilteredSpecimens.length > 0 && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+            <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
               <SpecimensLoading fullScreen={false} />
             </div>
           )}
