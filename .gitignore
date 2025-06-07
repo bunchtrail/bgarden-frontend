@@ -42,3 +42,6 @@ yarn-error.log*
 .temp
 .tmp
 .cache
+
+# структура проекта - документация
+docs/Структура_*.md
