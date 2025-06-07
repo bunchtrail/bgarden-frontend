@@ -7,10 +7,12 @@ const WelcomeUser: React.FC = () => {
 
   if (!isAuthenticated || !user) return null;
 
+  const firstName = user.fullName ? user.fullName.split(' ')[0] : user.username;
+
   return (
     <div className="mb-6 rounded-lg bg-green-50 p-4 shadow-md">
       <h2 className="mb-2 text-xl font-semibold text-green-800">
-        Добро пожаловать, {user.fullName || user.username}!
+        Добро пожаловать, {firstName}!
       </h2>
       <p className="mb-3 text-gray-600">
         Рады видеть вас снова в нашем Ботаническом саду.
@@ -33,4 +35,4 @@ const WelcomeUser: React.FC = () => {
   );
 };
 
-export default WelcomeUser; 
+export default WelcomeUser;
