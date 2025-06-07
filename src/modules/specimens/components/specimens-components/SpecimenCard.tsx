@@ -91,7 +91,11 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         subtitle={headerProps.subtitle}
         headerAction={headerProps.headerAction}
         footer={
-          <div className="flex flex-wrap justify-between items-center w-full gap-2">
+          <div className="flex flex-col items-center w-full gap-2">
+            <SpecimenCardFooter
+              specimenId={specimen.id}
+              onDelete={onDelete}
+            />
             <Button
               variant="secondary"
               size="small"
@@ -103,10 +107,6 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
               </svg>
               Изображение
             </Button>
-            <SpecimenCardFooter 
-              specimenId={specimen.id} 
-              onDelete={onDelete} 
-            />
           </div>
         }
         onClick={isClickable ? handleCardClick : undefined}
