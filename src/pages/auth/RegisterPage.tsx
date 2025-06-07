@@ -64,7 +64,7 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className='flex items-center justify-center py-4 md:py-6'>
+    <div className='flex items-center justify-center min-h-screen'>
       <div className='w-full max-w-xl px-4 sm:px-6 lg:px-8 mx-auto'>
         <div className='space-y-4 animate-fadeIn'>
           <div className='text-center space-y-2'>

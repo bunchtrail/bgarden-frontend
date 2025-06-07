@@ -3,7 +3,7 @@
   - **docs**
     - `refactoring.md` (15.4 KB)
     - `styles-guide.md` (3.2 KB)
-    - `Структура_bgarden-frontend_от_29-03-2025.md` (13.4 KB)
+    - `Структура_bgarden-frontend_от_16-04-2025.md` (13.4 KB)
   - **logs**
   - `package-lock.json` (707.2 KB)
   - `package.json` (1.7 KB)
