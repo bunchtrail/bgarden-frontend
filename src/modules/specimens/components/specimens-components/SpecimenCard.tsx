@@ -5,11 +5,11 @@ import Modal from '../../../ui/components/Modal';
 import Button from '../../../ui/components/Button';
 import { Specimen, SectorType } from '../../types';
 import { animationClasses, getUnifiedButtonClasses } from '../../../../styles/global-styles';
-import { 
-  getSpecimenCardHeader, 
-  SpecimenBadges, 
+import { sectorTypeColors } from '../../styles';
+import {
+  SpecimenBadges,
   SpecimenDetails,
-  SpecimenCardFooter 
+  SpecimenCardFooter
 } from './card-parts';
 import SpecimenModal from './SpecimenModal';
 import { useSpecimenImage } from '../../hooks';
@@ -38,12 +38,8 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const sectorType = specimen.sectorType as SectorType;
   
   // Получаем пропсы для заголовка
-  const headerProps = getSpecimenCardHeader({
-    id: specimen.id,
-    russianName: specimen.russianName,
-    latinName: specimen.latinName,
-    sectorType
-  });
+  const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
+  const headerClassName = `${sectorColor.bg} py-3 border-b border-gray-200`;
   
   // Используем хук для загрузки изображения, только когда открыто модальное окно
   const { imageSrc, isLoading, fetchImage, handleImageError, placeholderImage } = useSpecimenImage(
@@ -84,15 +80,13 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const buttonClass = getUnifiedButtonClasses('card');
   
   return (
-    <div className="relative">
+    <div className="relative h-full">
       <Card
         className={`flex flex-col h-full ${animationClasses.transition} group overflow-hidden
           hover:shadow-lg ${isClickable ? 'cursor-pointer' : ''}`}
         contentClassName="flex-grow"
-        headerClassName={headerProps.headerClassName}
-        title={headerProps.title}
-        subtitle={headerProps.subtitle}
-        headerAction={headerProps.headerAction}
+        headerClassName={headerClassName}
+        title={specimen.russianName || 'Без названия'}
         footer={
           <div className="flex flex-col items-center w-full gap-2">
             <SpecimenCardFooter
@@ -148,20 +142,21 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         title={`Изображение: ${specimen.russianName}`}
         size="medium"
         variant="elevated"
-        animation="fade"
+        animation="spring"
         blockScroll={false}
+        usePortal={false}
       >
         <div className="flex flex-col items-center p-2">
-          <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
+          <div className="w-64 h-64 overflow-hidden rounded-lg">
             {isLoading ? (
-              <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100">
+              <div className="w-64 h-64 flex items-center justify-center bg-gray-100">
                 <span className="text-gray-500">Загрузка изображения...</span>
               </div>
             ) : (
               <img
                 src={imageSrc || placeholderImage}
                 alt={`${specimen.russianName} (${specimen.latinName})`}
-                className="w-full h-full object-contain"
+                className="w-64 h-64 object-contain"
                 onError={() => handleImageError()}
               />
             )}

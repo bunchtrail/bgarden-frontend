@@ -38,7 +38,10 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   return (
     <div className={`${layoutClasses.grid4.replace('gap-6', 'gap-8')} ${animationClasses.fadeIn}`}>
       {specimens.map((specimen) => (
-        <div key={specimen.id} className={`${animationClasses.transition} h-full`}>
+        <div
+          key={specimen.id}
+          className={`${animationClasses.transition} h-96`}
+        >
           <SpecimenCard
             specimen={specimen}
             getSectorTypeName={getSectorTypeName}
