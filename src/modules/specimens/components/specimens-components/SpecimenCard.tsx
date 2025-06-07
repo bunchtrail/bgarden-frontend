@@ -153,16 +153,16 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         usePortal={false}
       >
         <div className="flex flex-col items-center p-2">
-          <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
+          <div className="w-64 h-64 overflow-hidden rounded-lg">
             {isLoading ? (
-              <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100">
+              <div className="w-64 h-64 flex items-center justify-center bg-gray-100">
                 <span className="text-gray-500">Загрузка изображения...</span>
               </div>
             ) : (
               <img
                 src={imageSrc || placeholderImage}
                 alt={`${specimen.russianName} (${specimen.latinName})`}
-                className="w-full h-full object-contain"
+                className="w-64 h-64 object-contain"
                 onError={() => handleImageError()}
               />
             )}
