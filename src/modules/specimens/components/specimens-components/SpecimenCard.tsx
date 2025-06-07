@@ -87,7 +87,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
     <>
       <Card
         className={`relative flex flex-col h-full ${animationClasses.transition} group overflow-hidden
-          hover:shadow-lg hover:border-[#0A84FF]/20 ${isClickable ? 'cursor-pointer' : ''}`}
+          hover:shadow-lg ${isClickable ? 'cursor-pointer' : ''}`}
         contentClassName="flex-grow"
         headerClassName={headerProps.headerClassName}
         title={headerProps.title}
@@ -155,7 +155,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         <div className="flex flex-col items-center p-2">
           <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
             {isLoading ? (
-              <div className="w-full h-64 flex items-center justify-center bg-gray-100">
+              <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100">
                 <span className="text-gray-500">Загрузка изображения...</span>
               </div>
             ) : (

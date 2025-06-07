@@ -43,7 +43,7 @@ const Card: React.FC<CardProps> = ({
     : cardClasses.elevated;
     
   // Классы для основного контейнера
-  const containerClasses = `${baseClass} ${variantClass} ${className} ${onClick ? 'cursor-pointer transition-transform hover:-translate-y-1' : ''}`;
+  const containerClasses = `${baseClass} ${variantClass} ${className} ${onClick ? 'cursor-pointer transition-shadow duration-300' : ''}`;
   
   // Классы для содержимого
   const contentClasses = `${cardClasses.content} ${contentClassName}`;
