@@ -84,9 +84,9 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const buttonClass = getUnifiedButtonClasses('card');
   
   return (
-    <>
+    <div className="relative">
       <Card
-        className={`relative flex flex-col h-full ${animationClasses.transition} group overflow-hidden
+        className={`flex flex-col h-full ${animationClasses.transition} group overflow-hidden
           hover:shadow-lg ${isClickable ? 'cursor-pointer' : ''}`}
         contentClassName="flex-grow"
         headerClassName={headerProps.headerClassName}
@@ -175,7 +175,7 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 
