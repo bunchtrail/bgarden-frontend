@@ -35,7 +35,7 @@ const ThumbnailsList: React.FC<ThumbnailsListProps> = ({
           onClick={() => onThumbnailClick(index)}
         >
           <img 
-            src={`data:${image.contentType};base64,${image.imageDataBase64}`} 
+            src={image.imageUrl} 
             alt={`Миниатюра ${index + 1}`}
             className={thumbnailStyles.thumbnail}
           />

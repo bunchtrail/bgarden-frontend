@@ -92,7 +92,7 @@ const ImageViewModal: React.FC<ImageViewModalProps> = ({
         )}
         <div className="w-full max-h-[75vh] overflow-hidden rounded-lg transition-all duration-300">
           <img 
-            src={`data:${currentImage.contentType};base64,${currentImage.imageDataBase64}`}
+            src={currentImage.imageUrl}
             alt={`${specimenName} (${latinName})`}
             className="w-full h-full object-contain transition-transform duration-300"
           />
