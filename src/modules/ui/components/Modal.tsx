@@ -67,7 +67,11 @@ export interface ModalProps {
    * Блокировать ли прокрутку страницы при открытии модального окна
    */
   blockScroll?: boolean;
-}
+  /**
+   * Рендерить модалку через портал в body
+   */
+  usePortal?: boolean;
+  }
 
 /**
  * Универсальный компонент модального окна.
@@ -89,7 +93,8 @@ const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   verticalPosition = 'center',
   animation = 'fade',
-  blockScroll = false
+  blockScroll = false,
+  usePortal = true
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -213,7 +218,7 @@ const Modal: React.FC<ModalProps> = ({
   
   const modalContent = (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 transition-all duration-300 ${
+      className={`${usePortal ? 'fixed' : 'absolute'} inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 transition-all duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={handleOverlayClick}
@@ -271,7 +276,7 @@ const Modal: React.FC<ModalProps> = ({
     </div>
   );
 
-  return ReactDOM.createPortal(modalContent, document.body);
+  return usePortal ? ReactDOM.createPortal(modalContent, document.body) : modalContent;
 };
 
 export default Modal; 
