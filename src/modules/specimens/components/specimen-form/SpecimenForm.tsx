@@ -20,7 +20,6 @@ import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { useSpecimenImage } from '../../hooks';
 import { specimenService } from '../../services/specimenService';
-import httpClient from '@/services/httpClient';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -249,42 +248,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
             type: img.type,
             size: img.size
           })));
-          
-          // Сначала создаем образец без изображений
-          const createdSpecimen = await specimenService.createSpecimen(finalFormData);
-          
-          // Используем FormData для отправки изображений напрямую
-          const formData = new FormData();
-          formData.append('SpecimenId', createdSpecimen.id.toString());
-          formData.append('IsMain', 'true');
-          
-          // Добавляем файлы в FormData
-          selectedImages.forEach(file => {
-            formData.append('Files', file, file.name);
-          });
-          
-          console.log(`Загрузка изображений для образца ID=${createdSpecimen.id}`);
-          
-          // Устанавливаем состояние загрузки
+
           setIsUploading(true);
-          
-          // Отправляем запрос напрямую, не используя хук
-          await httpClient.post(
-            'v1/specimen-images/batch-upload',
-            formData,
-            {
-              onUploadProgress: (progressEvent: any) => {
-                if (progressEvent.total) {
-                  const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                  setUploadProgress(percentCompleted);
-                }
-              }
-            }
-          );
-          
+
+          const result = await specimenService.createSpecimenWithImages(finalFormData, selectedImages);
+
           setIsUploading(false);
           notification.success('Образец успешно создан с изображениями', { duration: 5000 });
-          navigate(`/specimens/${createdSpecimen.id}`);
+          navigate(`/specimens/${result.specimen.id}`);
         } catch (error: any) {
           setIsUploading(false);
           console.error('Подробная ошибка:', error);

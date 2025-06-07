@@ -108,7 +108,7 @@ export const useSpecimenImage = (
         
         // Отправляем запрос
         const result = await httpClient.post<BatchImageUploadResult>(
-          'v1/specimen-images/batch-upload',
+          'specimen-images/batch-upload',
           formData,
           {
             onUploadProgress: (progressEvent) => {
@@ -141,7 +141,7 @@ export const useSpecimenImage = (
         
         // Отправляем запрос
         const result = await httpClient.post<BatchImageUploadResult>(
-          'v1/specimen-images/batch-upload',
+          'specimen-images/batch-upload',
           formData,
           {
             onUploadProgress: (progressEvent) => {
@@ -183,9 +183,9 @@ export const useSpecimenImage = (
       setIsLoading(true);
       console.log(`Установка изображения ID=${imageId} как основного`);
       
-      // Используем PATCH запрос к эндпоинту /api/v1/specimen-images/{id}/set-as-main
+      // Используем PATCH запрос к эндпоинту /api/specimen-images/{id}/set-as-main
       const result = await httpClient.patch<SpecimenImage>(
-        `v1/specimen-images/${imageId}/set-as-main`, 
+        `specimen-images/${imageId}/set-as-main`, 
         {}
       );
       

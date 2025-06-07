@@ -29,7 +29,7 @@ const MainImageDisplay: React.FC<MainImageDisplayProps> = ({
   const currentImageSrc = currentImage 
     ? (currentImage.imageDataBase64 
         ? `data:${currentImage.contentType};base64,${currentImage.imageDataBase64}` 
-        : `/api/v1/specimen-images/${currentImage.id}/content`)
+        : `/api/specimen-images/${currentImage.id}/content`)
     : '/images/specimens/placeholder.jpg';
 
   if (isLoading) {
