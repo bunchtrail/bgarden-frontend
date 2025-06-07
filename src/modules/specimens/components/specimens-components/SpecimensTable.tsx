@@ -71,10 +71,10 @@ const SpecimensTable: React.FC<SpecimensTableProps> = ({
   ];
 
   return (
-    <div className={`${cardClasses.elevated} backdrop-blur-lg overflow-hidden rounded-xl border border-[#E5E5EA]/80 ${animationClasses.transition}`}>
+    <div className={`${cardClasses.elevated} overflow-hidden rounded-xl border border-[#E5E5EA]/80 ${animationClasses.transition}`}>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-[#E5E5EA]">
-          <thead className="bg-[#F5F5F7]/80 backdrop-filter backdrop-blur-sm">
+          <thead className="bg-[#F5F5F7]/80">
             <tr>
               {tableHeaders.map((header) => (
                 <th 
@@ -96,7 +96,7 @@ const SpecimensTable: React.FC<SpecimensTableProps> = ({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white/80 backdrop-filter backdrop-blur-sm divide-y divide-[#E5E5EA]">
+          <tbody className="bg-white/80 divide-y divide-[#E5E5EA]">
             {specimensWithFamilies.length > 0 ? (
               specimensWithFamilies.map((specimen) => (
                 <SpecimenRow
@@ -120,4 +120,4 @@ const SpecimensTable: React.FC<SpecimensTableProps> = ({
   );
 };
 
-export default SpecimensTable; 
+export default React.memo(SpecimensTable);
