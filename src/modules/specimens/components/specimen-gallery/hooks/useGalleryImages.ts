@@ -71,6 +71,11 @@ export const useGalleryImages = ({ specimenId, imageUrl }: UseGalleryImagesProps
       setError(null);
       const images = await specimenService.getSpecimenImages(specimenId, true);
       setAllImages(images);
+
+      // После загрузки изображений выбираем основное изображение
+      const mainIndex = images.findIndex(img => img.isMain);
+      setCurrentImageIndex(mainIndex !== -1 ? mainIndex : 0);
+
       setIsLoading(false);
     } catch (err) {
       console.error('Ошибка при загрузке изображений:', err);
