@@ -63,4 +63,4 @@ const SpecimenRow: React.FC<SpecimenRowProps> = ({
   );
 };
 
-export default SpecimenRow; 
+export default React.memo(SpecimenRow);

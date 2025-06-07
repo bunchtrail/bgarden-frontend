@@ -178,4 +178,4 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   );
 };
 
-export default SpecimenCard; 
+export default React.memo(SpecimenCard);

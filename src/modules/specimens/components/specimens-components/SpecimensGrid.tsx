@@ -51,4 +51,4 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   );
 };
 
-export default SpecimensGrid; 
+export default React.memo(SpecimensGrid);

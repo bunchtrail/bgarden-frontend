@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { cardClasses } from '../../../styles/global-styles';
 
 export interface ModalProps {
@@ -210,8 +211,8 @@ const Modal: React.FC<ModalProps> = ({
     opacity: isOpen ? 1 : 0 
   } : {};
   
-  return (
-    <div 
+  const modalContent = (
+    <div
       className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 transition-all duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
@@ -220,7 +221,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-modal="true"
       style={{ pointerEvents: 'all' }}
     >
-      <div 
+      <div
         ref={modalRef}
         className={modalClasses}
         onClick={(e) => e.stopPropagation()}
@@ -269,6 +270,8 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default Modal; 
