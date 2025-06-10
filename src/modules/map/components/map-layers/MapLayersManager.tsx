@@ -5,6 +5,7 @@ import { RegionData } from '@/services/regions/types';
 // Убираем импорт и используем локальное объявление
 // import { MapLayerProps } from '../MapPage';
 import { MapImageLayer, MapRegionsLayer } from '../map-components';
+import { TileLayer } from 'react-leaflet';
 import { useMapLayers } from '../../hooks/useMapLayers';
 import { MapConfig, MAP_LAYERS } from '../../contexts/MapConfigContext';
 import { getAllSpecimens, convertSpecimensToPlants } from '../../services/plantService';
@@ -90,14 +91,22 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
   // Проверяем, что мы находимся внутри контекста Leaflet
   const renderLayers = () => {
     const layers = [
-      // Слой изображения карты (всегда первый)
-      mapImageUrl && hasMapImage && (
-        <MapImageLayer 
-          key="map-base-image"
-          imageUrl={mapImageUrl} 
-          bounds={imageBounds}
-        />
-      ),
+      // Слой базовой карты в зависимости от типа
+      mapConfigContext.mapType === 'schematic'
+        ? (mapImageUrl && hasMapImage && (
+            <MapImageLayer
+              key="map-base-image"
+              imageUrl={mapImageUrl}
+              bounds={imageBounds}
+            />
+          ))
+        : (
+            <TileLayer
+              key="geo-tiles"
+              attribution="&copy; OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+          ),
       
       // Слой регионов (всегда второй)
       shouldShowRegions && filteredRegions.length > 0 && (

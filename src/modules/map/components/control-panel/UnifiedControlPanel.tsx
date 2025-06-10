@@ -266,10 +266,18 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             />
           )}
           
-          <Switch 
+          <Switch
             label="Создание областей"
             checked={mapConfig.drawingEnabled}
             onChange={handleToggleDrawing}
+          />
+          <Switch
+            label="Географическая карта"
+            checked={mapConfig.mapType === 'geo'}
+            onChange={() => {
+              updateMapConfig({ mapType: mapConfig.mapType === 'geo' ? 'schematic' : 'geo' });
+              setHasChanges(true);
+            }}
           />
         </div>
       </div>

@@ -22,7 +22,7 @@ const CACHE_TIME = 60000; // 1 минута
  * Улучшенный компонент слоя маркеров растений с модульной архитектурой
  */
 const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo(({ 
-  isVisible, 
+  isVisible,
   mapConfig,
   onPlantsLoaded
 }) => {
@@ -43,6 +43,16 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
   const isFirstRender = useRef(true);
   const requestInProgress = useRef(false);
 
+  const adjustPlantsForMapType = (data: Plant[]): Plant[] => {
+    const isGeo = mapConfig.mapType === 'geo';
+    return data
+      .map(p => ({
+        ...p,
+        position: isGeo ? p.geoCoordinates ?? p.position : p.mapCoordinates ?? p.position
+      }))
+      .filter(p => Array.isArray(p.position) && p.position.length === 2);
+  };
+
   // Загрузка данных растений
   useEffect(() => {
     const fetchPlants = async () => {
@@ -52,9 +62,10 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
       
       // Используем кэшированные данные, если они есть и не истекли
       if (cachedPlantsData && !cacheExpired && !isFirstRender.current) {
-        setPlants(cachedPlantsData);
+        const adjusted = adjustPlantsForMapType(cachedPlantsData);
+        setPlants(adjusted);
         if (onPlantsLoaded) {
-          onPlantsLoaded(cachedPlantsData);
+          onPlantsLoaded(adjusted);
         }
         return;
       }
@@ -76,12 +87,13 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
           // Обновляем кэш и время последнего обновления
           cachedPlantsData = plantsData;
           lastFetchTime = Date.now();
-          
-          setPlants(plantsData);
+
+          const adjusted = adjustPlantsForMapType(plantsData);
+          setPlants(adjusted);
           
           // Обратная связь с родительским компонентом о загруженных данных
           if (onPlantsLoaded) {
-            onPlantsLoaded(plantsData);
+            onPlantsLoaded(adjusted);
           }
           
           // Если планты загрузились, но их массив пуст, не показываем ошибку - просто пустой слой
@@ -121,6 +133,11 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
 
     fetchPlants();
   }, [isVisible, clearMarkers, warning, onPlantsLoaded]);
+
+  // Пересчитываем координаты при смене типа карты
+  useEffect(() => {
+    setPlants(prev => adjustPlantsForMapType(prev));
+  }, [mapConfig.mapType]);
 
   // Очистка при размонтировании
   useEffect(() => {

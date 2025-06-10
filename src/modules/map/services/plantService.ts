@@ -100,27 +100,33 @@ export const convertSpecimensToPlants = (specimens: SpecimenData[]): Plant[] => 
       // Добавляем ID в набор использованных
       usedIds.add(plantId);
       
-      // Определяем координаты в зависимости от типа локации
-      let x: number, y: number;
-      
+      // Сохраняем оба типа координат, если доступны
+      let mapX: number | undefined = specimen.mapX;
+      let mapY: number | undefined = specimen.mapY;
+      let lat: number | undefined = specimen.latitude;
+      let lng: number | undefined = specimen.longitude;
+
+      // Выбор координат по умолчанию зависит от locationType
+      let x: number;
+      let y: number;
+
       if (specimen.locationType === LocationType.Geographic) {
-        // Для географических координат
-        x = specimen.latitude;
-        y = specimen.longitude;
+        x = lat as number;
+        y = lng as number;
       } else if (specimen.locationType === LocationType.SchematicMap) {
-        // Для координат на схеме
-        x = specimen.mapX;
-        y = specimen.mapY;
+        x = mapX as number;
+        y = mapY as number;
       } else {
-        // Если тип локации не определен, предпочитаем mapX/mapY, но если их нет, используем latitude/longitude
-        x = (specimen.mapX !== undefined && specimen.mapX !== null) ? specimen.mapX : specimen.latitude;
-        y = (specimen.mapY !== undefined && specimen.mapY !== null) ? specimen.mapY : specimen.longitude;
+        x = mapX ?? lat ?? 0;
+        y = mapY ?? lng ?? 0;
       }
       
       return {
         id: plantId,
         name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
         position: [x, y] as [number, number],
+        mapCoordinates: mapX !== undefined && mapY !== undefined ? [mapX, mapY] as [number, number] : undefined,
+        geoCoordinates: lat !== undefined && lng !== undefined ? [lat, lng] as [number, number] : undefined,
         description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
         latinName: specimen.latinName
       };

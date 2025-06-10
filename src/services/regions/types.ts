@@ -87,5 +87,13 @@ export interface Plant {
   name: string;
   latinName?: string;
   description?: string;
-  position: CoordinatePoint; // [x, y] координаты на карте
-} 
+  /**
+   * Текущие координаты, используемые слоем маркеров
+   * В зависимости от выбранного типа карты это либо map, либо гео координаты
+   */
+  position: CoordinatePoint;
+  /** Координаты на схематической карте, если доступны */
+  mapCoordinates?: CoordinatePoint;
+  /** Географические координаты в формате [lat, lng], если доступны */
+  geoCoordinates?: CoordinatePoint;
+}
