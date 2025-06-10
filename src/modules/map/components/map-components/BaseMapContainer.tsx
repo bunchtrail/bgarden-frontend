@@ -14,8 +14,8 @@ export interface BaseMapContainerProps {
 }
 
 /**
- * Базовый компонент контейнера карты, абстрагирующий общие настройки MapContainer
- * для устранения дублирования между MapPage и LightMapView
+ * Базовый компонент контейнера карты, который теперь динамически
+ * настраивает систему координат (CRS) в зависимости от типа карты.
  */
 const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   mapConfig,
@@ -26,13 +26,16 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
 }) => {
   return (
     <MapContainer
+      // Ключ для принудительного пересоздания контейнера при смене типа карты
+      key={mapConfig.mapType} 
       center={mapConfig.center}
       zoom={mapConfig.zoom}
       maxZoom={mapConfig.maxZoom}
       minZoom={mapConfig.minZoom}
       style={style}
       zoomControl={false}
-      crs={L.CRS.Simple}
+      // Динамическая установка системы координат
+      crs={mapConfig.mapType === 'geo' ? L.CRS.EPSG3857 : L.CRS.Simple}
       maxBounds={mapConfig.maxBounds}
       maxBoundsViscosity={mapConfig.maxBoundsViscosity}
       attributionControl={false}
@@ -46,4 +49,4 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   );
 };
 
-export default BaseMapContainer; 
+export default BaseMapContainer;

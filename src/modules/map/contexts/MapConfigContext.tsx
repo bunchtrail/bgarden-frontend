@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { LatLngExpression, LatLngBoundsExpression, ControlPosition } from 'leaflet';
 
 // Доступные слои карты
@@ -6,6 +6,13 @@ export const MAP_LAYERS = {
   IMAGERY: 'imagery',
   REGIONS: 'regions',
   PLANTS: 'plants',
+  GEO_TILES: 'geo_tiles', // Слой для гео-подложки
+} as const;
+
+// Типы карт
+export const MAP_TYPES = {
+  SCHEMATIC: 'schematic',
+  GEO: 'geo',
 } as const;
 
 // Режимы взаимодействия с картой
@@ -20,14 +27,14 @@ const STORAGE_KEY = 'bgarden_map_config';
 
 // Интерфейс конфигурации карты
 export interface MapConfig {
+  mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]; // Тип карты: 'schematic' или 'geo'
   center: LatLngExpression;
   zoom: number;
   maxZoom: number;
   minZoom: number;
-  maxBounds: LatLngBoundsExpression;
+  maxBounds?: LatLngBoundsExpression;
   maxBoundsViscosity: number;
   zoomControlPosition: ControlPosition;
-  // Дополнительные настройки для облегченной версии
   lightMode: boolean;
   visibleLayers: string[];
   showTooltips: boolean;
@@ -35,19 +42,17 @@ export interface MapConfig {
   availableLayers: string[];
   showControls: boolean;
   debug: boolean;
-  enableClustering: boolean; // Включить/выключить кластеризацию маркеров
-  showPopupOnClick: boolean; // Показывать всплывающее окно при нажатии на маркер
-  // Настройки режима взаимодействия с картой
-  interactionMode: string; // Режим взаимодействия с картой (просмотр, рисование, редактирование)
-  drawingEnabled: boolean; // Включен ли режим рисования областей
-  // Режим редактирования
+  enableClustering: boolean;
+  showPopupOnClick: boolean;
+  interactionMode: string;
+  drawingEnabled: boolean;
   editMode: boolean;
-  // Флаг завершения рисования полигона
   hasCompletedDrawing: boolean;
 }
 
-// Настройки по умолчанию для стандартной карты
-export const DEFAULT_MAP_CONFIG: MapConfig = {
+// Настройки по умолчанию для схематической карты
+export const DEFAULT_SCHEMATIC_CONFIG: MapConfig = {
+  mapType: MAP_TYPES.SCHEMATIC,
   center: [500, 500] as LatLngExpression,
   zoom: 0,
   maxZoom: 4,
@@ -55,7 +60,6 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   maxBounds: [[-1000, -1000], [2000, 2000]] as LatLngBoundsExpression,
   maxBoundsViscosity: 1.0,
   zoomControlPosition: 'bottomright' as ControlPosition,
-  // Дополнительные настройки
   lightMode: false,
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
   showTooltips: true,
@@ -65,12 +69,29 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   debug: false,
   enableClustering: true,
   showPopupOnClick: true,
-  // Настройки режима взаимодействия с картой
   interactionMode: MAP_MODES.VIEW,
   drawingEnabled: false,
   editMode: false,
   hasCompletedDrawing: false
 };
+
+// Настройки по умолчанию для гео-карты
+export const DEFAULT_GEO_CONFIG: MapConfig = {
+  ...DEFAULT_SCHEMATIC_CONFIG, // Наследуем общие настройки
+  mapType: MAP_TYPES.GEO,
+  center: [55.751244, 37.618423] as LatLngExpression, // Центр (Москва)
+  zoom: 10,
+  maxZoom: 18,
+  minZoom: 3,
+  maxBounds: undefined, // Без ограничений по перемещению
+  maxBoundsViscosity: 0.0,
+  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.PLANTS], // Другие слои по умолчанию
+  drawingEnabled: false, // Рисование недоступно на гео-карте
+  interactionMode: MAP_MODES.VIEW,
+};
+
+// Глобальная конфигурация по умолчанию
+export const DEFAULT_MAP_CONFIG: MapConfig = DEFAULT_SCHEMATIC_CONFIG;
 
 interface MapConfigContextProps {
   mapConfig: MapConfig;
@@ -80,6 +101,7 @@ interface MapConfigContextProps {
   toggleLayer: (layerName: string) => void;
   saveConfigToStorage: () => void;
   loadConfigFromStorage: () => void;
+  setMapType: (mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => void; // Новая функция
 }
 
 const MapConfigContext = createContext<MapConfigContextProps | undefined>(undefined);
@@ -98,13 +120,11 @@ interface MapConfigProviderProps {
 }
 
 export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, initialConfig }) => {
-  // Состояние для хранения конфигурации
   const [mapConfig, setMapConfig] = useState<MapConfig>({
     ...DEFAULT_MAP_CONFIG,
     ...initialConfig
   });
 
-  // Эффект для восстановления конфигурации из localStorage при монтировании компонента
   useEffect(() => {
     try {
       const savedConfig = localStorage.getItem(STORAGE_KEY);
@@ -113,7 +133,7 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
         setMapConfig(prevConfig => ({
           ...prevConfig,
           ...parsedConfig,
-          ...initialConfig // Приоритет имеют props из initialConfig
+          ...initialConfig
         }));
       }
     } catch (error) {
@@ -121,7 +141,6 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     }
   }, [initialConfig]);
   
-  // Логирование включения режима рисования
   useEffect(() => {
     if (mapConfig.drawingEnabled) {
       console.log('[MapConfig] Режим рисования включен', {
@@ -132,7 +151,6 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     }
   }, [mapConfig.drawingEnabled]);
 
-  // Функция для обновления конфигурации
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
     setMapConfig(prevConfig => ({
       ...prevConfig,
@@ -160,7 +178,10 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   };
 
   const resetMapConfig = () => {
-    setMapConfig(DEFAULT_MAP_CONFIG);
+    // Сбрасываем к конфигурации текущего типа карты
+    const currentMapType = mapConfig.mapType;
+    const defaultConfig = currentMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
+    setMapConfig(defaultConfig);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
@@ -170,20 +191,22 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
 
   const toggleLayer = (layerName: string) => {
     setMapConfig(prevConfig => {
-      // Проверяем, включен ли слой в текущей конфигурации
       const isLayerActive = prevConfig.visibleLayers.includes(layerName);
-      
-      // Новый массив слоев
       const newLayers = isLayerActive
-        ? prevConfig.visibleLayers.filter(layer => layer !== layerName) // Убираем слой
-        : [...prevConfig.visibleLayers, layerName]; // Добавляем слой
-      
-      return {
-        ...prevConfig,
-        visibleLayers: newLayers
-      };
+        ? prevConfig.visibleLayers.filter(layer => layer !== layerName)
+        : [...prevConfig.visibleLayers, layerName];
+      return { ...prevConfig, visibleLayers: newLayers };
     });
   };
+
+  // Новая функция для смены типа карты
+  const setMapType = useCallback((mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => {
+    if (mapType === mapConfig.mapType) return; // Не меняем, если тип тот же
+    
+    // При смене типа карты применяем соответствующую конфигурацию по умолчанию
+    const newConfig = mapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
+    updateMapConfig(newConfig);
+  }, [updateMapConfig, mapConfig.mapType]);
 
   const value = {
     mapConfig,
@@ -192,24 +215,15 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     resetMapConfig,
     toggleLayer,
     saveConfigToStorage,
-    loadConfigFromStorage
+    loadConfigFromStorage,
+    setMapType,
   };
 
   return (
-    <MapConfigContext.Provider
-      value={{
-        mapConfig,
-        setMapConfig,
-        updateMapConfig,
-        resetMapConfig,
-        toggleLayer,
-        saveConfigToStorage,
-        loadConfigFromStorage
-      }}
-    >
+    <MapConfigContext.Provider value={value}>
       {children}
     </MapConfigContext.Provider>
   );
 };
 
-export default MapConfigProvider; 
+export default MapConfigProvider;

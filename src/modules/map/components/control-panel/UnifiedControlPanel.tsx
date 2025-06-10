@@ -2,7 +2,9 @@ import React, { ReactNode, useCallback, useRef, useEffect, useState } from 'reac
 import { 
   useMapConfig, 
   MAP_LAYERS, 
-  MAP_MODES} from '../../contexts/MapConfigContext';
+  MAP_MODES,
+  MAP_TYPES // Импортируем типы карт
+} from '../../contexts/MapConfigContext';
 import { 
   PanelSection, 
   UnifiedPanelConfig, 
@@ -17,22 +19,17 @@ import {
 import PanelHeader from './PanelHeader';
 import ControlButtons from './ControlButtons';
 
-// Глобальный реестр отрисованных панелей
 const renderedPanels = new Set<string>();
 
 interface UnifiedControlPanelProps {
   className?: string;
-  pageType?: string; // Тип страницы для использования предопределенного пресета
-  config?: UnifiedPanelConfig; // Пользовательская конфигурация
+  pageType?: string;
+  config?: UnifiedPanelConfig;
   onClose?: () => void;
   customSections?: ReactNode;
-  panelId?: string; // Добавлен уникальный идентификатор панели
+  panelId?: string;
 }
 
-/**
- * Унифицированная панель управления картой
- * Позволяет гибко настраивать отображаемые секции и элементы управления
- */
 const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   className = '',
   pageType = 'map',
@@ -41,49 +38,36 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   customSections,
   panelId = 'default'
 }) => {
-  // Создаем ссылку на экземпляр панели для отслеживания дублирования
   const instanceRef = useRef<string>(panelId);
   const { 
     mapConfig, 
     toggleLayer, 
     updateMapConfig, 
     resetMapConfig,
-    saveConfigToStorage 
+    saveConfigToStorage,
+    setMapType // Получаем новую функцию из контекста
   } = useMapConfig();
   
-  // Проверяем и регистрируем панель при монтировании
   useEffect(() => {
-    // Добавляем ID в реестр отрисованных панелей
     renderedPanels.add(panelId);
-    
-    // Очищаем реестр при размонтировании компонента
     return () => {
       renderedPanels.delete(panelId);
     };
   }, [panelId]);
   
-  // Используем либо пользовательскую конфигурацию, либо предопределенный пресет
   const panelConfig = config || UNIFIED_PANEL_PRESETS[pageType] || UNIFIED_PANEL_PRESETS.map;
   
-  // Состояние для отслеживания развернутости панели
   const [isExpanded, setIsExpanded] = React.useState(true);
-  
-  // Состояние для отслеживания видимости панели
   const [isPanelVisible, setIsPanelVisible] = useState(mapConfig.showControls);
-  
-  // Состояние для отслеживания изменений настроек карты
   const [hasChanges, setHasChanges] = useState(false);
   
-  // Обработчики событий
   const handleToggleExpand = () => setIsExpanded(prev => !prev);
   
-  // Обработчик закрытия панели с возможностью повторного открытия
   const handleClose = useCallback(() => {
     setIsPanelVisible(false);
     if (onClose) onClose();
   }, [onClose]);
   
-  // Обработчик повторного открытия панели
   const handleReopenPanel = useCallback(() => {
     setIsPanelVisible(true);
   }, []);
@@ -105,49 +89,41 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     });
     setHasChanges(true);
   }, [updateMapConfig]);
+
+  const handleMapTypeChange = useCallback((type: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => {
+    setMapType(type);
+    setHasChanges(true);
+  }, [setMapType]);
   
   const handleResetConfig = useCallback(() => {
     resetMapConfig();
     setHasChanges(false);
   }, [resetMapConfig]);
   
-  // Обработчик для сохранения всех областей на сервер
   const handleSaveRegions = useCallback(() => {
-    // Здесь вызываем функцию сохранения всех регионов на сервере
     if (mapConfig.interactionMode === MAP_MODES.DRAW) {
-      // Вызываем функцию из регион-сервиса для сохранения
       try {
-        // Показываем уведомление о начале сохранения
-        // Предполагается, что в вашем приложении есть уведомления
         console.log('Сохранение областей...');
-        
-        // После успешного сохранения возвращаемся в режим просмотра
         updateMapConfig({ 
           interactionMode: MAP_MODES.VIEW,
           drawingEnabled: false
         });
-        
-        // Показываем уведомление об успешном сохранении
         console.log('Области успешно сохранены');
       } catch (error) {
-        // Обработка ошибки
         console.error('Ошибка при сохранении областей:', error);
       }
     }
   }, [mapConfig.interactionMode, updateMapConfig]);
   
-  // Обработчик сохранения настроек карты
   const handleSaveConfig = useCallback(() => {
     saveConfigToStorage();
     setHasChanges(false);
   }, [saveConfigToStorage]);
   
-  // Проверяем, должна ли отображаться секция
   const isSectionVisible = (section: PanelSection) => {
     return panelConfig.visibleSections.includes(section);
   };
   
-  // Если панель скрыта, показываем только кнопку повторного открытия
   if (!isPanelVisible) {
     return (
       <div className="absolute top-4 right-4 z-[1000]">
@@ -161,11 +137,38 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       </div>
     );
   }
+
+  // Рендеринг секции переключения вида карты
+  const renderMapTypeSection = () => {
+    const buttonBaseClasses = 'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
+    const activeClasses = 'bg-white shadow-sm text-blue-700';
+    const inactiveClasses = 'bg-transparent text-gray-600 hover:bg-white/60';
+
+    return (
+      <div className="mb-4">
+        <h4 className={`${textClasses.subheading} mb-2.5`}>Вид карты</h4>
+        <div className="flex p-1 space-x-1 bg-gray-200/80 rounded-xl">
+          <button 
+            onClick={() => handleMapTypeChange(MAP_TYPES.SCHEMATIC)}
+            className={`${buttonBaseClasses} ${mapConfig.mapType === MAP_TYPES.SCHEMATIC ? activeClasses : inactiveClasses}`}
+          >
+            Схема
+          </button>
+          <button 
+            onClick={() => handleMapTypeChange(MAP_TYPES.GEO)}
+            className={`${buttonBaseClasses} ${mapConfig.mapType === MAP_TYPES.GEO ? activeClasses : inactiveClasses}`}
+          >
+            Карта
+          </button>
+        </div>
+      </div>
+    );
+  };
   
-  // Рендеринг секции режима карты
   const renderModeSection = () => {
     if (!isSectionVisible(PanelSection.MODE)) return null;
-    
+    const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
+
     return (
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Режим карты</h4>
@@ -182,26 +185,28 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             <span className={`${textClasses.body} ${textClasses.primary}`}>Просмотр</span>
           </label>
           
-          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
+          <label className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${isGeoMap ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blue-50/60'}`}>
             <input
               type="radio"
               name="mapMode"
               value={MAP_MODES.DRAW}
-              checked={mapConfig.interactionMode === MAP_MODES.DRAW}
+              checked={!isGeoMap && mapConfig.interactionMode === MAP_MODES.DRAW}
               onChange={() => handleModeChange(MAP_MODES.DRAW)}
               className="mr-2.5 accent-blue-600 h-4 w-4"
+              disabled={isGeoMap}
             />
             <span className={`${textClasses.body} ${textClasses.primary}`}>Создание областей</span>
           </label>
           
-          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
+          <label className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${isGeoMap ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blue-50/60'}`}>
             <input
               type="radio"
               name="mapMode"
               value={MAP_MODES.EDIT}
-              checked={mapConfig.interactionMode === MAP_MODES.EDIT}
+              checked={!isGeoMap && mapConfig.interactionMode === MAP_MODES.EDIT}
               onChange={() => handleModeChange(MAP_MODES.EDIT)}
               className="mr-2.5 accent-blue-600 h-4 w-4"
+              disabled={isGeoMap}
             />
             <span className={`${textClasses.body} ${textClasses.primary}`}>Редактирование областей</span>
           </label>
@@ -210,40 +215,48 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     );
   };
   
-  // Рендеринг секции слоев карты
   const renderLayersSection = () => {
     if (!isSectionVisible(PanelSection.LAYERS)) return null;
-    
+    const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
+
     return (
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Слои</h4>
         <div className={`${cardClasses.filled} p-2.5 rounded-xl space-y-2.5`}>
-          <Switch 
-            label="Области"
-            checked={mapConfig.visibleLayers.includes(MAP_LAYERS.REGIONS)}
-            onChange={() => toggleLayer(MAP_LAYERS.REGIONS)}
-          />
+          {isGeoMap ? (
+            <Switch 
+              label="Гео-подложка"
+              checked={mapConfig.visibleLayers.includes(MAP_LAYERS.GEO_TILES)}
+              onChange={() => toggleLayer(MAP_LAYERS.GEO_TILES)}
+            />
+          ) : (
+            <>
+              <Switch 
+                label="Области"
+                checked={mapConfig.visibleLayers.includes(MAP_LAYERS.REGIONS)}
+                onChange={() => toggleLayer(MAP_LAYERS.REGIONS)}
+              />
+              <Switch 
+                label="Изображение карты"
+                checked={mapConfig.visibleLayers.includes(MAP_LAYERS.IMAGERY)}
+                onChange={() => toggleLayer(MAP_LAYERS.IMAGERY)}
+              />
+            </>
+          )}
           <Switch 
             label="Растения"
             checked={mapConfig.visibleLayers.includes(MAP_LAYERS.PLANTS)}
             onChange={() => toggleLayer(MAP_LAYERS.PLANTS)}
-          />
-          <Switch 
-            label="Изображение карты"
-            checked={mapConfig.visibleLayers.includes(MAP_LAYERS.IMAGERY)}
-            onChange={() => toggleLayer(MAP_LAYERS.IMAGERY)}
           />
         </div>
       </div>
     );
   };
   
-  // Рендеринг секции настроек
   const renderSettingsSection = () => {
     if (!isSectionVisible(PanelSection.SETTINGS)) return null;
-    
-    // Используем настройки секции, если они есть
     const settingsConfig = panelConfig.sectionConfig?.[PanelSection.SETTINGS] || {};
+    const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
     
     return (
       <div className="mb-4">
@@ -268,15 +281,15 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
           
           <Switch 
             label="Создание областей"
-            checked={mapConfig.drawingEnabled}
+            checked={!isGeoMap && mapConfig.drawingEnabled}
             onChange={handleToggleDrawing}
+            disabled={isGeoMap}
           />
         </div>
       </div>
     );
   };
   
-  // Рендеринг секции кнопок
   const renderButtonsSection = () => {
     if (!isSectionVisible(PanelSection.BUTTONS)) return null;
     
@@ -292,7 +305,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     );
   };
   
-  // Стили панели в стиле Apple с эффектом стекла
   const panelStyles = `
     absolute top-4 right-4 z-[1000] 
     max-w-xs w-full
@@ -315,6 +327,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       
       {isExpanded && (
         <div className="p-4 overflow-auto max-h-[calc(100vh-8rem)]">
+          {renderMapTypeSection()}
           {renderModeSection()}
           {renderLayersSection()}
           {renderSettingsSection()}
@@ -326,7 +339,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   );
 };
 
-// Добавляем отображаемое имя компонента для легкого определения типа
 UnifiedControlPanel.displayName = 'UnifiedControlPanel';
 
-export default UnifiedControlPanel; 
+export default UnifiedControlPanel;

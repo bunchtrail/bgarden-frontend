@@ -1,3 +1,5 @@
+// src/modules/map/components/plant-info/EnhancedPlantMarkersLayer.tsx
+
 import React, { memo, useEffect, useState, useRef } from 'react';
 import 'leaflet.markercluster';
 import { useMap } from 'react-leaflet';
@@ -13,14 +15,6 @@ interface EnhancedPlantMarkersLayerProps {
   onPlantsLoaded?: (plantsData: Plant[]) => void;
 }
 
-// Глобальное кэширование данных за пределами компонента
-let cachedPlantsData: Plant[] | null = null;
-let lastFetchTime = 0;
-const CACHE_TIME = 60000; // 1 минута
-
-/**
- * Улучшенный компонент слоя маркеров растений с модульной архитектурой
- */
 const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo(({ 
   isVisible, 
   mapConfig,
@@ -39,66 +33,34 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
   );
   const { warning } = useNotification();
   
-  // Используем ref для отслеживания изменений isVisible, чтобы избежать повторных запросов
   const isFirstRender = useRef(true);
   const requestInProgress = useRef(false);
 
-  // Загрузка данных растений
   useEffect(() => {
     const fetchPlants = async () => {
-      // Проверяем, есть ли данные в кэше и не истекло ли время кэширования
-      const now = Date.now();
-      const cacheExpired = now - lastFetchTime > CACHE_TIME;
-      
-      // Используем кэшированные данные, если они есть и не истекли
-      if (cachedPlantsData && !cacheExpired && !isFirstRender.current) {
-        setPlants(cachedPlantsData);
-        if (onPlantsLoaded) {
-          onPlantsLoaded(cachedPlantsData);
-        }
-        return;
-      }
-      
-      // Предотвращение параллельных запросов
-      if (requestInProgress.current) {
-        return;
-      }
+      if (requestInProgress.current) return;
       
       if (isVisible) {
-        isFirstRender.current = false;
         setLoading(true);
         setError(null);
         requestInProgress.current = true;
         
         try {
-          const plantsData = await PlantDataService.loadPlants();
-          
-          // Обновляем кэш и время последнего обновления
-          cachedPlantsData = plantsData;
-          lastFetchTime = Date.now();
+          // **ИСПРАВЛЕНИЕ:** Передаем `mapConfig.mapType` в сервис.
+          const plantsData = await PlantDataService.loadPlants(mapConfig.mapType);
           
           setPlants(plantsData);
           
-          // Обратная связь с родительским компонентом о загруженных данных
           if (onPlantsLoaded) {
             onPlantsLoaded(plantsData);
           }
           
-          // Если планты загрузились, но их массив пуст, не показываем ошибку - просто пустой слой
-          if (plantsData.length === 0) {
-            // Удалено логирование
-          }
         } catch (err) {
-          // Удалено логирование ошибки
           setError(err instanceof Error ? err : new Error('Не удалось загрузить данные растений'));
-          
-          // Обратная связь с родительским компонентом о пустых данных
           if (onPlantsLoaded) {
             onPlantsLoaded([]);
           }
           
-          // Уведомляем пользователя об ошибке, но не блокируем карту
-          // Показываем уведомление только при первой ошибке
           if (isFirstRender.current) {
             warning('Не удалось загрузить данные растений. Карта будет отображена без растений.', {
               title: 'Внимание'
@@ -107,12 +69,11 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
         } finally {
           setLoading(false);
           requestInProgress.current = false;
+          isFirstRender.current = false;
         }
       } else {
         setPlants([]);
         clearMarkers();
-        
-        // Если слой скрыт, передаем пустые данные
         if (onPlantsLoaded) {
           onPlantsLoaded([]);
         }
@@ -120,16 +81,16 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
     };
 
     fetchPlants();
-  }, [isVisible, clearMarkers, warning, onPlantsLoaded]);
+    // Добавляем mapConfig.mapType в зависимости, чтобы перезагружать данные при смене карты
+  }, [isVisible, mapConfig.mapType, clearMarkers, warning, onPlantsLoaded]);
 
-  // Очистка при размонтировании
   useEffect(() => {
     return () => {
       clearMarkers();
     };
   }, [clearMarkers]);
 
-  return null; // Компонент не возвращает видимый UI
+  return null;
 });
 
-export default EnhancedPlantMarkersLayer; 
+export default EnhancedPlantMarkersLayer;
