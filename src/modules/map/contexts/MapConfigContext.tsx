@@ -120,9 +120,10 @@ interface MapConfigProviderProps {
 }
 
 export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, initialConfig }) => {
+  const initialConfigRef = React.useRef(initialConfig);
   const [mapConfig, setMapConfig] = useState<MapConfig>({
     ...DEFAULT_MAP_CONFIG,
-    ...initialConfig
+    ...initialConfigRef.current
   });
 
   useEffect(() => {
@@ -134,7 +135,7 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
         setMapConfig(prevConfig => ({
           ...prevConfig,
           ...parsedConfig,
-          ...initialConfig
+          ...initialConfigRef.current
         }));
       } else {
         console.log('[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.');
@@ -142,7 +143,7 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     } catch (error) {
       console.error('Ошибка при загрузке конфигурации карты:', error);
     }
-  }, [initialConfig]);
+  }, []);
   
   useEffect(() => {
     if (mapConfig.drawingEnabled) {
