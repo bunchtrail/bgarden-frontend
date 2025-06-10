@@ -79,7 +79,7 @@ export const DEFAULT_SCHEMATIC_CONFIG: MapConfig = {
 export const DEFAULT_GEO_CONFIG: MapConfig = {
   ...DEFAULT_SCHEMATIC_CONFIG, // Наследуем общие настройки
   mapType: MAP_TYPES.GEO,
-  center: [55.751244, 37.618423] as LatLngExpression, // Центр (Москва)
+  center: [58.5964361, 49.01083] as LatLngExpression, // Центр (Москва)
   zoom: 10,
   maxZoom: 18,
   minZoom: 3,
@@ -130,11 +130,14 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
       const savedConfig = localStorage.getItem(STORAGE_KEY);
       if (savedConfig) {
         const parsedConfig = JSON.parse(savedConfig);
+        console.log('[MapConfig] Загружена конфигурация из localStorage:', parsedConfig);
         setMapConfig(prevConfig => ({
           ...prevConfig,
           ...parsedConfig,
           ...initialConfig
         }));
+      } else {
+        console.log('[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.');
       }
     } catch (error) {
       console.error('Ошибка при загрузке конфигурации карты:', error);
@@ -152,14 +155,20 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   }, [mapConfig.drawingEnabled]);
 
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
-    setMapConfig(prevConfig => ({
-      ...prevConfig,
-      ...updates
-    }));
+    console.log('[MapConfig] Обновление конфигурации:', updates);
+    setMapConfig(prevConfig => {
+      const newConfig = {
+        ...prevConfig,
+        ...updates
+      };
+      console.log('[MapConfig] Новое состояние после обновления:', newConfig);
+      return newConfig;
+    });
   }, []);
 
   const saveConfigToStorage = () => {
     try {
+      console.log('[MapConfig] Сохранение конфигурации в localStorage:', mapConfig);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
     } catch (error) {
       console.error('Ошибка при сохранении конфигурации карты:', error);
@@ -170,7 +179,9 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     try {
       const savedConfig = localStorage.getItem(STORAGE_KEY);
       if (savedConfig) {
-        setMapConfig(JSON.parse(savedConfig));
+        const parsedConfig = JSON.parse(savedConfig);
+        console.log('[MapConfig] Загружена конфигурация из localStorage (принудительно):', parsedConfig);
+        setMapConfig(parsedConfig);
       }
     } catch (error) {
       console.error('Ошибка при загрузке конфигурации карты:', error);
@@ -178,23 +189,26 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   };
 
   const resetMapConfig = () => {
-    // Сбрасываем к конфигурации текущего типа карты
     const currentMapType = mapConfig.mapType;
+    console.log(`[MapConfig] Сброс конфигурации для типа карты: ${currentMapType}`);
     const defaultConfig = currentMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
     setMapConfig(defaultConfig);
     try {
       localStorage.removeItem(STORAGE_KEY);
+      console.log('[MapConfig] Конфигурация из localStorage удалена.');
     } catch (error) {
       console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
     }
   };
 
   const toggleLayer = (layerName: string) => {
+    console.log(`[MapConfig] Переключение слоя: ${layerName}`);
     setMapConfig(prevConfig => {
       const isLayerActive = prevConfig.visibleLayers.includes(layerName);
       const newLayers = isLayerActive
         ? prevConfig.visibleLayers.filter(layer => layer !== layerName)
         : [...prevConfig.visibleLayers, layerName];
+      console.log(`[MapConfig] Новые видимые слои:`, newLayers);
       return { ...prevConfig, visibleLayers: newLayers };
     });
   };
@@ -202,11 +216,36 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   // Новая функция для смены типа карты
   const setMapType = useCallback((mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => {
     if (mapType === mapConfig.mapType) return; // Не меняем, если тип тот же
-    
-    // При смене типа карты применяем соответствующую конфигурацию по умолчанию
-    const newConfig = mapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
-    updateMapConfig(newConfig);
-  }, [updateMapConfig, mapConfig.mapType]);
+
+    console.log(`[MapConfig] Смена типа карты на: ${mapType}`);
+    // Используем функциональную форму setMapConfig для доступа к предыдущему состоянию
+    setMapConfig(prevConfig => {
+      console.log('[MapConfig] Предыдущее состояние:', prevConfig);
+      // Выбираем конфиг по умолчанию для НОВОГО типа карты
+      const defaultConfig = mapType === MAP_TYPES.GEO 
+        ? DEFAULT_GEO_CONFIG 
+        : DEFAULT_SCHEMATIC_CONFIG;
+      
+      console.log('[MapConfig] Конфигурация по умолчанию для нового типа:', defaultConfig);
+
+      // Явно создаем НОВЫЙ объект состояния.
+      // Начинаем с чистого конфига по умолчанию и добавляем только те настройки,
+      // которые нужно сохранить из предыдущего состояния.
+      const newConfig = {
+        ...defaultConfig, // Полностью берем новый конфиг (с правильным центром, зумом и т.д.)
+        
+        // Сохраняем пользовательские UI-настройки из предыдущего конфига
+        showTooltips: prevConfig.showTooltips,
+        showControls: prevConfig.showControls,
+        debug: prevConfig.debug,
+        enableClustering: prevConfig.enableClustering,
+        showPopupOnClick: prevConfig.showPopupOnClick,
+      };
+
+      console.log('[MapConfig] Новое состояние после смены типа:', newConfig);
+      return newConfig;
+    });
+  }, [mapConfig.mapType]); // Зависимость теперь только от mapConfig.mapType, что более корректно
 
   const value = {
     mapConfig,

@@ -1,13 +1,18 @@
 import L from 'leaflet';
+import 'leaflet.markercluster';
 import { Plant } from '@/services/regions/types';
 import { MarkerIconFactory } from '../utils/MarkerIconFactory';
 import { specimenService } from '@/modules/specimens/services/specimenService';
+
+interface AddMarkersOptions {
+  fitBounds?: boolean;
+}
 
 /**
  * Класс для управления кластеризацией маркеров на карте
  */
 export class MarkerClusterManager {
-  private markerClusterGroup: L.MarkerClusterGroup | null = null;
+  private markerClusterGroup: L.MarkerClusterGroup;
   private markers: L.Marker[] = [];
   private map: L.Map;
   private popupImageCache: Map<string, string> = new Map();
@@ -21,6 +26,16 @@ export class MarkerClusterManager {
   constructor(map: L.Map, showPopupOnClick: boolean = true) {
     this.map = map;
     this.showPopupOnClick = showPopupOnClick;
+
+    this.markerClusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 40,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: MarkerIconFactory.createClusterIcon
+    });
+
+    this.map.addLayer(this.markerClusterGroup);
   }
 
   /**
@@ -143,26 +158,20 @@ export class MarkerClusterManager {
   /**
    * Добавляет маркеры на карту с кластеризацией
    * @param markers Массив маркеров
+   * @param options Опции добавления маркеров
    */
-  addMarkersWithClustering(markers: L.Marker[]): void {
+  addMarkersWithClustering(markers: L.Marker[], options: AddMarkersOptions = { fitBounds: true }): void {
     this.clearAllMarkers();
     this.markers = markers;
+    
+    this.markerClusterGroup.addLayers(markers);
 
-    this.markerClusterGroup = L.markerClusterGroup({
-      maxClusterRadius: 40,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      iconCreateFunction: MarkerIconFactory.createClusterIcon
-    });
-
-    markers.forEach(marker => {
-      if (this.markerClusterGroup) {
-        this.markerClusterGroup.addLayer(marker);
+    if (options.fitBounds && markers.length > 0) {
+      const bounds = this.markerClusterGroup.getBounds();
+      if (bounds.isValid()) {
+        this.map.fitBounds(bounds, { padding: [50, 50] });
       }
-    });
-
-    this.map.addLayer(this.markerClusterGroup);
+    }
   }
 
   /**
@@ -182,10 +191,7 @@ export class MarkerClusterManager {
    * Очищает все маркеры и кластеры с карты
    */
   clearAllMarkers(): void {
-    if (this.markerClusterGroup) {
-      this.map.removeLayer(this.markerClusterGroup);
-      this.markerClusterGroup = null;
-    }
+    this.markerClusterGroup.clearLayers();
     
     this.markers.forEach(marker => marker.remove());
     this.markers = [];
