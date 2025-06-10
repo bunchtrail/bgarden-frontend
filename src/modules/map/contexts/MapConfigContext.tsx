@@ -27,6 +27,8 @@ export interface MapConfig {
   maxBounds: LatLngBoundsExpression;
   maxBoundsViscosity: number;
   zoomControlPosition: ControlPosition;
+  /** Тип отображаемой карты: схематическая или географическая */
+  mapType: 'schematic' | 'geo';
   // Дополнительные настройки для облегченной версии
   lightMode: boolean;
   visibleLayers: string[];
@@ -55,6 +57,7 @@ export const DEFAULT_MAP_CONFIG: MapConfig = {
   maxBounds: [[-1000, -1000], [2000, 2000]] as LatLngBoundsExpression,
   maxBoundsViscosity: 1.0,
   zoomControlPosition: 'bottomright' as ControlPosition,
+  mapType: 'schematic',
   // Дополнительные настройки
   lightMode: false,
   visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],

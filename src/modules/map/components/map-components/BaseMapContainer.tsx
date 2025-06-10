@@ -24,6 +24,7 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   style = { height: '100%', width: '100%' },
   className = ''
 }) => {
+  const crs = mapConfig.mapType === 'schematic' ? L.CRS.Simple : L.CRS.EPSG3857;
   return (
     <MapContainer
       center={mapConfig.center}
@@ -32,7 +33,7 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
       minZoom={mapConfig.minZoom}
       style={style}
       zoomControl={false}
-      crs={L.CRS.Simple}
+      crs={crs}
       maxBounds={mapConfig.maxBounds}
       maxBoundsViscosity={mapConfig.maxBoundsViscosity}
       attributionControl={false}

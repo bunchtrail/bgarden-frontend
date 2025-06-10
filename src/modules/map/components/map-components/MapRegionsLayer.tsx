@@ -2,11 +2,12 @@ import React from 'react';
 import { Polygon, Tooltip, useMap as useLeafletMap } from 'react-leaflet';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { PolygonFactory } from '@/services/regions/PolygonFactory';
-import { parseCoordinates } from '@/services/regions/RegionUtils';
+import { parseCoordinates, parseWKT } from '@/services/regions/RegionUtils';
 import { useMap } from '@/modules/map/hooks';
 import regionBridge from '@/services/regions/RegionBridge';
 import { MAP_STYLES } from '../../styles';
 import { COLORS, textClasses } from '@/styles/global-styles';
+import { useMapConfig } from '../../contexts/MapConfigContext';
 
 export interface MapRegionsLayerProps {
   regions: RegionData[];
@@ -23,6 +24,7 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
 }) => {
   const { setSelectedAreaId, selectedAreaId } = useMap();
   const leafletMap = useLeafletMap();
+  const { mapConfig } = useMapConfig();
 
   const handleRegionClick = (regionId: string | number, e?: L.LeafletMouseEvent) => {
     // Преобразование ID региона
@@ -71,7 +73,11 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
       {regions.map((region) => {
         // Используем RegionBridge для преобразования RegionData в Area и получения points
         const area = regionBridge.toArea(region);
-        if (area.points.length < 3) return null; // Полигон должен иметь как минимум 3 точки
+        let points = area.points;
+        if (mapConfig.mapType === 'geo' && region.boundaryWkt) {
+          points = parseWKT(region.boundaryWkt);
+        }
+        if (points.length < 3) return null; // Полигон должен иметь как минимум 3 точки
         
         const isSelected = highlightSelected && selectedAreaId === area.id;
         
@@ -122,7 +128,7 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
         return (
           <Polygon
             key={`region-${region.id}`}
-            positions={area.points}
+            positions={points}
             pathOptions={pathOptions}
             eventHandlers={eventHandlers}
             data-region-id={region.id} // Добавляем data-атрибут для идентификации
