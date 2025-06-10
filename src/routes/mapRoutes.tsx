@@ -2,10 +2,9 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
 import { MainLayout } from '../modules/layouts';
-import { 
-  MapPage, 
-  MapProvider, 
-  useMapConfig, 
+import {
+  MapPage,
+  useMapConfig,
   MAP_LAYERS,
   MAP_MODES,
   DEFAULT_MAP_CONFIG,
@@ -24,12 +23,10 @@ export const mapRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <MainLayout>
-          <MapProvider>
-            <MapPage 
-              showControls={true}
-              extraControls={<UnifiedControlPanel pageType="map" />}
-            />
-          </MapProvider>
+          <MapPage
+            showControls={true}
+            extraControls={<UnifiedControlPanel pageType="map" />}
+          />
         </MainLayout>
       </ProtectedRoute>
     ),
@@ -39,12 +36,10 @@ export const mapRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <MainLayout>
-          <MapProvider>
-            <MapPage 
-              showControls={true}
-              extraControls={<UnifiedControlPanel pageType="sector" />}
-            />
-          </MapProvider>
+          <MapPage
+            showControls={true}
+            extraControls={<UnifiedControlPanel pageType="sector" />}
+          />
         </MainLayout>
       </ProtectedRoute>
     ),
