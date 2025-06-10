@@ -25,8 +25,12 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   className = ''
 }) => {
   const crs = mapConfig.mapType === 'schematic' ? L.CRS.Simple : L.CRS.EPSG3857;
+  // Чтобы корректно менять систему координат при переключении типа карты,
+  // используем ключ для принудительного размонтирования контейнера
+  const mapKey = mapConfig.mapType;
   return (
     <MapContainer
+      key={mapKey}
       center={mapConfig.center}
       zoom={mapConfig.zoom}
       maxZoom={mapConfig.maxZoom}

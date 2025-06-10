@@ -44,12 +44,13 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo
   const requestInProgress = useRef(false);
 
   const adjustPlantsForMapType = (data: Plant[]): Plant[] => {
-    return data.map(p => ({
-      ...p,
-      position: mapConfig.mapType === 'schematic'
-        ? (p.mapCoordinates ?? p.position)
-        : (p.geoCoordinates ?? p.position)
-    }));
+    const isGeo = mapConfig.mapType === 'geo';
+    return data
+      .map(p => ({
+        ...p,
+        position: isGeo ? p.geoCoordinates ?? p.position : p.mapCoordinates ?? p.position
+      }))
+      .filter(p => Array.isArray(p.position) && p.position.length === 2);
   };
 
   // Загрузка данных растений

@@ -2,7 +2,7 @@ import React from 'react';
 import { Polygon, Tooltip, useMap as useLeafletMap } from 'react-leaflet';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { PolygonFactory } from '@/services/regions/PolygonFactory';
-import { parseCoordinates, parseWKT } from '@/services/regions/RegionUtils';
+import { parseWKT } from '@/services/regions/RegionUtils';
 import { useMap } from '@/modules/map/hooks';
 import regionBridge from '@/services/regions/RegionBridge';
 import { MAP_STYLES } from '../../styles';
