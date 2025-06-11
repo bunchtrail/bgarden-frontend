@@ -4,7 +4,6 @@ import { useMapData, useMapControlPanel } from '../hooks';
 import MapCard from './map-card/MapCard';
 import MapContentController from './map-content/MapContentController';
 import { MapPageContentProps } from '../types/mapTypes';
-import { pageClasses } from '../../../styles/global-styles';
 import L from 'leaflet';
 
 /**
@@ -62,6 +61,13 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
       : mapData?.name || 'Интерактивная карта ботанического сада';
   }, [mapConfig.lightMode, mapData?.name]);
 
+  // Настройки заголовка для полноэкранного режима
+  const headerConfig = {
+    hideHeader: true, // полностью скрыть заголовок - название будет в панели управления
+    compactHeader: false, // true - компактный заголовок
+    floatingHeader: false, // true - плавающий заголовок поверх карты (облачко)
+  };
+
   // Обработчик обновления данных
   const handleRefresh = useCallback(() => {
     refreshMapData();
@@ -80,11 +86,16 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   }, [customLayers]);
 
   return (
-    <div className={pageClasses.fullscreen}>
-      <div
-        className={`${pageClasses.container} ${pageClasses.fullscreenContent}`}
-      >
-        <MapCard title={mapTitle} loading={loading}>
+    <div className="h-screen-minus-navbar flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 w-full">
+        <MapCard
+          title={mapTitle}
+          loading={loading}
+          fullscreen
+          hideHeader={headerConfig.hideHeader}
+          compactHeader={headerConfig.compactHeader}
+          floatingHeader={headerConfig.floatingHeader}
+        >
           <MapContentController
             loading={loading}
             error={errorObj}
@@ -105,6 +116,7 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
             onMapReady={onMapReady}
             plugins={plugins}
             isEmpty={isEmpty}
+            mapTitle={mapTitle}
           />
         </MapCard>
       </div>

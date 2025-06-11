@@ -11,7 +11,7 @@ export enum SectorType {
   GARDEN = 2,
   ROCKERY = 3,
   AQUATIC = 4,
-  OTHER = 5
+  OTHER = 5,
 }
 
 // Переэкспортируем RegionData для обратной совместимости
@@ -28,7 +28,7 @@ export enum RegionFilterType {
   ALL = 'all',
   WITH_SPECIMENS = 'withSpecimens',
   WITHOUT_SPECIMENS = 'withoutSpecimens',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 // Интерфейс для пользовательских слоёв
@@ -51,13 +51,17 @@ export interface MapPageContentProps {
   onRegionClick?: (regionId: string) => void;
   controlPanelPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
   showControls?: boolean;
-  onDataLoaded?: (data: { mapData: MapData | null, regions: RegionData[] }) => void;
+  onDataLoaded?: (data: {
+    mapData: MapData | null;
+    regions: RegionData[];
+  }) => void;
   onError?: (error: Error) => void;
   onMapReady?: (map: L.Map) => void;
 }
 
 // Интерфейс для публичного компонента карты
-export interface MapPageProps extends Omit<MapPageContentProps, 'onDataLoaded' | 'onError'> {
+export interface MapPageProps
+  extends Omit<MapPageContentProps, 'onDataLoaded' | 'onError'> {
   initialConfig?: Record<string, any>;
   onMapReady?: (map: L.Map) => void;
 }
@@ -67,6 +71,10 @@ export interface MapCardProps {
   title: string;
   loading?: boolean;
   children: ReactNode;
+  fullscreen?: boolean;
+  hideHeader?: boolean;
+  compactHeader?: boolean;
+  floatingHeader?: boolean;
 }
 
 // Интерфейс для компонента расчета границ изображения
@@ -85,9 +93,9 @@ export interface MapViewContainerProps {
   onRegionClick?: (regionId: string) => void;
   onMapReady?: (map: L.Map) => void;
   plugins?: ReactNode;
-  onDataStateChange?: (state: { 
-    hasPlants: boolean; 
-    hasRegions: boolean; 
+  onDataStateChange?: (state: {
+    hasPlants: boolean;
+    hasRegions: boolean;
     isEmpty: boolean;
   }) => void;
 }
@@ -113,4 +121,5 @@ export interface MapContentControllerProps {
   onMapReady?: (map: L.Map) => void;
   plugins?: ReactNode;
   isEmpty?: boolean; // Флаг, указывающий, что на карте нет ни растений, ни областей
-} 
+  mapTitle?: string; // Название карты для отображения в панели управления
+}

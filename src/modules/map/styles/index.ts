@@ -1,8 +1,13 @@
-// Экспорт стилей модуля карты
-import { COLORS } from '@/styles/global-styles';
+// Экспорт стилей модуля карты с современным дизайном
 
 // Импорт переопределений стилей Leaflet
 import './leaflet-overrides.css';
+
+// Импорт стилей компонентов карты
+import './map-components.css';
+
+// Импорт утилитарных классов
+import './utilities.css';
 
 // Импорт стилей для маркер-кластеров
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -10,121 +15,231 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // Экспорт готовых констант для часто используемых стилей
 export const MAP_STYLES = {
-  // Tailwind классы для карты
+  // Улучшенные Tailwind классы для карты
   mapContainer:
-    'w-full h-full flex flex-col shadow-lg rounded-lg overflow-hidden bg-white map-fullscreen',
+    'w-full h-full flex flex-col shadow-2xl rounded-2xl overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100 map-fullscreen border border-slate-200/60',
   mapContent:
-    'w-full h-full flex-1 relative rounded-b-lg overflow-hidden backdrop-blur-md map-content-fullscreen',
+    'w-full h-full flex-1 relative overflow-hidden backdrop-blur-xl map-content-fullscreen',
 
-  // Классы для панели управления
+  // Улучшенные классы для панели управления
   controlPanel:
-    'p-4 bg-white/95 backdrop-blur rounded-t-lg border-b border-neutral-dark/20 shadow-sm',
-  controlPanelHeader: 'flex items-center justify-between mb-3',
-  controlPanelTitle: 'text-lg font-medium text-text-primary',
+    'p-6 bg-white/90 backdrop-blur-2xl rounded-t-2xl border-b border-slate-200/80 shadow-lg',
+  controlPanelHeader: 'flex items-center justify-between mb-4',
+  controlPanelTitle:
+    'text-xl font-bold text-slate-800 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent',
   controlPanelSection:
-    'mt-3 pt-3 border-t border-neutral-dark/20 first:border-0 first:mt-0 first:pt-0',
+    'mt-4 pt-4 border-t border-slate-200/60 first:border-0 first:mt-0 first:pt-0',
 
   // Классы для элементов регионов
-  regionTooltip: 'min-w-[180px] max-w-[280px] p-2',
+  regionTooltip: 'min-w-[200px] max-w-[300px] p-3',
 
-  // Инфографика для регионов
-  regionInfo: 'mt-2 text-sm',
-  regionCount: 'font-medium text-primary-main',
-  regionTitle: 'text-text-primary font-medium mb-1 text-base',
-  regionDescription: 'text-text-secondary leading-snug',
+  // Улучшенная инфографика для регионов
+  regionInfo: 'mt-3 text-sm',
+  regionCount: 'font-bold text-blue-600 text-lg',
+  regionTitle:
+    'text-slate-800 font-bold mb-2 text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent',
+  regionDescription: 'text-slate-600 leading-relaxed font-medium',
 
-  // Кластеры и маркеры
+  // Улучшенные кластеры и маркеры
   clusterBase:
-    'flex items-center justify-center rounded-full shadow-md bg-white/80 backdrop-blur-sm border border-neutral-dark/20',
-  clusterIcon: 'w-8 h-8 text-primary-main',
-  markerIcon: 'w-7 h-7 drop-shadow-md transition-transform',
+    'flex items-center justify-center rounded-full shadow-xl bg-white/90 backdrop-blur-lg border-2 border-blue-200/60',
+  clusterIcon: 'w-9 h-9 text-blue-600',
+  markerIcon: 'w-8 h-8 drop-shadow-lg transition-all duration-300',
 
-  // Классы для легенды
-  legendItem: 'flex items-center gap-2 py-1.5',
-  legendColor: 'w-4 h-4 rounded',
-  legendText: 'text-sm text-text-secondary',
+  // Улучшенные классы для легенды
+  legendItem: 'flex items-center gap-3 py-2',
+  legendColor: 'w-5 h-5 rounded-lg shadow-sm',
+  legendText: 'text-sm text-slate-600 font-medium',
 
-  // Кнопки слоев
+  // Улучшенные кнопки слоев
   layerButton:
-    'flex items-center gap-2 py-1.5 px-3 rounded-md hover:bg-neutral-main transition-all duration-200',
-  layerButtonActive: 'bg-primary-light text-primary-main',
+    'flex items-center gap-3 py-2 px-4 rounded-xl hover:bg-slate-100/80 transition-all duration-300 backdrop-blur-sm',
+  layerButtonActive:
+    'bg-blue-50 text-blue-700 shadow-inner border border-blue-200/60',
 
-  // Анимации
+  // Улучшенные анимации
   animation: {
     fadeIn: 'animate-fadeIn',
     slideInRight:
-      'transition-all duration-300 ease-in-out translate-x-0 opacity-100',
+      'transition-all duration-500 ease-out translate-x-0 opacity-100',
     slideOutRight:
-      'transition-all duration-300 ease-in-out translate-x-full opacity-0',
-    springHover: 'hover:scale-105 transition-transform duration-200',
+      'transition-all duration-500 ease-out translate-x-full opacity-0',
+    springHover: 'hover:scale-110 transition-all duration-300 ease-out',
+    gentleBounce: 'animate-bounce',
+    pulse: 'animate-pulse',
   },
 
   // Стили карты Leaflet (переопределение стилей библиотеки)
   leafletTooltip:
-    'bg-white/95 shadow-lg rounded-xl backdrop-filter backdrop-blur-lg',
-  lightMode: 'leaflet-light-mode filter brightness-110 saturate-60 contrast-95',
+    'bg-white/95 shadow-2xl rounded-2xl backdrop-filter backdrop-blur-2xl border border-white/30',
+  lightMode: 'leaflet-light-mode filter brightness-115 saturate-70 contrast-98',
 };
 
-// Цвета для карты - теперь используем глобальные цвета из COLORS
+// Улучшенные цвета для карты с современными градиентами
 export const MAP_COLORS = {
-  primary: COLORS.primary.main,
-  primaryDark: COLORS.primary.dark,
-  primaryLight: COLORS.primary.light,
-  secondary: COLORS.secondary.main,
-  secondaryLight: COLORS.secondary.light,
-  warning: COLORS.warning.main,
-  danger: COLORS.danger.main,
-  success: COLORS.SUCCESS,
+  primary: '#3b82f6', // Современный синий
+  primaryDark: '#1e40af',
+  primaryLight: '#93c5fd',
+  secondary: '#8b5cf6', // Фиолетовый акцент
+  secondaryLight: '#c4b5fd',
+  warning: '#f59e0b',
+  danger: '#ef4444',
+  success: '#10b981',
   text: {
-    primary: COLORS.text.primary,
-    secondary: COLORS.text.secondary,
-    tertiary: COLORS.text.tertiary,
+    primary: '#1f2937',
+    secondary: '#6b7280',
+    tertiary: '#9ca3af',
   },
   background: {
-    light: COLORS.neutral.light,
-    gray: COLORS.neutral.main,
-    dark: COLORS.neutral.dark,
+    light: '#f8fafc',
+    gray: '#f1f5f9',
+    dark: '#e2e8f0',
   },
-  border: COLORS.neutral.dark,
+  border: '#e2e8f0',
 
-  // Цвета для регионов на карте
+  // Современные цвета для регионов на карте
   regions: {
-    default: 'rgba(10, 132, 255, 0.2)',
-    hover: 'rgba(10, 132, 255, 0.4)',
-    active: 'rgba(10, 132, 255, 0.6)',
-    stroke: 'rgba(10, 132, 255, 0.8)',
-    highlight: 'rgba(255, 159, 10, 0.4)',
+    default: 'rgba(59, 130, 246, 0.15)',
+    hover: 'rgba(59, 130, 246, 0.35)',
+    active: 'rgba(59, 130, 246, 0.55)',
+    stroke: 'rgba(59, 130, 246, 0.8)',
+    highlight: 'rgba(139, 92, 246, 0.4)',
   },
 };
 
 // Предустановленные карточки для разных типов данных
 export const MAP_CARDS = {
   region: {
-    // Стиль для карточки региона на карте
+    // Улучшенный стиль для карточки региона на карте
     container:
-      'bg-white/95 backdrop-blur-lg rounded-xl shadow-lg p-4 border border-neutral-dark/20',
-    header: 'border-b border-neutral-dark/20 pb-2 mb-2',
-    title: 'text-lg font-medium text-text-primary',
-    description: 'text-sm text-text-secondary',
-    dataRow: 'flex justify-between items-center py-1',
-    dataLabel: 'text-sm text-text-secondary',
-    dataValue: 'font-medium text-text-primary',
-    footer: 'mt-3 pt-2 border-t border-neutral-dark/20 flex justify-end',
+      'bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 border border-white/40',
+    header: 'border-b border-slate-200/60 pb-3 mb-3',
+    title:
+      'text-xl font-bold text-slate-800 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent',
+    description: 'text-sm text-slate-600 font-medium leading-relaxed',
+    dataRow: 'flex justify-between items-center py-2',
+    dataLabel: 'text-sm text-slate-500 font-medium',
+    dataValue: 'font-bold text-slate-800',
+    footer: 'mt-4 pt-3 border-t border-slate-200/60 flex justify-end',
   },
 };
 
-// Добавляем стили для улучшения взаимодействия с картой
+// Экспорт утилитарных классов для компонентов
+export const MAP_UTILITIES = {
+  // Глассморфизм эффекты
+  glass: {
+    light: 'glass-light',
+    medium: 'glass-medium',
+    dark: 'glass-dark',
+  },
+
+  // Градиентные фоны
+  gradients: {
+    blue: 'gradient-blue',
+    purple: 'gradient-purple',
+    ocean: 'gradient-ocean',
+    sunset: 'gradient-sunset',
+    forest: 'gradient-forest',
+    aurora: 'aurora-effect',
+  },
+
+  // Неоморфизм
+  neumorphism: {
+    light: 'neumorphism-light',
+    inset: 'neumorphism-inset',
+  },
+
+  // Анимации
+  animations: {
+    float: 'animate-float',
+    glow: 'animate-glow',
+    pulseFlow: 'animate-pulse-slow',
+    bounceGentle: 'animate-bounce-gentle',
+    fadeIn: 'fade-in',
+    slideUp: 'slide-up',
+  },
+
+  // Интерактивные эффекты
+  interactive: {
+    scale: 'interactive-scale',
+    lift: 'interactive-lift',
+    glow: 'interactive-glow',
+  },
+
+  // Цветовые схемы
+  colorSchemes: {
+    blue: 'color-scheme-blue',
+    green: 'color-scheme-green',
+    purple: 'color-scheme-purple',
+  },
+
+  // Состояния
+  states: {
+    success: 'success-state',
+    error: 'error-state',
+    warning: 'warning-state',
+    info: 'info-state',
+    loading: 'skeleton',
+  },
+
+  // Позиционирование
+  positioning: {
+    centerAbsolute: 'center-absolute',
+    centerFlex: 'center-flex',
+  },
+
+  // Типографика
+  textGradients: {
+    blue: 'text-gradient-blue',
+    purple: 'text-gradient-purple',
+    rainbow: 'text-gradient-rainbow',
+  },
+
+  // Специальные эффекты
+  special: {
+    sparkle: 'sparkle',
+  },
+};
+
+// Экспорт готовых комбинаций классов для частых случаев использования
+export const MAP_PRESETS = {
+  // Современная панель управления
+  modernPanel: `${MAP_STYLES.controlPanel} glass-medium interactive-lift fade-in`,
+
+  // Стильная карточка региона
+  regionCard: `${MAP_CARDS.region.container} interactive-lift animate-glow`,
+
+  // Красивая кнопка действия
+  actionButton: `map-action-button interactive-scale text-gradient-blue`,
+
+  // Элегантная легенда
+  elegantLegend: `map-legend glass-light interactive-lift`,
+
+  // Привлекающий внимание маркер
+  prominentMarker: `custom-plant-marker animate-float sparkle`,
+
+  // Стильный индикатор загрузки
+  loadingIndicator: `map-loading-indicator glass-medium skeleton`,
+
+  // Уведомление с эффектом
+  notification: `map-notification glass-light interactive-lift slide-up`,
+};
+
+// Современные стили для улучшения взаимодействия с картой
 export const CUSTOM_STYLES = `
   /* Улучшение взаимодействия с полигонами регионов */
   .region-polygon {
     cursor: pointer;
     pointer-events: auto !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
   }
   
-  /* Стиль выделения при наведении на регион */
+  /* Современный стиль выделения при наведении на регион */
   .region-polygon.region-hover {
-    stroke-width: 3px;
-    stroke-opacity: 0.8;
+    stroke-width: 4px;
+    stroke-opacity: 0.9;
+    filter: brightness(1.1) saturate(1.2);
+    transform: scale(1.002);
   }
   
   /* Указываем, что все элементы на карте должны быть интерактивными */
@@ -132,9 +247,15 @@ export const CUSTOM_STYLES = `
     pointer-events: auto !important;
   }
   
-  /* Стиль для маркера растения */
+  /* Улучшенный стиль для маркера растения */
   .custom-plant-marker {
     z-index: 1000 !important;
+    cursor: grab;
+    transition: all 0.3s ease;
+  }
+
+  .custom-plant-marker:active {
+    cursor: grabbing;
   }
 
   /* Исправляем порядок слоев, чтобы маркер был поверх регионов */
@@ -144,6 +265,16 @@ export const CUSTOM_STYLES = `
   
   .leaflet-overlay-pane {
     z-index: 640 !important;
+  }
+
+  /* Плавные переходы для всех интерактивных элементов */
+  .leaflet-interactive, .custom-plant-marker, .plant-cluster-icon {
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  }
+  
+  /* Улучшенные тени для контролов */
+  .leaflet-control {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
   }
 `;
 

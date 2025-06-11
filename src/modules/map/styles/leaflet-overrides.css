@@ -1,78 +1,145 @@
-/* Переопределение стилей Leaflet для соответствия дизайну Apple */
+/* Современные стили для карты с улучшенной визуализацией */
 
 /* Стили для тултипов на карте */
 .leaflet-tooltip {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-  padding: 8px 12px !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
-  min-width: 160px;
-  max-width: 300px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.95) 100%
+  ) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset !important;
+  padding: 12px 16px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  min-width: 180px;
+  max-width: 320px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px !important;
   transform: translateY(0);
-  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .leaflet-tooltip-top {
-  margin-bottom: 8px !important;
+  margin-bottom: 12px !important;
 }
 
 .leaflet-tooltip strong {
-  color: #1D1D1F;
-  font-weight: 600;
-  font-size: 1.05rem;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 1.1rem;
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #374151 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .leaflet-tooltip p {
-  color: #86868B;
+  color: #6b7280;
   font-size: 0.9rem;
-  margin: 0.25rem 0;
-  line-height: 1.4;
+  margin: 0.3rem 0;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
-/* Стили для элементов управления картой */
+/* Современные стили для элементов управления картой */
 .leaflet-control-zoom {
   border: none !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
   overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .leaflet-control-zoom a {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #1D1D1F !important;
-  border: 1px solid rgba(229, 229, 234, 0.8) !important;
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  font-size: 18px !important;
-  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.95) 100%
+  ) !important;
+  color: #374151 !important;
+  border: none !important;
+  width: 42px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  font-size: 20px !important;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(147, 51, 234, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #F5F5F7 !important;
-  color: #0A84FF !important;
-  transform: scale(1.05);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(249, 250, 251, 0.98) 100%
+  ) !important;
+  color: #2563eb !important;
+  transform: scale(1.08) translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.15),
+    0 0 0 1px rgba(37, 99, 235, 0.1);
+}
+
+.leaflet-control-zoom a:hover::before {
+  opacity: 1;
 }
 
 .leaflet-control-zoom a:active {
-  transform: scale(0.98);
+  transform: scale(1.02) translateY(0);
 }
 
-/* Удаление теней и рамок для контейнера карты */
+/* Современный контейнер карты с улучшенными тенями */
 .leaflet-container {
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.07);
-  background-color: #F5F5F7 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.04),
+    0 16px 64px rgba(0, 0, 0, 0.02);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
   pointer-events: auto !important;
+  position: relative;
+}
+
+.leaflet-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.02) 0%,
+    rgba(147, 51, 234, 0.02) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Предотвращение выделения полигонов и областей при клике */
@@ -101,98 +168,231 @@
 }
 
 .custom-plant-marker div {
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  position: relative;
+}
+
+.custom-plant-marker div::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(147, 51, 234, 0.3) 100%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .custom-plant-marker div:hover {
-  transform: scale(1.2) translateY(-3px);
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+  transform: scale(1.25) translateY(-4px);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+}
+
+.custom-plant-marker div:hover::before {
+  opacity: 1;
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
 }
 
 .custom-plant-marker div:active {
-  transform: scale(1.1) translateY(-1px);
+  transform: scale(1.15) translateY(-2px);
   cursor: grabbing;
 }
 
-/* Стили для кластеров маркеров */
+/* Улучшенные стили для кластеров маркеров */
 .plant-cluster-icon {
   background-color: transparent !important;
   border: none !important;
 }
 
 .plant-cluster-icon div {
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(249, 250, 251, 0.9) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+.plant-cluster-icon div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(147, 51, 234, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .plant-cluster-icon div:hover {
-  transform: scale(1.15) translateY(-3px);
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+  transform: scale(1.2) translateY(-4px);
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.2));
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* Анимация для появления кластеров */
+.plant-cluster-icon div:hover::before {
+  opacity: 1;
+}
+
+/* Улучшенные анимации для появления кластеров */
 @keyframes clusterPulse {
-  0% { transform: scale(0.8); opacity: 0.7; filter: blur(2px); }
-  50% { transform: scale(1.08); opacity: 0.9; filter: blur(0px); }
-  100% { transform: scale(1); opacity: 1; filter: blur(0px); }
+  0% {
+    transform: scale(0.6) rotate(-5deg);
+    opacity: 0;
+    filter: blur(4px) brightness(0.8);
+  }
+  60% {
+    transform: scale(1.15) rotate(2deg);
+    opacity: 0.95;
+    filter: blur(0px) brightness(1.1);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+  }
 }
 
 .plant-cluster-icon div {
-  animation: clusterPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: clusterPulse 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Анимация для маркеров при добавлении на карту */
+/* Улучшенная анимация для маркеров при добавлении на карту */
 @keyframes markerPulse {
-  0% { transform: scale(0.5) translateY(10px); opacity: 0; }
-  70% { transform: scale(1.1) translateY(-3px); opacity: 0.9; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% {
+    transform: scale(0.3) translateY(20px) rotate(-10deg);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  70% {
+    transform: scale(1.2) translateY(-5px) rotate(3deg);
+    opacity: 0.95;
+    filter: blur(0px);
+  }
+  100% {
+    transform: scale(1) translateY(0) rotate(0deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
 }
 
 .custom-plant-marker div {
-  animation: markerPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: markerPulse 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Стили для светлого режима карты */
+/* Улучшенные стили для светлого режима карты */
 .leaflet-light-mode {
-  filter: brightness(110%) saturate(65%) contrast(95%);
-  transition: filter 0.4s ease;
+  filter: brightness(115%) saturate(70%) contrast(98%) hue-rotate(2deg);
+  transition: filter 0.5s ease;
 }
 
-/* Анимация для масштабирования карты */
+/* Плавная анимация для масштабирования карты */
 @keyframes mapZoomAnimation {
-  0% { opacity: 0.4; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0.3;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .leaflet-zoom-animated {
-  animation: mapZoomAnimation 0.3s ease-out;
+  animation: mapZoomAnimation 0.4s ease-out;
 }
 
-/* Улучшенные стили для попапов */
+/* Ультрасовременные стили для попапов */
 .leaflet-popup-content-wrapper {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.95) 100%
+  ) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 16px 64px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.leaflet-popup-content-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.03) 0%,
+    rgba(147, 51, 234, 0.03) 100%
+  );
+  z-index: -1;
 }
 
 .leaflet-popup-tip {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.95) 100%
+  ) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 16px 64px rgba(0, 0, 0, 0.06) !important;
 }
 
 .leaflet-popup-close-button {
-  color: #86868B !important;
-  font-size: 20px !important;
-  transition: all 0.2s ease;
+  color: #9ca3af !important;
+  font-size: 22px !important;
+  font-weight: 300;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  line-height: 26px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .leaflet-popup-close-button:hover {
-  color: #0A84FF !important;
-  transform: scale(1.1);
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1) rotate(90deg);
 }
 
 /* Установка z-index для контейнера карты */
@@ -200,7 +400,7 @@
   z-index: 100 !important;
 }
 
-.leaflet-top, 
+.leaflet-top,
 .leaflet-bottom {
   z-index: 1000 !important;
 }
@@ -325,20 +525,26 @@
   padding: 20px;
   text-align: center;
   font-size: 14px;
-  color: #64748B;
+  color: #64748b;
 }
 
 .plant-popup-error {
   padding: 20px;
   text-align: center;
   font-size: 14px;
-  color: #EF4444;
+  color: #ef4444;
 }
 
 /* Анимация для появления попапа */
 @keyframes popupFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .leaflet-popup {
@@ -361,4 +567,229 @@
   transform: none !important;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15)) !important;
   cursor: default !important;
-} 
+}
+
+/* Дополнительные современные стили для карты */
+
+/* Улучшенные стили для полноэкранного режима */
+.map-fullscreen {
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+}
+
+.map-fullscreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(59, 130, 246, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(139, 92, 246, 0.05) 0%,
+      transparent 50%
+    );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Стили для загрузки карты */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Современные стили для контейнера ошибки */
+.map-error {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  color: #991b1b;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Стили для области без данных */
+.map-empty {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 2px dashed #d1d5db;
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Улучшенные стили для слоев Leaflet */
+.leaflet-tile-pane {
+  filter: contrast(105%) brightness(102%) saturate(95%);
+}
+
+/* Анимация для переключения слоев */
+.leaflet-layer {
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* Стили для выделенных регионов */
+.region-selected {
+  stroke: #3b82f6 !important;
+  stroke-width: 4px !important;
+  stroke-opacity: 1 !important;
+  fill-opacity: 0.3 !important;
+  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3));
+  animation: regionPulse 2s infinite;
+}
+
+@keyframes regionPulse {
+  0%,
+  100% {
+    stroke-opacity: 1;
+    fill-opacity: 0.3;
+  }
+  50% {
+    stroke-opacity: 0.7;
+    fill-opacity: 0.15;
+  }
+}
+
+/* Стили для активного состояния элементов управления */
+.leaflet-control-layers {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(249, 250, 251, 0.9) 100%
+  ) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Стили для кнопок в легенде */
+.leaflet-control-layers input[type='checkbox'] {
+  transform: scale(1.2);
+  accent-color: #3b82f6;
+}
+
+/* Плавная анимация для появления/исчезновения элементов */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Улучшенные стили для маркеров с уведомлениями */
+.marker-notification {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 1000;
+  animation: notificationPulse 2s infinite;
+}
+
+@keyframes notificationPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Стили для режима редактирования */
+.map-editing-mode {
+  filter: brightness(110%) saturate(80%);
+}
+
+.map-editing-mode .leaflet-container {
+  cursor: crosshair;
+}
+
+/* Стили для временных элементов */
+.temp-element {
+  opacity: 0.7;
+  animation: tempPulse 1s infinite alternate;
+}
+
+@keyframes tempPulse {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
