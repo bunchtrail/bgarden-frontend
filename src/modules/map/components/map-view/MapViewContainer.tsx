@@ -70,7 +70,7 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
   
   // Мемоизация контента для предотвращения лишних перерисовок
   return useMemo(() => {
-    if (!mapImageUrl) return null;
+    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO) return null;
     
     return (
       <BaseMapContainer
