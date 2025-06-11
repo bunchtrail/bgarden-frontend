@@ -5,7 +5,13 @@ export { Navbar } from './components';
 export type { NavConfig, NavItem } from './types';
 
 // Экспорт хуков
-export { useNavigation } from './hooks';
+export { useNavigation, useNavbarHeight } from './hooks';
+
+// Экспорт контекстов
+export {
+  NavbarHeightProvider,
+  useNavbarHeightContext,
+} from './contexts/NavbarHeightContext';
 
 // Экспорт конфигураций
 export { defaultNavConfig } from './components/configs/defaultNavConfig';

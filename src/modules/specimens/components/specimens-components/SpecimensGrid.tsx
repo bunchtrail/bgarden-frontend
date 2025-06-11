@@ -1,6 +1,9 @@
 import React from 'react';
 import { Specimen, SectorType } from '../../types';
-import { layoutClasses, animationClasses } from '../../../../styles/global-styles';
+import {
+  layoutClasses,
+  animationClasses,
+} from '../../../../styles/global-styles';
 import SpecimenCard from './SpecimenCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +19,7 @@ interface SpecimensGridProps {
 const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   specimens,
   getSectorTypeName,
-  onDelete
+  onDelete,
 }) => {
   const navigate = useNavigate();
 
@@ -25,7 +28,9 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
       <div className="w-full py-12 flex items-center justify-center">
         <div className="text-center px-4 py-8 rounded-xl bg-white/80 border border-[#E5E5EA]/60 shadow-sm">
           <p className="text-[#86868B] mb-2">Нет доступных образцов</p>
-          <p className="text-xs text-[#AEAEB2]">Добавьте новый образец, чтобы увидеть его здесь</p>
+          <p className="text-xs text-[#AEAEB2]">
+            Добавьте новый образец, чтобы увидеть его здесь
+          </p>
         </div>
       </div>
     );
@@ -34,13 +39,15 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
   const handleCardClick = (specimenId: number) => {
     navigate(`/specimens/${specimenId}`);
   };
-
   return (
-    <div className={`${layoutClasses.grid4.replace('gap-6', 'gap-8')} ${animationClasses.fadeIn}`}>
-      {specimens.map((specimen) => (
+    <div className={`${layoutClasses.grid4.replace('gap-6', 'gap-8')}`}>
+      {specimens.map((specimen, index) => (
         <div
           key={specimen.id}
-          className={`${animationClasses.transition} h-96`}
+          className={`${animationClasses.transition} h-96 animate-staggeredFadeIn`}
+          style={{
+            animationDelay: `${index * 0.05}s`,
+          }}
         >
           <SpecimenCard
             specimen={specimen}

@@ -39,18 +39,18 @@ export const COLORS = {
 // Стили для карточек
 export const cardClasses = {
   base: 'rounded-xl overflow-hidden',
-  
+
   elevated: 'bg-white/80 border border-[#E5E5EA]/80 shadow-md',
   outlined: 'bg-white border border-[#E5E5EA]',
   filled: 'bg-[#F5F5F7]',
-  
+
   interactive: 'transition-all duration-300 hover:shadow-xl cursor-pointer',
   flat: 'bg-white border border-[#E5E5EA] shadow-sm',
-  
+
   header: 'flex items-center justify-between px-5 pt-4 pb-2',
   content: 'px-5 py-4',
   footer: 'px-5 py-3 border-t border-[#E5E5EA]',
-  
+
   title: 'text-lg font-medium text-[#1D1D1F]',
   subtitle: 'text-sm text-[#86868B]',
 };
@@ -66,23 +66,44 @@ export const textClasses = {
   tertiary: 'text-[#AEAEB2]',
 };
 
+// Дополнительные стили для выравнивания текста
+export const textAlignClasses = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+  justify: 'text-justify',
+};
+
+// Стили для сброса выравнивания
+export const resetClasses = {
+  textAlign: 'text-left', // Сбрасываем выравнивание текста к левому краю
+  margin: 'm-0',
+  padding: 'p-0',
+};
+
 // Стили для кнопок
 export const buttonClasses = {
   base: 'py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300',
-  primary: 'bg-gradient-to-r from-[#0A84FF] to-[#0071E3] text-white hover:shadow-lg',
-  secondary: 'bg-white text-[#0A84FF] border border-[#0A84FF] hover:bg-[#F2F7FF]',
-  danger: 'bg-gradient-to-r from-[#FF3B30] to-[#FF453A] text-white hover:shadow-lg',
+  primary:
+    'bg-gradient-to-r from-[#0A84FF] to-[#0071E3] text-white hover:shadow-lg',
+  secondary:
+    'bg-white text-[#0A84FF] border border-[#0A84FF] hover:bg-[#F2F7FF]',
+  danger:
+    'bg-gradient-to-r from-[#FF3B30] to-[#FF453A] text-white hover:shadow-lg',
   neutral: 'bg-[#F5F5F7] text-[#86868B] border border-[#E5E5EA] hover:bg-white',
-  warning: 'bg-gradient-to-r from-[#FF9F0A] to-[#FF8A00] text-white hover:shadow-lg',
-  success: 'bg-gradient-to-r from-[#30D158] to-[#28BD4C] text-white hover:shadow-lg',
-  disabled: 'opacity-60 cursor-not-allowed bg-gray-200 text-gray-500 hover:shadow-none',
-  
+  warning:
+    'bg-gradient-to-r from-[#FF9F0A] to-[#FF8A00] text-white hover:shadow-lg',
+  success:
+    'bg-gradient-to-r from-[#30D158] to-[#28BD4C] text-white hover:shadow-lg',
+  disabled:
+    'opacity-60 cursor-not-allowed bg-gray-200 text-gray-500 hover:shadow-none',
+
   // Унифицированные стили для кнопок в карточках
   unified: {
     base: 'flex items-center py-1.5 transition-all duration-300',
     card: 'py-1.5 flex-1',
     row: '!p-1.5',
-  }
+  },
 };
 
 // Хелпер для получения унифицированных классов кнопок
@@ -102,7 +123,7 @@ export const chipClasses = {
 
 // Стили для контейнеров
 export const containerClasses = {
-  base: 'flex flex-col items-center justify-center min-h-[50vh] p-4'
+  base: 'flex flex-col items-center justify-center min-h-[50vh] p-4',
 };
 
 // Стили для макетов
@@ -122,7 +143,8 @@ export const animationClasses = {
   fadeIn: 'animate-fadeIn',
   transition: 'transition-all duration-300',
   hover: 'hover:scale-105',
-  springHover: 'transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99]',
+  springHover:
+    'transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99]',
   shake: 'animate-shake',
 };
 
@@ -154,20 +176,52 @@ export const greetingStyles = {
       100% { transform: scale(1); filter: brightness(1); }
     }
   `,
-  
+
   classes: {
     iconBase: 'w-8 h-8 transition-all',
     iconMorning: `text-[${COLORS.warning.main}]`,
     iconDay: `text-[${COLORS.primary.main}]`,
     iconEvening: `text-[${COLORS.warning.main}]`,
     iconNight: `text-[${COLORS.secondary.main}]`,
-    
+
     particle: 'animation: float-animation linear infinite paused',
     particleActive: 'animation-play-state: running',
-    
+
     hoverEffects: 'hover-effect hover-wave-text',
-    hoverPulse: 'hover-pulse-effect'
-  }
+    hoverPulse: 'hover-pulse-effect',
+  },
+};
+
+// Стили для страниц
+export const pageClasses = {
+  // Базовый контейнер для всех страниц
+  base: 'flex-1 flex flex-col',
+
+  // Полноэкранные контейнеры без скролла
+  fullscreen: 'h-screen-minus-navbar flex flex-col overflow-hidden',
+  fullscreenContent: 'flex-1 flex flex-col min-h-0',
+
+  // Центрированный контейнер с максимальной шириной
+  container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full',
+  containerMd: 'max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full',
+  containerSm: 'max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full',
+  containerXs: 'max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full',
+
+  // Отступы для контента
+  section: 'py-6 md:py-12',
+  sectionSm: 'py-4 md:py-8',
+
+  // Компактные отступы для полноэкранных страниц
+  sectionCompact: 'py-2 md:py-4',
+
+  // Центрирование для auth страниц
+  authCenter: 'h-screen-minus-navbar flex items-center justify-center',
+
+  // Полная высота минус навбар
+  fullHeight: 'min-h-screen-minus-navbar',
+
+  // Центрирование контента по вертикали
+  centerContent: 'flex-1 flex flex-col justify-center',
 };
 
 // Общий объект стилей приложения
@@ -179,7 +233,10 @@ export const appStyles = {
   containerClasses,
   chipClasses,
   layoutClasses,
+  pageClasses,
+  textAlignClasses,
+  resetClasses,
   animationClasses,
   greetingStyles,
   getUnifiedButtonClasses,
-}; 
+};

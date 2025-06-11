@@ -4,6 +4,7 @@ import { useMapData, useMapControlPanel } from '../hooks';
 import MapCard from './map-card/MapCard';
 import MapContentController from './map-content/MapContentController';
 import { MapPageContentProps } from '../types/mapTypes';
+import { pageClasses } from '../../../styles/global-styles';
 import L from 'leaflet';
 
 /**
@@ -19,59 +20,71 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   controlPanelPosition = 'topRight',
   showControls,
   onDataLoaded,
-  onError
+  onError,
 }) => {
   // Состояние для bounds
-  const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
+  const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([
+    [0, 0],
+    [1000, 1000],
+  ]);
   const [imageBoundsCalculated, setImageBoundsCalculated] = useState(false);
-  
+
   // Хуки для данных и управления
-  const { mapData, regions, loading, error, mapImageUrl, refreshMapData, isEmpty } = useMapData({
-    autoLoad: true, 
-    onDataLoaded, 
-    onError
+  const {
+    mapData,
+    regions,
+    loading,
+    error,
+    mapImageUrl,
+    refreshMapData,
+    isEmpty,
+  } = useMapData({
+    autoLoad: true,
+    onDataLoaded,
+    onError,
   });
-  
-  const { showControlPanel, toggleControlPanel, controlPanelStyles } = useMapControlPanel({
-    controlPanelPosition
-  });
-  
+
+  const { showControlPanel, toggleControlPanel, controlPanelStyles } =
+    useMapControlPanel({
+      controlPanelPosition,
+    });
+
   const { mapConfig } = useMapConfig();
-  
+
   // Используем showControls из параметров, если передан, иначе из mapConfig
-  const effectiveShowControls = showControls !== undefined ? showControls : mapConfig.showControls;
-  
+  const effectiveShowControls =
+    showControls !== undefined ? showControls : mapConfig.showControls;
+
   // Заголовок карты
   const mapTitle = useMemo(() => {
-    return mapConfig.lightMode 
-      ? "Облегченная карта" 
-      : (mapData?.name || "Интерактивная карта ботанического сада");
+    return mapConfig.lightMode
+      ? 'Облегченная карта'
+      : mapData?.name || 'Интерактивная карта ботанического сада';
   }, [mapConfig.lightMode, mapData?.name]);
-    
+
   // Обработчик обновления данных
   const handleRefresh = useCallback(() => {
     refreshMapData();
   }, [refreshMapData]);
-  
+
   // Преобразование строковой ошибки в объект Error
   const errorObj = useMemo(() => {
     if (!error) return null;
     return new Error(error);
   }, [error]);
-  
+
   // Не добавляем слой для рисования здесь, так как он уже добавляется в MapLayersManager
   const enhancedLayers = useMemo(() => {
     // Просто возвращаем пользовательские слои без добавления слоя рисования
     return [...customLayers];
   }, [customLayers]);
-    
+
   return (
-    <div className="w-full h-full flex justify-center items-center pt-8 mt-4">
-      <div className="w-full max-w-10xl">
-        <MapCard 
-          title={mapTitle}
-          loading={loading}
-        >
+    <div className={pageClasses.fullscreen}>
+      <div
+        className={`${pageClasses.container} ${pageClasses.fullscreenContent}`}
+      >
+        <MapCard title={mapTitle} loading={loading}>
           <MapContentController
             loading={loading}
             error={errorObj}
@@ -99,4 +112,5 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   );
 };
 
-export default MapPageContent; 
+export default MapPageContent;
+

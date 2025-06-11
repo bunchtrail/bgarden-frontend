@@ -6,19 +6,22 @@ import { MapCardProps } from '../../types/mapTypes';
 /**
  * Компонент карточки карты отвечает за отображение карты в контейнере карточки
  */
-const MapCard: React.FC<MapCardProps> = ({ title, loading = false, children }) => {
+const MapCard: React.FC<MapCardProps> = ({
+  title,
+  loading = false,
+  children,
+}) => {
   return (
-    <Card 
+    <Card
       title={title}
       headerAction={loading && <LoadingSpinner size="small" message="" />}
       variant="elevated"
-      contentClassName="p-0"
+      className="flex flex-col flex-1"
+      contentClassName="flex-1 p-0 flex"
     >
-      <div className={MAP_STYLES.mapContent}>
-        {children}
-      </div>
+      <div className={MAP_STYLES.mapContent}>{children}</div>
     </Card>
   );
 };
 
-export default MapCard; 
+export default MapCard;

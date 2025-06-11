@@ -1,15 +1,16 @@
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigation } from '../hooks';
-import { NavConfig, NavItem } from '../types';
+import { NavConfig } from '../types';
 import { defaultNavConfig } from './configs/defaultNavConfig';
 import { CloseIcon, MenuIcon } from './icons';
 import { NavbarItem } from './NavbarItem';
-import { buttonClasses, layoutClasses, COLORS } from '../../../styles/global-styles';
+import { buttonClasses, layoutClasses } from '../../../styles/global-styles';
 
 interface NavbarProps {
   config?: NavConfig;
   className?: string;
+  navbarRef?: React.RefObject<HTMLElement | null>;
 }
 
 // Стили для навигации, специфичные для компонента
@@ -18,26 +19,30 @@ const navStyles = {
   container: 'w-full bg-white shadow-sm z-10 fixed top-0 left-0 right-0',
   innerContainer: `${layoutClasses.container} mx-auto px-4 sm:px-6 lg:px-8`,
   flexWrapper: 'flex justify-between items-center py-3',
-  
+
   // Логотип и брендинг
   logoContainer: 'flex items-center',
   logo: 'flex items-center text-[#1D1D1F] hover:opacity-90 transition-opacity',
   logoImage: 'h-10 w-10 rounded-full object-cover border-2 border-[#0A84FF]',
   logoText: 'ml-3 text-lg font-medium',
-  
+
   // Навигационные элементы для desktop
   desktopNav: 'hidden md:flex items-center space-x-6',
-  desktopLink: 'text-[#1D1D1F] hover:text-[#0A84FF] transition-colors duration-200 text-sm font-medium',
+  desktopLink:
+    'text-[#1D1D1F] hover:text-[#0A84FF] transition-colors duration-200 text-sm font-medium',
   desktopActiveLink: 'text-[#0A84FF] font-semibold',
-  
+
   // Мобильное меню
   mobileMenuBtn: 'flex items-center md:hidden',
-  menuButton: 'inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none',
-  mobileMenu: 'md:hidden bg-white shadow-lg fixed inset-x-0 top-14 z-50 transform transition-transform duration-300 ease-in-out',
+  menuButton:
+    'inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none',
+  mobileMenu:
+    'md:hidden bg-white shadow-lg fixed inset-x-0 top-14 z-50 transform transition-transform duration-300 ease-in-out',
   mobileMenuInner: 'px-4 pt-2 pb-3 space-y-1',
-  mobileLink: 'block px-4 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-sm font-medium',
+  mobileLink:
+    'block px-4 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-sm font-medium',
   mobileActiveLink: 'bg-gray-50 text-[#0A84FF] font-semibold',
-  
+
   // Кнопки авторизации из глобальных стилей
   authButton: `${buttonClasses.base} ${buttonClasses.primary}`,
   mobileAuthButton: `block w-full text-left px-4 py-2.5 rounded-md hover:bg-gray-50 transition-colors duration-200 text-sm font-medium ${buttonClasses.neutral}`,
@@ -46,6 +51,7 @@ const navStyles = {
 export const Navbar: React.FC<NavbarProps> = ({
   config = defaultNavConfig,
   className = '',
+  navbarRef,
 }) => {
   const {
     isMenuOpen,
@@ -70,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       return (
         <Link
-          to='/login'
+          to="/login"
           className={btnClasses}
           onClick={isMobile ? closeMenu : undefined}
         >
@@ -80,9 +86,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
     [user, closeMenu]
   );
-
   return (
     <nav
+      ref={navbarRef}
       className={`${navStyles.container} ${className}`}
       style={{
         fontFamily:

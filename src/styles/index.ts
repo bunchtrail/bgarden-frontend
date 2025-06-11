@@ -4,10 +4,11 @@
 
 // Импортируем CSS файл (без экспорта)
 import './animations.css';
+import './navbar-utils.css';
 import { appStyles } from './global-styles';
 
 // Экспорт глобальных стилей и переиспользуемых классов
 export * from './global-styles';
 
 // Экспорт по умолчанию для удобства
-export default appStyles; 
+export default appStyles;
