@@ -42,6 +42,7 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
       className={`${mapConfig.lightMode ? MAP_STYLES.lightMode : ''} ${className}`}
       scrollWheelZoom={showControls}
       dragging={showControls}
+      keyboard={false}
     >
       {showControls && <ZoomControl position={mapConfig.zoomControlPosition} />}
       {children}
