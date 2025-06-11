@@ -12,7 +12,8 @@ const MapCard: React.FC<MapCardProps> = ({ title, loading = false, children }) =
       title={title}
       headerAction={loading && <LoadingSpinner size="small" message="" />}
       variant="elevated"
-      contentClassName="p-0"
+      className="h-full flex flex-col"
+      contentClassName="p-0 flex-1"
     >
       <div className={MAP_STYLES.mapContent}>
         {children}

@@ -66,8 +66,8 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   }, [customLayers]);
     
   return (
-    <div className="w-full h-full flex justify-center items-center pt-8 mt-4">
-      <div className="w-full max-w-10xl">
+    <div className="w-full flex justify-center items-center min-h-[calc(100vh-64px)]">
+      <div className="w-full max-w-10xl h-full">
         <MapCard 
           title={mapTitle}
           loading={loading}

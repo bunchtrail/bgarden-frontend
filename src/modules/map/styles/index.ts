@@ -12,7 +12,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 export const MAP_STYLES = {
   // Tailwind классы для карты
   mapContainer: 'w-full h-full flex flex-col shadow-lg rounded-lg overflow-hidden bg-white',
-  mapContent: 'w-full h-[810px] relative rounded-b-lg overflow-hidden backdrop-blur-md',
+  mapContent: 'w-full h-full min-h-[calc(100vh-64px)] relative rounded-b-lg overflow-hidden backdrop-blur-md',
   
   // Классы для панели управления
   controlPanel: 'p-4 bg-white/95 backdrop-blur rounded-t-lg border-b border-neutral-dark/20 shadow-sm',
