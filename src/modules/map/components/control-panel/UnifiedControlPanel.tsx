@@ -52,6 +52,9 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       renderedPanels.delete(panelId);
     };
   }, [panelId]);
+
+  // Получаем конфигурацию панели - config является основным источником
+  // DEPRECATED: pageType будет удален в будущих версиях - используйте config
   const panelConfig =
     config || UNIFIED_PANEL_PRESETS[pageType] || UNIFIED_PANEL_PRESETS.map;
 
@@ -204,10 +207,37 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       </div>
     );
   };
-
   const renderModeSection = () => {
     if (!isSectionVisible(PanelSection.MODE)) return null;
     const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
+    const modeConfig = panelConfig.sectionConfig?.[PanelSection.MODE] || {};
+
+    // Определяем доступные режимы на основе конфигурации и типа карты
+    const availableModes = [
+      {
+        id: MAP_MODES.VIEW,
+        label: 'Просмотр',
+        alwaysAvailable: true, // Режим просмотра всегда доступен
+      },
+      {
+        id: MAP_MODES.DRAW,
+        label: 'Создание областей',
+        disabledForGeo: true, // Отключен для географических карт
+        showInConfig: modeConfig.showDrawMode,
+      },
+      {
+        id: MAP_MODES.EDIT,
+        label: 'Редактирование областей',
+        disabledForGeo: true, // Отключен для географических карт
+        showInConfig: modeConfig.showEditMode,
+      },
+    ].filter((mode) => {
+      // Проверяем, разрешен ли режим в конфигурации
+      if (!mode.alwaysAvailable && mode.showInConfig === false) {
+        return false;
+      }
+      return true;
+    });
 
     return (
       <div className="mb-4">
@@ -215,65 +245,35 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
         <div
           className={`${cardClasses.filled} p-2.5 rounded-xl flex flex-col space-y-1.5`}
         >
-          <label className="flex items-center px-2 py-1.5 cursor-pointer hover:bg-blue-50/60 rounded-lg transition-colors">
-            <input
-              type="radio"
-              name="mapMode"
-              value={MAP_MODES.VIEW}
-              checked={mapConfig.interactionMode === MAP_MODES.VIEW}
-              onChange={() => handleModeChange(MAP_MODES.VIEW)}
-              className="mr-2.5 accent-blue-600 h-4 w-4"
-            />
-            <span className={`${textClasses.body} ${textClasses.primary}`}>
-              Просмотр
-            </span>
-          </label>
+          {availableModes.map((mode) => {
+            const isDisabled = isGeoMap && mode.disabledForGeo;
+            const isChecked =
+              !isDisabled && mapConfig.interactionMode === mode.id;
 
-          <label
-            className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${
-              isGeoMap
-                ? 'cursor-not-allowed opacity-50'
-                : 'cursor-pointer hover:bg-blue-50/60'
-            }`}
-          >
-            <input
-              type="radio"
-              name="mapMode"
-              value={MAP_MODES.DRAW}
-              checked={
-                !isGeoMap && mapConfig.interactionMode === MAP_MODES.DRAW
-              }
-              onChange={() => handleModeChange(MAP_MODES.DRAW)}
-              className="mr-2.5 accent-blue-600 h-4 w-4"
-              disabled={isGeoMap}
-            />
-            <span className={`${textClasses.body} ${textClasses.primary}`}>
-              Создание областей
-            </span>
-          </label>
-
-          <label
-            className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${
-              isGeoMap
-                ? 'cursor-not-allowed opacity-50'
-                : 'cursor-pointer hover:bg-blue-50/60'
-            }`}
-          >
-            <input
-              type="radio"
-              name="mapMode"
-              value={MAP_MODES.EDIT}
-              checked={
-                !isGeoMap && mapConfig.interactionMode === MAP_MODES.EDIT
-              }
-              onChange={() => handleModeChange(MAP_MODES.EDIT)}
-              className="mr-2.5 accent-blue-600 h-4 w-4"
-              disabled={isGeoMap}
-            />
-            <span className={`${textClasses.body} ${textClasses.primary}`}>
-              Редактирование областей
-            </span>
-          </label>
+            return (
+              <label
+                key={mode.id}
+                className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${
+                  isDisabled
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer hover:bg-blue-50/60'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="mapMode"
+                  value={mode.id}
+                  checked={isChecked}
+                  onChange={() => handleModeChange(mode.id)}
+                  className="mr-2.5 accent-blue-600 h-4 w-4"
+                  disabled={isDisabled}
+                />
+                <span className={`${textClasses.body} ${textClasses.primary}`}>
+                  {mode.label}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
     );
@@ -316,7 +316,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       </div>
     );
   };
-
   const renderSettingsSection = () => {
     if (!isSectionVisible(PanelSection.SETTINGS)) return null;
     const settingsConfig =
@@ -327,11 +326,13 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Настройки</h4>
         <div className={`${cardClasses.filled} p-2.5 rounded-xl space-y-2.5`}>
-          <Switch
-            label="Кластеризация маркеров"
-            checked={mapConfig.enableClustering}
-            onChange={handleToggleClustering}
-          />
+          {settingsConfig.showClusteringToggle !== false && (
+            <Switch
+              label="Кластеризация маркеров"
+              checked={mapConfig.enableClustering}
+              onChange={handleToggleClustering}
+            />
+          )}
 
           {settingsConfig.showPopupToggle !== false && (
             <Switch
@@ -346,12 +347,14 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             />
           )}
 
-          <Switch
-            label="Создание областей"
-            checked={!isGeoMap && mapConfig.drawingEnabled}
-            onChange={handleToggleDrawing}
-            disabled={isGeoMap}
-          />
+          {settingsConfig.showDrawingToggle !== false && !isGeoMap && (
+            <Switch
+              label="Создание областей"
+              checked={mapConfig.drawingEnabled}
+              onChange={handleToggleDrawing}
+              disabled={isGeoMap}
+            />
+          )}
         </div>
       </div>
     );

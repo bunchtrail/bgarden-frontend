@@ -5,7 +5,10 @@ import { RegionData } from '@/modules/map/types/mapTypes';
 import { MapMarker } from './MapMarker';
 import { useMapData } from '../hooks';
 import regionBridge from '@/services/regions/RegionBridge';
-import { UnifiedControlPanel } from '@/modules/map/components/control-panel';
+import {
+  UnifiedControlPanel,
+  UNIFIED_PANEL_PRESETS,
+} from '@/modules/map/components/control-panel';
 
 // Константы для типов слоев на карте
 export const MAP_LAYERS = {
@@ -55,12 +58,11 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   // Адаптер для преобразования координат
   const handleCoordinatesChange = (lat: number, lng: number) => {
     onCoordinatesChange(lat, lng);
-  };
-  // Используем стандартную панель управления с типом "specimen"
+  }; // Используем стандартную панель управления с явной конфигурацией для режима "specimen"
   const mapControlPanel = useMemo(
     () => (
       <UnifiedControlPanel
-        pageType="specimen"
+        config={UNIFIED_PANEL_PRESETS.specimen}
         panelId="geography-map-controls"
         position="topRight"
         collapsible={false}

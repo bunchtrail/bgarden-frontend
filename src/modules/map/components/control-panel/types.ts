@@ -39,6 +39,10 @@ export interface UnifiedPanelConfig {
   sectionConfig?: {
     [PanelSection.LAYERS]?: {
       layers?: Array<{ id: string; label: string }>;
+      showRegionsLayer?: boolean;
+      showImageryLayer?: boolean;
+      showPlantsLayer?: boolean;
+      showGeoTilesLayer?: boolean;
     };
     [PanelSection.SETTINGS]?: {
       showTooltipToggle?: boolean;
@@ -48,6 +52,9 @@ export interface UnifiedPanelConfig {
     };
     [PanelSection.MODE]?: {
       modes?: Array<{ id: string; label: string }>;
+      showViewMode?: boolean;
+      showDrawMode?: boolean;
+      showEditMode?: boolean;
     };
   };
   // Позиционирование и стилизация
@@ -72,6 +79,17 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
       PanelSection.BUTTONS,
     ],
     sectionConfig: {
+      [PanelSection.LAYERS]: {
+        showRegionsLayer: true,
+        showImageryLayer: true,
+        showPlantsLayer: true,
+        showGeoTilesLayer: true,
+      },
+      [PanelSection.MODE]: {
+        showViewMode: true,
+        showDrawMode: true,
+        showEditMode: true,
+      },
       [PanelSection.SETTINGS]: {
         showPopupToggle: true,
         showClusteringToggle: true,
@@ -88,10 +106,21 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
     mode: 'geography',
     visibleSections: [PanelSection.LAYERS, PanelSection.SETTINGS],
     sectionConfig: {
+      [PanelSection.LAYERS]: {
+        showRegionsLayer: true,
+        showImageryLayer: true,
+        showPlantsLayer: true,
+        showGeoTilesLayer: true,
+      },
+      [PanelSection.MODE]: {
+        showViewMode: true,
+        showDrawMode: false, // Отключено для географического режима
+        showEditMode: false, // Отключено для географического режима
+      },
       [PanelSection.SETTINGS]: {
         showPopupToggle: true,
         showClusteringToggle: true,
-        showDrawingToggle: false,
+        showDrawingToggle: false, // Явно отключено для сектора
         showTooltipToggle: false,
       },
     },
@@ -104,11 +133,22 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
     mode: 'minimal',
     visibleSections: [PanelSection.LAYERS, PanelSection.SETTINGS],
     sectionConfig: {
+      [PanelSection.LAYERS]: {
+        showRegionsLayer: true,
+        showImageryLayer: false, // Для образцов не показываем изображение карты
+        showPlantsLayer: true,
+        showGeoTilesLayer: false, // Для образцов не показываем гео-подложку
+      },
+      [PanelSection.MODE]: {
+        showViewMode: true,
+        showDrawMode: false, // Отключено для минимального режима образцов
+        showEditMode: false, // Отключено для минимального режима образцов
+      },
       [PanelSection.SETTINGS]: {
         showClusteringToggle: true,
         showTooltipToggle: false,
-        showDrawingToggle: false,
-        showPopupToggle: false,
+        showDrawingToggle: false, // Явно отключено для образцов
+        showPopupToggle: false, // Явно отключено для образцов
       },
     },
     positioning: {
@@ -121,32 +161,7 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
 // Интерфейс для пропсов основного компонента
 export interface UnifiedControlPanelProps {
   // Основные настройки
-  pageType?: string;
-  config?: UnifiedPanelConfig;
-
-  // Кастомизация
-  customSections?: ReactNode;
-  mapTitle?: string;
-  panelId?: string;
-
-  // Позиционирование и стили
-  position?: PanelPosition;
-  className?: string;
-  style?: React.CSSProperties;
-  zIndex?: number;
-
-  // Обработчики событий
-  onClose?: () => void;
-  onConfigChange?: (key: string, value: boolean | string | number) => void;
-
-  // Дополнительные опции
-  collapsible?: boolean;
-  defaultExpanded?: boolean;
-}
-// Интерфейс для пропсов основного компонента
-export interface UnifiedControlPanelProps {
-  // Основные настройки
-  pageType?: string;
+  pageType?: string; // DEPRECATED: будет удален в будущих версиях - используйте config
   config?: UnifiedPanelConfig;
 
   // Кастомизация
@@ -188,3 +203,4 @@ export const getPositionClasses = (
       return `${baseClasses} top-4 right-4`;
   }
 };
+

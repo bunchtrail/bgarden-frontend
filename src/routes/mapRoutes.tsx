@@ -3,7 +3,10 @@ import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
 import { FullscreenLayout } from '../modules/layouts';
 import { MapPage } from '../modules/map';
-import { PositionedControlPanel } from '../modules/map/components/control-panel';
+import {
+  PositionedControlPanel,
+  UNIFIED_PANEL_PRESETS,
+} from '../modules/map/components/control-panel';
 
 export const mapRoutes: RouteObject[] = [
   {
@@ -14,7 +17,10 @@ export const mapRoutes: RouteObject[] = [
           <MapPage
             showControls={true}
             extraControls={
-              <PositionedControlPanel pageType="map" panelId="main-map-panel" />
+              <PositionedControlPanel
+                config={UNIFIED_PANEL_PRESETS.map}
+                panelId="main-map-panel"
+              />
             }
           />
         </FullscreenLayout>
@@ -30,7 +36,7 @@ export const mapRoutes: RouteObject[] = [
             showControls={true}
             extraControls={
               <PositionedControlPanel
-                pageType="sector"
+                config={UNIFIED_PANEL_PRESETS.sector}
                 panelId="sector-map-panel"
               />
             }
