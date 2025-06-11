@@ -79,14 +79,14 @@ export const DEFAULT_SCHEMATIC_CONFIG: MapConfig = {
 export const DEFAULT_GEO_CONFIG: MapConfig = {
   ...DEFAULT_SCHEMATIC_CONFIG, // Наследуем общие настройки
   mapType: MAP_TYPES.GEO,
-  center: [58.5964361, 49.01083] as LatLngExpression, // Центр (Москва)
-  zoom: 10,
-  maxZoom: 18,
-  minZoom: 3,
-  maxBounds: undefined, // Без ограничений по перемещению
-  maxBoundsViscosity: 0.0,
-  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.PLANTS], // Другие слои по умолчанию
-  drawingEnabled: false, // Рисование недоступно на гео-карте
+  center: [58.596323, 49.666755] as LatLngExpression,
+  zoom: 18,
+  maxZoom: 20,
+  minZoom: 18,
+  maxBounds: undefined,
+  maxBoundsViscosity: 1.0,
+  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.PLANTS],
+  drawingEnabled: false,
   interactionMode: MAP_MODES.VIEW,
 };
 

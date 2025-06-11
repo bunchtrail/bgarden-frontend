@@ -1,9 +1,34 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 import { BaseMapContainer, MapBoundsHandler, MapReadyHandler } from '../map-components';
+import LockBoundsAtInit from '../map-components/LockBoundsAtInit';
 import MapLayersManager from '../map-layers/MapLayersManager';
 import { MapViewContainerProps } from '../../types/mapTypes';
 import { Plant } from '@/services/regions/types';
+import { MAP_TYPES } from '../../contexts/MapConfigContext';
+import { useMapEvents } from 'react-leaflet';
+
+/**
+ * Компонент для логирования событий взаимодействия с картой.
+ * Срабатывает, когда пользователь заканчивает перемещать карту или изменять масштаб.
+ */
+const MapInteractionLogger = () => {
+  useMapEvents({
+    moveend: (e) => {
+      const map = e.target;
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      console.log('[Map] Позиция карты изменена (перемещение остановлено):', {
+        center: { lat: center.lat.toFixed(6), lng: center.lng.toFixed(6) },
+        zoom: zoom,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  });
+
+  return null; // Компонент ничего не рендерит
+};
 
 /**
  * Компонент контейнера вида карты
@@ -55,6 +80,14 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
         {/* Обработчик события ready */}
         {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
         
+        {/* Логирование изменений позиции карты */}
+        <MapInteractionLogger />
+
+        {/* Фиксация границ для гео-карты */}
+        {mapConfig.mapType === MAP_TYPES.GEO && (
+          <LockBoundsAtInit />
+        )}
+
         {/* Слои карты */}
         <MapLayersManager 
           visibleLayers={mapConfig.visibleLayers}
@@ -68,8 +101,10 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
           onPlantsLoaded={handlePlantsLoaded}
         />
         
-        {/* Обработчик границ карты */}
-        <MapBoundsHandler imageBounds={imageBounds} />
+        {/* Обработчик границ карты - только для схематической карты */}
+        {mapConfig.mapType === MAP_TYPES.SCHEMATIC && (
+          <MapBoundsHandler imageBounds={imageBounds} />
+        )}
 
         {/* Плагины */}
         {plugins}
@@ -88,4 +123,4 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
   ]);
 };
 
-export default MapViewContainer; 
+export default MapViewContainer;

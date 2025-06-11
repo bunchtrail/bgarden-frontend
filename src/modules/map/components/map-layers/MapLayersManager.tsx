@@ -86,6 +86,9 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
               key="geo-tile-layer"
               attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maxNativeZoom={18}
+              maxZoom={mapConfigContext.maxZoom}
+              minZoom={mapConfigContext.minZoom}
             />
           )
         )
