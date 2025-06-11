@@ -6,7 +6,7 @@ import { MapMarker } from './MapMarker';
 import { useMapData } from '../hooks';
 import regionBridge from '@/services/regions/RegionBridge';
 import {
-  UnifiedControlPanel,
+  PositionedControlPanel,
   UNIFIED_PANEL_PRESETS,
 } from '@/modules/map/components/control-panel';
 
@@ -61,12 +61,11 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   }; // Используем стандартную панель управления с явной конфигурацией для режима "specimen"
   const mapControlPanel = useMemo(
     () => (
-      <UnifiedControlPanel
+      <PositionedControlPanel
         config={UNIFIED_PANEL_PRESETS.specimen}
         panelId="geography-map-controls"
         position="topRight"
         collapsible={false}
-        className="relative"
       />
     ),
     []
