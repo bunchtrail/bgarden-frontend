@@ -12,7 +12,7 @@ export const MAP_LAYERS = {
   IMAGERY: 'imagery',
   REGIONS: 'regions',
   PLANTS: 'plants',
-  GRID: 'grid'
+  GRID: 'grid',
 };
 
 export interface RegionMapSelectorProps {
@@ -24,21 +24,23 @@ export interface RegionMapSelectorProps {
   showTooltips?: boolean;
 }
 
-export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({ 
-  regions, 
-  selectedRegionIds, 
-  onRegionClick, 
-  onCoordinatesChange, 
+export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
+  regions,
+  selectedRegionIds,
+  onRegionClick,
+  onCoordinatesChange,
   markerPosition,
-  showTooltips = false
+  showTooltips = false,
 }) => {
   const { mapData, loading } = useMapData();
-  
+
   // Преобразуем ID регионов в ID областей для карты
   const selectedAreaIds = useMemo(() => {
-    return selectedRegionIds.map(id => regionBridge.regionIdToAreaId(Number(id)));
+    return selectedRegionIds.map((id) =>
+      regionBridge.regionIdToAreaId(Number(id))
+    );
   }, [selectedRegionIds]);
-  
+
   // Обработчик клика по региону
   const handleRegionClick = (regionId: string) => {
     // Извлекаем числовой ID региона из ID области
@@ -49,43 +51,51 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
       onRegionClick(regionId);
     }
   };
-  
+
   // Адаптер для преобразования координат
   const handleCoordinatesChange = (lat: number, lng: number) => {
     onCoordinatesChange(lat, lng);
   };
-  
   // Используем стандартную панель управления с типом "specimen"
-  const mapControlPanel = useMemo(() => (
-    <UnifiedControlPanel 
-      pageType="specimen"
-      panelId="geography-map-controls"
-    />
-  ), []);
-  
+  const mapControlPanel = useMemo(
+    () => (
+      <UnifiedControlPanel
+        pageType="specimen"
+        panelId="geography-map-controls"
+        position="topRight"
+        collapsible={false}
+        className="relative"
+      />
+    ),
+    []
+  );
+
   // Формируем начальную конфигурацию для карты
-  const initialMapConfig = useMemo(() => ({
-    lightMode: true,
-    visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],
-    showTooltips: showTooltips,
-    maxZoom: 2,
-    minZoom: -1,
-    selectedAreaIds,
-    enableClustering: true,
-    mapInteractionPriority: 'marker',
-    showControls: false,
-  }), [selectedAreaIds, showTooltips]);
-  
+  const initialMapConfig = useMemo(
+    () => ({
+      lightMode: true,
+      visibleLayers: [MAP_LAYERS.IMAGERY, MAP_LAYERS.REGIONS],
+      showTooltips: showTooltips,
+      maxZoom: 2,
+      minZoom: -1,
+      selectedAreaIds,
+      enableClustering: true,
+      mapInteractionPriority: 'marker',
+      showControls: false,
+    }),
+    [selectedAreaIds, showTooltips]
+  );
+
   return (
     <div className="relative">
       <MapProvider>
-        <MapPage 
+        <MapPage
           mode="light"
           initialConfig={initialMapConfig}
           showControls={true}
           customLayers={[]}
           plugins={
-            <MapMarker 
+            <MapMarker
               position={markerPosition}
               onPositionChange={handleCoordinatesChange}
             />
@@ -98,4 +108,4 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   );
 };
 
-export default RegionMapSelector; 
+export default RegionMapSelector;

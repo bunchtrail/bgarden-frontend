@@ -2,7 +2,8 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
 import { FullscreenLayout } from '../modules/layouts';
-import { MapPage, UnifiedControlPanel } from '../modules/map';
+import { MapPage } from '../modules/map';
+import { PositionedControlPanel } from '../modules/map/components/control-panel';
 
 export const mapRoutes: RouteObject[] = [
   {
@@ -12,7 +13,9 @@ export const mapRoutes: RouteObject[] = [
         <FullscreenLayout>
           <MapPage
             showControls={true}
-            extraControls={<UnifiedControlPanel pageType="map" />}
+            extraControls={
+              <PositionedControlPanel pageType="map" panelId="main-map-panel" />
+            }
           />
         </FullscreenLayout>
       </ProtectedRoute>
@@ -25,7 +28,12 @@ export const mapRoutes: RouteObject[] = [
         <FullscreenLayout>
           <MapPage
             showControls={true}
-            extraControls={<UnifiedControlPanel pageType="sector" />}
+            extraControls={
+              <PositionedControlPanel
+                pageType="sector"
+                panelId="sector-map-panel"
+              />
+            }
           />
         </FullscreenLayout>
       </ProtectedRoute>

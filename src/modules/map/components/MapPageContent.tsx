@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useMapConfig } from '../contexts/MapConfigContext';
-import { useMapData, useMapControlPanel } from '../hooks';
+import { useMapData } from '../hooks';
 import MapCard from './map-card/MapCard';
 import MapContentController from './map-content/MapContentController';
 import { MapPageContentProps } from '../types/mapTypes';
@@ -16,7 +16,6 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   plugins,
   onRegionClick,
   onMapReady,
-  controlPanelPosition = 'topRight',
   showControls,
   onDataLoaded,
   onError,
@@ -42,11 +41,6 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
     onDataLoaded,
     onError,
   });
-
-  const { showControlPanel, toggleControlPanel, controlPanelStyles } =
-    useMapControlPanel({
-      controlPanelPosition,
-    });
 
   const { mapConfig } = useMapConfig();
 
@@ -107,9 +101,6 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
             setImageBoundsCalculated={setImageBoundsCalculated}
             refreshMapData={handleRefresh}
             showControls={effectiveShowControls}
-            controlPanelStyles={controlPanelStyles}
-            toggleControlPanel={toggleControlPanel}
-            showControlPanel={showControlPanel}
             extraControls={extraControls}
             customLayers={enhancedLayers}
             onRegionClick={onRegionClick}

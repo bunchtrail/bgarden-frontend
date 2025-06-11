@@ -1,6 +1,5 @@
-import React, { useState, useCallback, isValidElement } from 'react';
+import React, { useState, useCallback } from 'react';
 import MapContentStateRenderer from './MapContentStateRenderer';
-import { UnifiedControlPanel } from '../../components/control-panel';
 import MapViewContainer from '../map-view/MapViewContainer';
 import ImageBoundsCalculator from '../map-view/ImageBoundsCalculator';
 import { MapContentControllerProps } from '../../types/mapTypes';
@@ -21,9 +20,6 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
   setImageBoundsCalculated,
   refreshMapData,
   showControls,
-  controlPanelStyles,
-  toggleControlPanel,
-  showControlPanel,
   extraControls,
   customLayers,
   onRegionClick,
@@ -42,20 +38,8 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
     },
     []
   );
-
   // Используем значение пустоты данных, либо переданное извне, либо локальное
   const effectiveIsEmpty = isEmpty || localIsEmpty;
-
-  /**
-   * Более простой и надежный способ проверки, является ли элемент панелью управления -
-   * просто проверяем наличие свойства pageType у props
-   */
-  const isControlPanel =
-    extraControls &&
-    isValidElement(extraControls) &&
-    typeof extraControls.props === 'object' &&
-    extraControls.props !== null &&
-    'pageType' in extraControls.props;
 
   return (
     <MapContentStateRenderer
@@ -65,24 +49,8 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
       handleRefresh={refreshMapData}
       isEmpty={effectiveIsEmpty}
     >
-      {/* Рендерим элементы управления картой */}
-      {showControls && (
-        <>
-          {/* Если передана панель управления через extraControls, используем её */}
-          {isControlPanel ? (
-            extraControls
-          ) : (
-            /* Иначе создаем стандартную и используем extraControls как customSections */ <UnifiedControlPanel
-              pageType="map"
-              className={controlPanelStyles?.container}
-              onClose={toggleControlPanel}
-              customSections={extraControls}
-              panelId="main-map-control-panel"
-              mapTitle={mapTitle}
-            />
-          )}
-        </>
-      )}
+      {/* Рендерим элементы управления картой, если переданы */}
+      {showControls && extraControls}
 
       {/* Компонент для расчета границ */}
       <ImageBoundsCalculator

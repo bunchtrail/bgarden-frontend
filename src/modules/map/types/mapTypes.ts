@@ -49,7 +49,6 @@ export interface MapPageContentProps {
   customLayers?: MapLayerProps[];
   plugins?: ReactNode;
   onRegionClick?: (regionId: string) => void;
-  controlPanelPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
   showControls?: boolean;
   onDataLoaded?: (data: {
     mapData: MapData | null;
@@ -112,9 +111,6 @@ export interface MapContentControllerProps {
   setImageBoundsCalculated: (calculated: boolean) => void;
   refreshMapData: () => void;
   showControls: boolean;
-  controlPanelStyles: Record<string, string>;
-  toggleControlPanel: () => void;
-  showControlPanel: boolean;
   extraControls?: ReactNode;
   customLayers?: MapLayerProps[];
   onRegionClick?: (regionId: string) => void;

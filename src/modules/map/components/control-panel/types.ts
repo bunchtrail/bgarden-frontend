@@ -9,34 +9,36 @@ export enum PanelSection {
   MODE = 'mode',
   SETTINGS = 'settings',
   DRAWING = 'drawing',
-  BUTTONS = 'buttons'
+  BUTTONS = 'buttons',
 }
 
-// Интерфейс для пресета настроек панели управления
-export interface PanelConfigPreset {
-  showLayerSelector: boolean;
-  showModeToggle: boolean;
-  showTooltipToggle: boolean;
-  showLabelToggle: boolean;
-  showClusteringToggle: boolean;
-  showMarkerToggle: boolean;
-  showDrawingControls: boolean;
-  showDrawingToggle?: boolean;
-  sections?: ControlPanelSection[];
+// Типы позиционирования панели
+export type PanelPosition =
+  | 'topLeft'
+  | 'topRight'
+  | 'bottomLeft'
+  | 'bottomRight';
+
+// Интерфейс для позиционирования и стилизации
+export interface PanelPositioning {
+  position?: PanelPosition;
+  className?: string;
+  style?: React.CSSProperties;
+  zIndex?: number;
 }
 
-// Новый интерфейс для унифицированной панели управления
+// Унифицированный интерфейс для конфигурации панели управления
 export interface UnifiedPanelConfig {
   // Режим панели
   mode: PanelMode;
-  // Видимые секции (массив или объект с настройками)
+  // Видимые секции
   visibleSections: PanelSection[];
   // Дополнительные секции
   customSections?: ControlPanelSection[];
   // Конфигурация по секциям
   sectionConfig?: {
     [PanelSection.LAYERS]?: {
-      layers: Array<{ id: string, label: string }>;
+      layers?: Array<{ id: string; label: string }>;
     };
     [PanelSection.SETTINGS]?: {
       showTooltipToggle?: boolean;
@@ -45,9 +47,11 @@ export interface UnifiedPanelConfig {
       showPopupToggle?: boolean;
     };
     [PanelSection.MODE]?: {
-      modes: Array<{ id: string, label: string }>;
+      modes?: Array<{ id: string; label: string }>;
     };
   };
+  // Позиционирование и стилизация
+  positioning?: PanelPositioning;
 }
 
 // Интерфейс для секции панели управления
@@ -57,117 +61,130 @@ export interface ControlPanelSection {
   content: ReactNode;
 }
 
-// Предопределенные пресеты для разных режимов панели
-export const PANEL_PRESETS: Record<Exclude<PanelMode, 'custom'>, PanelConfigPreset> = {
-  'full': {
-    showLayerSelector: true,
-    showModeToggle: true,
-    showTooltipToggle: true,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: true,
-    showDrawingToggle: true,
-  },
-  'light': {
-    showLayerSelector: false,
-    showModeToggle: false,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: false,
-    showDrawingToggle: false,
-  },
-  'minimal': {
-    showLayerSelector: false,
-    showModeToggle: false,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: false,
-    showMarkerToggle: false,
-    showDrawingControls: false,
-    showDrawingToggle: false,
-  },
-  'geography': {
-    showLayerSelector: false,
-    showModeToggle: true,
-    showTooltipToggle: false,
-    showLabelToggle: false,
-    showClusteringToggle: true,
-    showMarkerToggle: false,
-    showDrawingControls: true,
-    showDrawingToggle: true,
-  }
-};
-
 // Предопределенные конфигурации для унифицированной панели
 export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
-  'map': {
+  map: {
     mode: 'full',
     visibleSections: [
       PanelSection.MODE,
       PanelSection.LAYERS,
       PanelSection.SETTINGS,
-      PanelSection.BUTTONS
+      PanelSection.BUTTONS,
     ],
     sectionConfig: {
       [PanelSection.SETTINGS]: {
-        showPopupToggle: true
-      }
-    }
+        showPopupToggle: true,
+        showClusteringToggle: true,
+        showDrawingToggle: true,
+        showTooltipToggle: true,
+      },
+    },
+    positioning: {
+      position: 'topRight',
+      zIndex: 1000,
+    },
   },
-  'sector': {
+  sector: {
     mode: 'geography',
-    visibleSections: [
-      PanelSection.LAYERS,
-      PanelSection.SETTINGS
-    ],
+    visibleSections: [PanelSection.LAYERS, PanelSection.SETTINGS],
     sectionConfig: {
       [PanelSection.SETTINGS]: {
-        showPopupToggle: true
-      }
-    }
+        showPopupToggle: true,
+        showClusteringToggle: true,
+        showDrawingToggle: false,
+        showTooltipToggle: false,
+      },
+    },
+    positioning: {
+      position: 'topRight',
+      zIndex: 1000,
+    },
   },
-  'specimen': {
+  specimen: {
     mode: 'minimal',
-    visibleSections: [
-      PanelSection.LAYERS,
-      PanelSection.SETTINGS
-    ],
-    // Настройки для секций при работе со страницей растения
+    visibleSections: [PanelSection.LAYERS, PanelSection.SETTINGS],
     sectionConfig: {
       [PanelSection.SETTINGS]: {
         showClusteringToggle: true,
         showTooltipToggle: false,
         showDrawingToggle: false,
-        showPopupToggle: false
-      }
-    }
-  }
+        showPopupToggle: false,
+      },
+    },
+    positioning: {
+      position: 'topRight',
+      zIndex: 1000,
+    },
+  },
 };
 
 // Интерфейс для пропсов основного компонента
-export interface MapControlPanelProps {
+export interface UnifiedControlPanelProps {
+  // Основные настройки
+  pageType?: string;
+  config?: UnifiedPanelConfig;
+
+  // Кастомизация
+  customSections?: ReactNode;
+  mapTitle?: string;
+  panelId?: string;
+
+  // Позиционирование и стили
+  position?: PanelPosition;
   className?: string;
-  // Режим панели управления
-  panelMode?: PanelMode;
-  showLayerSelector?: boolean;
-  showModeToggle?: boolean;
-  showTooltipToggle?: boolean;
-  showLabelToggle?: boolean;
-  showClusteringToggle?: boolean;
-  showMarkerToggle?: boolean;
-  showDrawingControls?: boolean;
-  showDrawingToggle?: boolean;
+  style?: React.CSSProperties;
+  zIndex?: number;
+
+  // Обработчики событий
   onClose?: () => void;
-  customSections?: ControlPanelSection[];
-  children?: ReactNode;
   onConfigChange?: (key: string, value: boolean | string | number) => void;
-  header?: ReactNode;
-  footer?: ReactNode;
-  // Возможность передать полный пресет конфигурации
-  configPreset?: PanelConfigPreset;
-  // Для унифицированной панели
-  unifiedConfig?: UnifiedPanelConfig;
-} 
+
+  // Дополнительные опции
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
+}
+// Интерфейс для пропсов основного компонента
+export interface UnifiedControlPanelProps {
+  // Основные настройки
+  pageType?: string;
+  config?: UnifiedPanelConfig;
+
+  // Кастомизация
+  customSections?: ReactNode;
+  mapTitle?: string;
+  panelId?: string;
+
+  // Позиционирование и стили
+  position?: PanelPosition;
+  className?: string;
+  style?: React.CSSProperties;
+  zIndex?: number;
+
+  // Обработчики событий
+  onClose?: () => void;
+  onConfigChange?: (key: string, value: boolean | string | number) => void;
+
+  // Дополнительные опции
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
+}
+
+// Утилитарные функции для работы с позиционированием
+export const getPositionClasses = (
+  position: PanelPosition = 'topRight'
+): string => {
+  const baseClasses = 'absolute';
+
+  switch (position) {
+    case 'topLeft':
+      return `${baseClasses} top-4 left-4`;
+    case 'topRight':
+      return `${baseClasses} top-4 right-4`;
+    case 'bottomLeft':
+      return `${baseClasses} bottom-4 left-4`;
+    case 'bottomRight':
+      return `${baseClasses} bottom-4 right-4`;
+    default:
+      return `${baseClasses} top-4 right-4`;
+  }
+};

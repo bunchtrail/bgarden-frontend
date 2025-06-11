@@ -1,14 +1,15 @@
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useMapConfig,
   MAP_LAYERS,
   MAP_MODES,
-  MAP_TYPES, // Импортируем типы карт
+  MAP_TYPES,
 } from '../../contexts/MapConfigContext';
 import {
   PanelSection,
-  UnifiedPanelConfig,
   UNIFIED_PANEL_PRESETS,
+  UnifiedControlPanelProps,
+  getPositionClasses,
 } from './types';
 import { Switch } from '../../../ui/components/Form';
 import {
@@ -21,24 +22,20 @@ import ControlButtons from './ControlButtons';
 
 const renderedPanels = new Set<string>();
 
-interface UnifiedControlPanelProps {
-  className?: string;
-  pageType?: string;
-  config?: UnifiedPanelConfig;
-  onClose?: () => void;
-  customSections?: ReactNode;
-  panelId?: string;
-  mapTitle?: string;
-}
-
 const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
-  className = '',
   pageType = 'map',
   config,
-  onClose,
   customSections,
-  panelId = 'default',
   mapTitle,
+  panelId = 'default',
+  position = 'topRight',
+  className = '',
+  style,
+  zIndex = 1000,
+  onClose,
+  onConfigChange,
+  collapsible = true,
+  defaultExpanded = true,
 }) => {
   const {
     mapConfig,
@@ -55,11 +52,10 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       renderedPanels.delete(panelId);
     };
   }, [panelId]);
-
   const panelConfig =
     config || UNIFIED_PANEL_PRESETS[pageType] || UNIFIED_PANEL_PRESETS.map;
 
-  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const [isPanelVisible, setIsPanelVisible] = useState(mapConfig.showControls);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -74,15 +70,50 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     setIsPanelVisible(true);
   }, []);
 
+  // Создаем динамические стили панели
+  const panelStyles = React.useMemo(() => {
+    const positionClasses = getPositionClasses(position);
+    const baseStyles = `
+      ${positionClasses}
+      max-w-xs w-full
+      overflow-hidden
+      ${cardClasses.base}
+      bg-white/85 backdrop-blur-md 
+      shadow-[0_0_10px_rgba(0,0,0,0.08)]
+      ${isExpanded ? 'opacity-100' : 'opacity-95 hover:opacity-100'}
+      ${animationClasses.transition}
+      ${className}
+    `;
+
+    return {
+      className: baseStyles,
+      style: {
+        zIndex,
+        ...style,
+      },
+    };
+  }, [position, isExpanded, className, zIndex, style]);
+
+  // Создаем стили для кнопки повторного открытия
+  const reopenButtonStyles = React.useMemo(() => {
+    const positionClasses = getPositionClasses(position);
+    return `${positionClasses} z-[1000]`;
+  }, [position]);
   const handleToggleClustering = useCallback(() => {
     updateMapConfig({ enableClustering: !mapConfig.enableClustering });
     setHasChanges(true);
-  }, [mapConfig.enableClustering, updateMapConfig]);
+    if (onConfigChange) {
+      onConfigChange('enableClustering', !mapConfig.enableClustering);
+    }
+  }, [mapConfig.enableClustering, updateMapConfig, onConfigChange]);
 
   const handleToggleDrawing = useCallback(() => {
     updateMapConfig({ drawingEnabled: !mapConfig.drawingEnabled });
     setHasChanges(true);
-  }, [mapConfig.drawingEnabled, updateMapConfig]);
+    if (onConfigChange) {
+      onConfigChange('drawingEnabled', !mapConfig.drawingEnabled);
+    }
+  }, [mapConfig.drawingEnabled, updateMapConfig, onConfigChange]);
 
   const handleModeChange = useCallback(
     (mode: string) => {
@@ -91,16 +122,22 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
         drawingEnabled: mode === MAP_MODES.DRAW,
       });
       setHasChanges(true);
+      if (onConfigChange) {
+        onConfigChange('interactionMode', mode);
+      }
     },
-    [updateMapConfig]
+    [updateMapConfig, onConfigChange]
   );
 
   const handleMapTypeChange = useCallback(
     (type: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => {
       setMapType(type);
       setHasChanges(true);
+      if (onConfigChange) {
+        onConfigChange('mapType', type);
+      }
     },
-    [setMapType]
+    [setMapType, onConfigChange]
   );
 
   const handleResetConfig = useCallback(() => {
@@ -131,20 +168,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   const isSectionVisible = (section: PanelSection) => {
     return panelConfig.visibleSections.includes(section);
   };
-
-  if (!isPanelVisible) {
-    return (
-      <div className="absolute top-4 right-4 z-[1000]">
-        <button
-          onClick={handleReopenPanel}
-          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
-          aria-label="Открыть панель управления"
-        >
-          <span className="text-xl">⚙️</span>
-        </button>
-      </div>
-    );
-  }
 
   // Рендеринг секции переключения вида карты
   const renderMapTypeSection = () => {
@@ -383,25 +406,29 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       </div>
     );
   };
-
-  const panelStyles = `
-    absolute top-4 right-4 z-[1000] 
-    max-w-xs w-full
-    overflow-hidden
-    ${cardClasses.base}
-    bg-white/85 backdrop-blur-md 
-    shadow-[0_0_10px_rgba(0,0,0,0.08)]
-    ${isExpanded ? 'opacity-100' : 'opacity-95 hover:opacity-100'}
-    ${animationClasses.transition}
-    ${className}
-  `;
+  if (!isPanelVisible) {
+    return (
+      <div className={reopenButtonStyles}>
+        <button
+          onClick={handleReopenPanel}
+          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
+          aria-label="Открыть панель управления"
+        >
+          <span className="text-xl">⚙️</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className={panelStyles} data-panel-id={panelId}>
-      {' '}
+    <div
+      className={panelStyles.className}
+      style={panelStyles.style}
+      data-panel-id={panelId}
+    >
       <PanelHeader
         customHeader={renderCustomHeader()}
-        onToggleExpand={handleToggleExpand}
+        onToggleExpand={collapsible ? handleToggleExpand : undefined}
         onClose={handleClose}
         isExpanded={isExpanded}
       />

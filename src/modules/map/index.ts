@@ -7,40 +7,34 @@ export * from './types/mapTypes';
 export { default as MapPage } from './components/MapPage';
 
 // Экспорт контекстов
-export { 
-  MapProvider, 
-  useMapContext,
-} from './contexts/MapContext';
+export { MapProvider, useMapContext } from './contexts/MapContext';
 
-export { 
+export {
   MapConfigProvider,
   MAP_LAYERS,
   MAP_MODES,
   DEFAULT_MAP_CONFIG,
-  useMapConfig
+  useMapConfig,
 } from './contexts/MapConfigContext';
 
 // Экспорт унифицированной панели управления
 export { default as UnifiedControlPanel } from './components/control-panel/UnifiedControlPanel';
+export { default as PositionedControlPanel } from './components/control-panel/PositionedControlPanel';
 export { PanelSection } from './components/control-panel/types';
-export type { ControlPanelSection, UnifiedPanelConfig, UNIFIED_PANEL_PRESETS } from './components/control-panel';
+export type {
+  ControlPanelSection,
+  UnifiedPanelConfig,
+  UNIFIED_PANEL_PRESETS,
+} from './components/control-panel';
 
 // Дополнительные типы
 export type { MapData } from './services/mapService';
 
 // Хуки
-export { 
-  useMap, 
-  useMapData, 
-  useMapLayers,
-  useMapControlPanel
-} from './hooks';
+export { useMap, useMapData, useMapLayers } from './hooks';
 
 // Сервисы
-export { 
-  getMapImageUrl, 
-  getActiveMap 
-} from './services/mapService';
+export { getMapImageUrl, getActiveMap } from './services/mapService';
 
 export {
   getAllRegions,
@@ -54,7 +48,7 @@ export {
   parseCoordinates,
   getDefaultCoordinates,
   getDefaultRegions,
-  getSectorRegionMapping
+  getSectorRegionMapping,
 } from '@/services/regions';
 
 // Стили
@@ -69,7 +63,7 @@ export {
   EmptyMapView,
   LoadingView,
   MapReadyHandler,
-  BaseMapContainer
+  BaseMapContainer,
 } from './components/map-components';
 
 // Компоненты панели управления (кроме UnifiedControlPanel, который уже экспортирован выше)
@@ -86,4 +80,4 @@ export { default as MapLayersManager } from './components/map-layers/MapLayersMa
 export { default as MapContentStateRenderer } from './components/map-content/MapContentStateRenderer';
 
 // Компоненты информации о растениях
-export { EnhancedPlantMarkersLayer } from './components/plant-info'; 
+export { EnhancedPlantMarkersLayer } from './components/plant-info';
