@@ -127,9 +127,10 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           mapConfig={mapConfigContext}
           onPlantsLoaded={handlePlantsLoaded}
         />
-      ), // Слой рисования и редактирования - доступен в режимах DRAW и EDIT
+      ), // Слой рисования и редактирования - доступен в режимах DRAW, EDIT и DELETE
       (mapConfigContext.interactionMode === MAP_MODES.DRAW ||
-        mapConfigContext.interactionMode === MAP_MODES.EDIT) && (
+        mapConfigContext.interactionMode === MAP_MODES.EDIT ||
+        mapConfigContext.interactionMode === MAP_MODES.DELETE) && (
         <MapDrawingLayer
           key="map-drawing"
           isVisible={true}

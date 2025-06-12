@@ -26,6 +26,7 @@ import { MAP_MODES, useMapConfig, useMapContext } from '@/modules/map';
 import { COLORS } from '@/styles';
 import AreaCreationModal from './MapDrawingLayer/components/AreaCreationModal';
 import AreaEditModal from './MapDrawingLayer/components/AreaEditModal';
+import AreaDeletionModal from './MapDrawingLayer/components/AreaDeletionModal';
 import { useLeafletEvents } from './MapDrawingLayer/hooks/useLeafletEvents';
 
 // Дополняем типы Leaflet для устаревшего метода _flat
@@ -99,6 +100,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const [drawControl, setDrawControl] = useState<L.Control.Draw | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeletionModalOpen, setIsDeletionModalOpen] = useState(false);
   const [hasCompletedDrawing, setHasCompletedDrawing] =
     useState<boolean>(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -106,6 +108,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const [newAreaName, setNewAreaName] = useState('');
   const [newAreaDescription, setNewAreaDescription] = useState('');
   const [editingAreaId, setEditingAreaId] = useState<string | null>(null);
+  const [deletingAreaId, setDeletingAreaId] = useState<string | null>(null);
 
   // Храним слой + данные области при создании (до сохранения)
   const [tempAreaData, setTempAreaData] = useState<{
@@ -153,7 +156,9 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     // на случай размонтирования - восстанавливаем исходное состояние
     return () => togglePointerEvents(true);
   }, [map, isDrawingMode]);
-  const isEditMode = mapConfig.interactionMode === MAP_MODES.EDIT;
+  const isEditMode =
+    mapConfig.interactionMode === MAP_MODES.EDIT ||
+    mapConfig.interactionMode === MAP_MODES.DELETE;
 
   // Синхронизируем локальную ref с актуальным состоянием areas
   useEffect(() => {
@@ -221,15 +226,31 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       }
     },
     [config, setAreas, mapConfig.mapType]
-  ); // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
+  );
+
+  // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
   const makePolygonDraggable = useCallback(
     (polygon: L.Polygon | L.Rectangle) => {
       polygon.on('click', function (e: any) {
-        // Если пользователь выбрал «корзину» – даём Leaflet-Draw самому удалить слой
+        const areaId = (polygon as any).options?.areaId;
+
+        // В режиме удаления показываем модальное окно подтверждения
+        if (mapConfig.interactionMode === MAP_MODES.DELETE && areaId) {
+          L.DomEvent.stop(e); // Блокируем всплытие события
+          const area = areas.find((a) => a.id === areaId);
+          if (area) {
+            setDeletingAreaId(areaId);
+            setNewAreaName(area.name); // Используем для отображения в модалке
+            setIsDeletionModalOpen(true);
+          }
+          return;
+        }
+
+        // Если пользователь выбрал «корзину» в Leaflet-Draw – даём ему самому удалить слой
         // Не блокируем события, чтобы удаление работало корректно
         if (isDeleteMode) return;
 
-        if (isEditMode) {
+        if (isEditMode && mapConfig.interactionMode === MAP_MODES.EDIT) {
           // Блокируем всплытие события только для режима редактирования
           // чтобы включить перетаскивание полигона
           L.DomEvent.stop(e);
@@ -251,7 +272,15 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         }
       });
     },
-    [isEditMode, isDeleteMode]
+    [
+      isEditMode,
+      isDeleteMode,
+      mapConfig.interactionMode,
+      areas,
+      setDeletingAreaId,
+      setNewAreaName,
+      setIsDeletionModalOpen,
+    ]
   );
 
   // Вспомогательный хук для трекинга событий Leaflet (draw:start, stop и т. п.)
@@ -425,7 +454,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         } catch {}
       }
     };
-  }, [map, isVisible, isDrawingMode, isEditMode, config]);
+  }, [map, isVisible, isDrawingMode, isEditMode, config, drawControl]);
 
   // Сброс флага завершения рисования при выходе из DRAW-режима
   useEffect(() => {
@@ -508,19 +537,43 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     setEditingAreaId(null);
   };
 
-  // Обработчики открытия модалок (например, по клику на слой — см. useLeafletEvents)
-  const openCreateModal = (defaultName: string) => {
-    setNewAreaName(defaultName);
-    setNewAreaDescription('');
-    setIsModalOpen(true);
+  // Обработчик подтверждения удаления области
+  const handleConfirmDeletion = () => {
+    if (!deletingAreaId) return;
+
+    // Удаляем область из состояния
+    const updatedAreas = areasRef.current.filter(
+      (a) => a.id !== deletingAreaId
+    );
+    setAreas(updatedAreas);
+
+    // Удаляем слой с карты
+    if (drawnItemsRef.current) {
+      drawnItemsRef.current.eachLayer((layer: any) => {
+        if (layer.options?.areaId === deletingAreaId) {
+          drawnItemsRef.current?.removeLayer(layer);
+        }
+      });
+    }
+
+    // Если это регион из сервера, удаляем его и там
+    if (deletingAreaId.startsWith('region-')) {
+      const regionId = regionBridge.areaIdToRegionId(deletingAreaId);
+      // TODO: вызвать deleteRegion(regionId) когда будет готов API
+      console.log('Удаление региона с сервера:', regionId);
+    }
+
+    setIsDeletionModalOpen(false);
+    setDeletingAreaId(null);
   };
 
-  const openEditModal = (areaId: string, name: string, description: string) => {
-    setEditingAreaId(areaId);
-    setNewAreaName(name);
-    setNewAreaDescription(description);
-    setIsEditModalOpen(true);
+  // Обработчик отмены удаления
+  const handleCancelDeletion = () => {
+    setIsDeletionModalOpen(false);
+    setDeletingAreaId(null);
   };
+  // Обработчики открытия модалок (например, по клику на слой — см. useLeafletEvents)
+  // (Удалены неиспользуемые функции openCreateModal и openEditModal)
 
   // Эффект для отслеживания режима удаления Leaflet Draw
   useEffect(() => {
@@ -558,6 +611,13 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         newAreaDescription={newAreaDescription}
         setNewAreaDescription={setNewAreaDescription}
         onSave={handleSaveAreaEdit}
+      />
+
+      <AreaDeletionModal
+        isOpen={isDeletionModalOpen}
+        onClose={handleCancelDeletion}
+        areaName={newAreaName}
+        onConfirm={handleConfirmDeletion}
       />
     </>
   );

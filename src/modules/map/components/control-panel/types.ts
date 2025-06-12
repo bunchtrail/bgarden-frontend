@@ -55,6 +55,7 @@ export interface UnifiedPanelConfig {
       showViewMode?: boolean;
       showDrawMode?: boolean;
       showEditMode?: boolean;
+      showDeleteMode?: boolean;
     };
   };
   // Позиционирование и стилизация
@@ -89,6 +90,7 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
         showViewMode: true,
         showDrawMode: true,
         showEditMode: true,
+        showDeleteMode: true,
       },
       [PanelSection.SETTINGS]: {
         showPopupToggle: true,
@@ -116,6 +118,7 @@ export const UNIFIED_PANEL_PRESETS: Record<string, UnifiedPanelConfig> = {
         showViewMode: true,
         showDrawMode: false, // Отключено для географического режима
         showEditMode: false, // Отключено для географического режима
+        showDeleteMode: false, // Отключено для географического режима
       },
       [PanelSection.SETTINGS]: {
         showPopupToggle: true,

@@ -13,6 +13,101 @@ import './utilities.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
+/**
+ * ВАЖНО: CSS стили в этом файле решают проблему конфликта слоев карты
+ *
+ * Проблема: В режиме удаления (delete) Leaflet-Draw не может удалять области,
+ * потому что служебные полигоны MapRegionsLayer перехватывают клики
+ *
+ * Решение: При включении режимов редактирования/удаления отключаем
+ * pointer-events для всех служебных полигонов (.region-polygon)
+ *
+ * Это позволяет Leaflet-Draw корректно обрабатывать клики по нужным слоям
+ */
+
+// Логгер для отслеживания состояний карты и стилей
+export const MapStylesLogger = {
+  // Префикс для всех логов
+  PREFIX: '[MapStyles]',
+
+  // Включение/выключение подробного логгирования
+  DEBUG_ENABLED: process.env.NODE_ENV === 'development',
+
+  log(message: string, data?: any) {
+    if (this.DEBUG_ENABLED) {
+      console.log(`${this.PREFIX} ${message}`, data || '');
+    }
+  },
+
+  warn(message: string, data?: any) {
+    console.warn(`${this.PREFIX} WARNING: ${message}`, data || '');
+  },
+
+  error(message: string, data?: any) {
+    console.error(`${this.PREFIX} ERROR: ${message}`, data || '');
+  },
+
+  // Специальные методы для отслеживания состояний карты
+  logDrawModeChange(mode: string, enabled: boolean) {
+    this.log(`Draw mode ${mode} ${enabled ? 'ENABLED' : 'DISABLED'}`);
+    this.logCurrentMapState();
+  },
+
+  logStyleApplication(styleName: string, applied: boolean) {
+    this.log(`Style "${styleName}" ${applied ? 'APPLIED' : 'REMOVED'}`);
+  },
+
+  logRegionInteraction(action: string, regionId?: string) {
+    this.log(
+      `Region interaction: ${action}`,
+      regionId ? `Region: ${regionId}` : ''
+    );
+  },
+
+  logCurrentMapState() {
+    if (!this.DEBUG_ENABLED) return;
+
+    const container = document.querySelector('.leaflet-container');
+    if (!container) {
+      this.warn('Leaflet container not found');
+      return;
+    }
+
+    const state = {
+      drawToolbarEnabled: container.classList.contains(
+        'leaflet-draw-toolbar-enabled'
+      ),
+      drawActive: document.documentElement.classList.contains(
+        'leaflet-draw-active'
+      ),
+      regionPolygons: container.querySelectorAll('.region-polygon').length,
+      interactiveElements: container.querySelectorAll('.leaflet-interactive')
+        .length,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.log('Current map state:', state);
+  },
+
+  logPointerEventsStatus() {
+    if (!this.DEBUG_ENABLED) return;
+
+    const regionPolygons = document.querySelectorAll('.region-polygon');
+    const statusReport = Array.from(regionPolygons).map((polygon, index) => {
+      const computedStyle = window.getComputedStyle(polygon);
+      return {
+        index,
+        pointerEvents: computedStyle.pointerEvents,
+        cursor: computedStyle.cursor,
+        zIndex: computedStyle.zIndex,
+        classes: polygon.className,
+      };
+    });
+
+    this.log('Pointer events status for region polygons:', statusReport);
+  },
+};
+
 // Экспорт готовых констант для часто используемых стилей
 export const MAP_STYLES = {
   // Улучшенные Tailwind классы для карты
@@ -199,6 +294,14 @@ export const MAP_UTILITIES = {
   special: {
     sparkle: 'sparkle',
   },
+
+  // Отладочные утилиты
+  debug: {
+    enabled: 'data-debug="enabled"',
+    regionOutline: 'debug-region-outline',
+    pointerEventsNone: 'debug-pointer-events-none',
+    interactionBlocked: 'debug-interaction-blocked',
+  },
 };
 
 // Экспорт готовых комбинаций классов для частых случаев использования
@@ -235,10 +338,31 @@ export const CUSTOM_STYLES = `
     cursor: crosshair;
   }
   
+  /* Дополнительная защита: отключение событий для всех служебных элементов регионов */
+  .leaflet-draw-toolbar-enabled .region-polygon,
+  .leaflet-draw-toolbar-enabled .leaflet-interactive.region-polygon {
+    pointer-events: none !important;
+    cursor: crosshair !important;
+    z-index: auto !important;
+    /* Добавляем визуальный индикатор отключенного состояния для отладки */
+    opacity: 0.7 !important;
+    filter: grayscale(0.3) !important;
+  }
+  
   /* Глобальное переопределение курсора в режиме рисования */
   html.leaflet-draw-active, 
   html.leaflet-draw-active * { 
     cursor: crosshair !important; 
+  }
+  
+  /* Специальные стили для режима удаления */
+  .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-draw-toolbar-button-enabled ~ .leaflet-container .region-polygon,
+  .leaflet-draw-edit-remove.leaflet-draw-toolbar-button-enabled ~ .leaflet-container .region-polygon {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    /* Визуальная индикация режима удаления */
+    opacity: 0.5 !important;
+    filter: grayscale(0.5) sepia(0.2) hue-rotate(320deg) !important;
   }
   
   /* Улучшение взаимодействия с полигонами регионов */
@@ -254,6 +378,23 @@ export const CUSTOM_STYLES = `
     stroke-opacity: 0.9;
     filter: brightness(1.1) saturate(1.2);
     transform: scale(1.002);
+  }
+  
+  /* Отключение интерактивности служебных полигонов во время режимов редактирования/удаления */
+  .leaflet-draw-toolbar-enabled .region-polygon {
+    pointer-events: none !important;
+    cursor: crosshair !important;
+  }
+  
+  /* Дебаг-стили для визуального контроля применения правил */
+  .region-polygon[data-debug="enabled"] {
+    outline: 2px dashed #ff0000 !important;
+    outline-offset: 2px !important;
+  }
+  
+  .leaflet-draw-toolbar-enabled .region-polygon[data-debug="enabled"] {
+    outline: 2px dashed #00ff00 !important;
+    outline-offset: 2px !important;
   }
   
   /* Указываем, что все элементы на карте должны быть интерактивными */
@@ -297,5 +438,281 @@ if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.innerHTML = CUSTOM_STYLES;
   document.head.appendChild(style);
+
+  // Инициализация логгирования
+  MapStylesLogger.log('Custom styles loaded and applied to document');
+
+  // Мониторинг изменений классов на body/html для отслеживания режимов карты
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.type === 'attributes' &&
+        mutation.attributeName === 'class'
+      ) {
+        const target = mutation.target as HTMLElement;
+
+        if (target.tagName === 'HTML') {
+          const hasDrawActive = target.classList.contains(
+            'leaflet-draw-active'
+          );
+          MapStylesLogger.logDrawModeChange('draw-active', hasDrawActive);
+        }
+      }
+    });
+  });
+
+  // Мониторинг изменений в контейнере карты
+  const mapObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.type === 'attributes' &&
+        mutation.attributeName === 'class'
+      ) {
+        const target = mutation.target as HTMLElement;
+
+        if (target.classList.contains('leaflet-container')) {
+          const hasDrawToolbar = target.classList.contains(
+            'leaflet-draw-toolbar-enabled'
+          );
+          MapStylesLogger.logDrawModeChange('draw-toolbar', hasDrawToolbar);
+
+          // Логгируем статус pointer-events после изменения
+          setTimeout(() => {
+            MapStylesLogger.logPointerEventsStatus();
+          }, 100);
+        }
+      }
+
+      // Отслеживание добавления/удаления полигонов регионов
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (
+            node instanceof HTMLElement &&
+            node.classList.contains('region-polygon')
+          ) {
+            MapStylesLogger.logRegionInteraction(
+              'Region polygon added',
+              node.id || 'unknown'
+            );
+          }
+        });
+
+        mutation.removedNodes.forEach((node) => {
+          if (
+            node instanceof HTMLElement &&
+            node.classList.contains('region-polygon')
+          ) {
+            MapStylesLogger.logRegionInteraction(
+              'Region polygon removed',
+              node.id || 'unknown'
+            );
+          }
+        });
+      }
+    });
+  });
+
+  // Запуск наблюдателей
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+
+  // Ждем загрузки DOM для запуска наблюдателя карты
+  document.addEventListener('DOMContentLoaded', () => {
+    const mapContainer = document.querySelector('.leaflet-container');
+    if (mapContainer) {
+      mapObserver.observe(mapContainer, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ['class'],
+      });
+      MapStylesLogger.log('Map container observer started');
+    } else {
+      // Если карта еще не загружена, ждем ее появления
+      const containerWatcher = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (
+              node instanceof HTMLElement &&
+              node.classList.contains('leaflet-container')
+            ) {
+              mapObserver.observe(node, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                attributeFilter: ['class'],
+              });
+              MapStylesLogger.log('Map container found and observer started');
+              containerWatcher.disconnect();
+            }
+          });
+        });
+      });
+
+      containerWatcher.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  });
+
+  // Добавляем глобальные функции для ручного логгирования (доступны в консоли браузера)
+  (window as any).mapStylesDebug = {
+    logCurrentState: () => MapStylesLogger.logCurrentMapState(),
+    logPointerEvents: () => MapStylesLogger.logPointerEventsStatus(),
+    enableDebug: () => {
+      MapStylesLogger.DEBUG_ENABLED = true;
+    },
+    disableDebug: () => {
+      MapStylesLogger.DEBUG_ENABLED = false;
+    },
+    getLogger: () => MapStylesLogger,
+  };
+
+  MapStylesLogger.log('Debug functions added to window.mapStylesDebug');
 }
+
+// Дополнительные утилиты для интеграции с компонентами карты
+export const MapInteractionUtils = {
+  /**
+   * Включает визуальную отладку для всех полигонов регионов
+   */
+  enableVisualDebug() {
+    const polygons = document.querySelectorAll('.region-polygon');
+    polygons.forEach((polygon) => {
+      polygon.setAttribute('data-debug', 'enabled');
+    });
+    MapStylesLogger.log('Visual debug enabled for all region polygons');
+  },
+
+  /**
+   * Отключает визуальную отладку
+   */
+  disableVisualDebug() {
+    const polygons = document.querySelectorAll('.region-polygon[data-debug]');
+    polygons.forEach((polygon) => {
+      polygon.removeAttribute('data-debug');
+    });
+    MapStylesLogger.log('Visual debug disabled');
+  },
+
+  /**
+   * Проверяет, применяются ли стили блокировки интерактивности
+   */
+  checkInteractionBlocking(): boolean {
+    const container = document.querySelector('.leaflet-container');
+    if (!container) {
+      MapStylesLogger.warn('Leaflet container not found');
+      return false;
+    }
+
+    const hasDrawToolbar = container.classList.contains(
+      'leaflet-draw-toolbar-enabled'
+    );
+    const polygons = container.querySelectorAll('.region-polygon');
+
+    let blockingApplied = true;
+    polygons.forEach((polygon, index) => {
+      const computedStyle = window.getComputedStyle(polygon);
+      const isBlocked = computedStyle.pointerEvents === 'none';
+
+      if (hasDrawToolbar && !isBlocked) {
+        MapStylesLogger.warn(
+          `Region polygon ${index} is not blocked when it should be`
+        );
+        blockingApplied = false;
+      } else if (!hasDrawToolbar && isBlocked) {
+        MapStylesLogger.warn(
+          `Region polygon ${index} is blocked when it shouldn't be`
+        );
+        blockingApplied = false;
+      }
+    });
+
+    MapStylesLogger.log(
+      `Interaction blocking check: ${blockingApplied ? 'PASSED' : 'FAILED'}`,
+      {
+        drawToolbarEnabled: hasDrawToolbar,
+        polygonCount: polygons.length,
+      }
+    );
+
+    return blockingApplied;
+  },
+
+  /**
+   * Логгирует детальную информацию о состоянии всех элементов карты
+   */
+  generateDetailedReport() {
+    const report = {
+      timestamp: new Date().toISOString(),
+      environment: {
+        userAgent: navigator.userAgent,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+      },
+      mapContainer: null as any,
+      regionPolygons: [] as any[],
+      leafletLayers: [] as any[],
+      appliedStyles: [] as any[],
+    };
+
+    // Информация о контейнере карты
+    const container = document.querySelector('.leaflet-container');
+    if (container) {
+      report.mapContainer = {
+        classes: container.className,
+        drawToolbarEnabled: container.classList.contains(
+          'leaflet-draw-toolbar-enabled'
+        ),
+        dimensions: {
+          width: container.clientWidth,
+          height: container.clientHeight,
+        },
+      };
+    }
+
+    // Информация о полигонах регионов
+    const polygons = document.querySelectorAll('.region-polygon');
+    polygons.forEach((polygon, index) => {
+      const computedStyle = window.getComputedStyle(polygon);
+      report.regionPolygons.push({
+        index,
+        id: (polygon as HTMLElement).id || null,
+        classes: polygon.className,
+        pointerEvents: computedStyle.pointerEvents,
+        cursor: computedStyle.cursor,
+        opacity: computedStyle.opacity,
+        zIndex: computedStyle.zIndex,
+        isVisible: computedStyle.display !== 'none',
+        hasDebugAttribute: polygon.hasAttribute('data-debug'),
+      });
+    });
+
+    // Информация о слоях Leaflet
+    const leafletLayers = document.querySelectorAll('.leaflet-layer');
+    leafletLayers.forEach((layer, index) => {
+      const computedStyle = window.getComputedStyle(layer);
+      report.leafletLayers.push({
+        index,
+        classes: layer.className,
+        zIndex: computedStyle.zIndex,
+        pointerEvents: computedStyle.pointerEvents,
+      });
+    });
+
+    // Проверка применения стилей
+    const styleElement = document.querySelector('style');
+    if (styleElement && styleElement.innerHTML.includes('region-polygon')) {
+      report.appliedStyles.push('Custom region polygon styles detected');
+    }
+
+    MapStylesLogger.log('Detailed map state report generated:', report);
+    return report;
+  },
+};
 

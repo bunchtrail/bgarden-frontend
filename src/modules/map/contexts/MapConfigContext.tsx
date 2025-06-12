@@ -31,6 +31,7 @@ export const MAP_MODES = {
   VIEW: 'view',
   DRAW: 'draw',
   EDIT: 'edit',
+  DELETE: 'delete', // Режим удаления объектов
 } as const;
 
 // Имя ключа для хранения конфигурации в localStorage
@@ -195,7 +196,7 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
         drawingEnabled: mapConfig.drawingEnabled,
       });
     }
-  }, [mapConfig.drawingEnabled]);
+  }, [mapConfig.drawingEnabled, mapConfig.interactionMode]);
 
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
     console.log('[MapConfig] Обновление конфигурации:', updates);

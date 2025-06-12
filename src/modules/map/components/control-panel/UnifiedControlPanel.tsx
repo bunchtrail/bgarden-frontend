@@ -236,6 +236,11 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
         label: 'Редактирование объектов',
         showInConfig: modeConfig.showEditMode,
       },
+      {
+        id: MAP_MODES.DELETE,
+        label: 'Удаление объектов',
+        showInConfig: modeConfig.showDeleteMode,
+      },
     ].filter((mode) => {
       // Проверяем, разрешен ли режим в конфигурации
       if (!mode.alwaysAvailable && mode.showInConfig === false) {
