@@ -9,6 +9,7 @@ import {
   MapConfig,
   MAP_LAYERS,
   MAP_TYPES,
+  MAP_MODES,
 } from '../../contexts/MapConfigContext';
 import { Plant } from '@/services/regions/types';
 import MapDrawingLayer from './MapDrawingLayer';
@@ -126,8 +127,9 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           mapConfig={mapConfigContext}
           onPlantsLoaded={handlePlantsLoaded}
         />
-      ), // Слой рисования - доступен на всех типах карт
-      mapConfigContext.drawingEnabled && (
+      ), // Слой рисования и редактирования - доступен в режимах DRAW и EDIT
+      (mapConfigContext.interactionMode === MAP_MODES.DRAW ||
+        mapConfigContext.interactionMode === MAP_MODES.EDIT) && (
         <MapDrawingLayer
           key="map-drawing"
           isVisible={true}

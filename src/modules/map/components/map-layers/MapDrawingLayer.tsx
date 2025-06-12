@@ -96,12 +96,12 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const map = useMap();
   const { mapConfig, updateMapConfig } = useMapConfig();
   const { areas, setAreas } = useMapContext();
-
   const [drawControl, setDrawControl] = useState<L.Control.Draw | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [hasCompletedDrawing, setHasCompletedDrawing] =
     useState<boolean>(false);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
 
   const [newAreaName, setNewAreaName] = useState('');
   const [newAreaDescription, setNewAreaDescription] = useState('');
@@ -118,6 +118,41 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const areasRef = useRef<Area[]>(areas);
 
   const isDrawingMode = mapConfig.interactionMode === MAP_MODES.DRAW;
+
+  // Эффект для управления pointer-events у панелей в режиме рисования
+  useEffect(() => {
+    if (!map) return;
+
+    // перечень панелей, которые перехватывают клики
+    const panes = [
+      'overlayPane',
+      'markerPane',
+      'shadowPane',
+      'popupPane',
+      'tooltipPane',
+    ] as const;
+
+    const togglePointerEvents = (enabled: boolean) => {
+      panes.forEach((name) => {
+        const pane = map.getPane(name);
+        if (pane) pane.style.pointerEvents = enabled ? 'auto' : 'none';
+      });
+    };
+
+    // при входе в режим рисования
+    if (isDrawingMode) {
+      togglePointerEvents(false); // ❌ блокируем перетаскивание
+      map.dragging.disable(); // выключаем drag карты
+      map.doubleClickZoom.disable(); // отключаем зум по двойному клику
+    } else {
+      togglePointerEvents(true); // ✅ возвращаем интерактивность
+      map.dragging.enable();
+      map.doubleClickZoom.enable();
+    }
+
+    // на случай размонтирования - восстанавливаем исходное состояние
+    return () => togglePointerEvents(true);
+  }, [map, isDrawingMode]);
   const isEditMode = mapConfig.interactionMode === MAP_MODES.EDIT;
 
   // Синхронизируем локальную ref с актуальным состоянием areas
@@ -186,13 +221,17 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       }
     },
     [config, setAreas, mapConfig.mapType]
-  );
-
-  // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
+  ); // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
   const makePolygonDraggable = useCallback(
     (polygon: L.Polygon | L.Rectangle) => {
       polygon.on('click', function (e: any) {
+        // Если пользователь выбрал «корзину» – даём Leaflet-Draw самому удалить слой
+        // Не блокируем события, чтобы удаление работало корректно
+        if (isDeleteMode) return;
+
         if (isEditMode) {
+          // Блокируем всплытие события только для режима редактирования
+          // чтобы включить перетаскивание полигона
           L.DomEvent.stop(e);
           const editableLayer = polygon as any;
           if (
@@ -212,7 +251,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         }
       });
     },
-    [isEditMode]
+    [isEditMode, isDeleteMode]
   );
 
   // Вспомогательный хук для трекинга событий Leaflet (draw:start, stop и т. п.)
@@ -250,17 +289,79 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         });
         if (drawnItemsRef.current) {
           drawnItemsRef.current.addLayer(polygon);
+          // В режиме редактирования делаем полигон сразу редактируемым
+          if (isEditMode) {
+            makePolygonDraggable(polygon);
+          }
         }
       }
     });
-  }, [areas, isVisible, config]);
+  }, [areas, isVisible, config, isEditMode, makePolygonDraggable]);
+
+  // Эффект для включения режима редактирования всех полигонов при переходе в режим EDIT
+  useEffect(() => {
+    if (!drawnItemsRef.current || !isEditMode) return;
+
+    // Включаем редактирование для всех существующих полигонов
+    drawnItemsRef.current.eachLayer((layer: any) => {
+      if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+        // Включаем режим редактирования для каждого полигона
+        if (layer.editing && typeof layer.editing.enable === 'function') {
+          layer.editing.enable();
+        }
+        // Добавляем визуальную подсказку о том, что полигон редактируется
+        layer.setStyle({
+          ...layer.options,
+          weight: (layer.options.weight || 2) + 1,
+          opacity: 0.8,
+          dashArray: '5, 5',
+        });
+      }
+    });
+
+    // При выходе из режима редактирования отключаем редактирование
+    return () => {
+      if (drawnItemsRef.current) {
+        drawnItemsRef.current.eachLayer((layer: any) => {
+          if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+            if (layer.editing && typeof layer.editing.disable === 'function') {
+              layer.editing.disable();
+            }
+            // Возвращаем стандартный стиль
+            layer.setStyle({
+              ...layer.options,
+              weight: layer.options.weight || 2,
+              opacity: 1,
+              dashArray: undefined,
+            });
+          }
+        });
+      }
+    };
+  }, [isEditMode]);
 
   // Управляем появлением/скрытием контролов рисования в зависимости от режима
   useEffect(() => {
-    if (!isVisible) return;
+    if (!map || !isVisible) return;
 
-    if (!drawControl && isVisible) {
-      const drawingControl = new L.Control.Draw({
+    // Удаляем предыдущий контрол, если он существует
+    if (drawControl) {
+      try {
+        map.removeControl(drawControl);
+      } catch {}
+      setDrawControl(null);
+    }
+
+    // Инициализируем drawnItemsRef, если не инициализирован
+    if (!drawnItemsRef.current) {
+      drawnItemsRef.current = new L.FeatureGroup();
+      map.addLayer(drawnItemsRef.current);
+    }
+
+    let newDrawControl: L.Control.Draw | null = null;
+    if (isDrawingMode) {
+      // Режим создания областей - показываем инструменты рисования
+      newDrawControl = new L.Control.Draw({
         position: 'topleft',
         draw: {
           polyline: false,
@@ -287,37 +388,44 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
           },
         },
         edit: {
-          featureGroup: drawnItemsRef.current ?? new L.FeatureGroup(),
+          featureGroup: drawnItemsRef.current,
+          remove: false,
+          edit: false,
+        },
+      });
+    } else if (isEditMode) {
+      // Режим редактирования объектов - показываем только инструменты редактирования
+      newDrawControl = new L.Control.Draw({
+        position: 'topleft',
+        draw: {
+          polyline: false,
+          circle: false,
+          circlemarker: false,
+          marker: false,
+          rectangle: false,
+          polygon: false,
+        },
+        edit: {
+          featureGroup: drawnItemsRef.current,
           remove: true,
           edit: {},
         },
       });
-      setDrawControl(drawingControl);
-      // Инициализируем drawnItemsRef, если не инициализирован
-      if (!drawnItemsRef.current) {
-        drawnItemsRef.current = new L.FeatureGroup();
-        map.addLayer(drawnItemsRef.current);
-      }
     }
 
-    if (drawControl) {
-      if (isDrawingMode || isEditMode) {
-        map.addControl(drawControl);
-      } else {
-        try {
-          map.removeControl(drawControl);
-        } catch {}
-      }
+    if (newDrawControl) {
+      setDrawControl(newDrawControl);
+      map.addControl(newDrawControl);
     }
 
     return () => {
-      if (drawControl) {
+      if (newDrawControl) {
         try {
-          map.removeControl(drawControl);
+          map.removeControl(newDrawControl);
         } catch {}
       }
     };
-  }, [map, isVisible, isDrawingMode, isEditMode, drawControl, config]);
+  }, [map, isVisible, isDrawingMode, isEditMode, config]);
 
   // Сброс флага завершения рисования при выходе из DRAW-режима
   useEffect(() => {
@@ -413,6 +521,22 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     setNewAreaDescription(description);
     setIsEditModalOpen(true);
   };
+
+  // Эффект для отслеживания режима удаления Leaflet Draw
+  useEffect(() => {
+    if (!map) return;
+
+    const onDeleteStart = () => setIsDeleteMode(true);
+    const onDeleteStop = () => setIsDeleteMode(false);
+
+    map.on('draw:deletestart', onDeleteStart);
+    map.on('draw:deletestop', onDeleteStop);
+
+    return () => {
+      map.off('draw:deletestart', onDeleteStart);
+      map.off('draw:deletestop', onDeleteStop);
+    };
+  }, [map]);
 
   return (
     <>

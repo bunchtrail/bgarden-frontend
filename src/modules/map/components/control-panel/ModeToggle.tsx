@@ -10,12 +10,11 @@ interface ModeToggleProps {
  */
 const ModeToggle: React.FC<ModeToggleProps> = ({ className = '' }) => {
   const { mapConfig, updateMapConfig } = useMapConfig();
-
   // Переключение режима взаимодействия с картой
   const handleModeChange = (mode: string) => {
     updateMapConfig({
       interactionMode: mode,
-      drawingEnabled: mode === MAP_MODES.DRAW,
+      drawingEnabled: mode !== MAP_MODES.VIEW, // TRUE для DRAW и EDIT
     });
   };
 
@@ -56,7 +55,7 @@ const ModeToggle: React.FC<ModeToggleProps> = ({ className = '' }) => {
             onChange={() => handleModeChange(MAP_MODES.EDIT)}
             className="mr-2"
           />
-          <span className="text-sm text-gray-700">Редактирование областей</span>
+          <span className="text-sm text-gray-700">Редактирование объектов</span>
         </label>
       </div>
     </div>

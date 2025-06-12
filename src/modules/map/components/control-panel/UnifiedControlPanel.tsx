@@ -100,20 +100,23 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       onConfigChange('enableClustering', !mapConfig.enableClustering);
     }
   }, [mapConfig.enableClustering, updateMapConfig, onConfigChange]);
-
   const handleToggleDrawing = useCallback(() => {
-    updateMapConfig({ drawingEnabled: !mapConfig.drawingEnabled });
+    const newEnabled = !mapConfig.drawingEnabled;
+
+    updateMapConfig({
+      drawingEnabled: newEnabled,
+      interactionMode: newEnabled ? MAP_MODES.DRAW : MAP_MODES.VIEW,
+    });
     setHasChanges(true);
     if (onConfigChange) {
-      onConfigChange('drawingEnabled', !mapConfig.drawingEnabled);
+      onConfigChange('drawingEnabled', newEnabled);
     }
   }, [mapConfig.drawingEnabled, updateMapConfig, onConfigChange]);
-
   const handleModeChange = useCallback(
     (mode: string) => {
       updateMapConfig({
         interactionMode: mode,
-        drawingEnabled: mode === MAP_MODES.DRAW,
+        drawingEnabled: mode !== MAP_MODES.VIEW, // TRUE для DRAW и EDIT
       });
       setHasChanges(true);
       if (onConfigChange) {
@@ -230,7 +233,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       },
       {
         id: MAP_MODES.EDIT,
-        label: 'Редактирование областей',
+        label: 'Редактирование объектов',
         showInConfig: modeConfig.showEditMode,
       },
     ].filter((mode) => {
@@ -344,7 +347,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
 
           {settingsConfig.showDrawingToggle !== false && !isGeoMap && (
             <Switch
-              label="Создание областей"
+              label="Редактирование областей"
               checked={mapConfig.drawingEnabled}
               onChange={handleToggleDrawing}
               disabled={isGeoMap}

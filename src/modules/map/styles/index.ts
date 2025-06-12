@@ -227,6 +227,20 @@ export const MAP_PRESETS = {
 
 // Современные стили для улучшения взаимодействия с картой
 export const CUSTOM_STYLES = `
+  /* Отключение перехвата событий в режиме рисования */
+  .leaflet-draw-toolbar-enabled .leaflet-overlay-pane,
+  .leaflet-draw-toolbar-enabled .leaflet-marker-pane,
+  .leaflet-draw-toolbar-enabled .leaflet-shadow-pane {
+    pointer-events: none !important;
+    cursor: crosshair;
+  }
+  
+  /* Глобальное переопределение курсора в режиме рисования */
+  html.leaflet-draw-active, 
+  html.leaflet-draw-active * { 
+    cursor: crosshair !important; 
+  }
+  
   /* Улучшение взаимодействия с полигонами регионов */
   .region-polygon {
     cursor: pointer;
