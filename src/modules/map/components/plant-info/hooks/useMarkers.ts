@@ -35,7 +35,7 @@ export const useMarkers = (
       setManager(newManager);
 
       return () => {
-        newManager.clearAllMarkers();
+        newManager.clearAllMarkers(true); // Полная очистка при размонтировании компонента
       };
     }
   }, [map, showPopupOnClick]);
@@ -48,12 +48,12 @@ export const useMarkers = (
 
   useEffect(() => {
     if (!isVisible || !manager) {
-      if (manager) manager.clearAllMarkers();
+      if (manager) manager.clearAllMarkers(false); // Сохраняем кэш при скрытии
       return;
     }
 
     if (plants.length === 0) {
-      manager.clearAllMarkers();
+      manager.clearAllMarkers(false); // Сохраняем кэш при отсутствии растений
       return;
     }
 
@@ -83,7 +83,7 @@ export const useMarkers = (
 
   const clearMarkers = useCallback(() => {
     if (manager) {
-      manager.clearAllMarkers();
+      manager.clearAllMarkers(true); // Полная очистка включая кэш только при явном вызове
       isInitialMarkersLoad.current = true;
     }
   }, [manager]);

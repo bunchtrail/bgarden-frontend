@@ -7,6 +7,7 @@ import { MapViewContainerProps } from '../../types/mapTypes';
 import { Plant } from '@/services/regions/types';
 import { MAP_TYPES } from '../../contexts/MapConfigContext';
 import { useMapEvents } from 'react-leaflet';
+import { mapLogger } from '../../utils/logger';
 
 /**
  * Компонент для логирования событий взаимодействия с картой.
@@ -60,17 +61,22 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
     
     // Уведомляем родительский компонент об изменении состояния данных
     if (onDataStateChange) {
-      onDataStateChange({
+      const state = {
         hasPlants: plants && plants.length > 0,
         hasRegions: regions && regions.length > 0,
         isEmpty: isEmpty
-      });
+      };
+      mapLogger.log('Состояние данных карты изменилось:', state);
+      onDataStateChange(state);
     }
   }, [regions, onDataStateChange]);
   
   // Мемоизация контента для предотвращения лишних перерисовок
   return useMemo(() => {
-    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO) return null;
+    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO) {
+      mapLogger.log('Нет URL изображения карты для схематического режима');
+      return null;
+    }
     
     return (
       <BaseMapContainer

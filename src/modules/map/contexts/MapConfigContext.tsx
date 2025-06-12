@@ -6,11 +6,13 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import L from 'leaflet';
 import {
   LatLngExpression,
   LatLngBoundsExpression,
   ControlPosition,
 } from 'leaflet';
+import { mapLogger } from '../utils/logger';
 
 // Доступные слои карты
 export const MAP_LAYERS = {
@@ -116,7 +118,7 @@ interface MapConfigContextProps {
   toggleLayer: (layerName: string) => void;
   saveConfigToStorage: () => void;
   loadConfigFromStorage: () => void;
-  setMapType: (mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => void; // Новая функция
+  setMapType: (mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => void;
 }
 
 const MapConfigContext = createContext<MapConfigContextProps | undefined>(
@@ -131,179 +133,111 @@ export const useMapConfig = (): MapConfigContextProps => {
   return context;
 };
 
-interface MapConfigProviderProps {
-  children: ReactNode;
-  initialConfig?: Partial<MapConfig>;
-}
-
-// Утилита для безопасного доступа к localStorage
-const isClient = typeof window !== 'undefined';
-
-const getStoredConfig = () => {
-  if (!isClient) return null;
-  try {
-    const savedConfig = localStorage.getItem(STORAGE_KEY);
-    return savedConfig ? JSON.parse(savedConfig) : null;
-  } catch (error) {
-    console.error('Ошибка при чтении конфигурации карты:', error);
-    return null;
-  }
-};
-
-const setStoredConfig = (config: MapConfig) => {
-  if (!isClient) return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  } catch (error) {
-    console.error('Ошибка при сохранении конфигурации карты:', error);
-  }
-};
-
-export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
-  children,
-  initialConfig,
-}) => {
-  const initialConfigRef = React.useRef(initialConfig);
+export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: Partial<MapConfig>; }> = ({ children, initialConfig = {} }) => {
   const [mapConfig, setMapConfig] = useState<MapConfig>({
-    ...DEFAULT_MAP_CONFIG,
-    ...initialConfigRef.current,
+    ...DEFAULT_SCHEMATIC_CONFIG,
+    ...initialConfig,
   });
 
+  // Обновляем состояние логгера при изменении конфигурации
   useEffect(() => {
-    const savedConfig = getStoredConfig();
-    if (savedConfig) {
-      console.log(
-        '[MapConfig] Загружена конфигурация из localStorage:',
-        savedConfig
-      );
-      setMapConfig((prevConfig) => ({
-        ...prevConfig,
-        ...savedConfig,
-        ...initialConfigRef.current,
-      }));
-    } else {
-      console.log(
-        '[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.'
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    if (mapConfig.drawingEnabled) {
-      console.log('[MapConfig] Режим рисования включен', {
-        timestamp: new Date().toISOString(),
-        interactionMode: mapConfig.interactionMode,
-        drawingEnabled: mapConfig.drawingEnabled,
-      });
-    }
-  }, [mapConfig.drawingEnabled, mapConfig.interactionMode]);
+    mapLogger.setConfig(mapConfig);
+  }, [mapConfig]);
 
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
-    console.log('[MapConfig] Обновление конфигурации:', updates);
+    mapLogger.log('Обновление конфигурации:', updates);
+    
     setMapConfig((prevConfig) => {
-      const newConfig = {
-        ...prevConfig,
-        ...updates,
-      };
-      console.log('[MapConfig] Новое состояние после обновления:', newConfig);
+      const newConfig = { ...prevConfig, ...updates };
+      mapLogger.log('Новое состояние после обновления:', newConfig);
       return newConfig;
     });
   }, []);
 
-  const saveConfigToStorage = () => {
-    console.log(
-      '[MapConfig] Сохранение конфигурации в localStorage:',
-      mapConfig
-    );
-    setStoredConfig(mapConfig);
-  };
+  const resetMapConfig = useCallback(() => {
+    mapLogger.log('Сброс конфигурации карты');
+    setMapConfig(DEFAULT_SCHEMATIC_CONFIG);
+  }, []);
 
-  const loadConfigFromStorage = () => {
-    const savedConfig = getStoredConfig();
-    if (savedConfig) {
-      console.log(
-        '[MapConfig] Загружена конфигурация из localStorage (принудительно):',
-        savedConfig
-      );
-      setMapConfig(savedConfig);
-    }
-  };
-
-  const resetMapConfig = () => {
-    const currentMapType = mapConfig.mapType;
-    console.log(
-      `[MapConfig] Сброс конфигурации для типа карты: ${currentMapType}`
-    );
-    const defaultConfig =
-      currentMapType === MAP_TYPES.GEO
-        ? DEFAULT_GEO_CONFIG
-        : DEFAULT_SCHEMATIC_CONFIG;
-    setMapConfig(defaultConfig);
-    if (isClient) {
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-        console.log('[MapConfig] Конфигурация из localStorage удалена.');
-      } catch (error) {
-        console.error(
-          'Ошибка при удалении сохраненной конфигурации карты:',
-          error
-        );
-      }
-    }
-  };
-
-  const toggleLayer = (layerName: string) => {
-    console.log(`[MapConfig] Переключение слоя: ${layerName}`);
+  const toggleLayer = useCallback((layerName: string) => {
+    mapLogger.log(`Переключение слоя: ${layerName}`);
+    
     setMapConfig((prevConfig) => {
-      const isLayerActive = prevConfig.visibleLayers.includes(layerName);
-      const newLayers = isLayerActive
+      const newVisibleLayers = prevConfig.visibleLayers.includes(layerName)
         ? prevConfig.visibleLayers.filter((layer) => layer !== layerName)
         : [...prevConfig.visibleLayers, layerName];
-      console.log(`[MapConfig] Новые видимые слои:`, newLayers);
-      return { ...prevConfig, visibleLayers: newLayers };
+
+      // Проверка для схематической карты - должен быть активен хотя бы один базовый слой
+      if (prevConfig.mapType === MAP_TYPES.SCHEMATIC) {
+        // Проверяем наличие хотя бы одного базового слоя (IMAGERY или REGIONS)
+        const hasImagery = newVisibleLayers.includes(MAP_LAYERS.IMAGERY);
+        const hasRegions = newVisibleLayers.includes(MAP_LAYERS.REGIONS);
+        
+        // Если пытаемся выключить последний базовый слой, отменяем операцию
+        if (!hasImagery && !hasRegions) {
+          mapLogger.log('Отмена выключения - для схематической карты требуется хотя бы один базовый слой (IMAGERY или REGIONS)');
+          return prevConfig;
+        }
+      }
+
+      mapLogger.log('Новые видимые слои:', newVisibleLayers);
+      return {
+        ...prevConfig,
+        visibleLayers: newVisibleLayers,
+      };
     });
-  };
+  }, []);
 
-  // Новая функция для смены типа карты
-  const setMapType = useCallback(
-    (mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => {
-      if (mapType === mapConfig.mapType) return; // Не меняем, если тип тот же
-
-      console.log(`[MapConfig] Смена типа карты на: ${mapType}`);
-      // Используем функциональную форму setMapConfig для доступа к предыдущему состоянию
-      setMapConfig((prevConfig) => {
-        console.log('[MapConfig] Предыдущее состояние:', prevConfig);
-        // Выбираем конфиг по умолчанию для НОВОГО типа карты
-        const defaultConfig =
-          mapType === MAP_TYPES.GEO
-            ? DEFAULT_GEO_CONFIG
-            : DEFAULT_SCHEMATIC_CONFIG;
-
-        console.log(
-          '[MapConfig] Конфигурация по умолчанию для нового типа:',
-          defaultConfig
-        );
-
-        // Явно создаем НОВЫЙ объект состояния.
-        // Начинаем с чистого конфига по умолчанию и добавляем только те настройки,
-        // которые нужно сохранить из предыдущего состояния.
-        const newConfig = {
-          ...defaultConfig, // Полностью берем новый конфиг (с правильным центром, зумом и т.д.)
-
-          // Сохраняем пользовательские UI-настройки из предыдущего конфига
-          showTooltips: prevConfig.showTooltips,
-          showControls: prevConfig.showControls,
-          debug: prevConfig.debug,
-          enableClustering: prevConfig.enableClustering,
-          showPopupOnClick: prevConfig.showPopupOnClick,
-        };
-
-        console.log('[MapConfig] Новое состояние после смены типа:', newConfig);
-        return newConfig;
+  const setMapType = useCallback((newMapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => {
+    mapLogger.log(`Смена типа карты на: ${newMapType}`);
+    
+    // Очищаем все слои перед сменой типа карты
+    const mapElement = document.querySelector('.leaflet-container');
+    const map = mapElement ? (mapElement as any)._leaflet_map as L.Map : null;
+    
+    if (map) {
+      map.eachLayer((layer: L.Layer) => {
+        if ((layer as any)._drawnItems) {
+          (layer as any).clearLayers();
+        }
+        if (layer instanceof L.MarkerClusterGroup) {
+          layer.clearLayers();
+        }
+        map.removeLayer(layer);
       });
-    },
-    [mapConfig.mapType]
-  ); // Зависимость теперь только от mapConfig.mapType, что более корректно
+    }
+
+    // Устанавливаем новый тип карты с соответствующими настройками
+    setMapConfig((prevConfig) => {
+      const newConfig = {
+        ...(newMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG),
+        mapType: newMapType,
+        debug: prevConfig.debug,
+        showTooltips: prevConfig.showTooltips,
+      };
+      mapLogger.log('Новая конфигурация карты:', newConfig);
+      return newConfig;
+    });
+  }, []);
+
+  const saveConfigToStorage = useCallback(() => {
+    mapLogger.log('Сохранение конфигурации в localStorage');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
+  }, [mapConfig]);
+
+  const loadConfigFromStorage = useCallback(() => {
+    const savedConfig = localStorage.getItem(STORAGE_KEY);
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        mapLogger.log('Загружена конфигурация из localStorage:', parsedConfig);
+        setMapConfig(parsedConfig);
+      } catch (error) {
+        mapLogger.log('Ошибка при загрузке конфигурации из localStorage:', error);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
 
   const value = {
     mapConfig,

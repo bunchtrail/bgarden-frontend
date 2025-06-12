@@ -121,8 +121,12 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const areasRef = useRef<Area[]>(areas);
 
   const isDrawingMode = mapConfig.interactionMode === MAP_MODES.DRAW;
+  const isEditMode =
+    mapConfig.interactionMode === MAP_MODES.EDIT ||
+    mapConfig.interactionMode === MAP_MODES.DELETE;
+  const isDeleteModeOnly = mapConfig.interactionMode === MAP_MODES.DELETE;
 
-  // Эффект для управления pointer-events у панелей в режиме рисования
+  // Эффект для управления pointer-events у панелей в режиме рисования и удаления
   useEffect(() => {
     if (!map) return;
 
@@ -142,25 +146,35 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       });
     };
 
-    // при входе в режим рисования
-    if (isDrawingMode) {
+    // при входе в режим рисования или удаления
+    if (isDrawingMode || isDeleteModeOnly) {
       togglePointerEvents(false); // ❌ блокируем перетаскивание
       map.dragging.disable(); // выключаем drag карты
       map.doubleClickZoom.disable(); // отключаем зум по двойному клику
+      
+      // Дополнительная блокировка для DELETE режима через класс
+      if (isDeleteModeOnly && map.getPanes().overlayPane) {
+        map.getPanes().overlayPane.classList.add('leaflet-pane-no-pointer-events');
+      }
     } else {
       togglePointerEvents(true); // ✅ возвращаем интерактивность
       map.dragging.enable();
       map.doubleClickZoom.enable();
+      
+      // Убираем блокировку для DELETE режима
+      if (map.getPanes().overlayPane) {
+        map.getPanes().overlayPane.classList.remove('leaflet-pane-no-pointer-events');
+      }
     }
 
     // на случай размонтирования - восстанавливаем исходное состояние
-    return () => togglePointerEvents(true);
-  }, [map, isDrawingMode]);
-  const isEditMode =
-    mapConfig.interactionMode === MAP_MODES.EDIT ||
-    mapConfig.interactionMode === MAP_MODES.DELETE;
-
-  const isDeleteModeOnly = mapConfig.interactionMode === MAP_MODES.DELETE;
+    return () => {
+      togglePointerEvents(true);
+      if (map.getPanes().overlayPane) {
+        map.getPanes().overlayPane.classList.remove('leaflet-pane-no-pointer-events');
+      }
+    };
+  }, [map, isDrawingMode, isDeleteModeOnly]);
 
   // Синхронизируем локальную ref с актуальным состоянием areas
   useEffect(() => {
@@ -584,7 +598,9 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     if (deletingAreaId.startsWith('region-')) {
       const regionId = regionBridge.areaIdToRegionId(deletingAreaId);
       // TODO: вызвать deleteRegion(regionId) когда будет готов API
-      console.log('Удаление региона с сервера:', regionId);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Удаление региона с сервера:', regionId);
+      }
     }
 
     setIsDeletionModalOpen(false);
@@ -614,6 +630,59 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       map.off('draw:deletestop', onDeleteStop);
     };
   }, [map]);
+
+  // Обработчик смены типа карты для очистки кэш-слоев
+  useEffect(() => {
+    const handleMapTypeChange = (event: CustomEvent) => {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(
+          '[MapDrawingLayer] Очистка слоев при смене типа карты:',
+          event.detail
+        );
+      }
+
+      // Очищаем все нарисованные слои
+      if (drawnItemsRef.current) {
+        drawnItemsRef.current.clearLayers();
+        if (map && map.hasLayer(drawnItemsRef.current)) {
+          map.removeLayer(drawnItemsRef.current);
+        }
+        drawnItemsRef.current = null;
+      }
+
+      // Удаляем контрол рисования
+      if (drawControl) {
+        try {
+          map?.removeControl(drawControl);
+        } catch {}
+        setDrawControl(null);
+      }
+
+      // Сбрасываем состояние модалок и временных данных
+      setIsModalOpen(false);
+      setIsEditModalOpen(false);
+      setIsDeletionModalOpen(false);
+      setTempAreaData(null);
+      setHasCompletedDrawing(false);
+      setNewAreaName('');
+      setNewAreaDescription('');
+      setEditingAreaId(null);
+      setDeletingAreaId(null);
+    };
+
+    // Подписываемся на событие смены типа карты
+    window.addEventListener(
+      'mapTypeChange',
+      handleMapTypeChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        'mapTypeChange',
+        handleMapTypeChange as EventListener
+      );
+    };
+  }, [map, drawControl]);
 
   return (
     <>

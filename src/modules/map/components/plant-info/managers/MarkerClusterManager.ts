@@ -8,6 +8,16 @@ interface AddMarkersOptions {
   fitBounds?: boolean;
 }
 
+interface CacheKey {
+  mapType: string;
+  specimenId: string;
+}
+
+// Расширяем тип Plant для поддержки mapType
+interface PlantWithMapType extends Plant {
+  mapType?: string;
+}
+
 /**
  * Класс для управления кластеризацией маркеров на карте
  */
@@ -17,6 +27,7 @@ export class MarkerClusterManager {
   private map: L.Map;
   private popupImageCache: Map<string, string> = new Map();
   private showPopupOnClick: boolean;
+  private currentPlants: PlantWithMapType[] = [];
 
   /**
    * Создает новый менеджер кластеризации маркеров
@@ -43,7 +54,15 @@ export class MarkerClusterManager {
    * @param value Новое значение настройки
    */
   public setShowPopupOnClick(value: boolean): void {
+    if (this.showPopupOnClick === value) return;
+    
     this.showPopupOnClick = value;
+    
+    // Пересоздаем маркеры с новыми настройками попапов
+    if (this.currentPlants.length > 0) {
+      const markers = this.createPlantMarkers(this.currentPlants);
+      this.addMarkersWithClustering(markers, { fitBounds: false });
+    }
   }
 
   /**
@@ -51,7 +70,7 @@ export class MarkerClusterManager {
    * @param plant Данные растения
    * @returns HTML-содержимое попапа
    */
-  private async createPopupContent(plant: Plant): Promise<string> {
+  private async createPopupContent(plant: PlantWithMapType): Promise<string> {
     let imageUrl = '/images/specimens/placeholder.jpg';
 
     // Извлекаем ID образца из ID растения (specimen-123 -> 123)
@@ -59,10 +78,11 @@ export class MarkerClusterManager {
 
     if (specimenIdMatch && specimenIdMatch[1]) {
       const specimenId = parseInt(specimenIdMatch[1], 10);
+      const cacheKey = `${plant.mapType || 'default'}-${plant.id}`;
 
       // Проверяем кэш изображений
-      if (this.popupImageCache.has(plant.id)) {
-        imageUrl = this.popupImageCache.get(plant.id) || imageUrl;
+      if (this.popupImageCache.has(cacheKey)) {
+        imageUrl = this.popupImageCache.get(cacheKey) || imageUrl;
       } else {
         try {
           // Получаем изображение растения
@@ -72,7 +92,7 @@ export class MarkerClusterManager {
             // Используем полученный URL
             imageUrl = image.imageUrl;
             // Сохраняем в кэш
-            this.popupImageCache.set(plant.id, imageUrl);
+            this.popupImageCache.set(cacheKey, imageUrl);
           }
         } catch (error) {
           console.error('Ошибка при загрузке изображения для попапа:', error);
@@ -118,7 +138,10 @@ export class MarkerClusterManager {
    * @param plants Массив растений
    * @returns Массив маркеров Leaflet
    */
-  createPlantMarkers(plants: Plant[]): L.Marker[] {
+  createPlantMarkers(plants: PlantWithMapType[]): L.Marker[] {
+    // Сохраняем текущие растения для возможного пересоздания маркеров
+    this.currentPlants = plants;
+
     return plants.map((plant) => {
       const marker = L.marker(plant.position, {
         title: plant.name,
@@ -176,7 +199,15 @@ export class MarkerClusterManager {
     markers: L.Marker[],
     options: AddMarkersOptions = { fitBounds: true }
   ): void {
-    this.clearAllMarkers();
+    this.clearAllMarkers(false); // Не очищаем кэш при обновлении маркеров
+    
+    // Оптимизируем кэш - очищаем только устаревшие записи
+    if (this.currentPlants.length > 0) {
+      const currentMapType = this.currentPlants[0]?.mapType || 'default';
+      const currentSpecimenIds = this.currentPlants.map(plant => plant.id);
+      this.clearStaleCache(currentMapType, currentSpecimenIds);
+    }
+    
     this.markers = markers;
 
     this.markerClusterGroup.addLayers(markers);
@@ -194,7 +225,15 @@ export class MarkerClusterManager {
    * @param markers Массив маркеров
    */
   addMarkersWithoutClustering(markers: L.Marker[]): void {
-    this.clearAllMarkers();
+    this.clearAllMarkers(false); // Не очищаем кэш при обновлении маркеров
+    
+    // Оптимизируем кэш - очищаем только устаревшие записи
+    if (this.currentPlants.length > 0) {
+      const currentMapType = this.currentPlants[0]?.mapType || 'default';
+      const currentSpecimenIds = this.currentPlants.map(plant => plant.id);
+      this.clearStaleCache(currentMapType, currentSpecimenIds);
+    }
+    
     this.markers = markers;
 
     markers.forEach((marker) => {
@@ -204,14 +243,31 @@ export class MarkerClusterManager {
 
   /**
    * Очищает все маркеры и кластеры с карты
+   * @param clearCache Флаг, указывающий, нужно ли очищать кэш изображений
    */
-  clearAllMarkers(): void {
+  clearAllMarkers(clearCache: boolean = true): void {
     this.markerClusterGroup.clearLayers();
 
     this.markers.forEach((marker) => marker.remove());
     this.markers = [];
 
-    // Очищаем кэш изображений при удалении всех маркеров
-    this.popupImageCache.clear();
+    // Очищаем кэш изображений только если явно запрошено
+    if (clearCache) {
+      this.popupImageCache.clear();
+    }
+  }
+
+  /**
+   * Очищает устаревшие записи из кэша изображений
+   * @param currentMapType Текущий тип карты
+   * @param currentSpecimenIds Массив текущих ID образцов
+   */
+  clearStaleCache(currentMapType: string, currentSpecimenIds: string[]): void {
+    Array.from(this.popupImageCache.keys()).forEach(key => {
+      const [mapType, specimenId] = key.split('-');
+      if (mapType !== currentMapType || !currentSpecimenIds.includes(specimenId)) {
+        this.popupImageCache.delete(key);
+      }
+    });
   }
 }

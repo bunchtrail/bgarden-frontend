@@ -214,6 +214,11 @@
   opacity: 1;
 }
 
+/* ===== ПАНЕЛИ И СОБЫТИЯ ===== */
+.leaflet-pane-no-pointer-events {
+  pointer-events: none !important;
+}
+
 /* ===== ПОПАПЫ И ТУЛТИПЫ ===== */
 .leaflet-popup-content-wrapper {
   background: var(--bg-primary);
