@@ -19,11 +19,13 @@ interface UseLeafletEventsProps {
   isDrawingMode: boolean;
   isEditMode: boolean;
   makePolygonDraggable: (layer: L.Polygon | L.Rectangle) => void;
-  setTempAreaData: React.Dispatch<React.SetStateAction<{
-    newAreaId: string;
-    layer: L.Layer;
-    points: [number, number][];
-  } | null>>;
+  setTempAreaData: React.Dispatch<
+    React.SetStateAction<{
+      newAreaId: string;
+      layer: L.Layer;
+      points: [number, number][];
+    } | null>
+  >;
   setHasCompletedDrawing: React.Dispatch<React.SetStateAction<boolean>>;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setNewAreaName: React.Dispatch<React.SetStateAction<string>>;
@@ -61,11 +63,18 @@ export function useLeafletEvents({
 
     // Отслеживаем события для отладки
     const eventsToLog = [
-      'draw:created', 'draw:edited', 'draw:drawstart', 'draw:drawstop', 
-      'draw:deletestart', 'draw:deletestop', 'draw:toolbaropened', 'draw:toolbarclosed',
-      'layeradd', 'layerremove'
+      'draw:created',
+      'draw:edited',
+      'draw:drawstart',
+      'draw:drawstop',
+      'draw:deletestart',
+      'draw:deletestop',
+      'draw:toolbaropened',
+      'draw:toolbarclosed',
+      'layeradd',
+      'layerremove',
     ];
-    eventsToLog.forEach(eventType => {
+    eventsToLog.forEach((eventType) => {
       map.on(eventType, (e: any) => {
         logDebug(`Событие: ${eventType}`, e);
       });
@@ -97,7 +106,9 @@ export function useLeafletEvents({
         // Преобразуем координаты
         const coords = layer.getLatLngs()[0];
         if (Array.isArray(coords)) {
-          const points = coords.map((coord: any) => [coord.lat, coord.lng] as [number, number]);
+          const points = coords.map(
+            (coord: any) => [coord.lat, coord.lng] as [number, number]
+          );
           const newArea = {
             id: newAreaId,
             name: `Новая область ${areasRef.current.length + 1}`,
@@ -105,7 +116,7 @@ export function useLeafletEvents({
             points,
             strokeColor: config?.color || COLORS.primary.main,
             fillColor: config?.fillColor || COLORS.primary.light,
-            fillOpacity: config?.fillOpacity || 0.3
+            fillOpacity: config?.fillOpacity || 0.3,
           } as Area;
 
           // Добавляем во временный массив (в состоянии)
@@ -133,14 +144,16 @@ export function useLeafletEvents({
       editedLayers.eachLayer((layer: any) => {
         const { areaId } = layer.options || {};
         if (!areaId) return;
-        const areaIndex = updatedAreas.findIndex(a => a.id === areaId);
+        const areaIndex = updatedAreas.findIndex((a) => a.id === areaId);
         if (areaIndex !== -1) {
           const coords = layer.getLatLngs()[0];
           if (Array.isArray(coords)) {
-            const newPoints = coords.map((coord: any) => [coord.lat, coord.lng] as [number, number]);
+            const newPoints = coords.map(
+              (coord: any) => [coord.lat, coord.lng] as [number, number]
+            );
             updatedAreas[areaIndex] = {
               ...updatedAreas[areaIndex],
-              points: newPoints
+              points: newPoints,
             };
             changed = true;
           }
@@ -150,14 +163,15 @@ export function useLeafletEvents({
       if (changed) {
         // Перерисовываем
         drawnItemsRef.current?.clearLayers();
-        updatedAreas.forEach(a => {
+        updatedAreas.forEach((a) => {
           if (a.points.length > 2) {
             const polygon = L.polygon(a.points, {
               color: a.strokeColor || config?.color || COLORS.primary.main,
-              fillColor: a.fillColor || config?.fillColor || COLORS.primary.light,
+              fillColor:
+                a.fillColor || config?.fillColor || COLORS.primary.light,
               fillOpacity: a.fillOpacity || config?.fillOpacity || 0.3,
               weight: config?.weight || 2,
-              areaId: a.id
+              areaId: a.id,
             });
             makePolygonDraggable(polygon);
             drawnItemsRef.current?.addLayer(polygon);
@@ -177,7 +191,9 @@ export function useLeafletEvents({
         }
       });
       if (deletedIds.length > 0) {
-        const updatedAreas = areasRef.current.filter(a => !deletedIds.includes(a.id));
+        const updatedAreas = areasRef.current.filter(
+          (a) => !deletedIds.includes(a.id)
+        );
         setAreas(updatedAreas);
       }
     });
@@ -189,7 +205,10 @@ export function useLeafletEvents({
 
       if (e.type === 'layerremove') {
         // Если слой удаляется, но мы в процессе рисования, возможно, нужно клонировать его.
-        if ((layer instanceof L.Polygon || layer instanceof L.Rectangle) && isDrawingMode) {
+        if (
+          (layer instanceof L.Polygon || layer instanceof L.Rectangle) &&
+          isDrawingMode
+        ) {
           if (!layer.options?.areaId) {
             try {
               const cloned = cloneLayer(layer);
@@ -200,7 +219,9 @@ export function useLeafletEvents({
               // Извлекаем координаты
               const coords = layer.getLatLngs()[0];
               if (Array.isArray(coords)) {
-                const points = coords.map((coord: any) => [coord.lat, coord.lng] as [number, number]);
+                const points = coords.map(
+                  (coord: any) => [coord.lat, coord.lng] as [number, number]
+                );
                 setTempAreaData({ newAreaId, layer: cloned, points });
                 setHasCompletedDrawing(true);
               }
@@ -217,7 +238,7 @@ export function useLeafletEvents({
 
     return () => {
       // Чистим все события
-      eventsToLog.forEach(evt => map.off(evt));
+      eventsToLog.forEach((evt) => map.off(evt));
       map.off(L.Draw.Event.DRAWSTART);
       map.off(L.Draw.Event.DRAWSTOP);
       map.off(L.Draw.Event.CREATED);
