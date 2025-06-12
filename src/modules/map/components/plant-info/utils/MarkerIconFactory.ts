@@ -15,29 +15,45 @@ export const MarkerIconFactory = {
     // Определяем цвет маркера на основе имеющихся данных о растении
     let markerColor = MAP_COLORS.primary;
     let markerSize = 15;
-    
+
     // Пытаемся определить тип растения по описанию или названию
     const latinName = plant.latinName?.toLowerCase() || '';
     const name = plant.name.toLowerCase();
     const description = plant.description?.toLowerCase() || '';
-    
+
     // Примерная категоризация растений по названию или описанию
-    if (latinName.includes('conifer') || name.includes('хвой') || description.includes('хвой')) {
+    if (
+      latinName.includes('conifer') ||
+      name.includes('хвой') ||
+      description.includes('хвой')
+    ) {
       markerColor = '#2D8731'; // Темно-зеленый для хвойных
       markerSize = 14;
-    } else if (latinName.includes('flower') || name.includes('цвет') || description.includes('цвет')) {
+    } else if (
+      latinName.includes('flower') ||
+      name.includes('цвет') ||
+      description.includes('цвет')
+    ) {
       markerColor = '#E86A33'; // Оранжевый для цветущих
       markerSize = 13;
-    } else if (latinName.includes('shrub') || name.includes('куст') || description.includes('куст')) {
+    } else if (
+      latinName.includes('shrub') ||
+      name.includes('куст') ||
+      description.includes('куст')
+    ) {
       markerColor = '#41924B'; // Зеленый для кустарников
       markerSize = 12;
-    } else if (latinName.includes('tree') || name.includes('дерев') || description.includes('дерев')) {
+    } else if (
+      latinName.includes('tree') ||
+      name.includes('дерев') ||
+      description.includes('дерев')
+    ) {
       markerColor = '#1A5D1A'; // Темно-зеленый для деревьев
       markerSize = 16;
     }
 
     const halfSize = markerSize / 2;
-    
+
     return L.divIcon({
       className: 'custom-plant-marker',
       html: `<div style="
@@ -50,7 +66,7 @@ export const MarkerIconFactory = {
         cursor: pointer;
       "></div>`,
       iconSize: [markerSize, markerSize],
-      iconAnchor: [halfSize, halfSize]
+      iconAnchor: [halfSize, halfSize],
     });
   },
 
@@ -65,7 +81,7 @@ export const MarkerIconFactory = {
     let size = 30;
     if (count > 50) size = 40;
     else if (count > 20) size = 35;
-    
+
     return L.divIcon({
       html: `<div style="
         display: flex;
@@ -82,7 +98,7 @@ export const MarkerIconFactory = {
         font-size: ${count > 99 ? '10px' : '12px'};
       ">${count > 99 ? '99+' : count}</div>`,
       className: 'plant-cluster-icon',
-      iconSize: L.point(size, size)
+      iconSize: L.point(size, size),
     });
-  }
-}; 
+  },
+};

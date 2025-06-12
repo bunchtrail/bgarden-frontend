@@ -9,19 +9,13 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 
 import { Area } from '@/services/regions/types';
 
-
 // Логгеры и утилиты
 import { logError } from '@/utils/logger';
 
 // Модалки
 
-
 // Сервисы
-import {
-  PolygonFactory,
-  createRegion,
-  updateRegion,
-} from '@/services/regions';
+import { PolygonFactory, createRegion, updateRegion } from '@/services/regions';
 import regionBridge from '@/services/regions/RegionBridge';
 
 // Хуки
@@ -42,7 +36,7 @@ declare module 'leaflet' {
 // Исправляем устаревшее использование _flat
 if (typeof L.LineUtil !== 'undefined') {
   if (!L.LineUtil.isFlat && L.LineUtil._flat) {
-    L.LineUtil.isFlat = function(latlngs) {
+    L.LineUtil.isFlat = function (latlngs) {
       return L.LineUtil._flat(latlngs);
     };
   }
@@ -93,7 +87,10 @@ interface MapDrawingLayerProps {
 /**
  * Основной компонент для рисования и редактирования областей на карте
  */
-const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) => {
+const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
+  isVisible,
+  config,
+}) => {
   const map = useMap();
   const { mapConfig, updateMapConfig } = useMapConfig();
   const { areas, setAreas } = useMapContext();
@@ -101,7 +98,8 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   const [drawControl, setDrawControl] = useState<L.Control.Draw | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [hasCompletedDrawing, setHasCompletedDrawing] = useState<boolean>(false);
+  const [hasCompletedDrawing, setHasCompletedDrawing] =
+    useState<boolean>(false);
 
   const [newAreaName, setNewAreaName] = useState('');
   const [newAreaDescription, setNewAreaDescription] = useState('');
@@ -126,83 +124,90 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   }, [areas]);
 
   // Основная функция для сохранения области на сервере
-  const saveAreaToServer = useCallback((
-    areaId: string, 
-    areaName: string, 
-    areaDescription: string, 
-    points: [number, number][]
-  ) => {
-    const area: Area = {
-      id: areaId,
-      name: areaName,
-      description: areaDescription,
-      points,
-      fillColor: config?.fillColor || '#60A5FA',
-      strokeColor: config?.color || '#3B82F6',
-      fillOpacity: config?.fillOpacity || 0.3
-    };
+  const saveAreaToServer = useCallback(
+    (
+      areaId: string,
+      areaName: string,
+      areaDescription: string,
+      points: [number, number][]
+    ) => {
+      const area: Area = {
+        id: areaId,
+        name: areaName,
+        description: areaDescription,
+        points,
+        fillColor: config?.fillColor || '#60A5FA',
+        strokeColor: config?.color || '#3B82F6',
+        fillOpacity: config?.fillOpacity || 0.3,
+      };
 
-    const regionData = regionBridge.toRegionData(area);
-    const isEditingExistingRegion = areaId.startsWith('region-');
+      const regionData = regionBridge.toRegionData(area);
+      const isEditingExistingRegion = areaId.startsWith('region-');
 
-    if (isEditingExistingRegion) {
-      const regionId = regionBridge.areaIdToRegionId(areaId);
-      updateRegion(regionId, regionData)
-        .then(() => {
-          const updatedAreas = areasRef.current.map(a => 
-            a.id === areaId 
-              ? { ...a, name: areaName, description: areaDescription, points }
-              : a
-          );
-          setAreas(updatedAreas);
-        })
-        .catch((error: any) => {
-          logError('Ошибка при обновлении области:', error);
-        });
-    } else {
-      createRegion(regionData)
-        .then(response => {
-          const newRegionId = regionBridge.regionIdToAreaId(response.id);
-          const updatedAreas = areasRef.current.map(a => 
-            a.id === areaId 
-              ? { ...a, id: newRegionId }
-              : a
-          );
-          if (drawnItemsRef.current) {
-            drawnItemsRef.current.eachLayer((layer: any) => {
-              if (layer.options?.areaId === areaId) {
-                layer.options.areaId = newRegionId;
-              }
-            });
-          }
-          setAreas(updatedAreas);
-        })
-        .catch(error => {
-          logError('Ошибка при сохранении области:', error);
-        });
-    }
-  }, [config, setAreas]);
+      if (isEditingExistingRegion) {
+        const regionId = regionBridge.areaIdToRegionId(areaId);
+        updateRegion(regionId, regionData)
+          .then(() => {
+            const updatedAreas = areasRef.current.map((a) =>
+              a.id === areaId
+                ? { ...a, name: areaName, description: areaDescription, points }
+                : a
+            );
+            setAreas(updatedAreas);
+          })
+          .catch((error: any) => {
+            logError('Ошибка при обновлении области:', error);
+          });
+      } else {
+        createRegion(regionData)
+          .then((response) => {
+            const newRegionId = regionBridge.regionIdToAreaId(response.id);
+            const updatedAreas = areasRef.current.map((a) =>
+              a.id === areaId ? { ...a, id: newRegionId } : a
+            );
+            if (drawnItemsRef.current) {
+              drawnItemsRef.current.eachLayer((layer: any) => {
+                if (layer.options?.areaId === areaId) {
+                  layer.options.areaId = newRegionId;
+                }
+              });
+            }
+            setAreas(updatedAreas);
+          })
+          .catch((error) => {
+            logError('Ошибка при сохранении области:', error);
+          });
+      }
+    },
+    [config, setAreas]
+  );
 
   // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
-  const makePolygonDraggable = useCallback((polygon: L.Polygon | L.Rectangle) => {
-    polygon.on('click', function(e: any) {
-      if (isEditMode) {
-        L.DomEvent.stop(e);
-        const editableLayer = polygon as any;
-        if (editableLayer.editing && typeof editableLayer.editing.enable === 'function') {
-          editableLayer.editing.enable();
-          if (!localStorage.getItem('drag_polygon_hint_shown')) {
-            alert(
-              'Для перемещения всей области целиком:\n' + 
-              '1. Удерживайте клавишу Ctrl (или Command на Mac)\n' + 
-              '2. Нажмите на любую точку области и перетащите её'
-            );
-            localStorage.setItem('drag_polygon_hint_shown', 'true');
+  const makePolygonDraggable = useCallback(
+    (polygon: L.Polygon | L.Rectangle) => {
+      polygon.on('click', function (e: any) {
+        if (isEditMode) {
+          L.DomEvent.stop(e);
+          const editableLayer = polygon as any;
+          if (
+            editableLayer.editing &&
+            typeof editableLayer.editing.enable === 'function'
+          ) {
+            editableLayer.editing.enable();
+            if (!localStorage.getItem('drag_polygon_hint_shown')) {
+              alert(
+                'Для перемещения всей области целиком:\n' +
+                  '1. Удерживайте клавишу Ctrl (или Command на Mac)\n' +
+                  '2. Нажмите на любую точку области и перетащите её'
+              );
+              localStorage.setItem('drag_polygon_hint_shown', 'true');
+            }
           }
         }
-      }
-    });
-  }, [isEditMode]);
+      });
+    },
+    [isEditMode]
+  );
 
   // Вспомогательный хук для трекинга событий Leaflet (draw:start, stop и т. п.)
   useLeafletEvents({
@@ -226,15 +231,16 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   useEffect(() => {
     if (!isVisible || !drawnItemsRef.current) return;
     drawnItemsRef.current.clearLayers();
-    areas.forEach(area => {
+    areas.forEach((area) => {
       if (area.points.length > 2) {
         const polygon = PolygonFactory.createFromPoints(area.points, {
           areaId: area.id,
           strokeColor: area.strokeColor || config?.color || COLORS.primary.main,
-          fillColor: area.fillColor || config?.fillColor || COLORS.primary.light,
+          fillColor:
+            area.fillColor || config?.fillColor || COLORS.primary.light,
           fillOpacity: area.fillOpacity || config?.fillOpacity || 0.3,
           weight: config?.weight || 2,
-          isDraggable: true
+          isDraggable: true,
         });
         if (drawnItemsRef.current) {
           drawnItemsRef.current.addLayer(polygon);
@@ -260,8 +266,8 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
               color: config?.color || COLORS.primary.main,
               fillColor: config?.fillColor || COLORS.primary.light,
               fillOpacity: config?.fillOpacity || 0.3,
-              weight: config?.weight || 2
-            }
+              weight: config?.weight || 2,
+            },
           },
           polygon: {
             allowIntersection: false,
@@ -270,15 +276,15 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
               color: config?.color || COLORS.primary.main,
               fillColor: config?.fillColor || COLORS.primary.light,
               fillOpacity: config?.fillOpacity || 0.3,
-              weight: config?.weight || 2
-            }
-          }
+              weight: config?.weight || 2,
+            },
+          },
         },
         edit: {
           featureGroup: drawnItemsRef.current ?? new L.FeatureGroup(),
           remove: true,
-          edit: {}
-        }
+          edit: {},
+        },
       });
       setDrawControl(drawingControl);
       // Инициализируем drawnItemsRef, если не инициализирован
@@ -329,11 +335,16 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
       id: newAreaId,
       name: newAreaName || `Новая область ${areasRef.current.length + 1}`,
       description: newAreaDescription,
-      points
+      points,
     };
     const updatedAreas = [...areasRef.current, newArea];
     setAreas(updatedAreas);
-    saveAreaToServer(newAreaId, newArea.name, newArea.description || '', points);
+    saveAreaToServer(
+      newAreaId,
+      newArea.name,
+      newArea.description || '',
+      points
+    );
     setIsModalOpen(false);
     setTempAreaData(null);
     setHasCompletedDrawing(true);
@@ -352,13 +363,13 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({ isVisible, config }) 
   // Обработчик сохранения при редактировании
   const handleSaveAreaEdit = () => {
     if (!editingAreaId) return;
-    const areaIndex = areasRef.current.findIndex(a => a.id === editingAreaId);
+    const areaIndex = areasRef.current.findIndex((a) => a.id === editingAreaId);
     if (areaIndex !== -1) {
       const oldArea = areasRef.current[areaIndex];
       const updatedArea: Area = {
         ...oldArea,
         name: newAreaName || oldArea.name,
-        description: newAreaDescription
+        description: newAreaDescription,
       };
       const updatedAreas = [...areasRef.current];
       updatedAreas[areaIndex] = updatedArea;

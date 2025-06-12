@@ -146,7 +146,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
         updateMapConfig({
           interactionMode: MAP_MODES.VIEW,
           drawingEnabled: false,
-          hasCompletedDrawing: false
+          hasCompletedDrawing: false,
         });
         console.log('Области успешно сохранены');
       } catch (error) {
@@ -166,7 +166,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       toggleLayer(layerId);
       return;
     }
-    
+
     // Проверяем, можно ли отключить слой (должен остаться хотя бы один видимый слой)
     if (mapConfig.visibleLayers.length > 1) {
       toggleLayer(layerId);

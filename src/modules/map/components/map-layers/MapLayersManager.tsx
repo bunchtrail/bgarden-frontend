@@ -5,7 +5,11 @@ import { TileLayer } from 'react-leaflet'; // Импортируем TileLayer
 import { RegionData } from '@/services/regions/types';
 import { MapImageLayer, MapRegionsLayer } from '../map-components';
 import { useMapLayers } from '../../hooks/useMapLayers';
-import { MapConfig, MAP_LAYERS, MAP_TYPES } from '../../contexts/MapConfigContext';
+import {
+  MapConfig,
+  MAP_LAYERS,
+  MAP_TYPES,
+} from '../../contexts/MapConfigContext';
 import { Plant } from '@/services/regions/types';
 import MapDrawingLayer from './MapDrawingLayer';
 import { EnhancedPlantMarkersLayer } from '../plant-info';
@@ -51,60 +55,60 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
   mapConfig,
   onRegionClick,
   highlightSelected = true,
-  onPlantsLoaded
+  onPlantsLoaded,
 }) => {
   const { mapConfig: mapConfigContext } = useMapConfig();
-  
+
   const {
     isLayerVisible,
     sortedLayers,
     hasMapImage,
     filteredRegions,
-    shouldShowRegions
+    shouldShowRegions,
   } = useMapLayers({
     visibleLayers,
     regions,
     customLayers,
     mapImageUrl,
-    config: mapConfigContext
+    config: mapConfigContext,
   });
 
-  const handlePlantsLoaded = useCallback((plantsData: Plant[]) => {
-    if (onPlantsLoaded) {
-      onPlantsLoaded(plantsData);
-    }
-  }, [onPlantsLoaded]);
+  const handlePlantsLoaded = useCallback(
+    (plantsData: Plant[]) => {
+      if (onPlantsLoaded) {
+        onPlantsLoaded(plantsData);
+      }
+    },
+    [onPlantsLoaded]
+  );
 
   const renderLayers = () => {
     const isGeoMap = mapConfigContext.mapType === MAP_TYPES.GEO;
 
     // Динамический выбор базового слоя
     const baseLayer = isGeoMap
-      ? (
-          isLayerVisible(MAP_LAYERS.GEO_TILES) && (
-            <TileLayer
-              key="geo-tile-layer"
-              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxNativeZoom={18}
-              maxZoom={mapConfigContext.maxZoom}
-              minZoom={mapConfigContext.minZoom}
-            />
-          )
+      ? isLayerVisible(MAP_LAYERS.GEO_TILES) && (
+          <TileLayer
+            key="geo-tile-layer"
+            attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxNativeZoom={18}
+            maxZoom={mapConfigContext.maxZoom}
+            minZoom={mapConfigContext.minZoom}
+          />
         )
-      : (
-          mapImageUrl && hasMapImage && (
-            <MapImageLayer 
-              key="map-base-image"
-              imageUrl={mapImageUrl} 
-              bounds={imageBounds}
-            />
-          )
+      : mapImageUrl &&
+        hasMapImage && (
+          <MapImageLayer
+            key="map-base-image"
+            imageUrl={mapImageUrl}
+            bounds={imageBounds}
+          />
         );
 
     const layers = [
       baseLayer,
-      
+
       // Слой регионов - только на схематической карте
       !isGeoMap && shouldShowRegions && filteredRegions.length > 0 && (
         <MapRegionsLayer
@@ -115,17 +119,17 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           showTooltips={mapConfigContext.showTooltips}
         />
       ),
-      
+
       // Слой растений (теперь работает на обеих картах)
       isLayerVisible(MAP_LAYERS.PLANTS) && (
-        <EnhancedPlantMarkersLayer 
+        <EnhancedPlantMarkersLayer
           key="map-plants"
           isVisible={true}
           mapConfig={mapConfigContext}
           onPlantsLoaded={handlePlantsLoaded}
         />
       ),
-      
+
       // Слой рисования - только на схематической карте
       !isGeoMap && mapConfigContext.drawingEnabled && (
         <MapDrawingLayer
@@ -135,23 +139,23 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
             color: '#3B82F6',
             fillColor: '#60A5FA',
             fillOpacity: 0.3,
-            weight: 2
+            weight: 2,
           }}
         />
       ),
-      
-      ...sortedLayers.map(layer => {
+
+      ...sortedLayers.map((layer) => {
         const CustomLayer = layer.component;
         return (
           <CustomLayer
             key={`custom-layer-${layer.layerId}`}
-            isVisible={layer.isVisible} 
+            isVisible={layer.isVisible}
             config={layer.config}
           />
         );
-      })
+      }),
     ].filter(Boolean);
-    
+
     return layers;
   };
 

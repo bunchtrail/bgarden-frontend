@@ -32,7 +32,7 @@ export class MarkerClusterManager {
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      iconCreateFunction: MarkerIconFactory.createClusterIcon
+      iconCreateFunction: MarkerIconFactory.createClusterIcon,
     });
 
     this.map.addLayer(this.markerClusterGroup);
@@ -53,13 +53,13 @@ export class MarkerClusterManager {
    */
   private async createPopupContent(plant: Plant): Promise<string> {
     let imageUrl = '/images/specimens/placeholder.jpg';
-    
+
     // Извлекаем ID образца из ID растения (specimen-123 -> 123)
     const specimenIdMatch = plant.id.match(/specimen-(\d+)/);
-    
+
     if (specimenIdMatch && specimenIdMatch[1]) {
       const specimenId = parseInt(specimenIdMatch[1], 10);
-      
+
       // Проверяем кэш изображений
       if (this.popupImageCache.has(plant.id)) {
         imageUrl = this.popupImageCache.get(plant.id) || imageUrl;
@@ -67,7 +67,7 @@ export class MarkerClusterManager {
         try {
           // Получаем изображение растения
           const image = await specimenService.getSpecimenMainImage(specimenId);
-          
+
           if (image && image.imageUrl) {
             // Используем полученный URL
             imageUrl = image.imageUrl;
@@ -79,7 +79,7 @@ export class MarkerClusterManager {
         }
       }
     }
-    
+
     // HTML-структура попапа
     return `
       <div class="plant-popup" style="width: 250px; padding: 0;">
@@ -89,9 +89,19 @@ export class MarkerClusterManager {
           />
         </div>
         <div style="padding: 12px; background-color: white; border-radius: 0 0 8px 8px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1E293B;">${plant.name}</h3>
-          ${plant.latinName ? `<p style="margin: 0 0 8px 0; font-size: 14px; font-style: italic; color: #475569;">${plant.latinName}</p>` : ''}
-          ${plant.description ? `<p style="margin: 0; font-size: 14px; color: #64748B;">${plant.description}</p>` : ''}
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1E293B;">${
+            plant.name
+          }</h3>
+          ${
+            plant.latinName
+              ? `<p style="margin: 0 0 8px 0; font-size: 14px; font-style: italic; color: #475569;">${plant.latinName}</p>`
+              : ''
+          }
+          ${
+            plant.description
+              ? `<p style="margin: 0; font-size: 14px; color: #64748B;">${plant.description}</p>`
+              : ''
+          }
           <div style="margin-top: 12px; text-align: right;">
             <a href="/specimens/${specimenIdMatch?.[1] || ''}" 
                style="background-color: #0EA5E9; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px;">
@@ -109,12 +119,12 @@ export class MarkerClusterManager {
    * @returns Массив маркеров Leaflet
    */
   createPlantMarkers(plants: Plant[]): L.Marker[] {
-    return plants.map(plant => {
+    return plants.map((plant) => {
       const marker = L.marker(plant.position, {
         title: plant.name,
-        icon: MarkerIconFactory.createStyledMarkerIcon(plant)
+        icon: MarkerIconFactory.createStyledMarkerIcon(plant),
       });
-      
+
       // Добавляем попап только если включена соответствующая настройка
       if (this.showPopupOnClick) {
         // Создаем пустой попап и привязываем к маркеру
@@ -125,11 +135,11 @@ export class MarkerClusterManager {
           offset: [0, -10],
           autoPan: true,
           closeButton: true,
-          closeOnClick: false
+          closeOnClick: false,
         }).setContent('<div class="plant-popup-loading">Загрузка...</div>');
-        
+
         marker.bindPopup(popup);
-        
+
         // Добавляем обработчик события открытия попапа
         marker.on('popupopen', async () => {
           try {
@@ -139,7 +149,9 @@ export class MarkerClusterManager {
             popup.update();
           } catch (error) {
             console.error('Ошибка при загрузке данных для попапа:', error);
-            popup.setContent('<div class="plant-popup-error">Ошибка загрузки данных</div>');
+            popup.setContent(
+              '<div class="plant-popup-error">Ошибка загрузки данных</div>'
+            );
             popup.update();
           }
         });
@@ -150,7 +162,7 @@ export class MarkerClusterManager {
           iconElement.classList.add('popup-disabled');
         }
       }
-      
+
       return marker;
     });
   }
@@ -160,10 +172,13 @@ export class MarkerClusterManager {
    * @param markers Массив маркеров
    * @param options Опции добавления маркеров
    */
-  addMarkersWithClustering(markers: L.Marker[], options: AddMarkersOptions = { fitBounds: true }): void {
+  addMarkersWithClustering(
+    markers: L.Marker[],
+    options: AddMarkersOptions = { fitBounds: true }
+  ): void {
     this.clearAllMarkers();
     this.markers = markers;
-    
+
     this.markerClusterGroup.addLayers(markers);
 
     if (options.fitBounds && markers.length > 0) {
@@ -182,7 +197,7 @@ export class MarkerClusterManager {
     this.clearAllMarkers();
     this.markers = markers;
 
-    markers.forEach(marker => {
+    markers.forEach((marker) => {
       marker.addTo(this.map);
     });
   }
@@ -192,11 +207,11 @@ export class MarkerClusterManager {
    */
   clearAllMarkers(): void {
     this.markerClusterGroup.clearLayers();
-    
-    this.markers.forEach(marker => marker.remove());
+
+    this.markers.forEach((marker) => marker.remove());
     this.markers = [];
-    
+
     // Очищаем кэш изображений при удалении всех маркеров
     this.popupImageCache.clear();
   }
-} 
+}

@@ -1,7 +1,10 @@
 // src/modules/map/components/plant-info/services/PlantDataService.ts
 
 import { Plant } from '@/services/regions/types';
-import { getAllSpecimens, convertSpecimensToPlants } from '../../../services/plantService';
+import {
+  getAllSpecimens,
+  convertSpecimensToPlants,
+} from '../../../services/plantService';
 import { MAP_TYPES } from '../../../contexts/MapConfigContext';
 
 // Предполагаемая логика кэширования
@@ -19,7 +22,7 @@ export class PlantDataService {
    * @param mapType - Тип текущей карты ('schematic' или 'geo').
    */
   public static async loadPlants(
-    mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]
+    mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]
   ): Promise<Plant[]> {
     const now = Date.now();
 

@@ -60,7 +60,9 @@ export const useMarkers = (
     const markers = manager.createPlantMarkers(plants);
 
     if (enableClustering) {
-      manager.addMarkersWithClustering(markers, { fitBounds: !isInitialMarkersLoad.current });
+      manager.addMarkersWithClustering(markers, {
+        fitBounds: !isInitialMarkersLoad.current,
+      });
     } else {
       manager.addMarkersWithoutClustering(markers);
     }
@@ -87,4 +89,4 @@ export const useMarkers = (
   }, [manager]);
 
   return { clearMarkers };
-}; 
+};

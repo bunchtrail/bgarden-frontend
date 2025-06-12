@@ -15,20 +15,22 @@ interface MapContextType {
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 // Провайдер контекста
-export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MapProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
   const [plants, setPlants] = useState<Plant[]>([]);
 
   return (
-    <MapContext.Provider 
-      value={{ 
-        areas, 
-        setAreas, 
-        selectedAreaId, 
+    <MapContext.Provider
+      value={{
+        areas,
+        setAreas,
+        selectedAreaId,
         setSelectedAreaId,
         plants,
-        setPlants
+        setPlants,
       }}
     >
       {children}
@@ -43,4 +45,4 @@ export const useMapContext = () => {
     throw new Error('useMapContext must be used within a MapProvider');
   }
   return context;
-}; 
+};

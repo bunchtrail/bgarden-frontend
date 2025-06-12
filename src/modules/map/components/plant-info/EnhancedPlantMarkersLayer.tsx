@@ -15,82 +15,87 @@ interface EnhancedPlantMarkersLayerProps {
   onPlantsLoaded?: (plantsData: Plant[]) => void;
 }
 
-const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> = memo(({ 
-  isVisible, 
-  mapConfig,
-  onPlantsLoaded
-}) => {
-  const [plants, setPlants] = useState<Plant[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const map = useMap();
-  const { clearMarkers } = useMarkers(
-    map, 
-    plants, 
-    isVisible, 
-    mapConfig.enableClustering,
-    mapConfig.showPopupOnClick
-  );
-  const { warning } = useNotification();
-  
-  const isFirstRender = useRef(true);
-  const requestInProgress = useRef(false);
+const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> =
+  memo(({ isVisible, mapConfig, onPlantsLoaded }) => {
+    const [plants, setPlants] = useState<Plant[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    const map = useMap();
+    const { clearMarkers } = useMarkers(
+      map,
+      plants,
+      isVisible,
+      mapConfig.enableClustering,
+      mapConfig.showPopupOnClick
+    );
+    const { warning } = useNotification();
 
-  useEffect(() => {
-    const fetchPlants = async () => {
-      if (requestInProgress.current) return;
-      
-      if (isVisible) {
-        setLoading(true);
-        setError(null);
-        requestInProgress.current = true;
-        
-        try {
-          // **ИСПРАВЛЕНИЕ:** Передаем `mapConfig.mapType` в сервис.
-          const plantsData = await PlantDataService.loadPlants(mapConfig.mapType);
-          
-          setPlants(plantsData);
-          
-          if (onPlantsLoaded) {
-            onPlantsLoaded(plantsData);
+    const isFirstRender = useRef(true);
+    const requestInProgress = useRef(false);
+
+    useEffect(() => {
+      const fetchPlants = async () => {
+        if (requestInProgress.current) return;
+
+        if (isVisible) {
+          setLoading(true);
+          setError(null);
+          requestInProgress.current = true;
+
+          try {
+            // **ИСПРАВЛЕНИЕ:** Передаем `mapConfig.mapType` в сервис.
+            const plantsData = await PlantDataService.loadPlants(
+              mapConfig.mapType
+            );
+
+            setPlants(plantsData);
+
+            if (onPlantsLoaded) {
+              onPlantsLoaded(plantsData);
+            }
+          } catch (err) {
+            setError(
+              err instanceof Error
+                ? err
+                : new Error('Не удалось загрузить данные растений')
+            );
+            if (onPlantsLoaded) {
+              onPlantsLoaded([]);
+            }
+
+            if (isFirstRender.current) {
+              warning(
+                'Не удалось загрузить данные растений. Карта будет отображена без растений.',
+                {
+                  title: 'Внимание',
+                }
+              );
+            }
+          } finally {
+            setLoading(false);
+            requestInProgress.current = false;
+            isFirstRender.current = false;
           }
-          
-        } catch (err) {
-          setError(err instanceof Error ? err : new Error('Не удалось загрузить данные растений'));
+        } else {
+          setPlants([]);
+          clearMarkers();
           if (onPlantsLoaded) {
             onPlantsLoaded([]);
           }
-          
-          if (isFirstRender.current) {
-            warning('Не удалось загрузить данные растений. Карта будет отображена без растений.', {
-              title: 'Внимание'
-            });
-          }
-        } finally {
-          setLoading(false);
-          requestInProgress.current = false;
-          isFirstRender.current = false;
         }
-      } else {
-        setPlants([]);
+      };
+
+      fetchPlants();
+      // Добавляем mapConfig.mapType в зависимости, чтобы перезагружать данные при смене карты
+    }, [isVisible, mapConfig.mapType, clearMarkers, warning, onPlantsLoaded]);
+
+    useEffect(() => {
+      return () => {
         clearMarkers();
-        if (onPlantsLoaded) {
-          onPlantsLoaded([]);
-        }
-      }
-    };
+      };
+    }, [clearMarkers]);
 
-    fetchPlants();
-    // Добавляем mapConfig.mapType в зависимости, чтобы перезагружать данные при смене карты
-  }, [isVisible, mapConfig.mapType, clearMarkers, warning, onPlantsLoaded]);
-
-  useEffect(() => {
-    return () => {
-      clearMarkers();
-    };
-  }, [clearMarkers]);
-
-  return null;
-});
+    return null;
+  });
 
 export default EnhancedPlantMarkersLayer;

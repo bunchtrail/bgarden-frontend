@@ -1,5 +1,16 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { LatLngExpression, LatLngBoundsExpression, ControlPosition } from 'leaflet';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
+import {
+  LatLngExpression,
+  LatLngBoundsExpression,
+  ControlPosition,
+} from 'leaflet';
 
 // Доступные слои карты
 export const MAP_LAYERS = {
@@ -19,7 +30,7 @@ export const MAP_TYPES = {
 export const MAP_MODES = {
   VIEW: 'view',
   DRAW: 'draw',
-  EDIT: 'edit'
+  EDIT: 'edit',
 } as const;
 
 // Имя ключа для хранения конфигурации в localStorage
@@ -27,7 +38,7 @@ const STORAGE_KEY = 'bgarden_map_config';
 
 // Интерфейс конфигурации карты
 export interface MapConfig {
-  mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]; // Тип карты: 'schematic' или 'geo'
+  mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]; // Тип карты: 'schematic' или 'geo'
   center: LatLngExpression;
   zoom: number;
   maxZoom: number;
@@ -57,7 +68,10 @@ export const DEFAULT_SCHEMATIC_CONFIG: MapConfig = {
   zoom: 0,
   maxZoom: 4,
   minZoom: -2,
-  maxBounds: [[-1000, -1000], [2000, 2000]] as LatLngBoundsExpression,
+  maxBounds: [
+    [-1000, -1000],
+    [2000, 2000],
+  ] as LatLngBoundsExpression,
   maxBoundsViscosity: 1.0,
   zoomControlPosition: 'bottomright' as ControlPosition,
   lightMode: false,
@@ -72,7 +86,7 @@ export const DEFAULT_SCHEMATIC_CONFIG: MapConfig = {
   interactionMode: MAP_MODES.VIEW,
   drawingEnabled: false,
   editMode: false,
-  hasCompletedDrawing: false
+  hasCompletedDrawing: false,
 };
 
 // Настройки по умолчанию для гео-карты
@@ -101,10 +115,12 @@ interface MapConfigContextProps {
   toggleLayer: (layerName: string) => void;
   saveConfigToStorage: () => void;
   loadConfigFromStorage: () => void;
-  setMapType: (mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => void; // Новая функция
+  setMapType: (mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => void; // Новая функция
 }
 
-const MapConfigContext = createContext<MapConfigContextProps | undefined>(undefined);
+const MapConfigContext = createContext<MapConfigContextProps | undefined>(
+  undefined
+);
 
 export const useMapConfig = (): MapConfigContextProps => {
   const context = useContext(MapConfigContext);
@@ -142,43 +158,51 @@ const setStoredConfig = (config: MapConfig) => {
   }
 };
 
-export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, initialConfig }) => {
+export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({
+  children,
+  initialConfig,
+}) => {
   const initialConfigRef = React.useRef(initialConfig);
   const [mapConfig, setMapConfig] = useState<MapConfig>({
     ...DEFAULT_MAP_CONFIG,
-    ...initialConfigRef.current
+    ...initialConfigRef.current,
   });
 
   useEffect(() => {
     const savedConfig = getStoredConfig();
     if (savedConfig) {
-      console.log('[MapConfig] Загружена конфигурация из localStorage:', savedConfig);
-      setMapConfig(prevConfig => ({
+      console.log(
+        '[MapConfig] Загружена конфигурация из localStorage:',
+        savedConfig
+      );
+      setMapConfig((prevConfig) => ({
         ...prevConfig,
         ...savedConfig,
-        ...initialConfigRef.current
+        ...initialConfigRef.current,
       }));
     } else {
-      console.log('[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.');
+      console.log(
+        '[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.'
+      );
     }
   }, []);
-  
+
   useEffect(() => {
     if (mapConfig.drawingEnabled) {
       console.log('[MapConfig] Режим рисования включен', {
         timestamp: new Date().toISOString(),
         interactionMode: mapConfig.interactionMode,
-        drawingEnabled: mapConfig.drawingEnabled
+        drawingEnabled: mapConfig.drawingEnabled,
       });
     }
   }, [mapConfig.drawingEnabled]);
 
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
     console.log('[MapConfig] Обновление конфигурации:', updates);
-    setMapConfig(prevConfig => {
+    setMapConfig((prevConfig) => {
       const newConfig = {
         ...prevConfig,
-        ...updates
+        ...updates,
       };
       console.log('[MapConfig] Новое состояние после обновления:', newConfig);
       return newConfig;
@@ -186,39 +210,53 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   }, []);
 
   const saveConfigToStorage = () => {
-    console.log('[MapConfig] Сохранение конфигурации в localStorage:', mapConfig);
+    console.log(
+      '[MapConfig] Сохранение конфигурации в localStorage:',
+      mapConfig
+    );
     setStoredConfig(mapConfig);
   };
 
   const loadConfigFromStorage = () => {
     const savedConfig = getStoredConfig();
     if (savedConfig) {
-      console.log('[MapConfig] Загружена конфигурация из localStorage (принудительно):', savedConfig);
+      console.log(
+        '[MapConfig] Загружена конфигурация из localStorage (принудительно):',
+        savedConfig
+      );
       setMapConfig(savedConfig);
     }
   };
 
   const resetMapConfig = () => {
     const currentMapType = mapConfig.mapType;
-    console.log(`[MapConfig] Сброс конфигурации для типа карты: ${currentMapType}`);
-    const defaultConfig = currentMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
+    console.log(
+      `[MapConfig] Сброс конфигурации для типа карты: ${currentMapType}`
+    );
+    const defaultConfig =
+      currentMapType === MAP_TYPES.GEO
+        ? DEFAULT_GEO_CONFIG
+        : DEFAULT_SCHEMATIC_CONFIG;
     setMapConfig(defaultConfig);
     if (isClient) {
       try {
         localStorage.removeItem(STORAGE_KEY);
         console.log('[MapConfig] Конфигурация из localStorage удалена.');
       } catch (error) {
-        console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
+        console.error(
+          'Ошибка при удалении сохраненной конфигурации карты:',
+          error
+        );
       }
     }
   };
 
   const toggleLayer = (layerName: string) => {
     console.log(`[MapConfig] Переключение слоя: ${layerName}`);
-    setMapConfig(prevConfig => {
+    setMapConfig((prevConfig) => {
       const isLayerActive = prevConfig.visibleLayers.includes(layerName);
       const newLayers = isLayerActive
-        ? prevConfig.visibleLayers.filter(layer => layer !== layerName)
+        ? prevConfig.visibleLayers.filter((layer) => layer !== layerName)
         : [...prevConfig.visibleLayers, layerName];
       console.log(`[MapConfig] Новые видимые слои:`, newLayers);
       return { ...prevConfig, visibleLayers: newLayers };
@@ -226,38 +264,45 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   };
 
   // Новая функция для смены типа карты
-  const setMapType = useCallback((mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]) => {
-    if (mapType === mapConfig.mapType) return; // Не меняем, если тип тот же
+  const setMapType = useCallback(
+    (mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => {
+      if (mapType === mapConfig.mapType) return; // Не меняем, если тип тот же
 
-    console.log(`[MapConfig] Смена типа карты на: ${mapType}`);
-    // Используем функциональную форму setMapConfig для доступа к предыдущему состоянию
-    setMapConfig(prevConfig => {
-      console.log('[MapConfig] Предыдущее состояние:', prevConfig);
-      // Выбираем конфиг по умолчанию для НОВОГО типа карты
-      const defaultConfig = mapType === MAP_TYPES.GEO 
-        ? DEFAULT_GEO_CONFIG 
-        : DEFAULT_SCHEMATIC_CONFIG;
-      
-      console.log('[MapConfig] Конфигурация по умолчанию для нового типа:', defaultConfig);
+      console.log(`[MapConfig] Смена типа карты на: ${mapType}`);
+      // Используем функциональную форму setMapConfig для доступа к предыдущему состоянию
+      setMapConfig((prevConfig) => {
+        console.log('[MapConfig] Предыдущее состояние:', prevConfig);
+        // Выбираем конфиг по умолчанию для НОВОГО типа карты
+        const defaultConfig =
+          mapType === MAP_TYPES.GEO
+            ? DEFAULT_GEO_CONFIG
+            : DEFAULT_SCHEMATIC_CONFIG;
 
-      // Явно создаем НОВЫЙ объект состояния.
-      // Начинаем с чистого конфига по умолчанию и добавляем только те настройки,
-      // которые нужно сохранить из предыдущего состояния.
-      const newConfig = {
-        ...defaultConfig, // Полностью берем новый конфиг (с правильным центром, зумом и т.д.)
-        
-        // Сохраняем пользовательские UI-настройки из предыдущего конфига
-        showTooltips: prevConfig.showTooltips,
-        showControls: prevConfig.showControls,
-        debug: prevConfig.debug,
-        enableClustering: prevConfig.enableClustering,
-        showPopupOnClick: prevConfig.showPopupOnClick,
-      };
+        console.log(
+          '[MapConfig] Конфигурация по умолчанию для нового типа:',
+          defaultConfig
+        );
 
-      console.log('[MapConfig] Новое состояние после смены типа:', newConfig);
-      return newConfig;
-    });
-  }, [mapConfig.mapType]); // Зависимость теперь только от mapConfig.mapType, что более корректно
+        // Явно создаем НОВЫЙ объект состояния.
+        // Начинаем с чистого конфига по умолчанию и добавляем только те настройки,
+        // которые нужно сохранить из предыдущего состояния.
+        const newConfig = {
+          ...defaultConfig, // Полностью берем новый конфиг (с правильным центром, зумом и т.д.)
+
+          // Сохраняем пользовательские UI-настройки из предыдущего конфига
+          showTooltips: prevConfig.showTooltips,
+          showControls: prevConfig.showControls,
+          debug: prevConfig.debug,
+          enableClustering: prevConfig.enableClustering,
+          showPopupOnClick: prevConfig.showPopupOnClick,
+        };
+
+        console.log('[MapConfig] Новое состояние после смены типа:', newConfig);
+        return newConfig;
+      });
+    },
+    [mapConfig.mapType]
+  ); // Зависимость теперь только от mapConfig.mapType, что более корректно
 
   const value = {
     mapConfig,
