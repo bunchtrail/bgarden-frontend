@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLORS, animationClasses } from '../../../../styles/global-styles';
+import { animationClasses } from '../../../../styles/global-styles';
 
 export interface SwitchProps {
   label?: string;

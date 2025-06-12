@@ -119,6 +119,29 @@ interface MapConfigProviderProps {
   initialConfig?: Partial<MapConfig>;
 }
 
+// Утилита для безопасного доступа к localStorage
+const isClient = typeof window !== 'undefined';
+
+const getStoredConfig = () => {
+  if (!isClient) return null;
+  try {
+    const savedConfig = localStorage.getItem(STORAGE_KEY);
+    return savedConfig ? JSON.parse(savedConfig) : null;
+  } catch (error) {
+    console.error('Ошибка при чтении конфигурации карты:', error);
+    return null;
+  }
+};
+
+const setStoredConfig = (config: MapConfig) => {
+  if (!isClient) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch (error) {
+    console.error('Ошибка при сохранении конфигурации карты:', error);
+  }
+};
+
 export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, initialConfig }) => {
   const initialConfigRef = React.useRef(initialConfig);
   const [mapConfig, setMapConfig] = useState<MapConfig>({
@@ -127,21 +150,16 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   });
 
   useEffect(() => {
-    try {
-      const savedConfig = localStorage.getItem(STORAGE_KEY);
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        console.log('[MapConfig] Загружена конфигурация из localStorage:', parsedConfig);
-        setMapConfig(prevConfig => ({
-          ...prevConfig,
-          ...parsedConfig,
-          ...initialConfigRef.current
-        }));
-      } else {
-        console.log('[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.');
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке конфигурации карты:', error);
+    const savedConfig = getStoredConfig();
+    if (savedConfig) {
+      console.log('[MapConfig] Загружена конфигурация из localStorage:', savedConfig);
+      setMapConfig(prevConfig => ({
+        ...prevConfig,
+        ...savedConfig,
+        ...initialConfigRef.current
+      }));
+    } else {
+      console.log('[MapConfig] Конфигурация в localStorage не найдена, используется по умолчанию.');
     }
   }, []);
   
@@ -168,24 +186,15 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
   }, []);
 
   const saveConfigToStorage = () => {
-    try {
-      console.log('[MapConfig] Сохранение конфигурации в localStorage:', mapConfig);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
-    } catch (error) {
-      console.error('Ошибка при сохранении конфигурации карты:', error);
-    }
+    console.log('[MapConfig] Сохранение конфигурации в localStorage:', mapConfig);
+    setStoredConfig(mapConfig);
   };
 
   const loadConfigFromStorage = () => {
-    try {
-      const savedConfig = localStorage.getItem(STORAGE_KEY);
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        console.log('[MapConfig] Загружена конфигурация из localStorage (принудительно):', parsedConfig);
-        setMapConfig(parsedConfig);
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке конфигурации карты:', error);
+    const savedConfig = getStoredConfig();
+    if (savedConfig) {
+      console.log('[MapConfig] Загружена конфигурация из localStorage (принудительно):', savedConfig);
+      setMapConfig(savedConfig);
     }
   };
 
@@ -194,11 +203,13 @@ export const MapConfigProvider: React.FC<MapConfigProviderProps> = ({ children, 
     console.log(`[MapConfig] Сброс конфигурации для типа карты: ${currentMapType}`);
     const defaultConfig = currentMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG;
     setMapConfig(defaultConfig);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      console.log('[MapConfig] Конфигурация из localStorage удалена.');
-    } catch (error) {
-      console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
+    if (isClient) {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        console.log('[MapConfig] Конфигурация из localStorage удалена.');
+      } catch (error) {
+        console.error('Ошибка при удалении сохраненной конфигурации карты:', error);
+      }
     }
   };
 

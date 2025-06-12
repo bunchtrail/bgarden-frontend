@@ -8,7 +8,7 @@ interface MapSettingsSectionProps {
   showClusteringToggle?: boolean;
   showDrawingToggle?: boolean;
   showPopupToggle?: boolean;
-  onConfigChange: (key: string, value: boolean | string | number) => void;
+  onConfigChange?: (key: string, value: boolean | string | number) => void;
 }
 
 /**
@@ -21,7 +21,12 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
   showPopupToggle = true,
   onConfigChange
 }) => {
-  const { mapConfig } = useMapConfig();
+  const { mapConfig, updateMapConfig } = useMapConfig();
+
+  const handleConfigChange = (key: string, value: boolean | string | number) => {
+    updateMapConfig({ [key]: value });
+    onConfigChange?.(key, value);
+  };
 
   return (
     <div>
@@ -31,7 +36,7 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
           <Switch 
             label="Показывать подсказки"
             checked={mapConfig.showTooltips}
-            onChange={() => onConfigChange('showTooltips', !mapConfig.showTooltips)}
+            onChange={() => handleConfigChange('showTooltips', !mapConfig.showTooltips)}
           />
         )}
 
@@ -39,7 +44,7 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
           <Switch 
             label="Группировать маркеры"
             checked={mapConfig.enableClustering}
-            onChange={() => onConfigChange('enableClustering', !mapConfig.enableClustering)}
+            onChange={() => handleConfigChange('enableClustering', !mapConfig.enableClustering)}
           />
         )}
         
@@ -47,7 +52,7 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
           <Switch 
             label="Информация по клику"
             checked={mapConfig.showPopupOnClick}
-            onChange={() => onConfigChange('showPopupOnClick', !mapConfig.showPopupOnClick)}
+            onChange={() => handleConfigChange('showPopupOnClick', !mapConfig.showPopupOnClick)}
           />
         )}
         
@@ -55,7 +60,7 @@ const MapSettingsSection: React.FC<MapSettingsSectionProps> = ({
           <Switch 
             label="Создание областей"
             checked={mapConfig.drawingEnabled}
-            onChange={() => onConfigChange('drawingEnabled', !mapConfig.drawingEnabled)}
+            onChange={() => handleConfigChange('drawingEnabled', !mapConfig.drawingEnabled)}
           />
         )}
       </div>

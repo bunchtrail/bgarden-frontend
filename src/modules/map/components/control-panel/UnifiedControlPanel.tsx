@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   useMapConfig,
   MAP_LAYERS,
@@ -19,8 +19,6 @@ import {
 } from '../../../../styles/global-styles';
 import PanelHeader from './PanelHeader';
 import ControlButtons from './ControlButtons';
-
-const renderedPanels = new Set<string>();
 
 const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   pageType = 'map',
@@ -45,13 +43,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     saveConfigToStorage,
     setMapType, // Получаем новую функцию из контекста
   } = useMapConfig();
-
-  useEffect(() => {
-    renderedPanels.add(panelId);
-    return () => {
-      renderedPanels.delete(panelId);
-    };
-  }, [panelId]);
 
   // Получаем конфигурацию панели - config является основным источником
   // DEPRECATED: pageType будет удален в будущих версиях - используйте config
@@ -155,6 +146,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
         updateMapConfig({
           interactionMode: MAP_MODES.VIEW,
           drawingEnabled: false,
+          hasCompletedDrawing: false
         });
         console.log('Области успешно сохранены');
       } catch (error) {
@@ -167,6 +159,19 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     saveConfigToStorage();
     setHasChanges(false);
   }, [saveConfigToStorage]);
+
+  const handleToggleLayer = (layerId: string) => {
+    // Если слой выключен - его можно включить без проверок
+    if (!mapConfig.visibleLayers.includes(layerId)) {
+      toggleLayer(layerId);
+      return;
+    }
+    
+    // Проверяем, можно ли отключить слой (должен остаться хотя бы один видимый слой)
+    if (mapConfig.visibleLayers.length > 1) {
+      toggleLayer(layerId);
+    }
+  };
 
   const isSectionVisible = (section: PanelSection) => {
     return panelConfig.visibleSections.includes(section);
@@ -291,26 +296,26 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             <Switch
               label="Гео-подложка"
               checked={mapConfig.visibleLayers.includes(MAP_LAYERS.GEO_TILES)}
-              onChange={() => toggleLayer(MAP_LAYERS.GEO_TILES)}
+              onChange={() => handleToggleLayer(MAP_LAYERS.GEO_TILES)}
             />
           ) : (
             <>
               <Switch
                 label="Области"
                 checked={mapConfig.visibleLayers.includes(MAP_LAYERS.REGIONS)}
-                onChange={() => toggleLayer(MAP_LAYERS.REGIONS)}
+                onChange={() => handleToggleLayer(MAP_LAYERS.REGIONS)}
               />
               <Switch
                 label="Изображение карты"
                 checked={mapConfig.visibleLayers.includes(MAP_LAYERS.IMAGERY)}
-                onChange={() => toggleLayer(MAP_LAYERS.IMAGERY)}
+                onChange={() => handleToggleLayer(MAP_LAYERS.IMAGERY)}
               />
             </>
           )}
           <Switch
             label="Растения"
             checked={mapConfig.visibleLayers.includes(MAP_LAYERS.PLANTS)}
-            onChange={() => toggleLayer(MAP_LAYERS.PLANTS)}
+            onChange={() => handleToggleLayer(MAP_LAYERS.PLANTS)}
           />
         </div>
       </div>
@@ -411,15 +416,14 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   };
   if (!isPanelVisible) {
     return (
-      <div className={reopenButtonStyles}>
-        <button
-          onClick={handleReopenPanel}
-          className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
-          aria-label="Открыть панель управления"
-        >
-          <span className="text-xl">⚙️</span>
-        </button>
-      </div>
+      <button
+        onClick={handleReopenPanel}
+        className={`${reopenButtonStyles} p-2 rounded-lg bg-white/85 backdrop-blur-md shadow-md hover:bg-white/95 transition-colors`}
+        title="Открыть панель"
+        aria-label="Открыть панель управления"
+      >
+        ⚙️
+      </button>
     );
   }
 

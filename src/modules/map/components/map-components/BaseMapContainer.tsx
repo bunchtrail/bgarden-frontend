@@ -22,12 +22,12 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   children,
   showControls = true,
   style = { height: '100%', width: '100%' },
-  className = ''
+  className = '',
 }) => {
   return (
     <MapContainer
       // Ключ для принудительного пересоздания контейнера при смене типа карты
-      key={mapConfig.mapType} 
+      key={mapConfig.mapType}
       center={mapConfig.center}
       zoom={mapConfig.zoom}
       maxZoom={mapConfig.maxZoom}
@@ -39,9 +39,12 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
       maxBounds={mapConfig.maxBounds}
       maxBoundsViscosity={mapConfig.maxBoundsViscosity}
       attributionControl={false}
-      className={`${mapConfig.lightMode ? MAP_STYLES.lightMode : ''} ${className}`}
+      className={`${
+        mapConfig.lightMode ? MAP_STYLES.lightMode : ''
+      } ${className}`}
       scrollWheelZoom={showControls}
       dragging={showControls}
+      keyboard={false}
     >
       {showControls && <ZoomControl position={mapConfig.zoomControlPosition} />}
       {children}

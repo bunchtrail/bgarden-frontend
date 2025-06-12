@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMapConfig, MAP_MODES } from '../../contexts/MapConfigContext';
-import { cardClasses, textClasses } from '../../../../styles/global-styles';
+import { textClasses } from '../../../../styles/global-styles';
 
 interface ControlButtonsProps {
   onSaveRegions?: () => void;
