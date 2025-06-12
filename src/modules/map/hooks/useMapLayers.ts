@@ -29,12 +29,15 @@ export const useMapLayers = ({
   customLayers = [],
   mapImageUrl,
   regions = [],
-  config
+  config,
 }: UseMapLayersProps): UseMapLayersReturn => {
   // Проверка видимости слоя
-  const isLayerVisible = useCallback((layerId: string) => {
-    return visibleLayers.includes(layerId);
-  }, [visibleLayers]);
+  const isLayerVisible = useCallback(
+    (layerId: string) => {
+      return visibleLayers.includes(layerId);
+    },
+    [visibleLayers]
+  );
 
   // Сортируем пользовательские слои по порядку
   const sortedLayers = useMemo(() => {
@@ -43,12 +46,24 @@ export const useMapLayers = ({
 
   // Проверка наличия изображения карты
   const hasMapImage = !!mapImageUrl;
-  
-  // Фильтрация регионов (может быть расширена дополнительной логикой)
+  // Фильтрация регионов по типу карты и другим условиям
   const filteredRegions = useMemo(() => {
-    return regions;
-  }, [regions]);
-  
+    if (!config?.mapType) {
+      return regions; // Если тип карты не указан, возвращаем все регионы
+    }
+
+    // Фильтруем регионы по типу карты
+    return regions.filter((region) => {
+      // Если у региона не указан mapType, включаем его для обратной совместимости
+      if (!region.mapType) {
+        return true;
+      }
+
+      // Показываем только регионы, соответствующие текущему типу карты
+      return region.mapType === config.mapType;
+    });
+  }, [regions, config?.mapType]);
+
   // Определяем, нужно ли показывать регионы
   const shouldShowRegions = isLayerVisible('regions');
 
@@ -61,4 +76,4 @@ export const useMapLayers = ({
   };
 };
 
-export default useMapLayers; 
+export default useMapLayers;

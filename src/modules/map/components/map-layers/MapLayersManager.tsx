@@ -107,10 +107,8 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
         );
 
     const layers = [
-      baseLayer,
-
-      // Слой регионов - только на схематической карте
-      !isGeoMap && shouldShowRegions && filteredRegions.length > 0 && (
+      baseLayer, // Слой регионов - доступен на всех типах карт
+      shouldShowRegions && filteredRegions.length > 0 && (
         <MapRegionsLayer
           key="map-regions"
           regions={filteredRegions}
@@ -128,10 +126,8 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           mapConfig={mapConfigContext}
           onPlantsLoaded={handlePlantsLoaded}
         />
-      ),
-
-      // Слой рисования - только на схематической карте
-      !isGeoMap && mapConfigContext.drawingEnabled && (
+      ), // Слой рисования - доступен на всех типах карт
+      mapConfigContext.drawingEnabled && (
         <MapDrawingLayer
           key="map-drawing"
           isVisible={true}

@@ -1,5 +1,5 @@
 /**
- * Унифицированные типы для работы с областями карты 
+ * Унифицированные типы для работы с областями карты
  * Создано в рамках Этапа 3: Унификация типов и интерфейсов
  */
 
@@ -45,6 +45,7 @@ export interface RegionData extends RegionBase {
   boundaryWkt: string; // координаты в формате WKT
   sectorType: SectorType; // тип сектора области
   specimensCount: number; // количество образцов в области
+  mapType?: string; // тип карты: 'schematic' или 'geo'
 }
 
 /**
@@ -54,8 +55,10 @@ export interface RegionData extends RegionBase {
 export interface RegionBridge {
   /**
    * Преобразует RegionData в Area
+   * @param region - данные региона из БД
+   * @param mapType - тип карты (опционально)
    */
-  toArea(region: RegionData): Area;
+  toArea(region: RegionData, mapType?: string): Area;
 
   /**
    * Преобразует Area в RegionData (с опциональным опущением некоторых полей)
@@ -76,7 +79,7 @@ export enum RegionFilterType {
   ALL = 'all',
   WITH_SPECIMENS = 'withSpecimens',
   WITHOUT_SPECIMENS = 'withoutSpecimens',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 /**
@@ -88,4 +91,4 @@ export interface Plant {
   latinName?: string;
   description?: string;
   position: CoordinatePoint; // [x, y] координаты на карте
-} 
+}

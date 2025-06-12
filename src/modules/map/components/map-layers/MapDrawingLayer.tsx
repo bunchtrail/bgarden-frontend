@@ -16,7 +16,9 @@ import { logError } from '@/utils/logger';
 
 // Сервисы
 import { PolygonFactory, createRegion, updateRegion } from '@/services/regions';
-import regionBridge from '@/services/regions/RegionBridge';
+import regionBridge, {
+  convertPointsForStorage,
+} from '@/services/regions/RegionBridge';
 
 // Хуки
 
@@ -121,9 +123,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   // Синхронизируем локальную ref с актуальным состоянием areas
   useEffect(() => {
     areasRef.current = areas;
-  }, [areas]);
-
-  // Основная функция для сохранения области на сервере
+  }, [areas]); // Основная функция для сохранения области на сервере
   const saveAreaToServer = useCallback(
     (
       areaId: string,
@@ -131,17 +131,23 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       areaDescription: string,
       points: [number, number][]
     ) => {
+      // Преобразуем координаты для сохранения в БД в зависимости от типа карты
+      const storagePoints = convertPointsForStorage(points, mapConfig.mapType);
+
       const area: Area = {
         id: areaId,
         name: areaName,
         description: areaDescription,
-        points,
+        points: storagePoints, // Используем преобразованные координаты
         fillColor: config?.fillColor || '#60A5FA',
         strokeColor: config?.color || '#3B82F6',
         fillOpacity: config?.fillOpacity || 0.3,
       };
 
-      const regionData = regionBridge.toRegionData(area);
+      const regionData = {
+        ...regionBridge.toRegionData(area),
+        mapType: mapConfig.mapType, // Добавляем тип карты
+      };
       const isEditingExistingRegion = areaId.startsWith('region-');
 
       if (isEditingExistingRegion) {
@@ -179,7 +185,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
           });
       }
     },
-    [config, setAreas]
+    [config, setAreas, mapConfig.mapType]
   );
 
   // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)

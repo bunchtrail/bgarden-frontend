@@ -3,6 +3,7 @@ import { Polygon, Tooltip, useMap as useLeafletMap } from 'react-leaflet';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { PolygonFactory } from '@/services/regions/PolygonFactory';
 import { useMap } from '@/modules/map/hooks';
+import { useMapConfig } from '@/modules/map/contexts/MapConfigContext';
 import regionBridge from '@/services/regions/RegionBridge';
 
 export interface MapRegionsLayerProps {
@@ -19,6 +20,7 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
   onClick,
 }) => {
   const { setSelectedAreaId, selectedAreaId } = useMap();
+  const { mapConfig } = useMapConfig();
   const leafletMap = useLeafletMap();
 
   const handleRegionClick = (
@@ -71,9 +73,10 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
 
   return (
     <>
+      {' '}
       {regions.map((region) => {
         // Используем RegionBridge для преобразования RegionData в Area и получения points
-        const area = regionBridge.toArea(region);
+        const area = regionBridge.toArea(region, mapConfig.mapType);
         if (area.points.length < 3) return null; // Полигон должен иметь как минимум 3 точки
 
         const isSelected = highlightSelected && selectedAreaId === area.id;

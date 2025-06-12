@@ -214,7 +214,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   };
   const renderModeSection = () => {
     if (!isSectionVisible(PanelSection.MODE)) return null;
-    const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
     const modeConfig = panelConfig.sectionConfig?.[PanelSection.MODE] || {};
 
     // Определяем доступные режимы на основе конфигурации и типа карты
@@ -227,13 +226,11 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
       {
         id: MAP_MODES.DRAW,
         label: 'Создание областей',
-        disabledForGeo: true, // Отключен для географических карт
         showInConfig: modeConfig.showDrawMode,
       },
       {
         id: MAP_MODES.EDIT,
         label: 'Редактирование областей',
-        disabledForGeo: true, // Отключен для географических карт
         showInConfig: modeConfig.showEditMode,
       },
     ].filter((mode) => {
@@ -251,18 +248,12 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
           className={`${cardClasses.filled} p-2.5 rounded-xl flex flex-col space-y-1.5`}
         >
           {availableModes.map((mode) => {
-            const isDisabled = isGeoMap && mode.disabledForGeo;
-            const isChecked =
-              !isDisabled && mapConfig.interactionMode === mode.id;
+            const isChecked = mapConfig.interactionMode === mode.id;
 
             return (
               <label
                 key={mode.id}
-                className={`flex items-center px-2 py-1.5 rounded-lg transition-colors ${
-                  isDisabled
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'cursor-pointer hover:bg-blue-50/60'
-                }`}
+                className={`flex items-center px-2 py-1.5 rounded-lg transition-colors cursor-pointer hover:bg-blue-50/60`}
               >
                 <input
                   type="radio"
@@ -271,7 +262,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
                   checked={isChecked}
                   onChange={() => handleModeChange(mode.id)}
                   className="mr-2.5 accent-blue-600 h-4 w-4"
-                  disabled={isDisabled}
                 />
                 <span className={`${textClasses.body} ${textClasses.primary}`}>
                   {mode.label}

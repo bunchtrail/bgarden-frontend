@@ -2,6 +2,7 @@ import { Plant } from '@/services/regions/types';
 import httpClient from '@/services/httpClient';
 import { logError } from '@/utils/logger';
 import { LocationType } from '@/modules/specimens/types';
+import L from 'leaflet';
 // Импортируем типы карт для использования в функции
 import { MAP_TYPES } from '../contexts/MapConfigContext';
 
@@ -48,7 +49,7 @@ export interface SpecimenData {
 export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
   try {
     const data = await httpClient.get<SpecimenData[]>('/Specimen/all', {
-      suppressErrorsForStatus: [404]
+      suppressErrorsForStatus: [404],
     });
     return data;
   } catch (error) {
@@ -66,46 +67,60 @@ export const getAllSpecimens = async (): Promise<SpecimenData[]> => {
  */
 export const convertSpecimensToPlants = (
   specimens: SpecimenData[],
-  mapType: typeof MAP_TYPES[keyof typeof MAP_TYPES]
+  mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]
 ): Plant[] => {
   const usedIds = new Set<string>();
-  
+
   return specimens
-    .filter(specimen => {
+    .filter((specimen) => {
       // Фильтруем растения в зависимости от типа карты и наличия координат
       if (mapType === MAP_TYPES.GEO) {
         // Для гео-карты нужны георгафические координаты
         return (
-          (specimen.locationType === LocationType.Geographic || specimen.locationType === undefined) &&
+          (specimen.locationType === LocationType.Geographic ||
+            specimen.locationType === undefined) &&
           specimen.latitude != null &&
           specimen.longitude != null
         );
       }
       // Для схематической карты нужны координаты на схеме
       return (
-        (specimen.locationType === LocationType.SchematicMap || specimen.locationType === undefined) &&
+        (specimen.locationType === LocationType.SchematicMap ||
+          specimen.locationType === undefined) &&
         specimen.mapX != null &&
         specimen.mapY != null
       );
     })
-    .map(specimen => {
+    .map((specimen) => {
       let plantId = `specimen-${specimen.id}`;
       if (usedIds.has(plantId)) {
-        plantId = `specimen-${specimen.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+        plantId = `specimen-${specimen.id}-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 5)}`;
       }
       usedIds.add(plantId);
-      
       // Выбираем позицию в зависимости от типа карты
-      const position: [number, number] = mapType === MAP_TYPES.GEO
-        ? [specimen.latitude, specimen.longitude]
-        : [specimen.mapX, specimen.mapY];
-      
+      let position: [number, number];
+      if (mapType === MAP_TYPES.GEO) {
+        position = [specimen.latitude, specimen.longitude];
+      } else {
+        // Для схематических карт преобразуем пиксели в lat/lng
+        // Используем pointToLatLng, который правильно учитывает Transformation
+        const ZOOM = 0; // CRS.Simple всегда z=0
+        const ll = L.CRS.Simple.pointToLatLng(
+          L.point(specimen.mapX, specimen.mapY),
+          ZOOM
+        );
+        position = [ll.lat, ll.lng];
+      }
+
       return {
         id: plantId,
-        name: specimen.russianName || specimen.latinName || 'Неизвестное растение',
+        name:
+          specimen.russianName || specimen.latinName || 'Неизвестное растение',
         position,
         description: `${specimen.genus || ''} ${specimen.species || ''}`.trim(),
-        latinName: specimen.latinName
+        latinName: specimen.latinName,
       };
     });
 };
@@ -129,4 +144,4 @@ export const getSpecimenById = async (id: number): Promise<SpecimenData> => {
   }
 };
 
-export { };
+export {};

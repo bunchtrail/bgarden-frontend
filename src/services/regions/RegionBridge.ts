@@ -6,12 +6,62 @@
 
 import { RegionData, Area, RegionBridge } from './types';
 import { SectorType } from '@/modules/map/types/mapTypes';
-import { 
-  parseCoordinates, 
-  calculatePolygonCenter, 
-  convertPointsToPolygonCoordinates, 
-  convertPointsToWKT 
+import { MAP_TYPES } from '@/modules/map/contexts/MapConfigContext';
+import L from 'leaflet';
+import {
+  parseCoordinates,
+  calculatePolygonCenter,
+  convertPointsToPolygonCoordinates,
+  convertPointsToWKT,
 } from './RegionUtils';
+
+/**
+ * Преобразует координаты в зависимости от типа карты для сохранения в БД
+ * @param points - массив координат [lat, lng]
+ * @param mapType - тип карты
+ * @returns преобразованные координаты
+ */
+export const convertPointsForStorage = (
+  points: [number, number][],
+  mapType: string
+): [number, number][] => {
+  if (mapType === MAP_TYPES.GEO) {
+    // Для гео-карт сохраняем координаты как есть (lat/lng)
+    return points;
+  } else {
+    // Для схематических карт преобразуем lat/lng в пиксели
+    // Используем latLngToPoint, который правильно учитывает Transformation
+    const ZOOM = 0; // CRS.Simple всегда z=0
+    return points.map(([lat, lng]) => {
+      const p = L.CRS.Simple.latLngToPoint(L.latLng(lat, lng), ZOOM);
+      return [p.x, p.y]; // Y уже правильный, отрицательный знак не нужен
+    });
+  }
+};
+
+/**
+ * Преобразует координаты из БД для отображения на карте
+ * @param points - массив координат из БД
+ * @param mapType - тип карты
+ * @returns координаты для отображения на карте
+ */
+export const convertPointsForDisplay = (
+  points: [number, number][],
+  mapType: string
+): [number, number][] => {
+  if (mapType === MAP_TYPES.GEO) {
+    // Для гео-карт координаты уже в правильном формате (lat/lng)
+    return points;
+  } else {
+    // Для схематических карт преобразуем пиксели в lat/lng для отображения
+    // Используем pointToLatLng, который правильно учитывает Transformation
+    const ZOOM = 0; // CRS.Simple всегда z=0
+    return points.map(([x, y]) => {
+      const ll = L.CRS.Simple.pointToLatLng(L.point(x, y), ZOOM);
+      return [ll.lat, ll.lng];
+    });
+  }
+};
 
 /**
  * Класс-мост для преобразования между типами Area и RegionData
@@ -20,19 +70,27 @@ import {
 class RegionBridgeImpl implements RegionBridge {
   /**
    * Преобразует RegionData в Area
+   * @param region - данные региона из БД
+   * @param mapType - тип карты (опционально, для совместимости)
    */
-  toArea(region: RegionData): Area {
+  toArea(region: RegionData, mapType?: string): Area {
     // Парсим координаты из строки JSON
     const points = parseCoordinates(region.polygonCoordinates);
-    
+
+    // Определяем тип карты: из параметра, из данных региона или по умолчанию схематическая
+    const currentMapType = mapType || region.mapType || MAP_TYPES.SCHEMATIC;
+
+    // Преобразуем координаты для отображения на карте
+    const displayPoints = convertPointsForDisplay(points, currentMapType);
+
     return {
       id: `region-${region.id}`,
       name: region.name || 'Неизвестная область',
-      points,
+      points: displayPoints,
       description: region.description || '',
       fillColor: region.fillColor,
       strokeColor: region.strokeColor,
-      fillOpacity: region.fillOpacity
+      fillOpacity: region.fillOpacity,
     };
   }
 
@@ -41,7 +99,7 @@ class RegionBridgeImpl implements RegionBridge {
    */
   toRegionData(area: Area): Omit<RegionData, 'id' | 'specimensCount'> {
     const [latitude, longitude] = calculatePolygonCenter(area.points);
-    
+
     return {
       name: area.name,
       description: area.description || '',
@@ -53,7 +111,7 @@ class RegionBridgeImpl implements RegionBridge {
       sectorType: SectorType.UNDEFINED,
       fillColor: area.fillColor,
       strokeColor: area.strokeColor,
-      fillOpacity: area.fillOpacity
+      fillOpacity: area.fillOpacity,
     };
   }
 
@@ -70,7 +128,9 @@ class RegionBridgeImpl implements RegionBridge {
         return regionId;
       }
     }
-    throw new Error(`Неверный формат ID области: ${areaId}. Ожидается формат "region-XXX"`);
+    throw new Error(
+      `Неверный формат ID области: ${areaId}. Ожидается формат "region-XXX"`
+    );
   }
 
   /**
@@ -81,22 +141,23 @@ class RegionBridgeImpl implements RegionBridge {
   regionIdToAreaId(regionId: number | string): string {
     return `region-${regionId}`;
   }
-
   /**
    * Преобразует массив RegionData в массив Area
+   * @param regions - массив данных регионов
+   * @param mapType - тип карты (опционально)
    */
-  regionsToAreas(regions: RegionData[]): Area[] {
-    return regions.map(region => this.toArea(region));
+  regionsToAreas(regions: RegionData[], mapType?: string): Area[] {
+    return regions.map((region) => this.toArea(region, mapType));
   }
 
   /**
    * Преобразует массив Area в массив RegionData (без id и specimensCount)
    */
   areasToRegions(areas: Area[]): Omit<RegionData, 'id' | 'specimensCount'>[] {
-    return areas.map(area => this.toRegionData(area));
+    return areas.map((area) => this.toRegionData(area));
   }
 }
 
 // Экспортируем единственный экземпляр моста для использования в приложении
 const regionBridge = new RegionBridgeImpl();
-export default regionBridge; 
+export default regionBridge;
