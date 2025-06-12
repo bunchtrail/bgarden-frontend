@@ -160,6 +160,8 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     mapConfig.interactionMode === MAP_MODES.EDIT ||
     mapConfig.interactionMode === MAP_MODES.DELETE;
 
+  const isDeleteModeOnly = mapConfig.interactionMode === MAP_MODES.DELETE;
+
   // Синхронизируем локальную ref с актуальным состоянием areas
   useEffect(() => {
     areasRef.current = areas;
@@ -227,7 +229,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     },
     [config, setAreas, mapConfig.mapType]
   );
-
   // Функция, делающая полигон «перетаскиваемым» (через режим редактирования Leaflet)
   const makePolygonDraggable = useCallback(
     (polygon: L.Polygon | L.Rectangle) => {
@@ -250,6 +251,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         // Не блокируем события, чтобы удаление работало корректно
         if (isDeleteMode) return;
 
+        // Включаем точки редактирования только в режиме EDIT, но НЕ в режиме DELETE
         if (isEditMode && mapConfig.interactionMode === MAP_MODES.EDIT) {
           // Блокируем всплытие события только для режима редактирования
           // чтобы включить перетаскивание полигона
@@ -318,20 +320,33 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         });
         if (drawnItemsRef.current) {
           drawnItemsRef.current.addLayer(polygon);
-          // В режиме редактирования делаем полигон сразу редактируемым
-          if (isEditMode) {
+          // В режиме редактирования (но НЕ в режиме удаления) делаем полигон сразу редактируемым
+          if (isEditMode && mapConfig.interactionMode !== MAP_MODES.DELETE) {
+            makePolygonDraggable(polygon);
+          } else if (mapConfig.interactionMode === MAP_MODES.DELETE) {
+            // В режиме удаления добавляем только обработчик клика для модалки
             makePolygonDraggable(polygon);
           }
         }
       }
     });
-  }, [areas, isVisible, config, isEditMode, makePolygonDraggable]);
-
-  // Эффект для включения режима редактирования всех полигонов при переходе в режим EDIT
+  }, [
+    areas,
+    isVisible,
+    config,
+    isEditMode,
+    makePolygonDraggable,
+    mapConfig.interactionMode,
+  ]); // Эффект для включения режима редактирования всех полигонов при переходе в режим EDIT
   useEffect(() => {
-    if (!drawnItemsRef.current || !isEditMode) return;
+    if (
+      !drawnItemsRef.current ||
+      !isEditMode ||
+      mapConfig.interactionMode === MAP_MODES.DELETE
+    )
+      return;
 
-    // Включаем редактирование для всех существующих полигонов
+    // Включаем редактирование для всех существующих полигонов только в режиме EDIT, но не DELETE
     drawnItemsRef.current.eachLayer((layer: any) => {
       if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
         // Включаем режим редактирования для каждого полигона
@@ -367,7 +382,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         });
       }
     };
-  }, [isEditMode]);
+  }, [isEditMode, mapConfig.interactionMode]);
 
   // Управляем появлением/скрытием контролов рисования в зависимости от режима
   useEffect(() => {
@@ -386,7 +401,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       drawnItemsRef.current = new L.FeatureGroup();
       map.addLayer(drawnItemsRef.current);
     }
-
     let newDrawControl: L.Control.Draw | null = null;
     if (isDrawingMode) {
       // Режим создания областей - показываем инструменты рисования
@@ -422,8 +436,9 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
           edit: false,
         },
       });
-    } else if (isEditMode) {
+    } else if (isEditMode && !isDeleteModeOnly) {
       // Режим редактирования объектов - показываем только инструменты редактирования
+      // В режиме DELETE не показываем кнопки Leaflet
       newDrawControl = new L.Control.Draw({
         position: 'topleft',
         draw: {
@@ -441,6 +456,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         },
       });
     }
+    // В режиме DELETE (isDeleteModeOnly) не создаем никаких контролов
 
     if (newDrawControl) {
       setDrawControl(newDrawControl);
@@ -454,7 +470,15 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         } catch {}
       }
     };
-  }, [map, isVisible, isDrawingMode, isEditMode, config, drawControl]);
+  }, [
+    map,
+    isVisible,
+    isDrawingMode,
+    isEditMode,
+    isDeleteModeOnly,
+    config,
+    drawControl,
+  ]);
 
   // Сброс флага завершения рисования при выходе из DRAW-режима
   useEffect(() => {
