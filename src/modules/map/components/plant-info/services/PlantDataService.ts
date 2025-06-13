@@ -7,11 +7,14 @@ import {
 } from '../../../services/plantService';
 import { MAP_TYPES } from '../../../contexts/MapConfigContext';
 
-// Предполагаемая логика кэширования
+// Simple in-memory cache so that we don't flood the backend each time карта перерисовывается.
 let cachedPlants: Plant[] | null = null;
 let lastFetchTimestamp = 0;
 let lastMapType: string | null = null;
-const CACHE_DURATION_MS = 60000; // 1 минута
+
+// Время жизни кэша (60 секунд достаточно, чтобы предотвратить «всплеск» запросов при зуме/панорамировании,
+// но данные остаются относительно свежими).
+const CACHE_DURATION_MS = 60_000; // 1 минута
 
 /**
  * Сервис для загрузки и кэширования данных о растениях.
@@ -26,18 +29,26 @@ export class PlantDataService {
   ): Promise<Plant[]> {
     const now = Date.now();
 
-   
+    // Если в кэше есть данные для того же типа карты и кэш ещё не устарел, возвращаем его
+    if (
+      cachedPlants &&
+      lastMapType === mapType &&
+      now - lastFetchTimestamp < CACHE_DURATION_MS
+    ) {
+      return cachedPlants;
+    }
 
     try {
-      
-      // Запрашиваем данные с сервера
+      // Запрашиваем данные с сервера только если кэш отсутствует или устарел
       const specimens = await getAllSpecimens();
 
       // **ИСПРАВЛЕНИЕ:** Передаем `mapType` в функцию конвертации.
       const plants = convertSpecimensToPlants(specimens, mapType);
-     
 
-     
+      // Обновляем кэш
+      cachedPlants = plants;
+      lastFetchTimestamp = now;
+      lastMapType = mapType;
 
       return plants;
     } catch (error) {

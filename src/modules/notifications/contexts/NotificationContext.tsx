@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -35,8 +35,30 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (notification: Omit<Notification, 'id'>) => {
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // Используем ref для хранения последних отправленных уведомлений
+  const recentNotificationsRef = useRef<Record<string, number>>({});
+
+  // Функция для удаления уведомления по id
+  const removeNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  }, []);
+
+  /**
+   * Добавляет новое уведомление, предотвращая дублирование сообщений,
+   * отправленных в течение последней секунды с теми же параметрами.
+   */
+  const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
+    const now = Date.now();
+    const key = `${notification.type}|${notification.title ?? ''}|${notification.message}`;
+
+    // Если уже есть такое уведомление, отправленное менее секунды назад — игнорируем
+    const lastTime = recentNotificationsRef.current[key];
+    if (lastTime && now - lastTime < 1000) {
+      return;
+    }
+    recentNotificationsRef.current[key] = now;
+
+    const id = `${now}-${Math.random().toString(36).substr(2, 9)}`;
     const newNotification: Notification = {
       ...notification,
       id,
@@ -50,17 +72,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (newNotification.duration && newNotification.duration > 0) {
       setTimeout(() => {
         removeNotification(id);
+        // Удаляем запись о последнем времени, чтобы разрешить повторные уведомления позже
+        delete recentNotificationsRef.current[key];
       }, newNotification.duration);
+    } else {
+      // Если уведомление бессрочное, очищаем запись через 1 сек., чтобы не блокировать новые
+      setTimeout(() => delete recentNotificationsRef.current[key], 1000);
     }
-  };
+  }, [removeNotification]);
 
-  const removeNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
-  };
-
-  const clearAllNotifications = () => {
+  const clearAllNotifications = useCallback(() => {
     setNotifications([]);
-  };
+  }, []);
 
   return (
     <NotificationContext.Provider

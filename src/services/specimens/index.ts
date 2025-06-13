@@ -1,5 +1,5 @@
 import httpClient from '@/services/httpClient';
-import { logError } from '@/utils/logger';
+import { logError, logInfo, logDebug } from '@/utils/logger';
 import { updateSpecimensCount } from '@/services/regions';
 import { Plant } from '@/services/regions/types';
 import L from 'leaflet';
@@ -214,7 +214,7 @@ class UnifiedSpecimenService {
         try {
             return await httpClient.get<SpecimenData>(`Specimen/${id}`);
         } catch (error) {
-            logError('Ошибка при получении данных растения:', error);
+            logError('Ошибка при получении данных растения:', 'specimens', undefined, error);
             throw error;
         }
     }
@@ -246,12 +246,30 @@ class UnifiedSpecimenService {
 
     // Создать образец с изображениями
     async createSpecimenWithImages(specimen: Omit<Specimen, 'id'>, images: File[]): Promise<{ specimen: Specimen; imageIds: number[] }> {
+        logInfo('Начало создания образца с изображениями', 'SpecimenService', {
+            specimenInfo: {
+                inventoryNumber: specimen.inventoryNumber,
+                russianName: specimen.russianName,
+                latinName: specimen.latinName,
+                sectorType: specimen.sectorType,
+                regionId: specimen.regionId
+            },
+            imagesInfo: {
+                count: images.length,
+                totalSize: images.reduce((sum, img) => sum + img.size, 0),
+                imageNames: images.map(img => img.name),
+                imageSizes: images.map(img => img.size)
+            }
+        });
+        
         const form = new FormData();
         
         // Добавляем Id = 0 для нового экземпляра
         form.append('Specimen.Id', '0');
+        logDebug('Добавлен ID образца в FormData', 'SpecimenService', { specimenId: '0' });
         
         // Добавляем каждое поле specimen с правильной обработкой типов
+        const formFieldsAdded: Record<string, string> = {};
         Object.entries(specimen).forEach(([key, value]) => {
             let val: string = '';
             
@@ -277,6 +295,19 @@ class UnifiedSpecimenService {
 
             const fieldName = `Specimen.${key.charAt(0).toUpperCase() + key.slice(1)}`;
             form.append(fieldName, val);
+            formFieldsAdded[fieldName] = val;
+        });
+        
+        logDebug('Добавлены поля образца в FormData', 'SpecimenService', {
+            fieldsCount: Object.keys(formFieldsAdded).length,
+            importantFields: {
+                'Specimen.InventoryNumber': formFieldsAdded['Specimen.InventoryNumber'],
+                'Specimen.RussianName': formFieldsAdded['Specimen.RussianName'],
+                'Specimen.LatinName': formFieldsAdded['Specimen.LatinName'],
+                'Specimen.SectorType': formFieldsAdded['Specimen.SectorType'],
+                'Specimen.LocationType': formFieldsAdded['Specimen.LocationType'],
+                'Specimen.RegionId': formFieldsAdded['Specimen.RegionId']
+            }
         });
 
         // Добавляем поле SpecimenImages как JSON (согласно curl примеру)
@@ -293,20 +324,73 @@ class UnifiedSpecimenService {
             fileSize: 0
         };
         form.append('Specimen.SpecimenImages', JSON.stringify(specimenImages));
+        
+        logDebug('Добавлена конфигурация изображений в FormData', 'SpecimenService', {
+            specimenImages,
+            isMainImage: specimenImages.isMain
+        });
 
         // Добавляем изображения
-        images.forEach(img => form.append('Images', img, img.name));
-
-        const result = await httpClient.post<{ specimen: Specimen; imageIds: number[] }>(
-            'Specimen/with-images',
-            form,
-            { requiresAuth: true } // Добавляем авторизацию
-        );
+        images.forEach((img, index) => {
+            form.append('Images', img, img.name);
+            logDebug(`Добавлено изображение ${index + 1} в FormData`, 'SpecimenService', {
+                imageIndex: index,
+                fileName: img.name,
+                fileSize: img.size,
+                fileType: img.type,
+                lastModified: img.lastModified
+            });
+        });
         
-        if (result.specimen.regionId) {
-            await updateSpecimensCount(result.specimen.regionId, true);
+        logInfo('FormData подготовлена для отправки', 'SpecimenService', {
+            totalImages: images.length,
+            totalImageSize: images.reduce((sum, img) => sum + img.size, 0)
+        });
+
+        try {
+            logInfo('Отправка запроса на создание образца с изображениями', 'SpecimenService');
+            
+            const result = await httpClient.post<{ specimen: Specimen; imageIds: number[] }>(
+                'Specimen/with-images',
+                form,
+                { requiresAuth: true } // Добавляем авторизацию
+            );
+            
+            logInfo('Образец с изображениями успешно создан', 'SpecimenService', {
+                createdSpecimen: {
+                    id: result.specimen.id,
+                    inventoryNumber: result.specimen.inventoryNumber,
+                    russianName: result.specimen.russianName,
+                    latinName: result.specimen.latinName,
+                    regionId: result.specimen.regionId
+                },
+                uploadedImages: {
+                    count: result.imageIds?.length || 0,
+                    imageIds: result.imageIds
+                }
+            });
+            
+            if (result.specimen.regionId) {
+                logDebug('Обновляем счетчик образцов в регионе', 'SpecimenService', {
+                    regionId: result.specimen.regionId,
+                    increment: true
+                });
+                await updateSpecimensCount(result.specimen.regionId, true);
+            }
+            
+            return result;
+        } catch (error) {
+            logError('Ошибка при создании образца с изображениями', 'SpecimenService', {
+                specimenInfo: {
+                    inventoryNumber: specimen.inventoryNumber,
+                    russianName: specimen.russianName,
+                    latinName: specimen.latinName
+                },
+                imagesCount: images.length,
+                requestEndpoint: 'Specimen/with-images'
+            }, error);
+            throw error;
         }
-        return result;
     }
 
     // Обновить существующий образец
@@ -320,7 +404,7 @@ class UnifiedSpecimenService {
             const result = await httpClient.put<Specimen>(`Specimen/${id}/location`, locationData, { requiresAuth: true });
             return result;
         } catch (error) {
-            logError('Ошибка при обновлении местоположения образца:', error);
+            logError('Ошибка при обновлении местоположения образца:', 'specimens', undefined, error);
             throw error;
         }
     }
@@ -343,7 +427,7 @@ class UnifiedSpecimenService {
             
             return true;
         } catch (error) {
-            logError('Ошибка при удалении образца:', error);
+            logError('Ошибка при удалении образца:', 'specimens', undefined, error);
             throw error;
         }
     }
@@ -361,7 +445,7 @@ class UnifiedSpecimenService {
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
                 return null;
             }
-            logError(`Ошибка при получении изображения для образца с ID ${specimenId}:`, error);
+            logError(`Ошибка при получении изображения для образца с ID ${specimenId}:`, 'specimens', undefined, error);
             return null;
         }
     }
@@ -377,7 +461,7 @@ class UnifiedSpecimenService {
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
                 return [];
             }
-            logError(`Ошибка при получении изображений образца с ID ${specimenId}:`, error);
+            logError(`Ошибка при получении изображений образца с ID ${specimenId}:`, 'specimens', undefined, error);
             return [];
         }
     }
@@ -387,7 +471,7 @@ class UnifiedSpecimenService {
         try {
             return await httpClient.get<SpecimenImage>(`specimen-images/${imageId}`);
         } catch (error) {
-            logError(`Ошибка при получении изображения с ID ${imageId}:`, error);
+            logError(`Ошибка при получении изображения с ID ${imageId}:`, 'specimens', undefined, error);
             return null;
         }
     }
@@ -398,7 +482,7 @@ class UnifiedSpecimenService {
             await httpClient.delete(`specimen-images/${id}`, { requiresAuth: true });
             return true;
         } catch (error) {
-            logError(`Ошибка при удалении изображения с ID ${id}:`, error);
+            logError(`Ошибка при удалении изображения с ID ${id}:`, 'specimens', undefined, error);
             return false;
         }
     }

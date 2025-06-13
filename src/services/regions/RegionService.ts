@@ -47,7 +47,7 @@ export const getAllRegions = async (): Promise<RegionData[]> => {
 
     return regions;
   } catch (error) {
-    logError('Ошибка при получении областей:', error);
+    logError('Ошибка при получении областей:', 'regions', undefined, error);
     // В случае ошибки возвращаем временные данные
     return getDefaultRegions();
   }
@@ -60,7 +60,7 @@ export const getRegionById = async (id: number): Promise<RegionData> => {
   try {
     return await httpClient.get<RegionData>(`Region/${id}`);
   } catch (error) {
-    logError(`Ошибка при получении региона с ID ${id}:`, error);
+    logError(`Ошибка при получении региона с ID ${id}:`, 'regions', undefined, error);
     throw error;
   }
 };
@@ -90,7 +90,7 @@ export const createRegion = async (
     };
     return await httpClient.post<RegionData>('Region', newRegion);
   } catch (error) {
-    logError('Ошибка при создании области:', error);
+    logError('Ошибка при создании области:', 'regions', undefined, error);
     throw error;
   }
 };
@@ -125,7 +125,7 @@ export const updateRegion = async (
     };
     return await httpClient.put<RegionData>(`Region/${id}`, updatedRegion);
   } catch (error) {
-    logError('Ошибка при обновлении области:', error);
+    logError('Ошибка при обновлении области:', 'regions', undefined, error);
     throw error;
   }
 };
@@ -138,7 +138,7 @@ export const deleteRegion = async (id: number): Promise<boolean> => {
     await httpClient.delete(`Region/${id}`);
     return true;
   } catch (error) {
-    logError(`Ошибка при удалении региона ${id}:`, error);
+    logError(`Ошибка при удалении региона ${id}:`, 'regions', undefined, error);
     throw error;
   }
 };
@@ -152,7 +152,7 @@ export const getSpecimensInRegion = async (
   try {
     return await httpClient.get<Specimen[]>(`Region/${regionId}/specimens`);
   } catch (error) {
-    logError(`Ошибка при получении образцов из региона ${regionId}:`, error);
+    logError(`Ошибка при получении образцов из региона ${regionId}:`, 'regions', undefined, error);
     return [];
   }
 };
@@ -171,7 +171,7 @@ export const updateSpecimensCount = async (
 
     await httpClient.put(endpoint);
   } catch (error) {
-    logError('Ошибка при обновлении количества образцов в области:', error);
+    logError('Ошибка при обновлении количества образцов в области:', 'regions', undefined, error);
     throw error;
   }
 };
@@ -223,7 +223,7 @@ export const parseCoordinates = (
       // Дополнительная логика для других форматов
     }
 
-    logError('Ошибка при разборе координат', error);
+    logError('Ошибка при разборе координат', 'regions', undefined, error);
     return getDefaultCoordinates();
   }
 };

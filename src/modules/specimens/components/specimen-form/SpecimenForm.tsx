@@ -20,6 +20,7 @@ import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { useSpecimenImage } from '../../hooks';
 import { specimenService } from '../../services/specimenService';
+import { useLogger } from '@/hooks/useLogger';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -42,11 +43,22 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Инициализация логгера
+  const log = useLogger('SpecimenForm');
+  
   // Получаем тип сектора из URL, если он там есть
   const getSectorTypeFromUrl = (): number | null => {
     const params = new URLSearchParams(location.search);
     const sectorTypeParam = params.get('sectorType');
-    return sectorTypeParam ? Number(sectorTypeParam) : null;
+    const sectorType = sectorTypeParam ? Number(sectorTypeParam) : null;
+    
+    log.debug('Анализ параметров URL', { 
+      sectorTypeParam, 
+      sectorType, 
+      search: location.search 
+    });
+    
+    return sectorType;
   };
   
   // Получаем тип сектора из URL
@@ -142,20 +154,51 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Обновление формы при получении данных образца
   useEffect(() => {
     if (specimen) {
+      log.info('Инициализация формы для редактирования образца', { 
+        specimenId: specimen.id,
+        inventoryNumber: specimen.inventoryNumber,
+        russianName: specimen.russianName,
+        latinName: specimen.latinName
+      });
+      
       setFormData({
         ...specimen,
         sectorType: typeof specimen.sectorType === 'string' ? Number(specimen.sectorType) : specimen.sectorType
       });
+      
+      log.debug('Данные образца загружены в форму', { formData: specimen });
+    } else {
+      log.info('Инициализация формы для создания нового образца', { 
+        sectorTypeFromUrl,
+        initialSectorType: initialFormState.sectorType 
+      });
     }
-  }, [specimen, setFormData]);
+  }, [specimen, setFormData, log, sectorTypeFromUrl]);
 
   // Обработчик выбора изображений
   const handleImagesChange = (files: File[]) => {
+    log.info('Изображения выбраны пользователем', { 
+      filesCount: files.length,
+      filesInfo: files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        lastModified: f.lastModified
+      }))
+    });
+    
     setSelectedImages(files);
+    
+    log.debug('Детали выбранных изображений', {
+      totalSize: files.reduce((sum, f) => sum + f.size, 0),
+      fileTypes: Array.from(new Set(files.map(f => f.type))),
+      averageSize: files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) / files.length : 0
+    });
   };
 
   // Обработчик ошибок загрузки изображений
   const handleImageError = (message: string) => {
+    log.error('Ошибка при работе с изображениями', { errorMessage: message });
     notification.error(message);
   };
 
@@ -163,12 +206,21 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    log.info('Начало обработки отправки формы образца');
+    
     // Проверка, вызван ли submit действительно через кнопку "Сохранить"
     const submitEvent = e.nativeEvent as SubmitEvent;
     const isRealSubmit = submitEvent.submitter?.getAttribute('type') === 'submit';
     
+    log.debug('Анализ события отправки формы', { 
+      isRealSubmit,
+      submitterType: submitEvent.submitter?.getAttribute('type'),
+      submitterText: submitEvent.submitter?.textContent
+    });
+    
     // Если это не настоящий submit, то выходим (например, при клике на кнопку "Далее")
     if (!isRealSubmit) {
+      log.debug('Прервана обработка - не является настоящей отправкой формы');
       return;
     }
     
@@ -179,6 +231,20 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       'familyId', 'familyName', 'regionId'
     ];
     
+    log.debug('Валидация формы перед отправкой', { 
+      allFields,
+      currentFormData: {
+        inventoryNumber: formData.inventoryNumber,
+        russianName: formData.russianName,
+        latinName: formData.latinName,
+        genus: formData.genus,
+        species: formData.species,
+        familyId: formData.familyId,
+        familyName: formData.familyName,
+        regionId: formData.regionId
+      }
+    });
+    
     // Помечаем все обязательные поля как затронутые
     const newTouchedFields = { ...touchedFields };
     allFields.forEach(field => {
@@ -188,12 +254,28 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     
     // Валидируем все поля
     let isValid = true;
+    const validationErrors: string[] = [];
     allFields.forEach(field => {
       const fieldIsValid = validateField(field, formData[field as keyof SpecimenFormData]);
-      if (!fieldIsValid) isValid = false;
+      if (!fieldIsValid) {
+        isValid = false;
+        validationErrors.push(field);
+      }
+    });
+    
+    log.debug('Результат валидации формы', { 
+      isValid, 
+      validationErrors,
+      touchedFieldsCount: Object.keys(newTouchedFields).length
     });
     
     if (isValid) {
+      log.info('Форма прошла валидацию, начинаем отправку данных образца', {
+        hasImages: selectedImages.length > 0,
+        imagesCount: selectedImages.length,
+        isEditMode: !!specimen?.id
+      });
+      
       notification.info('Отправка данных образца...', { duration: 3000 });
       
       // Проверяем и преобразуем sectorType в число, если это строка
@@ -226,12 +308,32 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
             : formData.mapY,
       } as SpecimenFormData;
       
+      log.debug('Подготовлены финальные данные для отправки', {
+        finalFormData: {
+          inventoryNumber: finalFormData.inventoryNumber,
+          russianName: finalFormData.russianName,
+          latinName: finalFormData.latinName,
+          sectorType: finalFormData.sectorType,
+          locationType: finalFormData.locationType,
+          regionId: finalFormData.regionId,
+          familyId: finalFormData.familyId,
+          coordinates: {
+            latitude: finalFormData.latitude,
+            longitude: finalFormData.longitude,
+            mapX: finalFormData.mapX,
+            mapY: finalFormData.mapY
+          }
+        }
+      });
+      
       // Корректируем данные в зависимости от типа локации
       if (finalFormData.locationType === LocationType.SchematicMap) {
+        log.debug('Применены настройки для схематических координат - убираем географические');
         // Для схематических координат убираем географические
         finalFormData.latitude = null as unknown as number;
         finalFormData.longitude = null as unknown as number;
       } else if (finalFormData.locationType === LocationType.Geographic) {
+        log.debug('Применены настройки для географических координат - убираем схематические');
         // Для географических координат убираем схематические
         finalFormData.mapId = null as unknown as number;
         finalFormData.mapX = null as unknown as number;
@@ -242,26 +344,63 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       
       // Если есть изображения, используем обновленный метод работы с изображениями
       if (selectedImages.length > 0) {
+        log.info('Начинаем создание образца с изображениями', {
+          imagesCount: selectedImages.length,
+          imagesTotalSize: selectedImages.reduce((sum, f) => sum + f.size, 0),
+          imageNames: selectedImages.map(f => f.name)
+        });
+        
         try {
-          
-
           setIsUploading(true);
+          log.debug('Установлен статус загрузки изображений');
 
           const result = await specimenService.createSpecimenWithImages(finalFormData, selectedImages);
+
+          log.info('Образец успешно создан с изображениями', {
+            specimenId: result.specimen.id,
+            uploadedImageIds: result.imageIds,
+            imagesUploaded: result.imageIds?.length || 0
+          });
 
           setIsUploading(false);
           notification.success('Образец успешно создан с изображениями', { duration: 5000 });
           navigate(`/specimens/${result.specimen.id}`);
         } catch (error: any) {
           setIsUploading(false);
-          console.error('Подробная ошибка:', error);
+          
+          log.error('Ошибка при создании образца с изображениями', {
+            error: error.message || 'Неизвестная ошибка',
+            errorDetails: error,
+            finalFormData: {
+              inventoryNumber: finalFormData.inventoryNumber,
+              russianName: finalFormData.russianName,
+              latinName: finalFormData.latinName
+            },
+            imagesInfo: {
+              count: selectedImages.length,
+              totalSize: selectedImages.reduce((sum, f) => sum + f.size, 0)
+            }
+          }, error);
+          
           notification.error(`Ошибка при создании образца: ${error.message || 'Неизвестная ошибка'}`);
         }
       } else {
+        log.info('Создание образца без изображений', {
+          inventoryNumber: finalFormData.inventoryNumber,
+          russianName: finalFormData.russianName,
+          latinName: finalFormData.latinName
+        });
+        
         // Если изображения не выбраны, используем стандартный метод создания образца
         onSubmit(finalFormData);
       }
     } else {
+      log.warn('Форма не прошла валидацию', {
+        validationErrors,
+        currentStep: activeStep,
+        errors: errors
+      });
+      
       notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');
       
       // Переходим к первому шагу с ошибкой
@@ -277,7 +416,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         return stepFields.some(field => !!errors[field]);
       });
       
+      log.debug('Определены шаги с ошибками', {
+        stepsWithErrors,
+        fieldsToValidate,
+        currentErrors: errors
+      });
+      
       if (stepsWithErrors.length > 0) {
+        log.info('Переход к первому шагу с ошибкой', { targetStep: stepsWithErrors[0] });
         goToStep(stepsWithErrors[0]);
       }
     }

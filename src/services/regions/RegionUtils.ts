@@ -94,7 +94,7 @@ export const parseCoordinates = (coordsString: string | null | undefined): Coord
       return tryParseCoordinateString(coordsString);
     }
     
-    logError('Ошибка при разборе координат', error);
+    logError('Ошибка при разборе координат', 'regions', undefined, error);
     return getDefaultCoordinates();
   }
 };
@@ -153,7 +153,7 @@ export const parseWKT = (wktString: string): CoordinatePoint[] => {
     logWarning(`Не удалось распознать WKT формат: ${wktString}`);
     return getDefaultCoordinates();
   } catch (error) {
-    logError('Ошибка при разборе WKT', error);
+    logError('Ошибка при разборе WKT', 'regions', undefined, error);
     return getDefaultCoordinates();
   }
 };

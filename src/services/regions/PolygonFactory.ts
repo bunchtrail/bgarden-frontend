@@ -219,7 +219,7 @@ export class PolygonFactory {
       }
       return points;
     } catch (error) {
-      logError('Ошибка при оптимизации полигона', error);
+      logError('Ошибка при оптимизации полигона', 'map', undefined, error);
       return points;
     }
   }
@@ -293,7 +293,7 @@ export class PolygonFactory {
 
       return polygon;
     } catch (error) {
-      logError('Ошибка при создании полигона', error);
+      logError('Ошибка при создании полигона', 'map', undefined, error);
       // Возвращаем пустой полигон в случае ошибки
       return L.polygon([]);
     }
@@ -442,7 +442,7 @@ export class PolygonFactory {
       // Добавляем обработчик начала перетаскивания
       polygon.on('mousedown', onMouseDown);
     } catch (error) {
-      logError('Ошибка при настройке перетаскивания полигона', error);
+      logError('Ошибка при настройке перетаскивания полигона', 'map', undefined, error);
     }
   }
 
@@ -492,7 +492,7 @@ export class PolygonFactory {
 
       return polygon;
     } catch (error) {
-      logError(`Ошибка при создании полигона из региона ${region.id}`, error);
+      logError(`Ошибка при создании полигона из региона ${region.id}`, 'map', undefined, error);
       // Возвращаем пустой полигон в случае ошибки
       return L.polygon([]);
     }
@@ -536,7 +536,7 @@ export class PolygonFactory {
 
       return polygon;
     } catch (error) {
-      logError(`Ошибка при создании полигона из области ${area.id}`, error);
+      logError(`Ошибка при создании полигона из области ${area.id}`, 'map', undefined, error);
       // Возвращаем пустой полигон в случае ошибки
       return L.polygon([]);
     }

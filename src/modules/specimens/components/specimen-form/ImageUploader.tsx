@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { cardClasses } from '@/styles/global-styles';
+import { useLogger } from '@/hooks/useLogger';
 
 interface ImageUploaderProps {
   onChange: (files: File[]) => void;
@@ -19,9 +20,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const [previews, setPreviews] = useState<{ id: string; url: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const log = useLogger('ImageUploader');
 
   // Создаем превью при изменении value
   React.useEffect(() => {
+    log.debug('Обновление превью изображений', { 
+      filesCount: value.length,
+      filesInfo: value.map(f => ({ name: f.name, size: f.size, type: f.type }))
+    });
+    
     const newPreviews = value.map((file, index) => ({
       id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}-${index}`,
       url: URL.createObjectURL(file)
@@ -29,31 +36,60 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
     setPreviews(prev => {
       // Очищаем старые URL объекты для освобождения памяти
+      log.debug('Очистка старых URL объектов превью', { oldPreviewsCount: prev.length });
       prev.forEach(item => URL.revokeObjectURL(item.url));
       return newPreviews;
     });
 
+    log.debug('Созданы новые превью', { newPreviewsCount: newPreviews.length });
+
     return () => {
       // Очищаем URL объекты при размонтировании
+      log.debug('Очистка URL объектов при размонтировании компонента');
       newPreviews.forEach(item => URL.revokeObjectURL(item.url));
     };
-  }, [value]);
+  }, [value, log]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) return;
+    if (!event.target.files || event.target.files.length === 0) {
+      log.debug('Выбор файлов отменен или файлы не выбраны');
+      return;
+    }
 
     const files = Array.from(event.target.files);
     
+    log.info('Пользователь выбрал файлы через input', {
+      filesCount: files.length,
+      maxImages,
+      filesInfo: files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        sizeInMB: (f.size / (1024 * 1024)).toFixed(2)
+      }))
+    });
+    
     // Проверка на количество файлов
     if (files.length > maxImages) {
-      onError?.(`Максимальное количество изображений: ${maxImages}`);
+      const errorMsg = `Максимальное количество изображений: ${maxImages}`;
+      log.warn('Превышено максимальное количество файлов', { 
+        selectedCount: files.length, 
+        maxImages,
+        errorMsg 
+      });
+      onError?.(errorMsg);
       return;
     }
     
     // Проверка типов файлов
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'));
     if (invalidFiles.length > 0) {
-      onError?.('Пожалуйста, выберите только изображения');
+      const errorMsg = 'Пожалуйста, выберите только изображения';
+      log.warn('Выбраны файлы неподдерживаемых типов', {
+        invalidFiles: invalidFiles.map(f => ({ name: f.name, type: f.type })),
+        errorMsg
+      });
+      onError?.(errorMsg);
       return;
     }
     
@@ -61,9 +97,24 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const MAX_SIZE_MB = 5;
     const oversizedFiles = files.filter(file => file.size > MAX_SIZE_MB * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      onError?.(`Размер каждого изображения не должен превышать ${MAX_SIZE_MB} МБ`);
+      const errorMsg = `Размер каждого изображения не должен превышать ${MAX_SIZE_MB} МБ`;
+      log.warn('Файлы превышают максимальный размер', {
+        oversizedFiles: oversizedFiles.map(f => ({ 
+          name: f.name, 
+          size: f.size,
+          sizeInMB: (f.size / (1024 * 1024)).toFixed(2)
+        })),
+        maxSizeMB: MAX_SIZE_MB,
+        errorMsg
+      });
+      onError?.(errorMsg);
       return;
     }
+
+    log.info('Все файлы прошли валидацию, передаем в родительский компонент', {
+      validFilesCount: files.length,
+      totalSizeInMB: (files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024)).toFixed(2)
+    });
 
     onChange(files);
   };
@@ -71,43 +122,90 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.currentTarget.classList.add('border-green-500');
+    log.debug('Файлы перетаскиваются над областью загрузки');
   };
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.currentTarget.classList.remove('border-green-500');
+    log.debug('Файлы покинули область загрузки');
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.currentTarget.classList.remove('border-green-500');
     
+    log.info('Файлы сброшены в область загрузки', {
+      filesCount: event.dataTransfer.files?.length || 0
+    });
+    
     if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      const files = Array.from(event.dataTransfer.files).filter(file => 
-        file.type.startsWith('image/')
-      );
+      const allFiles = Array.from(event.dataTransfer.files);
+      const files = allFiles.filter(file => file.type.startsWith('image/'));
+      
+      log.debug('Анализ перетаскиваемых файлов', {
+        totalFiles: allFiles.length,
+        imageFiles: files.length,
+        nonImageFiles: allFiles.length - files.length,
+        maxImages
+      });
       
       if (files.length === 0) {
-        onError?.('Пожалуйста, выберите только изображения');
+        const errorMsg = 'Пожалуйста, выберите только изображения';
+        log.warn('Среди перетаскиваемых файлов нет изображений', {
+          allFiles: allFiles.map(f => ({ name: f.name, type: f.type })),
+          errorMsg
+        });
+        onError?.(errorMsg);
         return;
       }
       
       if (files.length > maxImages) {
-        onError?.(`Максимальное количество изображений: ${maxImages}`);
+        const errorMsg = `Максимальное количество изображений: ${maxImages}`;
+        log.warn('Перетаскиваемые файлы превышают максимальное количество', {
+          filesCount: files.length,
+          maxImages,
+          errorMsg
+        });
+        onError?.(errorMsg);
         return;
       }
+      
+      log.info('Перетаскиваемые файлы прошли валидацию', {
+        validFilesCount: files.length,
+        filesInfo: files.map(f => ({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          sizeInMB: (f.size / (1024 * 1024)).toFixed(2)
+        }))
+      });
       
       onChange(files);
     }
   };
 
   const handleRemoveFile = (index: number) => {
+    const fileToRemove = value[index];
+    log.info('Пользователь удаляет файл', {
+      index,
+      fileName: fileToRemove?.name,
+      fileSize: fileToRemove?.size,
+      remainingFilesCount: value.length - 1
+    });
+    
     const newFiles = [...value];
     newFiles.splice(index, 1);
     onChange(newFiles);
+    
+    log.debug('Файл удален из списка', {
+      removedFile: fileToRemove?.name,
+      newFilesCount: newFiles.length
+    });
   };
 
   const triggerFileInput = () => {
+    log.debug('Пользователь кликнул на область загрузки, открываем файловый диалог');
     fileInputRef.current?.click();
   };
 

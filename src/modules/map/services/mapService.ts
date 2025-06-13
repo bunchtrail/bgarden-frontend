@@ -22,7 +22,7 @@ export const getActiveMap = async (): Promise<MapData[]> => {
   try {
     return await httpClient.get<MapData[]>('Map/active');
   } catch (error) {
-    logError('Ошибка при получении активной карты:', error);
+    logError('Ошибка при получении активной карты:', 'map', undefined, error);
     throw error;
   }
 };

@@ -34,7 +34,7 @@ export const useTokenRefresh = (
           await refreshCallback();
         }
       } catch (error) {
-        logError('Ошибка при обновлении токена:', error);
+        logError('Ошибка при обновлении токена:', 'auth', undefined, error);
       }
     };
 
@@ -81,7 +81,7 @@ function isTokenExpiringSoon(token: string): boolean {
     
     return timeUntilExpiration <= fiveMinutesInMs;
   } catch (error) {
-    logError('Ошибка при проверке токена:', error);
+    logError('Ошибка при проверке токена:', 'auth', undefined, error);
     return false;
   }
 }

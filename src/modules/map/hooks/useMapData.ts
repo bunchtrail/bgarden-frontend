@@ -125,7 +125,7 @@ export const useMapData = (options?: {
       } catch (err) {
         const errorMessage =
           'Не удалось загрузить данные карты. Пожалуйста, попробуйте позже.';
-        logError('Ошибка при загрузке данных карты:', err);
+        logError('Ошибка при загрузке данных карты:', 'map', undefined, err);
         setError(errorMessage);
         setLoading(false);
 
