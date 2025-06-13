@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Notification, useNotifications } from '../contexts/NotificationContext';
-import '../styles/notification.css';
+import { 
+  notificationStyles, 
+  getNotificationClasses, 
+  notificationIconColors,
+  darkNotificationStyles 
+} from '../styles';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -11,56 +16,27 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   const { id, type, title, message, dismissible, duration } = notification;
   const [isExiting, setIsExiting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const elementRef = useRef<HTMLDivElement>(null);
 
-  // Определяем функцию handleDismiss перед использованием в useEffect
+  // Определяем функцию handleDismiss
   const handleDismiss = useCallback(() => {
-    // Если уведомление ещё не успело появиться, сразу удаляем его
-    if (!isVisible) {
-      removeNotification(id);
-      return;
-    }
-
+    if (isExiting) return;        // защита от повторного клика
     setIsExiting(true);
 
-    // Регистрируем слушатель события окончания анимации
-    if (elementRef.current) {
-      const onTransitionEnd = (e: TransitionEvent) => {
-        if (e.propertyName === 'opacity' || e.propertyName === 'transform') {
-          removeNotification(id);
-        }
-      };
+    setTimeout(() => {
+      removeNotification(id);
+    }, 300); // длина анимации
+  }, [id, removeNotification, isExiting]);
 
-      elementRef.current.addEventListener('transitionend', onTransitionEnd, { once: true });
-
-      // Подстраховка на случай, если transitionend не сработает
-      setTimeout(() => removeNotification(id), 350);
-    } else {
-      // Запасной вариант, если что-то пошло не так с анимацией
-      setTimeout(() => {
-        removeNotification(id);
-      }, 300);
-    }
-  }, [id, removeNotification, isVisible]);
-
-  // Используем один эффект для установки видимости с небольшой задержкой
+  // Эффект для начальной анимации появления
   useEffect(() => {
-    // Небольшая задержка для начальной настройки
-    requestAnimationFrame(() => {
+    const timer = requestAnimationFrame(() => {
       setIsVisible(true);
-      
-      // Регистрируем слушатель события окончания анимации
-      if (elementRef.current) {
-        elementRef.current.addEventListener('transitionend', (e) => {
-          if (e.propertyName === 'opacity' || e.propertyName === 'transform') {
-            // Анимация появления завершена
-          }
-        }, { once: true });
-      }
     });
-  }, [id]);
 
-  // Отдельный эффект для автоматического удаления
+    return () => cancelAnimationFrame(timer);
+  }, []);
+
+  // Эффект для автоматического удаления
   useEffect(() => {
     if (!duration || duration <= 0) return;
     
@@ -69,41 +45,67 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     }, duration);
 
     return () => clearTimeout(dismissTimer);
-  }, [duration, id, handleDismiss]);
+  }, [duration, handleDismiss]);
 
-  // Упрощаем классы для анимации - используем CSS-переходы вместо keyframes
-  const animationClass = isExiting 
-    ? 'notification-exit' 
-    : (isVisible ? 'notification-enter' : 'notification-initial');
+  // Определяем CSS классы для анимации
+  const getAnimationState = (): 'initial' | 'enter' | 'exit' => {
+    if (isExiting) return 'exit';
+    if (isVisible) return 'enter';
+    return 'initial';
+  };
 
-  // Классы для типов уведомлений
-  const notificationTypeClass = `notification-${type}`;
+  const notificationClasses = [
+    getNotificationClasses(type as 'success' | 'error' | 'warning' | 'info', getAnimationState()),
+    darkNotificationStyles.item.base,
+    darkNotificationStyles.item[type as keyof typeof darkNotificationStyles.item],
+  ].join(' ');
 
   return (
     <div 
-      ref={elementRef}
       id={`notification-${id}`}
-      className={`p-4 rounded-lg border shadow-md notification-item ${notificationTypeClass} ${animationClass}`}
+      className={notificationClasses}
       role="alert"
+      aria-live="polite"
+      aria-atomic="true"
     >
-      <div className="flex items-start">
-        <div className="flex-shrink-0 mr-3">
-          {getIcon(type)}
+      <div className={notificationStyles.content.layout}>
+        {/* Иконка уведомления */}
+        <div className={notificationStyles.content.icon}>
+          {getNotificationIcon(type)}
         </div>
-        <div className="flex-1">
-          {title && <h3 className="text-sm font-medium">{title}</h3>}
-          <div className="text-sm">{message}</div>
+        
+        {/* Содержимое уведомления */}
+        <div className={notificationStyles.content.body}>
+          {title && (
+            <h3 className={`${notificationStyles.content.title} ${darkNotificationStyles.content.title}`}>
+              {title}
+            </h3>
+          )}
+          <div className={`${notificationStyles.content.message} ${darkNotificationStyles.content.message}`}>
+            {message}
+          </div>
         </div>
+        
+        {/* Кнопка закрытия */}
         {dismissible && (
           <button
             type="button"
-            className="ml-auto -mx-1.5 -my-1.5 bg-transparent text-gray-500 rounded-lg inline-flex h-6 w-6 hover:bg-gray-200 notification-close-button"
-            aria-label="Закрыть"
+            className={`${notificationStyles.closeButton} ${darkNotificationStyles.closeButton}`}
+            aria-label="Закрыть уведомление"
             onClick={handleDismiss}
           >
-            <span className="sr-only">Закрыть</span>
-            <svg className="w-4 h-4 m-auto" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            <svg 
+              className="w-4 h-4" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="M6 18L18 6M6 6l12 12" 
+              />
             </svg>
           </button>
         )}
@@ -112,41 +114,59 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   );
 };
 
-// Перемещено в отдельную функцию для улучшения читаемости
-const getIcon = (type: string) => {
-  const iconColors: Record<string, string> = {
-    success: 'text-green-500',
-    error: 'text-red-500',
-    warning: 'text-yellow-500',
-    info: 'text-blue-500',
+// Функция для получения иконки уведомления
+const getNotificationIcon = (type: string): React.ReactElement => {
+  const iconColor = notificationIconColors[type as keyof typeof notificationIconColors] || notificationIconColors.info;
+  
+  const iconProps = {
+    className: `w-5 h-5 ${iconColor}`,
+    fill: "currentColor",
+    viewBox: "0 0 20 20"
   };
-
-  const iconColor = iconColors[type] || iconColors.info;
 
   switch (type) {
     case 'success':
       return (
-        <svg className={`w-5 h-5 ${iconColor}`} fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        <svg {...iconProps}>
+          <path 
+            fillRule="evenodd" 
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
+            clipRule="evenodd" 
+          />
         </svg>
       );
+    
     case 'error':
       return (
-        <svg className={`w-5 h-5 ${iconColor}`} fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+        <svg {...iconProps}>
+          <path 
+            fillRule="evenodd" 
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
+            clipRule="evenodd" 
+          />
         </svg>
       );
+    
     case 'warning':
       return (
-        <svg className={`w-5 h-5 ${iconColor}`} fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        <svg {...iconProps}>
+          <path 
+            fillRule="evenodd" 
+            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" 
+            clipRule="evenodd" 
+          />
         </svg>
       );
+    
     case 'info':
     default:
       return (
-        <svg className={`w-5 h-5 ${iconColor}`} fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
+        <svg {...iconProps}>
+          <path 
+            fillRule="evenodd" 
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" 
+            clipRule="evenodd" 
+          />
         </svg>
       );
   }

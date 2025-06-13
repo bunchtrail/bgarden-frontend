@@ -12,11 +12,7 @@ import {
 } from '../../modules/specimens/components/specimen-display';
 import { useSpecimenData } from '../../modules/specimens/hooks/useSpecimenData';
 import { useReferenceData } from '../../modules/specimens/hooks/useReferenceData';
-import {
-  cardClasses,
-  textClasses,
-  pageClasses,
-} from '../../styles/global-styles';
+import { specimenPageStyles } from '../../modules/specimens/styles';
 import { getActiveMap } from '../../modules/map/services/mapService';
 
 /**
@@ -206,10 +202,8 @@ const SpecimenPage: React.FC = () => {
   const error = specimenError || referenceError;
   if (loading) {
     return (
-      <div className={pageClasses.base}>
-        <div
-          className={`${pageClasses.container} ${pageClasses.centerContent}`}
-        >
+      <div className={specimenPageStyles.loadingContainer}>
+        <div className={specimenPageStyles.centerContent}>
           <LoadingSpinner />
         </div>
       </div>
@@ -218,11 +212,11 @@ const SpecimenPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className={pageClasses.base}>
-        <div className={`${pageClasses.container} ${pageClasses.section}`}>
-          <div className="bg-red-100 text-red-700 p-6 rounded-xl shadow-sm">
-            <h2 className={`${textClasses.heading} text-lg mb-2`}>Ошибка</h2>
-            <p className={textClasses.body}>{error}</p>
+      <div className={specimenPageStyles.errorContainer}>
+        <div className={specimenPageStyles.content}>
+          <div className={specimenPageStyles.errorCard}>
+            <h2 className={specimenPageStyles.errorTitle}>Ошибка</h2>
+            <p className={specimenPageStyles.errorText}>{error}</p>
             <Button
               variant="danger"
               className="mt-4"
@@ -236,8 +230,8 @@ const SpecimenPage: React.FC = () => {
     );
   }
   return (
-    <div className={pageClasses.base}>
-      <div className={`${pageClasses.container} ${pageClasses.section}`}>
+    <div className={specimenPageStyles.container}>
+      <div className={specimenPageStyles.content}>
         <SpecimenHeader
           specimen={specimen}
           isNew={isNewSpecimen}
@@ -248,7 +242,7 @@ const SpecimenPage: React.FC = () => {
 
         {/* При создании нового образца сразу показываем форму редактирования */}
         {isEditing ? (
-          <Card className={cardClasses.elevated}>
+          <Card className={specimenPageStyles.formCard}>
             <SpecimenForm
               specimen={isNewSpecimen ? undefined : specimen || undefined}
               onSubmit={handleSave}

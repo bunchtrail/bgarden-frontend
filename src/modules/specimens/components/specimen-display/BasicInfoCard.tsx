@@ -1,7 +1,8 @@
 import React from 'react';
 import Card from '../../../../modules/ui/components/Card';
 import { Specimen } from '../../types';
-import { cardClasses, textClasses, animationClasses } from '../../../../styles/global-styles';
+import { specimenDisplayStyles } from '../../styles';
+import InfoField from './InfoField';
 
 interface BasicInfoCardProps {
   specimen: Specimen;
@@ -12,69 +13,63 @@ interface BasicInfoCardProps {
  */
 const BasicInfoCard: React.FC<BasicInfoCardProps> = ({ specimen }) => {
   return (
-    <Card className={`${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`}>
-      <div className={cardClasses.header}>
-        <h2 className={cardClasses.title}>Основная информация</h2>
+    <Card className={specimenDisplayStyles.card.container}>
+      <div className={specimenDisplayStyles.card.header}>
+        <h2 className={specimenDisplayStyles.card.title}>Основная информация</h2>
       </div>
-      <div className={cardClasses.content}>
-        <div className={`space-y-4`}>
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Инвентарный номер</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.inventoryNumber}</div>
-          </div>
+      <div className={specimenDisplayStyles.card.content}>
+        <div className={specimenDisplayStyles.infoField.section}>
+          <InfoField 
+            label="Инвентарный номер" 
+            value={specimen.inventoryNumber}
+            type="highlight"
+          />
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Русское название</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.russianName}</div>
-          </div>
+          <InfoField 
+            label="Русское название" 
+            value={specimen.russianName}
+          />
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Латинское название</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.latinName}</div>
-          </div>
+          <InfoField 
+            label="Латинское название" 
+            value={specimen.latinName}
+            type="highlight"
+          />
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Семейство</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.familyName}</div>
-          </div>
+          <InfoField 
+            label="Семейство" 
+            value={specimen.familyName}
+          />
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Род</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.genus}</div>
-          </div>
+          <InfoField 
+            label="Род" 
+            value={specimen.genus}
+          />
           
-          <div className="border-b border-gray-100 pb-3">
-            <div className={`${textClasses.small} ${textClasses.secondary}`}>Вид</div>
-            <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.species}</div>
-          </div>
+          <InfoField 
+            label="Вид" 
+            value={specimen.species}
+          />
           
-          {specimen.cultivar && (
-            <div className="border-b border-gray-100 pb-3">
-              <div className={`${textClasses.small} ${textClasses.secondary}`}>Сорт</div>
-              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.cultivar}</div>
-            </div>
-          )}
+          <InfoField 
+            label="Сорт" 
+            value={specimen.cultivar}
+          />
           
-          {specimen.form && (
-            <div className="border-b border-gray-100 pb-3">
-              <div className={`${textClasses.small} ${textClasses.secondary}`}>Форма</div>
-              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.form}</div>
-            </div>
-          )}
+          <InfoField 
+            label="Форма" 
+            value={specimen.form}
+          />
           
-          {specimen.synonyms && (
-            <div className="border-b border-gray-100 pb-3">
-              <div className={`${textClasses.small} ${textClasses.secondary}`}>Синонимы</div>
-              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.synonyms}</div>
-            </div>
-          )}
+          <InfoField 
+            label="Синонимы" 
+            value={specimen.synonyms}
+          />
           
-          {specimen.determinedBy && (
-            <div className="border-b border-gray-100 pb-3">
-              <div className={`${textClasses.small} ${textClasses.secondary}`}>Определил</div>
-              <div className={`${textClasses.body} ${textClasses.primary} font-medium`}>{specimen.determinedBy}</div>
-            </div>
-          )}
+          <InfoField 
+            label="Определил" 
+            value={specimen.determinedBy}
+          />
         </div>
       </div>
     </Card>

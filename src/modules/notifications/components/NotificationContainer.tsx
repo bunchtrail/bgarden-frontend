@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import NotificationItem from './NotificationItem';
-import '../styles/notification.css';
+import { notificationStyles } from '../styles';
 
 const NotificationContainer: React.FC = () => {
   const { notifications } = useNotifications();
@@ -12,13 +12,19 @@ const NotificationContainer: React.FC = () => {
 
   return (
     <div 
-      className="fixed top-20 right-4 z-50 flex flex-col gap-4 max-w-md notifications-container"
+      className={`${notificationStyles.container} ${notificationStyles.responsive.mobile}`}
       aria-live="polite"
-      aria-atomic="true"
+      aria-atomic="false"
+      aria-label="Уведомления"
     >
-      {notifications.map((notification) => (
-        <NotificationItem key={notification.id} notification={notification} />
-      ))}
+      <div className="flex flex-col gap-3">
+        {notifications.map((notification) => (
+          <NotificationItem 
+            key={notification.id} 
+            notification={notification} 
+          />
+        ))}
+      </div>
     </div>
   );
 };

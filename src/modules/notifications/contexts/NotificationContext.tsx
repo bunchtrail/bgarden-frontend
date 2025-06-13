@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -13,87 +21,75 @@ export interface Notification {
 
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'id'>) => void;
+  addNotification: (n: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearAllNotifications: () => void;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined,
+);
 
-export const useNotifications = (): NotificationContextType => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications должен использоваться внутри NotificationProvider');
+export const useNotifications = () => {
+  const ctx = useContext(NotificationContext);
+  if (!ctx) {
+    throw new Error('useNotifications must be used within NotificationProvider');
   }
-  return context;
+  return ctx;
 };
 
-interface NotificationProviderProps {
+interface Props {
   children: ReactNode;
 }
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+export const NotificationProvider: React.FC<Props> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const recentRef = useRef<Record<string, number>>({});
 
-  // Используем ref для хранения последних отправленных уведомлений
-  const recentNotificationsRef = useRef<Record<string, number>>({});
-
-  // Функция для удаления уведомления по id
   const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
-  /**
-   * Добавляет новое уведомление, предотвращая дублирование сообщений,
-   * отправленных в течение последней секунды с теми же параметрами.
-   */
-  const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
-    const now = Date.now();
-    const key = `${notification.type}|${notification.title ?? ''}|${notification.message}`;
+  const addNotification = useCallback(
+    (n: Omit<Notification, 'id'>) => {
+      const now = Date.now();
+      const dedupeKey = `${n.type}|${n.title ?? ''}|${n.message}`;
 
-    // Если уже есть такое уведомление, отправленное менее секунды назад — игнорируем
-    const lastTime = recentNotificationsRef.current[key];
-    if (lastTime && now - lastTime < 1000) {
-      return;
-    }
-    recentNotificationsRef.current[key] = now;
+      if (recentRef.current[dedupeKey] && now - recentRef.current[dedupeKey] < 1_000) {
+        return; // дубликат, отправленный < 1 с назад
+      }
+      recentRef.current[dedupeKey] = now;
 
-    const id = `${now}-${Math.random().toString(36).substr(2, 9)}`;
-    const newNotification: Notification = {
-      ...notification,
-      id,
-      dismissible: notification.dismissible ?? true,
-      duration: notification.duration ?? 5000,
-    };
+      const id = `${now}-${Math.random().toString(36).slice(2, 9)}`;
+      const newNotification: Notification = {
+        ...n,
+        id,
+        duration: n.duration ?? 5_000,
+        dismissible: n.dismissible ?? true,
+      };
 
-    setNotifications((prev) => [...prev, newNotification]);
+      setNotifications((prev) => [...prev, newNotification]);
 
-    // Автоматическое удаление уведомления через указанное время
-    if (newNotification.duration && newNotification.duration > 0) {
-      setTimeout(() => {
-        removeNotification(id);
-        // Удаляем запись о последнем времени, чтобы разрешить повторные уведомления позже
-        delete recentNotificationsRef.current[key];
-      }, newNotification.duration);
-    } else {
-      // Если уведомление бессрочное, очищаем запись через 1 сек., чтобы не блокировать новые
-      setTimeout(() => delete recentNotificationsRef.current[key], 1000);
-    }
-  }, [removeNotification]);
+      // через секунду снова разрешаем такие же сообщения
+      setTimeout(() => delete recentRef.current[dedupeKey], 1_000);
+    },
+    [],
+  );
 
-  const clearAllNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
+  const clearAllNotifications = useCallback(() => setNotifications([]), []);
+
+  const contextValue = useMemo(
+    () => ({
+      notifications,
+      addNotification,
+      removeNotification,
+      clearAllNotifications,
+    }),
+    [notifications, addNotification, removeNotification, clearAllNotifications],
+  );
 
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        addNotification,
-        removeNotification,
-        clearAllNotifications,
-      }}
-    >
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );
