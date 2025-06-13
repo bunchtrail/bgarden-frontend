@@ -9,27 +9,7 @@ import { MAP_TYPES } from '../../contexts/MapConfigContext';
 import { useMapEvents } from 'react-leaflet';
 import { mapLogger } from '../../utils/logger';
 
-/**
- * Компонент для логирования событий взаимодействия с картой.
- * Срабатывает, когда пользователь заканчивает перемещать карту или изменять масштаб.
- */
-const MapInteractionLogger = () => {
-  useMapEvents({
-    moveend: (e) => {
-      const map = e.target;
-      const center = map.getCenter();
-      const zoom = map.getZoom();
 
-      console.log('[Map] Позиция карты изменена (перемещение остановлено):', {
-        center: { lat: center.lat.toFixed(6), lng: center.lng.toFixed(6) },
-        zoom: zoom,
-        timestamp: new Date().toISOString(),
-      });
-    },
-  });
-
-  return null; // Компонент ничего не рендерит
-};
 
 /**
  * Компонент контейнера вида карты
@@ -66,7 +46,6 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
         hasRegions: regions && regions.length > 0,
         isEmpty: isEmpty
       };
-      mapLogger.log('Состояние данных карты изменилось:', state);
       onDataStateChange(state);
     }
   }, [regions, onDataStateChange]);
@@ -74,7 +53,6 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
   // Мемоизация контента для предотвращения лишних перерисовок
   return useMemo(() => {
     if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO) {
-      mapLogger.log('Нет URL изображения карты для схематического режима');
       return null;
     }
     
@@ -86,8 +64,7 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
         {/* Обработчик события ready */}
         {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
         
-        {/* Логирование изменений позиции карты */}
-        <MapInteractionLogger />
+
 
         {/* Фиксация границ для гео-карты */}
         {mapConfig.mapType === MAP_TYPES.GEO && (

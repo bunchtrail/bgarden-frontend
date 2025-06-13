@@ -102,7 +102,12 @@ export const DEFAULT_GEO_CONFIG: MapConfig = {
   minZoom: 18,
   maxBounds: undefined,
   maxBoundsViscosity: 1.0,
-  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.PLANTS],
+  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
+  availableLayers: [
+    MAP_LAYERS.GEO_TILES,
+    MAP_LAYERS.REGIONS,
+    MAP_LAYERS.PLANTS,
+  ],
   drawingEnabled: false,
   interactionMode: MAP_MODES.VIEW,
 };
@@ -145,22 +150,20 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
   }, [mapConfig]);
 
   const updateMapConfig = useCallback((updates: Partial<MapConfig>) => {
-    mapLogger.log('Обновление конфигурации:', updates);
     
     setMapConfig((prevConfig) => {
       const newConfig = { ...prevConfig, ...updates };
-      mapLogger.log('Новое состояние после обновления:', newConfig);
       return newConfig;
     });
   }, []);
 
   const resetMapConfig = useCallback(() => {
-    mapLogger.log('Сброс конфигурации карты');
+    
     setMapConfig(DEFAULT_SCHEMATIC_CONFIG);
   }, []);
 
   const toggleLayer = useCallback((layerName: string) => {
-    mapLogger.log(`Переключение слоя: ${layerName}`);
+    
     
     setMapConfig((prevConfig) => {
       const newVisibleLayers = prevConfig.visibleLayers.includes(layerName)
@@ -175,12 +178,12 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
         
         // Если пытаемся выключить последний базовый слой, отменяем операцию
         if (!hasImagery && !hasRegions) {
-          mapLogger.log('Отмена выключения - для схематической карты требуется хотя бы один базовый слой (IMAGERY или REGIONS)');
+          
           return prevConfig;
         }
       }
 
-      mapLogger.log('Новые видимые слои:', newVisibleLayers);
+      
       return {
         ...prevConfig,
         visibleLayers: newVisibleLayers,
@@ -189,7 +192,7 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
   }, []);
 
   const setMapType = useCallback((newMapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]) => {
-    mapLogger.log(`Смена типа карты на: ${newMapType}`);
+    
     
     // Очищаем все слои перед сменой типа карты
     const mapElement = document.querySelector('.leaflet-container');
@@ -215,13 +218,21 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
         debug: prevConfig.debug,
         showTooltips: prevConfig.showTooltips,
       };
-      mapLogger.log('Новая конфигурация карты:', newConfig);
+      
+
+      // Генерируем кастомное событие для уведомления других компонентов
+      if (typeof window !== 'undefined' && window.dispatchEvent) {
+        window.dispatchEvent(
+          new CustomEvent('mapTypeChange', { detail: newMapType })
+        );
+      }
+
       return newConfig;
     });
   }, []);
 
   const saveConfigToStorage = useCallback(() => {
-    mapLogger.log('Сохранение конфигурации в localStorage');
+    
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mapConfig));
   }, [mapConfig]);
 
@@ -230,10 +241,10 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
     if (savedConfig) {
       try {
         const parsedConfig = JSON.parse(savedConfig);
-        mapLogger.log('Загружена конфигурация из localStorage:', parsedConfig);
+        
         setMapConfig(parsedConfig);
       } catch (error) {
-        mapLogger.log('Ошибка при загрузке конфигурации из localStorage:', error);
+        
         localStorage.removeItem(STORAGE_KEY);
       }
     }

@@ -59,6 +59,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     locationType: LocationType.SchematicMap,
     latitude: 0,
     longitude: 0,
+    locationWkt: '',
     mapX: 0,
     mapY: 0,
     regionId: null,
@@ -171,7 +172,6 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       return;
     }
     
-    console.log('Отправка формы образца...');
     
     // Проверяем все поля перед отправкой
     const allFields = [
@@ -197,11 +197,34 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       notification.info('Отправка данных образца...', { duration: 3000 });
       
       // Проверяем и преобразуем sectorType в число, если это строка
-      const finalFormData = { 
+      const finalFormData = {
         ...formData,
-        // Преобразуем строковое значение sectorType в число
-        sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
-      };
+        // Преобразуем строковые значения в числа там, где это требуется API
+        sectorType:
+          typeof formData.sectorType === 'string'
+            ? Number(formData.sectorType)
+            : formData.sectorType,
+        locationType:
+          typeof formData.locationType === 'string'
+            ? Number(formData.locationType)
+            : formData.locationType,
+        latitude:
+          typeof formData.latitude === 'string'
+            ? parseFloat(formData.latitude)
+            : formData.latitude,
+        longitude:
+          typeof formData.longitude === 'string'
+            ? parseFloat(formData.longitude)
+            : formData.longitude,
+        mapX:
+          typeof formData.mapX === 'string'
+            ? parseFloat(formData.mapX)
+            : formData.mapX,
+        mapY:
+          typeof formData.mapY === 'string'
+            ? parseFloat(formData.mapY)
+            : formData.mapY,
+      } as SpecimenFormData;
       
       // Корректируем данные в зависимости от типа локации
       if (finalFormData.locationType === LocationType.SchematicMap) {
@@ -215,39 +238,12 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         finalFormData.mapY = null as unknown as number;
       }
       
-      console.log('Детальные данные формы перед отправкой в SpecimenForm:', {
-        locationType: finalFormData.locationType,
-        coordinates: {
-          latitude: finalFormData.latitude,
-          longitude: finalFormData.longitude,
-          mapX: finalFormData.mapX,
-          mapY: finalFormData.mapY,
-          mapId: finalFormData.mapId
-        },
-        taxonomy: {
-          russianName: finalFormData.russianName,
-          latinName: finalFormData.latinName,
-          genus: finalFormData.genus,
-          species: finalFormData.species,
-          familyId: finalFormData.familyId
-        },
-        inventoryData: {
-          inventoryNumber: finalFormData.inventoryNumber,
-          sectorType: finalFormData.sectorType,
-          plantingYear: finalFormData.plantingYear,
-          expositionId: finalFormData.expositionId
-        }
-      });
+    
       
       // Если есть изображения, используем обновленный метод работы с изображениями
       if (selectedImages.length > 0) {
         try {
-          console.log('Отправляемые данные образца:', finalFormData);
-          console.log('Отправляемые изображения:', selectedImages.map(img => ({
-            name: img.name,
-            type: img.type,
-            size: img.size
-          })));
+          
 
           setIsUploading(true);
 

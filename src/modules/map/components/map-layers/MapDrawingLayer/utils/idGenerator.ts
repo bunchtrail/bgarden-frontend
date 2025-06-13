@@ -9,7 +9,7 @@ export const generateAreaId = (): string => {
 // Fallback counter-based generator in case crypto.randomUUID is not available
 let counter = 0;
 const generateCounterBasedId = (): string => {
-  return `area-${Date.now()}-${counter++}`;
+  return `area-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${counter++}`;
 };
 
 export const getAreaIdGenerator = () => {

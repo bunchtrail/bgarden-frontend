@@ -23,7 +23,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   // Создаем превью при изменении value
   React.useEffect(() => {
     const newPreviews = value.map((file, index) => ({
-      id: `${file.name}-${file.size}-${Date.now()}-${index}`,
+      id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}-${index}`,
       url: URL.createObjectURL(file)
     }));
 

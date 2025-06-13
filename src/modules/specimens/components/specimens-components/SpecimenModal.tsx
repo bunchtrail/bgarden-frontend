@@ -92,9 +92,9 @@ const SpecimenModal: React.FC<SpecimenModalProps> = ({
         <SpecimenDetails 
           inventoryNumber={specimen.inventoryNumber}
           latinName={specimen.latinName}
-          familyName={specimen.familyName}
-          regionName={specimen.regionName || undefined}
-          expositionName={specimen.expositionName}
+          familyName={specimen.familyName || ''}
+          regionName={specimen.regionName || ''}
+          expositionName={specimen.expositionName || ''}
         />
         
         {/* Дополнительная информация, которую можно показать в модальном окне */}

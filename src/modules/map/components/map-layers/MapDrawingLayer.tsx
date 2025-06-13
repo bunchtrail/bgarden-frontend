@@ -97,7 +97,8 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const map = useMap();
   const { mapConfig, updateMapConfig } = useMapConfig();
   const { areas, setAreas } = useMapContext();
-  const [drawControl, setDrawControl] = useState<L.Control.Draw | null>(null);
+  // Храним контрол рисования в ref, чтобы изменения не вызывали повторных рендеров
+  const drawControlRef = useRef<L.Control.Draw | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeletionModalOpen, setIsDeletionModalOpen] = useState(false);
@@ -403,11 +404,13 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     if (!map || !isVisible) return;
 
     // Удаляем предыдущий контрол, если он существует
-    if (drawControl) {
+    if (drawControlRef.current) {
       try {
-        map.removeControl(drawControl);
-      } catch {}
-      setDrawControl(null);
+        map.removeControl(drawControlRef.current);
+      } catch {
+        /* noop */
+      }
+      drawControlRef.current = null;
     }
 
     // Инициализируем drawnItemsRef, если не инициализирован
@@ -473,15 +476,18 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     // В режиме DELETE (isDeleteModeOnly) не создаем никаких контролов
 
     if (newDrawControl) {
-      setDrawControl(newDrawControl);
+      drawControlRef.current = newDrawControl;
       map.addControl(newDrawControl);
     }
 
     return () => {
-      if (newDrawControl) {
+      if (drawControlRef.current) {
         try {
-          map.removeControl(newDrawControl);
-        } catch {}
+          map.removeControl(drawControlRef.current);
+        } catch {
+          /* noop */
+        }
+        drawControlRef.current = null;
       }
     };
   }, [
@@ -491,7 +497,6 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
     isEditMode,
     isDeleteModeOnly,
     config,
-    drawControl,
   ]);
 
   // Сброс флага завершения рисования при выходе из DRAW-режима
@@ -594,14 +599,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       });
     }
 
-    // Если это регион из сервера, удаляем его и там
-    if (deletingAreaId.startsWith('region-')) {
-      const regionId = regionBridge.areaIdToRegionId(deletingAreaId);
-      // TODO: вызвать deleteRegion(regionId) когда будет готов API
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Удаление региона с сервера:', regionId);
-      }
-    }
+    
 
     setIsDeletionModalOpen(false);
     setDeletingAreaId(null);
@@ -634,12 +632,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   // Обработчик смены типа карты для очистки кэш-слоев
   useEffect(() => {
     const handleMapTypeChange = (event: CustomEvent) => {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(
-          '[MapDrawingLayer] Очистка слоев при смене типа карты:',
-          event.detail
-        );
-      }
+      
 
       // Очищаем все нарисованные слои
       if (drawnItemsRef.current) {
@@ -651,11 +644,13 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
       }
 
       // Удаляем контрол рисования
-      if (drawControl) {
+      if (drawControlRef.current) {
         try {
-          map?.removeControl(drawControl);
-        } catch {}
-        setDrawControl(null);
+          map?.removeControl(drawControlRef.current);
+        } catch {
+          /* noop */
+        }
+        drawControlRef.current = null;
       }
 
       // Сбрасываем состояние модалок и временных данных
@@ -682,7 +677,7 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
         handleMapTypeChange as EventListener
       );
     };
-  }, [map, drawControl]);
+  }, [map]);
 
   return (
     <>

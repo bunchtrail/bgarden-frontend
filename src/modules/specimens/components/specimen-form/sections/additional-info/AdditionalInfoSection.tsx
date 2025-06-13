@@ -36,7 +36,7 @@ export const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({ fo
             type="number"
             id="plantingYear"
             name="plantingYear"
-            value={formData.plantingYear}
+            value={formData.plantingYear ?? ''}
             onChange={onChange}
             className="w-full px-3 py-2 border rounded-md"
           />

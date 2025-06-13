@@ -1,57 +1,7 @@
-export interface Specimen {
-  id: number;
-  inventoryNumber: string;
-  sectorType: number;
-  locationType?: number;
-  latitude: number;
-  longitude: number;
-  locationWkt?: string;
-  mapId?: number | null;
-  mapX: number;
-  mapY: number;
-  regionId?: number | null;
-  regionName?: string | null;
-  familyId: number;
-  familyName: string;
-  russianName: string;
-  latinName: string;
-  genus: string;
-  species: string;
-  cultivar?: string | null;
-  form?: string | null;
-  synonyms?: string | null;
-  determinedBy?: string | null;
-  plantingYear: number;
-  sampleOrigin?: string | null;
-  naturalRange?: string | null;
-  ecologyAndBiology?: string | null;
-  economicUse?: string | null;
-  conservationStatus?: string | null;
-  expositionId: number;
-  expositionName: string;
-  hasHerbarium: boolean;
-  duplicatesInfo?: string | null;
-  originalBreeder?: string | null;
-  originalYear?: number | null;
-  country?: string | null;
-  illustration?: string | null;
-  notes?: string | null;
-  filledBy?: string | null;
-  imageUrl?: string | null;
-}
+// Реэкспорт основных типов из общего сервиса
+export * from '@/services/specimens';
 
-export enum SectorType {
-  Dendrology = 0,
-  Flora = 1,
-  Flowering = 2
-}
-
-export enum LocationType {
-  None = 0,
-  Geographic = 1,
-  SchematicMap = 2
-}
-
+// Дополнительные типы, специфичные для модуля specimens
 export enum UserRole {
   /**
    * Администратор системы (полный доступ)
@@ -69,15 +19,15 @@ export enum UserRole {
   Client = 3
 }
 
-export interface SpecimenFormData extends Omit<Specimen, 'id'> {
+export interface SpecimenFormData extends Omit<import('@/services/specimens').Specimen, 'id'> {
   id?: number;
 }
 
 export interface SpecimenFilterParams {
-  searchField?: keyof Specimen;
+  searchField?: keyof import('@/services/specimens').Specimen;
   searchValue?: string;
   familyId?: number;
-  sectorType?: SectorType;
+  sectorType?: import('@/services/specimens').SectorType;
   regionId?: number;
   expositionId?: number;
 }
@@ -129,23 +79,4 @@ export interface Region {
   name: string;
   description?: string;
   climate?: string;
-}
-
-// Интерфейс для данных изображения образца
-export interface SpecimenImage {
-  id: number;
-  specimenId: number;
-  imageUrl: string;
-  description: string;
-  isMain: boolean;
-  uploadedAt: string;
-}
-
-// Интерфейс для результатов загрузки изображений
-export interface BatchImageUploadResult {
-  specimenId: number;
-  successCount: number;
-  errorCount: number;
-  uploadedImageIds: number[];
-  errorMessages: string[];
 } 

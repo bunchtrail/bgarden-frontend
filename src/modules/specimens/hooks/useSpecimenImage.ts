@@ -46,7 +46,6 @@ export const useSpecimenImage = (
       if (imageData && imageData.imageUrl) {
         setImageSrc(imageData.imageUrl);
       } else {
-        console.log(`Для образца ID=${specimenId} используется изображение по умолчанию`);
         setImageSrc(imageUrl || placeholderImage);
       }
     } catch (error) {
@@ -88,7 +87,6 @@ export const useSpecimenImage = (
       
       // Реализация загрузки изображений
       if (Array.isArray(file)) {
-        console.log(`Начинаем множественную загрузку ${file.length} изображений для образца ID=${specimenId}`);
         
         const formData = new FormData();
         formData.append('SpecimenId', specimenId.toString());
@@ -101,7 +99,6 @@ export const useSpecimenImage = (
         // Добавляем файлы в FormData
         file.forEach(f => {
           formData.append('Files', f, f.name);
-          console.log(`Добавлено изображение для загрузки: ${f.name}, ${f.type}, ${f.size} байт`);
         });
         
         // Отправляем запрос
@@ -126,7 +123,7 @@ export const useSpecimenImage = (
         return result;
       } else if (file instanceof File) {
         // Загрузка одного файла
-        console.log(`Загрузка одиночного файла для образца ID=${specimenId}: ${file.name}`);
+       
         
         const formData = new FormData();
         formData.append('SpecimenId', specimenId.toString());
@@ -179,7 +176,7 @@ export const useSpecimenImage = (
   const setImageAsMain = useCallback(async (imageId: number) => {
     try {
       setIsLoading(true);
-      console.log(`Установка изображения ID=${imageId} как основного`);
+     
       
       // Используем PATCH запрос к эндпоинту /api/specimen-images/{id}/set-as-main
       const result = await httpClient.patch<SpecimenImage>(

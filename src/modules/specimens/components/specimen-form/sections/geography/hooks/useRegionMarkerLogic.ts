@@ -3,6 +3,7 @@ import { RegionData } from '@/services/regions/types';
 import { SpecimenFormData } from '@/modules/specimens/types';
 import L from 'leaflet';
 import { isPointInPolygon, parseCoordinates, pointToObject } from '@/services/regions';
+import { LocationType } from '@/modules/specimens/types';
 
 interface ExtendedSpecimenFormData extends SpecimenFormData {
   locationDescription?: string;
@@ -86,6 +87,11 @@ export function useRegionMarkerLogic(
     onChange({
       target: { name: 'mapY', value: lng.toString() }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
+    
+    // Устанавливаем тип координат как Geographic, если еще не установлен
+    onChange({
+      target: { name: 'locationType', value: LocationType.Geographic.toString() }
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
     
     // Если точка находится внутри какого-то региона, выбираем этот регион
     const containingRegion = findRegionContainingPoint(regions, lat, lng);

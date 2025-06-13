@@ -141,9 +141,9 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         <SpecimenDetails
           inventoryNumber={specimen.inventoryNumber}
           latinName={specimen.latinName}
-          familyName={specimen.familyName}
+          familyName={specimen.familyName || undefined}
           regionName={specimen.regionName || undefined}
-          expositionName={specimen.expositionName}
+          expositionName={specimen.expositionName || undefined}
         />
       </Card>
       {/* Модальное окно с детальной информацией */}

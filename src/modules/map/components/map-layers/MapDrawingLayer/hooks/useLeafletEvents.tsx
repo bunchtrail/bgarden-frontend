@@ -1,7 +1,6 @@
 // MapDrawingLayer/hooks/useLeafletEvents.ts
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { logDebug } from '../utils/logDebug';
 import cloneLayer from '../utils/cloneLayers';
 import { Area } from '@/services/regions/types';
 import { COLORS } from '@/styles/global-styles';
@@ -66,10 +65,7 @@ export function useLeafletEvents({
       map.addLayer(drawnItemsRef.current);
     }
 
-    // Store debug event handler
-    handlersRef.current.debug = (e: any) => {
-      logDebug(`Событие: ${e.type}`, e);
-    };
+    
 
     // Store drawstart handler
     handlersRef.current.drawstart = () => {
@@ -209,7 +205,6 @@ export function useLeafletEvents({
                 setHasCompletedDrawing(true);
               }
             } catch (error) {
-              logDebug('Ошибка при клонировании удаляемого слоя', error);
             }
           }
         }

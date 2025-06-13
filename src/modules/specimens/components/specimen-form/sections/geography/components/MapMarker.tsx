@@ -55,19 +55,13 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
           target.closest('.leaflet-marker-icon') ||
           target.closest('.leaflet-marker-shadow')
         ) {
-          console.log('Клик на маркере, игнорируем');
           return;
         }
       }
 
       const { lat, lng } = e.latlng;
 
-      // Логируем событие для отладки
-      console.log('Клик по карте:', {
-        lat,
-        lng,
-        originalEvent: e.originalEvent?.target,
-      });
+     
 
       // Принудительно останавливаем всплытие события, чтобы региональный слой не перехватил его
       if (e.originalEvent) {
@@ -120,7 +114,7 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
 
         // Проверка на валидные координаты
         if (point && isFinite(point.lat) && isFinite(point.lng)) {
-          console.log('Прямой клик на слое:', point, e.target);
+          
 
           // Останавливаем дальнейшее распространение события
           e.stopPropagation();

@@ -36,7 +36,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const addNotification = (notification: Omit<Notification, 'id'>) => {
-    const id = Date.now().toString();
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newNotification: Notification = {
       ...notification,
       id,

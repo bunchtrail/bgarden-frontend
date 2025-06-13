@@ -148,8 +148,7 @@ export const useGalleryImages = ({ specimenId, imageUrl }: UseGalleryImagesProps
     
     try {
       await uploadImage(selectedImages, {
-        isMain: allImages.length === 0,
-        onProgress: (progress) => console.log(`Прогресс загрузки: ${progress}%`)
+        isMain: allImages.length === 0
       });
       
       await loadImages();

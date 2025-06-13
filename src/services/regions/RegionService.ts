@@ -88,7 +88,7 @@ export const createRegion = async (
       ...processedData,
       specimensCount: 0, // Начальное количество экземпляров
     };
-    return await httpClient.post<RegionData>('/Region', newRegion);
+    return await httpClient.post<RegionData>('Region', newRegion);
   } catch (error) {
     logError('Ошибка при создании области:', error);
     throw error;
@@ -123,7 +123,7 @@ export const updateRegion = async (
       id: numericId,
       ...processedData,
     };
-    return await httpClient.put<RegionData>(`/Region/${id}`, updatedRegion);
+    return await httpClient.put<RegionData>(`Region/${id}`, updatedRegion);
   } catch (error) {
     logError('Ошибка при обновлении области:', error);
     throw error;
@@ -166,8 +166,8 @@ export const updateSpecimensCount = async (
 ): Promise<void> => {
   try {
     const endpoint = increment
-      ? `/Region/${regionId}/increment-specimens`
-      : `/Region/${regionId}/decrement-specimens`;
+      ? `Region/${regionId}/increment-specimens`
+      : `Region/${regionId}/decrement-specimens`;
 
     await httpClient.put(endpoint);
   } catch (error) {

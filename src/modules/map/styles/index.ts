@@ -33,12 +33,6 @@ export const MapStylesLogger = {
   // Включение/выключение подробного логгирования
   DEBUG_ENABLED: process.env.NODE_ENV === 'development',
 
-  log(message: string, data?: any) {
-    if (this.DEBUG_ENABLED) {
-      console.log(`${this.PREFIX} ${message}`, data || '');
-    }
-  },
-
   warn(message: string, data?: any) {
     console.warn(`${this.PREFIX} WARNING: ${message}`, data || '');
   },
@@ -49,16 +43,16 @@ export const MapStylesLogger = {
 
   // Специальные методы для отслеживания состояний карты
   logDrawModeChange(mode: string, enabled: boolean) {
-    this.log(`Draw mode ${mode} ${enabled ? 'ENABLED' : 'DISABLED'}`);
+    this.warn(`Draw mode ${mode} ${enabled ? 'ENABLED' : 'DISABLED'}`);
     this.logCurrentMapState();
   },
 
   logStyleApplication(styleName: string, applied: boolean) {
-    this.log(`Style "${styleName}" ${applied ? 'APPLIED' : 'REMOVED'}`);
+    this.warn(`Style "${styleName}" ${applied ? 'APPLIED' : 'REMOVED'}`);
   },
 
   logRegionInteraction(action: string, regionId?: string) {
-    this.log(
+    this.warn(
       `Region interaction: ${action}`,
       regionId ? `Region: ${regionId}` : ''
     );
@@ -86,7 +80,7 @@ export const MapStylesLogger = {
       timestamp: new Date().toISOString(),
     };
 
-    this.log('Current map state:', state);
+    this.warn('Current map state:', state);
   },
 
   logPointerEventsStatus() {
@@ -104,7 +98,7 @@ export const MapStylesLogger = {
       };
     });
 
-    this.log('Pointer events status for region polygons:', statusReport);
+    this.warn('Pointer events status for region polygons:', statusReport);
   },
 };
 
@@ -440,7 +434,7 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(style);
 
   // Инициализация логгирования
-  MapStylesLogger.log('Custom styles loaded and applied to document');
+  MapStylesLogger.warn('Custom styles loaded and applied to document');
 
   // Мониторинг изменений классов на body/html для отслеживания режимов карты
   const observer = new MutationObserver((mutations) => {
@@ -528,7 +522,7 @@ if (typeof document !== 'undefined') {
         subtree: true,
         attributeFilter: ['class'],
       });
-      MapStylesLogger.log('Map container observer started');
+      MapStylesLogger.warn('Map container observer started');
     } else {
       // Если карта еще не загружена, ждем ее появления
       const containerWatcher = new MutationObserver((mutations) => {
@@ -544,7 +538,7 @@ if (typeof document !== 'undefined') {
                 subtree: true,
                 attributeFilter: ['class'],
               });
-              MapStylesLogger.log('Map container found and observer started');
+              MapStylesLogger.warn('Map container found and observer started');
               containerWatcher.disconnect();
             }
           });
@@ -571,7 +565,7 @@ if (typeof document !== 'undefined') {
     getLogger: () => MapStylesLogger,
   };
 
-  MapStylesLogger.log('Debug functions added to window.mapStylesDebug');
+  MapStylesLogger.warn('Debug functions added to window.mapStylesDebug');
 }
 
 // Дополнительные утилиты для интеграции с компонентами карты
@@ -584,7 +578,7 @@ export const MapInteractionUtils = {
     polygons.forEach((polygon) => {
       polygon.setAttribute('data-debug', 'enabled');
     });
-    MapStylesLogger.log('Visual debug enabled for all region polygons');
+    MapStylesLogger.warn('Visual debug enabled for all region polygons');
   },
 
   /**
@@ -595,7 +589,7 @@ export const MapInteractionUtils = {
     polygons.forEach((polygon) => {
       polygon.removeAttribute('data-debug');
     });
-    MapStylesLogger.log('Visual debug disabled');
+      MapStylesLogger.warn('Visual debug disabled');
   },
 
   /**
@@ -631,7 +625,7 @@ export const MapInteractionUtils = {
       }
     });
 
-    MapStylesLogger.log(
+    MapStylesLogger.warn(
       `Interaction blocking check: ${blockingApplied ? 'PASSED' : 'FAILED'}`,
       {
         drawToolbarEnabled: hasDrawToolbar,
@@ -711,7 +705,7 @@ export const MapInteractionUtils = {
       report.appliedStyles.push('Custom region polygon styles detected');
     }
 
-    MapStylesLogger.log('Detailed map state report generated:', report);
+    MapStylesLogger.warn('Detailed map state report generated:', report);
     return report;
   },
 };

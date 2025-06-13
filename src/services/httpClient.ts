@@ -176,6 +176,8 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
     // Разбираем ответ
     const data = await parseResponse(response);
     if (!response.ok) {
+      // Детальное логирование для 400 ошибок удалено
+      
       // Если статус не ok — выбрасываем ошибку, если не решили её подавлять
       if (!suppressErrorsForStatus.includes(response.status)) {
         throw new ApiError(response.status, data?.message || 'Ошибка при запросе', data);
@@ -218,10 +220,7 @@ function handleError(error: unknown, suppressErrors: number[], method: HttpMetho
     (error.message.includes('Specimen') || 
      (error as any)?.url?.includes('/Specimen/all'));
   
-  // Логируем ошибку только если это не подавляемая 404 для Specimen
-  if (!isSpecimenNotFoundError) {
-    console.error('Request failed:', error);
-  }
+  // Логирование ошибок в консоль удалено
 
   // Если это ApiError
   if (error instanceof ApiError) {
@@ -312,7 +311,7 @@ async function sendWithProgress(
           const text = await responseData.text();
           responseData = new Blob([text], { type: 'application/json' });
         } catch (err) {
-          console.error('Ошибка при преобразовании ответа в JSON:', err);
+          // Логирование ошибки преобразования удалено
         }
       }
 
@@ -344,23 +343,12 @@ async function sendWithProgress(
 // Удобные обёртки для стандартных методов
 const httpClient = {
   get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-    console.log(`[HTTP] GET запрос: ${endpoint}`);
     return request<T>(endpoint, 'GET', options);
   },
   post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
-    console.log(`[HTTP] POST запрос: ${endpoint}`, {
-      contentType: body instanceof FormData ? undefined : 'application/json',
-      dataType: body instanceof FormData ? 'FormData' : 'JSON',
-      dataSize: body instanceof FormData ? 'FormData (размер не отображается)' : JSON.stringify(body).length + ' байт'
-    });
     return request<T>(endpoint, 'POST', { ...options, body });
   },
   put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
-    console.log(`[HTTP] PUT запрос: ${endpoint}`, {
-      contentType: body instanceof FormData ? undefined : 'application/json',
-      dataType: body instanceof FormData ? 'FormData' : 'JSON',
-      dataSize: body instanceof FormData ? 'FormData (размер не отображается)' : JSON.stringify(body).length + ' байт'
-    });
     return request<T>(endpoint, 'PUT', { ...options, body });
   },
   patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {

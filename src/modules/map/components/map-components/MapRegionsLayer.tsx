@@ -56,7 +56,6 @@ const MapRegionsLayer: React.FC<MapRegionsLayerProps> = ({
     const handleMapContainerClick = (e: MouseEvent) => {
       // Если клик был по полигону, но не обработан маркером
       if ((e.target as HTMLElement).closest('.leaflet-overlay-pane')) {
-        console.log('Запасной обработчик клика по контейнеру карты');
         // Не останавливаем распространение события здесь
         // и не предотвращаем дальнейшую обработку
       }

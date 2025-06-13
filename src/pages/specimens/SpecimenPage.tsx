@@ -65,33 +65,36 @@ const SpecimenPage: React.FC = () => {
         activeMaps && activeMaps.length > 0 ? activeMaps[0].id : 1; // Используем ID 1 как запасной вариант
 
       // Корректируем данные в зависимости от типа локации
-      const correctedSpecimen = { ...updatedSpecimen };
-      if (correctedSpecimen.locationType === 2) {
-        // SchematicMap
-        // Для схематических координат убираем географические
-        correctedSpecimen.latitude = null as unknown as number;
-        correctedSpecimen.longitude = null as unknown as number;
-        // Устанавливаем ID активной карты
-        correctedSpecimen.mapId = activeMapId;
-      } else if (correctedSpecimen.locationType === 1) {
-        // Geographic
-        // Для географических координат убираем схематические
-        correctedSpecimen.mapId = null as unknown as number;
-        correctedSpecimen.mapX = null as unknown as number;
-        correctedSpecimen.mapY = null as unknown as number;
-      }
+      const correctedSpecimen = {
+        ...updatedSpecimen,
+        locationType:
+          typeof updatedSpecimen.locationType === 'string'
+            ? Number(updatedSpecimen.locationType)
+            : updatedSpecimen.locationType,
+        latitude:
+          typeof updatedSpecimen.latitude === 'string'
+            ? parseFloat(updatedSpecimen.latitude)
+            : updatedSpecimen.latitude,
+        longitude:
+          typeof updatedSpecimen.longitude === 'string'
+            ? parseFloat(updatedSpecimen.longitude)
+            : updatedSpecimen.longitude,
+        mapX:
+          typeof updatedSpecimen.mapX === 'string'
+            ? parseFloat(updatedSpecimen.mapX)
+            : updatedSpecimen.mapX,
+        mapY:
+          typeof updatedSpecimen.mapY === 'string'
+            ? parseFloat(updatedSpecimen.mapY)
+            : updatedSpecimen.mapY,
+      } as SpecimenFormData;
 
-      // Логируем данные формы перед отправкой
-      console.log(
-        'Отправляемые данные формы (после корректировки):',
-        JSON.stringify(correctedSpecimen, null, 2)
-      );
+      // Логирование данных формы удалено
 
       let result;
 
       if (id && !isNewSpecimen) {
         // Обновление существующего
-        console.log('Обновление существующего образца с ID:', id);
         result = await specimenService.updateSpecimen(
           Number(id),
           correctedSpecimen as unknown as Specimen
@@ -126,10 +129,7 @@ const SpecimenPage: React.FC = () => {
             };
           }
 
-          console.log(
-            'Обновление местоположения образца:',
-            JSON.stringify(locationData, null, 2)
-          );
+          // Логирование обновления местоположения удалено
 
           // Обновляем местоположение через новый контроллер
           await specimenService.updateSpecimenLocation(
@@ -139,12 +139,10 @@ const SpecimenPage: React.FC = () => {
         }
       } else {
         // Создание нового образца
-        console.log('Создание нового образца...');
 
         result = await specimenService.createSpecimen(
           correctedSpecimen as unknown as Specimen
         );
-        console.log('Образец успешно создан с ID:', result.id);
 
         // После создания образца обновляем его местоположение с типом локации
         if (result && result.id && correctedSpecimen.locationType) {
@@ -175,21 +173,13 @@ const SpecimenPage: React.FC = () => {
             };
           }
 
-          console.log(
-            'Обновление местоположения нового образца:',
-            JSON.stringify(locationData, null, 2)
-          );
+          
 
           // Обновляем местоположение через новый контроллер
           await specimenService.updateSpecimenLocation(result.id, locationData);
-          console.log('Местоположение образца успешно обновлено');
         }
       }
 
-      console.log(
-        'Результат сохранения образца:',
-        JSON.stringify(result, null, 2)
-      );
       setSpecimen(result);
       setIsEditing(false);
 

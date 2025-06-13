@@ -29,13 +29,7 @@ const LockBoundsAtInit: React.FC<LockBoundsAtInitProps> = ({ onBoundsSet }) => {
       onBoundsSet(bounds);
     }
 
-    // Логируем установку границ
-    console.log('[Map] Границы карты зафиксированы:', {
-      bounds: bounds.toBBoxString(),
-      center: map.getCenter(),
-      zoom: map.getZoom(),
-      timestamp: new Date().toISOString(),
-    });
+    
   }, [map, onBoundsSet]);
 
   return null;

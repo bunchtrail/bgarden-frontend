@@ -142,21 +142,7 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     setHasChanges(false);
   }, [resetMapConfig]);
 
-  const handleSaveRegions = useCallback(() => {
-    if (mapConfig.interactionMode === MAP_MODES.DRAW) {
-      try {
-        console.log('Сохранение областей...');
-        updateMapConfig({
-          interactionMode: MAP_MODES.VIEW,
-          drawingEnabled: false,
-          hasCompletedDrawing: false,
-        });
-        console.log('Области успешно сохранены');
-      } catch (error) {
-        console.error('Ошибка при сохранении областей:', error);
-      }
-    }
-  }, [mapConfig.interactionMode, updateMapConfig]);
+ 
 
   const handleSaveConfig = useCallback(() => {
     saveConfigToStorage();
@@ -369,7 +355,6 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     return (
       <div className="mt-4">
         <ControlButtons
-          onSaveRegions={handleSaveRegions}
           onReset={handleResetConfig}
           onSave={handleSaveConfig}
           showSaveButton={hasChanges}

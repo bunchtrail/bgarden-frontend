@@ -26,26 +26,18 @@ export class PlantDataService {
   ): Promise<Plant[]> {
     const now = Date.now();
 
-    // Проверяем кэш. Кэш считается невалидным, если истекло время или изменился тип карты.
-    if (
-      cachedPlants &&
-      now - lastFetchTimestamp < CACHE_DURATION_MS &&
-      lastMapType === mapType
-    ) {
-      return cachedPlants;
-    }
+   
 
     try {
+      
       // Запрашиваем данные с сервера
       const specimens = await getAllSpecimens();
 
       // **ИСПРАВЛЕНИЕ:** Передаем `mapType` в функцию конвертации.
       const plants = convertSpecimensToPlants(specimens, mapType);
+     
 
-      // Обновляем кэш
-      cachedPlants = plants;
-      lastFetchTimestamp = now;
-      lastMapType = mapType;
+     
 
       return plants;
     } catch (error) {
