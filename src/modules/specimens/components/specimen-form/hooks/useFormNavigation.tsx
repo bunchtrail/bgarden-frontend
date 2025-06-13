@@ -5,7 +5,7 @@ import { useState } from 'react';
  * Управляет активным шагом и анимациями при переходе между шагами
  */
 export const useFormNavigation = () => {
-  // Текущий активный шаг формы (1-4)
+  // Текущий активный шаг формы (1-5)
   const [activeStep, setActiveStep] = useState(1);
   
   // Для анимаций при смене шагов
@@ -15,7 +15,7 @@ export const useFormNavigation = () => {
   const goToNextStep = () => {
     setSlideDirection('left');
     setTimeout(() => {
-      setActiveStep(prev => Math.min(prev + 1, 4));
+      setActiveStep(prev => Math.min(prev + 1, 5));
       setSlideDirection('right');
     }, 200);
   };

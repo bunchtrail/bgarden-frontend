@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
-import { cardClasses } from '@/styles/global-styles';
 import { useNotification } from '@/modules/notifications';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/modules/auth/hooks';
 import { useFormValidation } from './hooks/useFormValidation';
 import { useFormChanges } from './hooks/useFormChanges';
 import { useFormNavigation } from './hooks/useFormNavigation';
@@ -225,10 +223,12 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     }
     
     
-    // Проверяем все поля перед отправкой
+    // Проверяем все обязательные поля перед отправкой (согласованно с другими функциями валидации)
     const allFields = [
-      'inventoryNumber', 'russianName', 'latinName', 'genus', 'species',
-      'familyId', 'familyName', 'regionId'
+      'inventoryNumber', 'russianName', 'latinName', // Шаг 1
+      'familyId', // Шаг 2  
+      'regionId' // Шаг 3
+      // Шаги 4 и 5 не имеют обязательных полей
     ];
     
     log.debug('Валидация формы перед отправкой', { 
@@ -237,10 +237,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
         inventoryNumber: formData.inventoryNumber,
         russianName: formData.russianName,
         latinName: formData.latinName,
-        genus: formData.genus,
-        species: formData.species,
         familyId: formData.familyId,
-        familyName: formData.familyName,
         regionId: formData.regionId
       }
     });
@@ -405,13 +402,14 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       
       // Переходим к первому шагу с ошибкой
       const fieldsToValidate: Record<number, string[]> = {
-        1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
-        2: ['familyId', 'familyName'],
+        1: ['inventoryNumber', 'russianName', 'latinName'],
+        2: ['familyId'],
         3: ['regionId'],
-        4: []
+        4: [],
+        5: []
       };
       
-      const stepsWithErrors = [1, 2, 3, 4].filter(step => {
+      const stepsWithErrors = [1, 2, 3, 4, 5].filter(step => {
         const stepFields = (fieldsToValidate[step] || []);
         return stepFields.some(field => !!errors[field]);
       });
@@ -441,10 +439,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Функция для проверки валидности шага без побочных эффектов
   const checkStepValidity = (step: number) => {
     const fieldsToValidate: Record<number, string[]> = {
-      1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
-      2: ['familyId', 'familyName'],
+      1: ['inventoryNumber', 'russianName', 'latinName'],
+      2: ['familyId'],
       3: ['regionId'],
-      4: []
+      4: [],
+      5: []
     };
     
     const stepFields = fieldsToValidate[step] || [];
@@ -455,6 +454,9 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       const value = formData[field as keyof SpecimenFormData];
       if (field === 'inventoryNumber' || field === 'russianName' || field === 'latinName') {
         return value !== undefined && value !== '';
+      }
+      if (field === 'familyId' || field === 'regionId') {
+        return value !== undefined && value !== 0 && value !== '0';
       }
       return true;
     });
@@ -467,7 +469,8 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       1: checkStepValidity(1),
       2: checkStepValidity(2),
       3: checkStepValidity(3),
-      4: checkStepValidity(4)
+      4: checkStepValidity(4),
+      5: checkStepValidity(5)
     };
   }, [formData]);
 
@@ -478,7 +481,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Проверка валидности всей формы для кнопки "Сохранить"
   const isFormValid = useMemo(() => {
-    return [1, 2, 3, 4].every(step => checkStepValidity(step));
+    return [1, 2, 3, 4, 5].every(step => checkStepValidity(step));
   }, [formData]);
 
   // Рендер шага с загрузкой изображений
@@ -526,64 +529,70 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   );
 
   return (
-    <div>
+    <div className="space-y-6">
       <FormStepper 
         activeStep={activeStep} 
         goToStep={goToStep} 
       />
       
-      <form onSubmit={handleSubmit} className={`${cardClasses.outlined} ${cardClasses.content} rounded-xl`}>
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Контейнер шагов с анимацией */}
-        <StepContainer slideDirection={slideDirection}>
-          {/* Рендерер активного шага */}
-          <StepRenderer 
-            activeStep={activeStep} 
-            formData={formData} 
-            onChange={handleChange}
-            errors={errors}
-            touchedFields={touchedFields}
-            families={families}
-            regions={regions}
-            expositions={expositions}
-            imagesStep={renderImagesStep()}
-          />
-        </StepContainer>
+        <div className="p-8">
+          <StepContainer slideDirection={slideDirection}>
+            {/* Рендерер активного шага */}
+            <StepRenderer 
+              activeStep={activeStep} 
+              formData={formData} 
+              onChange={handleChange}
+              errors={errors}
+              touchedFields={touchedFields}
+              families={families}
+              regions={regions}
+              expositions={expositions}
+              imagesStep={renderImagesStep()}
+            />
+          </StepContainer>
+        </div>
         
         {/* Индикатор заполненности формы */}
-        <FormProgress 
-          progress={calculateFormProgress(formData)} 
-        />
+        <div className="px-8 py-4 bg-gray-50 border-t border-gray-100">
+          <FormProgress 
+            progress={calculateFormProgress(formData)} 
+          />
+        </div>
         
         {/* Навигационные кнопки */}
-        <NavigationButtons 
-          activeStep={activeStep}
-          totalSteps={formSteps.length}
-          onNext={() => {
-            // Проверяем текущий шаг и переходим к следующему
-            if (isCurrentStepValid) {
-              // Убираем уведомление о переходе на следующий шаг
-              goToNextStep();
-            } else {
-              notification.warning('Пожалуйста, заполните все обязательные поля', {
-                title: 'Невозможно перейти дальше'
+        <div className="px-8 py-6 bg-white border-t border-gray-100">
+          <NavigationButtons 
+            activeStep={activeStep}
+            totalSteps={formSteps.length}
+            onNext={() => {
+              // Проверяем текущий шаг и переходим к следующему
+              if (isCurrentStepValid) {
+                // Убираем уведомление о переходе на следующий шаг
+                goToNextStep();
+              } else {
+                notification.warning('Пожалуйста, заполните все обязательные поля', {
+                  title: 'Невозможно перейти дальше'
+                });
+              }
+            }}
+            onPrevious={() => {
+              const prevStepInfo = formSteps[activeStep - 2];
+              notification.info(`Возврат к шагу "${prevStepInfo.title}"`, { 
+                duration: 2000 
               });
-            }
-          }}
-          onPrevious={() => {
-            const prevStepInfo = formSteps[activeStep - 2];
-            notification.info(`Возврат к шагу "${prevStepInfo.title}"`, { 
-              duration: 2000 
-            });
-            goToPreviousStep();
-          }}
-          onCancel={() => {
-            notification.info('Ввод данных отменен', { duration: 3000 });
-            onCancel();
-          }}
-          onSubmit={handleSubmit}
-          isNextDisabled={!isCurrentStepValid}
-          isSubmitDisabled={!isFormValid}
-        />
+              goToPreviousStep();
+            }}
+            onCancel={() => {
+              notification.info('Ввод данных отменен', { duration: 3000 });
+              onCancel();
+            }}
+            onSubmit={handleSubmit}
+            isNextDisabled={!isCurrentStepValid}
+            isSubmitDisabled={!isFormValid}
+          />
+        </div>
       </form>
     </div>
   );

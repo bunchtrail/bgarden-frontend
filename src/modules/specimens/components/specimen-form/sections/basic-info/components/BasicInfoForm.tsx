@@ -11,8 +11,8 @@ interface BasicInfoFormProps {
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ formData, onChange, getFieldError }) => {
   return (
-    <div className={`${layoutClasses.grid2} gap-6`}>
-      <div className="space-y-4">
+    <div className={`${layoutClasses.grid2} gap-8`}>
+      <div className="space-y-5">
         <FormField
           type="text"
           id="inventoryNumber"
@@ -49,7 +49,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ formData, onChange
         />
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-5">
         <FormField
           type="select"
           id="sectorType"
@@ -70,7 +70,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ formData, onChange
           type="text"
           id="genus"
           name="genus"
-          label="Род *"
+          label="Род"
           value={formData.genus ?? ''}
           onChange={onChange}
           iconType="classification"
@@ -81,7 +81,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ formData, onChange
           type="text"
           id="species"
           name="species"
-          label="Вид *"
+          label="Вид"
           value={formData.species ?? ''}
           onChange={onChange}
           iconType="classification"

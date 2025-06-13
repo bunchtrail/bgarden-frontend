@@ -26,7 +26,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   isSubmitDisabled = false
 }) => {
   return (
-    <div className="flex justify-between pt-6 mt-4 border-t border-gray-200">
+    <div className="flex justify-between">
       <div>
         {activeStep > 1 ? (
           <Button 

@@ -22,14 +22,14 @@ export const FormProgress: React.FC<FormProgressProps> = ({ progress }) => {
   };
 
   return (
-    <div className="mt-4">
-      <div className="flex justify-between mb-1 text-sm">
-        <span>Заполнено:</span>
-        <span className="font-medium">{roundedProgress}%</span>
+    <div className="space-y-3">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium text-gray-700">Заполнено:</span>
+        <span className="font-semibold text-gray-900">{roundedProgress}%</span>
       </div>
-      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
         <div 
-          className={`h-full ${getProgressColor()} transition-all duration-500`}
+          className={`h-full ${getProgressColor()} transition-all duration-700 ease-out rounded-full`}
           style={{ width: `${roundedProgress}%` }}
         />
       </div>
