@@ -46,7 +46,7 @@ const ThumbnailsList: React.FC<ThumbnailsListProps> = ({
           {/* Индикатор основного изображения */}
           {image.isMain && (
             <div className={thumbnailStyles.indicator} title="Основное изображение">
-              <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>

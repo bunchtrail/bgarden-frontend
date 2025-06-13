@@ -2,13 +2,7 @@ import React from 'react';
 import { Specimen } from '../../types';
 import { 
   galleryContainerStyles,
-  galleryHeaderStyles,
   mainImageStyles,
-  imageCounterStyles,
-  thumbnailStyles,
-  specimenInfoStyles,
-  imageViewModalStyles,
-  imageUploadModalStyles,
   errorStateStyles
 } from '../../styles';
 import Card from '../../../../modules/ui/components/Card';
@@ -42,7 +36,6 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
     isLoading,
     error,
     currentImageIndex,
-    selectedImageId,
     selectedImages,
     isModalOpen,
     isUploadModalOpen,
@@ -80,10 +73,10 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
   }
   
   return (
-    <Card className={`${galleryContainerStyles.wrapper} p-4`}>
+    <Card className={`${galleryContainerStyles.wrapper} p-3`}>
       <GalleryHeader onAddClick={handleOpenUploadModal} />
       
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center space-y-1">
         <div className={mainImageStyles.container}>
           <MainImageDisplay
             isLoading={isLoading}
