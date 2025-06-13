@@ -15,23 +15,33 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
 
   // Определяем функцию handleDismiss перед использованием в useEffect
   const handleDismiss = useCallback(() => {
+    // Если уведомление ещё не успело появиться, сразу удаляем его
+    if (!isVisible) {
+      removeNotification(id);
+      return;
+    }
+
     setIsExiting(true);
-    
+
     // Регистрируем слушатель события окончания анимации
     if (elementRef.current) {
-      elementRef.current.addEventListener('transitionend', (e) => {
+      const onTransitionEnd = (e: TransitionEvent) => {
         if (e.propertyName === 'opacity' || e.propertyName === 'transform') {
-          // Удаляем после завершения анимации
           removeNotification(id);
         }
-      }, { once: true });
+      };
+
+      elementRef.current.addEventListener('transitionend', onTransitionEnd, { once: true });
+
+      // Подстраховка на случай, если transitionend не сработает
+      setTimeout(() => removeNotification(id), 350);
     } else {
       // Запасной вариант, если что-то пошло не так с анимацией
       setTimeout(() => {
         removeNotification(id);
       }, 300);
     }
-  }, [id, removeNotification]);
+  }, [id, removeNotification, isVisible]);
 
   // Используем один эффект для установки видимости с небольшой задержкой
   useEffect(() => {
