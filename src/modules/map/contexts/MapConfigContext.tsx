@@ -119,7 +119,7 @@ export const DEFAULT_DGIS_CONFIG: MapConfig = {
   mapType: MAP_TYPES.DGIS,
   center: [58.596323, 49.666755] as LatLngExpression, // Координаты ботсада
   zoom: 13,
-  maxZoom: 18,
+  maxZoom: 22, // Увеличиваем максимальный зум (тайлы будут растягиваться после maxNativeZoom)
   minZoom: 8,
   maxBounds: undefined,
   maxBoundsViscosity: 1.0,

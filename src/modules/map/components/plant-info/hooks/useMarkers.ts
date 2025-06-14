@@ -10,6 +10,7 @@ import { MarkerClusterManager } from '../managers/MarkerClusterManager';
  * @param isVisible Флаг видимости слоя
  * @param enableClustering Флаг включения кластеризации
  * @param showPopupOnClick Флаг, указывающий, нужно ли показывать попап при клике на маркер
+ * @param interactionMode Режим взаимодействия с маркерами
  * @returns Объект с функцией для очистки маркеров
  */
 export const useMarkers = (
@@ -17,7 +18,8 @@ export const useMarkers = (
   plants: Plant[],
   isVisible: boolean,
   enableClustering: boolean,
-  showPopupOnClick: boolean = true
+  showPopupOnClick: boolean = true,
+  interactionMode: string = 'view'
 ) => {
   const [manager, setManager] = useState<MarkerClusterManager | null>(null);
   const isInitialMarkersLoad = useRef(true);
@@ -31,20 +33,31 @@ export const useMarkers = (
 
   useEffect(() => {
     if (map) {
-      const newManager = new MarkerClusterManager(map, showPopupOnClick);
+      const newManager = new MarkerClusterManager(
+        map,
+        showPopupOnClick,
+        interactionMode
+      );
       setManager(newManager);
 
       return () => {
         newManager.clearAllMarkers(true); // Полная очистка при размонтировании компонента
       };
     }
-  }, [map, showPopupOnClick]);
+  }, [map, showPopupOnClick, interactionMode]);
 
   useEffect(() => {
     if (manager) {
       manager.setShowPopupOnClick(showPopupOnClick);
     }
   }, [manager, showPopupOnClick]);
+
+  // Обновляем режим взаимодействия при его изменении
+  useEffect(() => {
+    if (manager) {
+      manager.setInteractionMode(interactionMode);
+    }
+  }, [manager, interactionMode]);
 
   useEffect(() => {
     if (!isVisible || !manager) {

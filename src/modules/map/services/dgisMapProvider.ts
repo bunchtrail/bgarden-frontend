@@ -23,7 +23,7 @@ export const DEFAULT_DGIS_SETTINGS: DgisMapSettings = {
   tile_url: "https://tile{s}.maps.2gis.com/tiles?x={x}&y={y}&z={z}&v=1",
   subdomains: ["0", "1", "2", "3"],
   attribution: "&copy; 2ГИС",
-  maxZoom: 18,
+  maxZoom: 22, // Увеличиваем максимальный зум (после 18 тайлы будут растягиваться)
   minZoom: 8,
   center: [58.596323, 49.666755], // Координаты ботанического сада в Кирове
 };
@@ -108,20 +108,65 @@ export class DgisMapProvider {
   }
 
   /**
-   * Проверить доступность сервиса 2ГИС
+   * Проверка доступности тайлового сервиса 2ГИС.
+   * Реализована через загрузку маленького изображения, что избавляет
+   * от проблем 405 (Method Not Allowed) при HEAD-запросах и CORS-ограничений.
    */
   async checkAvailability(): Promise<boolean> {
-    try {
-      const testUrl = `https://tile0.maps.2gis.com/tiles?x=0&y=0&z=1&v=1`;
-      const response = await fetch(testUrl, { 
-        method: 'HEAD',
-        mode: 'no-cors'
-      });
-      return true;
-    } catch (error) {
-      console.warn('2ГИС service is not available:', error);
-      return false;
-    }
+    const testUrl = `https://tile0.maps.2gis.com/tiles?x=0&y=0&z=1&v=1`;
+
+    return new Promise<boolean>((resolve) => {
+      const img = new Image();
+
+      const timer = setTimeout(() => {
+        // если за 5 сек не загрузилось – считаем недоступным
+        img.src = '';
+        resolve(false);
+      }, 5000);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(true);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timer);
+        resolve(false);
+      };
+
+      img.src = testUrl;
+    });
+  }
+
+  /**
+   * Тестирование конкретного тайла для отладки
+   */
+  async testTile(x: number, y: number, z: number): Promise<boolean> {
+    const testUrl = `https://tile0.maps.2gis.com/tiles?x=${x}&y=${y}&z=${z}&v=1`;
+    
+    return new Promise<boolean>((resolve) => {
+      const img = new Image();
+
+      const timer = setTimeout(() => {
+        console.warn(`2ГИС тайл не загружен за 10 сек: z=${z}, x=${x}, y=${y}`);
+        img.src = '';
+        resolve(false);
+      }, 10000);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        console.log(`2ГИС тайл успешно загружен: z=${z}, x=${x}, y=${y}`);
+        resolve(true);
+      };
+
+      img.onerror = (error) => {
+        clearTimeout(timer);
+        console.error(`2ГИС тайл ошибка загрузки: z=${z}, x=${x}, y=${y}`, error);
+        resolve(false);
+      };
+
+      img.src = testUrl;
+    });
   }
 
   /**
@@ -133,14 +178,16 @@ export class DgisMapProvider {
       options: {
         attribution: this.getAttribution(),
         subdomains: this.getSubdomains(),
-        maxZoom: this.getMaxZoom(),
+        maxZoom: this.getMaxZoom(), // Максимальный зум для пользователя
         minZoom: this.getMinZoom(),
-        maxNativeZoom: 18,
-        detectRetina: true,
-        crossOrigin: true,
+        maxNativeZoom: 18, // 2ГИС предоставляет реальные тайлы до 18 зума
+        detectRetina: false, // Отключаем для стабильности
+        crossOrigin: false, // Убираем CORS проблемы
         updateWhenIdle: false,
-        updateWhenZooming: true,
-        keepBuffer: 4,
+        updateWhenZooming: false, // Отключаем для лучшей производительности
+        keepBuffer: 2, // Уменьшаем буфер для экономии памяти
+        tileSize: 256, // Стандартный размер тайлов 2ГИС
+        zIndex: 1,
       },
     };
   }

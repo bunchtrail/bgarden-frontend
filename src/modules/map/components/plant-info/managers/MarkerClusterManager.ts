@@ -3,6 +3,7 @@ import 'leaflet.markercluster';
 import { Plant } from '@/services/regions/types';
 import { MarkerIconFactory } from '../utils/MarkerIconFactory';
 import { specimenService } from '@/modules/specimens/services/specimenService';
+import { MAP_MODES } from '@/modules/map/contexts/MapConfigContext';
 
 interface AddMarkersOptions {
   fitBounds?: boolean;
@@ -28,15 +29,22 @@ export class MarkerClusterManager {
   private popupImageCache: Map<string, string> = new Map();
   private showPopupOnClick: boolean;
   private currentPlants: PlantWithMapType[] = [];
+  private interactionMode: string;
 
   /**
    * Создает новый менеджер кластеризации маркеров
    * @param map Карта Leaflet
    * @param showPopupOnClick Флаг, указывающий, нужно ли показывать попап при клике на маркер
+   * @param interactionMode Текущий режим взаимодействия карты (VIEW, DELETE и т. д.)
    */
-  constructor(map: L.Map, showPopupOnClick: boolean = true) {
+  constructor(
+    map: L.Map,
+    showPopupOnClick: boolean = true,
+    interactionMode: string = MAP_MODES.VIEW
+  ) {
     this.map = map;
     this.showPopupOnClick = showPopupOnClick;
+    this.interactionMode = interactionMode;
 
     this.markerClusterGroup = L.markerClusterGroup({
       maxClusterRadius: 40,
@@ -63,6 +71,13 @@ export class MarkerClusterManager {
       const markers = this.createPlantMarkers(this.currentPlants);
       this.addMarkersWithClustering(markers, { fitBounds: false });
     }
+  }
+
+  /**
+   * Устанавливает текущий режим взаимодействия карты (VIEW, DELETE и т. д.)
+   */
+  public setInteractionMode(mode: string): void {
+    this.interactionMode = mode;
   }
 
   /**
@@ -148,8 +163,21 @@ export class MarkerClusterManager {
         icon: MarkerIconFactory.createStyledMarkerIcon(plant),
       });
 
-      // Добавляем попап только если включена соответствующая настройка
-      if (this.showPopupOnClick) {
+      // ===== Обработка клика по маркеру в зависимости от режима =====
+
+      if (this.interactionMode === MAP_MODES.DELETE) {
+        // В режиме удаления запрашиваем подтверждение и удаляем растение
+        marker.on('click', (e: any) => {
+          L.DomEvent.stop(e);
+          const specimenIdMatch = plant.id.match(/specimen-(\d+)/);
+          const specimenId = specimenIdMatch && specimenIdMatch[1] ? parseInt(specimenIdMatch[1], 10) : null;
+
+          if (!specimenId) return;
+
+          // Создаем красивый попап для подтверждения удаления образца
+          this.showSpecimenDeletionPopup(plant, marker);
+        });
+      } else if (this.showPopupOnClick) {
         // Создаем пустой попап и привязываем к маркеру
         const popup = L.popup({
           className: 'plant-popup-container',
@@ -269,5 +297,90 @@ export class MarkerClusterManager {
         this.popupImageCache.delete(key);
       }
     });
+  }
+
+  /**
+   * Показывает стилизованный попап для подтверждения удаления образца
+   */
+  private showSpecimenDeletionPopup(plant: PlantWithMapType, marker: L.Marker): void {
+    // Создаем backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 z-[9999] flex items-center justify-center';
+    backdrop.innerHTML = `
+      <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+      <div class="relative max-w-md w-full mx-4 rounded-xl overflow-hidden bg-white/80 border border-gray-200 shadow-md transform transition-all duration-300 scale-100 animate-fadeIn">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 pt-4 pb-2">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg text-gray-900">Удаление образца</h3>
+              <p class="text-sm text-gray-600">Это действие нельзя отменить</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="px-5 py-4">
+          <p class="text-sm text-gray-900 leading-relaxed">
+            Вы действительно хотите удалить образец 
+            <span class="font-semibold text-red-600">"${plant.name}"</span>?
+          </p>
+          ${plant.latinName ? `<p class="text-xs text-gray-500 mt-1 italic">${plant.latinName}</p>` : ''}
+          <p class="text-xs text-gray-600 mt-2">
+            Все данные, связанные с этим образцом, будут безвозвратно удалены.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3 border-t border-gray-200 flex justify-end space-x-3">
+          <button class="px-6 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:bg-white transition-all duration-300" data-action="cancel">
+            Отмена
+          </button>
+          <button class="px-6 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-lg transition-all duration-300" data-action="confirm">
+            Удалить
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Добавляем обработчики событий
+    const cancelBtn = backdrop.querySelector('[data-action="cancel"]') as HTMLButtonElement;
+    const confirmBtn = backdrop.querySelector('[data-action="confirm"]') as HTMLButtonElement;
+    const backdropDiv = backdrop.querySelector('.absolute.inset-0') as HTMLDivElement;
+
+    const closePopup = () => {
+      backdrop.remove();
+    };
+
+    const handleConfirm = async () => {
+      try {
+        const specimenIdMatch = plant.id.match(/specimen-(\d+)/);
+        const specimenId = specimenIdMatch && specimenIdMatch[1] ? parseInt(specimenIdMatch[1], 10) : null;
+        
+        if (specimenId) {
+          await specimenService.deleteSpecimen(specimenId);
+          // Удаляем маркер с карты и из кластера
+          this.markerClusterGroup.removeLayer(marker);
+          // Обновляем внутреннее состояние
+          this.currentPlants = this.currentPlants.filter((p) => p.id !== plant.id);
+        }
+      } catch (error) {
+        console.error('Ошибка при удалении образца:', error);
+      } finally {
+        closePopup();
+      }
+    };
+
+    cancelBtn.addEventListener('click', closePopup);
+    confirmBtn.addEventListener('click', handleConfirm);
+    backdropDiv.addEventListener('click', closePopup);
+
+    // Добавляем попап в DOM
+    document.body.appendChild(backdrop);
   }
 }

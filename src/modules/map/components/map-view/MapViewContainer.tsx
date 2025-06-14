@@ -52,7 +52,8 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
   
   // Мемоизация контента для предотвращения лишних перерисовок
   return useMemo(() => {
-    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO) {
+    // Для гео-карт и 2ГИС не нужен mapImageUrl, для схематических карт нужен
+    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO && mapConfig.mapType !== MAP_TYPES.DGIS) {
       return null;
     }
     
@@ -66,8 +67,8 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
         
 
 
-        {/* Фиксация границ для гео-карты */}
-        {mapConfig.mapType === MAP_TYPES.GEO && (
+        {/* Фиксация границ для гео-карты и 2ГИС */}
+        {(mapConfig.mapType === MAP_TYPES.GEO || mapConfig.mapType === MAP_TYPES.DGIS) && (
           <LockBoundsAtInit />
         )}
 

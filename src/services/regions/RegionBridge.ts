@@ -25,8 +25,8 @@ export const convertPointsForStorage = (
   points: [number, number][],
   mapType: string
 ): [number, number][] => {
-  if (mapType === MAP_TYPES.GEO) {
-    // Для гео-карт сохраняем координаты как есть (lat/lng)
+  if (mapType === MAP_TYPES.GEO || mapType === MAP_TYPES.DGIS) {
+    // Для гео-карт и 2ГИС сохраняем координаты как есть (lat/lng)
     return points;
   } else {
     // Для схематических карт преобразуем lat/lng в пиксели
@@ -49,8 +49,8 @@ export const convertPointsForDisplay = (
   points: [number, number][],
   mapType: string
 ): [number, number][] => {
-  if (mapType === MAP_TYPES.GEO) {
-    // Для гео-карт координаты уже в правильном формате (lat/lng)
+  if (mapType === MAP_TYPES.GEO || mapType === MAP_TYPES.DGIS) {
+    // Для гео-карт и 2ГИС координаты уже в правильном формате (lat/lng)
     return points;
   } else {
     // Для схематических карт преобразуем пиксели в lat/lng для отображения

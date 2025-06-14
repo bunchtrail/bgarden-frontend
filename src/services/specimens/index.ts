@@ -538,8 +538,8 @@ class UnifiedSpecimenService {
             const normalizedLocationType = normalizeLocationType(specimen.locationType);
 
             // Фильтруем растения в зависимости от типа карты и наличия координат
-            if (mapType === MAP_TYPES.GEO) {
-                // Для гео-карты нужны географические координаты
+            if (mapType === MAP_TYPES.GEO || mapType === MAP_TYPES.DGIS) {
+                // Для гео-карты и 2ГИС нужны географические координаты
                 return (
                     (normalizedLocationType === LocationType.Geographic ||
                         normalizedLocationType === undefined) &&
@@ -567,7 +567,7 @@ class UnifiedSpecimenService {
                 
                 // Выбираем позицию в зависимости от типа карты
                 let position: [number, number];
-                if (mapType === MAP_TYPES.GEO) {
+                if (mapType === MAP_TYPES.GEO || mapType === MAP_TYPES.DGIS) {
                     position = [specimen.latitude, specimen.longitude];
                 } else {
                     // Для схематических карт преобразуем пиксели в lat/lng

@@ -26,7 +26,8 @@ const EnhancedPlantMarkersLayer: React.FC<EnhancedPlantMarkersLayerProps> =
       plants,
       isVisible,
       mapConfig.enableClustering,
-      mapConfig.showPopupOnClick
+      mapConfig.showPopupOnClick,
+      mapConfig.interactionMode
     );
     const { warning } = useNotification();
 

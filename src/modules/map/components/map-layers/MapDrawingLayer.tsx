@@ -15,7 +15,12 @@ import { logError } from '@/utils/logger';
 // Модалки
 
 // Сервисы
-import { PolygonFactory, createRegion, updateRegion } from '@/services/regions';
+import {
+  PolygonFactory,
+  createRegion,
+  updateRegion,
+  deleteRegion,
+} from '@/services/regions';
 import regionBridge, {
   convertPointsForStorage,
 } from '@/services/regions/RegionBridge';
@@ -584,25 +589,42 @@ const MapDrawingLayer: React.FC<MapDrawingLayerProps> = ({
   const handleConfirmDeletion = () => {
     if (!deletingAreaId) return;
 
-    // Удаляем область из состояния
-    const updatedAreas = areasRef.current.filter(
-      (a) => a.id !== deletingAreaId
-    );
-    setAreas(updatedAreas);
-
-    // Удаляем слой с карты
-    if (drawnItemsRef.current) {
-      drawnItemsRef.current.eachLayer((layer: any) => {
-        if (layer.options?.areaId === deletingAreaId) {
-          drawnItemsRef.current?.removeLayer(layer);
+    (async () => {
+      // Если это существующая область из БД, сначала удаляем её на сервере
+      if (deletingAreaId.startsWith('region-')) {
+        try {
+          const regionId = regionBridge.areaIdToRegionId(deletingAreaId);
+          await deleteRegion(regionId);
+        } catch (error) {
+          // Если не удалось удалить на сервере — не продолжаем локальное удаление
+          logError(
+            'Ошибка при удалении области на сервере:',
+            'regions',
+            undefined,
+            error as any
+          );
+          return;
         }
-      });
-    }
+      }
 
-    
+      // Удаляем область из локального состояния
+      const updatedAreas = areasRef.current.filter(
+        (a) => a.id !== deletingAreaId
+      );
+      setAreas(updatedAreas);
 
-    setIsDeletionModalOpen(false);
-    setDeletingAreaId(null);
+      // Удаляем слой с карты
+      if (drawnItemsRef.current) {
+        drawnItemsRef.current.eachLayer((layer: any) => {
+          if (layer.options?.areaId === deletingAreaId) {
+            drawnItemsRef.current?.removeLayer(layer);
+          }
+        });
+      }
+
+      setIsDeletionModalOpen(false);
+      setDeletingAreaId(null);
+    })();
   };
 
   // Обработчик отмены удаления
