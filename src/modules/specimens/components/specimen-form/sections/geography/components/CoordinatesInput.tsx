@@ -43,7 +43,7 @@ const CoordinatesInput: React.FC<CoordinatesInputProps> = ({
         </select>
       </div>
 
-      {locationType === LocationType.SchematicMap && (
+      {Number(locationType) === LocationType.SchematicMap && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="mapX" className={`block text-sm font-medium ${textClasses.primary} mb-1`}>
@@ -76,7 +76,7 @@ const CoordinatesInput: React.FC<CoordinatesInputProps> = ({
         </div>
       )}
 
-      {locationType === LocationType.Geographic && (
+      {Number(locationType) === LocationType.Geographic && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="latitude" className={`block text-sm font-medium ${textClasses.primary} mb-1`}>

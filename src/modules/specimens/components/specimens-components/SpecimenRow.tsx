@@ -1,6 +1,6 @@
 import React from 'react';
 import { Specimen, SectorType } from '../../types';
-import { sectorTypeColors } from '../../styles';
+import { sectorTypeColors, getSectorTypeNumber } from '../../styles';
 import { animationClasses } from '../../../../styles/global-styles';
 import ActionButtons from '../specimens-controls/ActionButtons';
 
@@ -22,8 +22,9 @@ const SpecimenRow: React.FC<SpecimenRowProps> = ({
   className = '',
   style = {},
 }) => {
-  const sectorType = specimen.sectorType as SectorType;
-  const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
+  const sectorTypeNumber = getSectorTypeNumber(specimen.sectorType);
+  const sectorType = sectorTypeNumber as SectorType;
+  const sectorColor = sectorTypeColors[sectorTypeNumber as keyof typeof sectorTypeColors] || sectorTypeColors[0];
   return (
     <tr
       className={`${animationClasses.transition} hover:bg-[#F5F5F7]/90 group cursor-default ${className}`}

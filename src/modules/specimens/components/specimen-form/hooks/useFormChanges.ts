@@ -36,20 +36,39 @@ export const useFormChanges = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    
+
+    // Список полей, которые должны храниться как числа,
+    // даже если источник события — select или кастомное событие без указания type.
+    const numericFields = [
+      'familyId',
+      'regionId',
+      'expositionId',
+      'sectorType',
+      'locationType',
+      'plantingYear',
+      'originalYear',
+      'latitude',
+      'longitude',
+      'mapX',
+      'mapY',
+    ];
+
     // Для чекбоксов обрабатываем отдельно
     if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
       updateField(name, checkbox.checked);
       return;
     }
-    
-    // Для числовых полей преобразуем значение
-    if (type === 'number') {
-      updateField(name, value === '' ? 0 : Number(value));
+
+    // Приводим к числу, если поле числовое или указано type="number"
+    if (type === 'number' || numericFields.includes(name)) {
+      // Если значение пустое, интерпретируем его как null, а не 0 —
+      // это важно, чтобы не сбрасывались такие поля, как regionId и координаты,
+      // при повторном монтировании компонентов.
+      updateField(name, value === '' ? null : Number(value));
       return;
     }
-    
+
     // Для остальных полей просто устанавливаем значение
     updateField(name, value);
   }, [updateField]);

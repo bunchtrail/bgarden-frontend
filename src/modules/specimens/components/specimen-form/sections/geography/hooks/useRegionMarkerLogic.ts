@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { RegionData } from '@/services/regions/types';
 import { SpecimenFormData } from '@/modules/specimens/types';
 import L from 'leaflet';
@@ -14,8 +14,26 @@ export function useRegionMarkerLogic(
   regions: RegionData[], 
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
 ) {
-  const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
-  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+  // Вычисляем начальную позицию маркера из текущих координат формы
+  const initialMarkerPosition: [number, number] | null = useMemo(() => {
+    if (formData.latitude && formData.longitude) {
+      const lat = Number(formData.latitude);
+      const lng = Number(formData.longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return [lat, lng];
+      }
+    }
+    return null;
+  }, [formData.latitude, formData.longitude]);
+
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(initialMarkerPosition);
+
+  // Сохраняем выбранные регионы для первоначального рендера
+  const initialSelectedRegions = useMemo(() => {
+    return formData.regionId ? [formData.regionId.toString()] : [];
+  }, [formData.regionId]);
+
+  const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>(initialSelectedRegions);
   const [showTooltips, setShowTooltips] = useState<boolean>(false);
   
   // Инициализация маркера из координат formData

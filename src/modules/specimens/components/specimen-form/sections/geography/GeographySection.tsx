@@ -13,6 +13,7 @@ import {
 } from './components';
 import { useRegionMarkerLogic } from './hooks';
 import Switch from '@/modules/ui/components/Form/Switch';
+import { MAP_TYPES } from '@/modules/map/contexts/MapConfigContext';
 
 // Расширяем интерфейс SpecimenFormData для дополнительных полей
 interface ExtendedSpecimenFormData extends SpecimenFormData {
@@ -84,6 +85,7 @@ export const GeographySection: React.FC<GeographySectionProps> = ({
             onCoordinatesChange={handleCoordinatesChange}
             markerPosition={markerPosition}
             showTooltips={showTooltips}
+            initialMapType={formData.locationType === LocationType.Geographic ? MAP_TYPES.GEO : MAP_TYPES.SCHEMATIC}
           />
         </div>
       </div>

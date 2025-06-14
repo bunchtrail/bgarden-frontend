@@ -62,10 +62,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Получаем тип сектора из URL
   const sectorTypeFromUrl = getSectorTypeFromUrl();
   
-  // Начальное состояние формы
+  // Формируем начальное состояние формы, учитывая тип сектора из URL (если он указан)
   const initialFormState: SpecimenFormData = {
     inventoryNumber: '',
-    sectorType: SectorType.Dendrology,
+    // Если в URL присутствует параметр sectorType, используем его, иначе по умолчанию — дендрология
+    sectorType: (sectorTypeFromUrl !== null ? sectorTypeFromUrl : SectorType.Dendrology) as SectorType,
     locationType: LocationType.SchematicMap,
     latitude: 0,
     longitude: 0,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { SectorType } from '../../../types';
-import { sectorTypeColors, statusColors } from '../../../styles';
+import { sectorTypeColors, statusColors, getSectorTypeNumber } from '../../../styles';
 
 interface SpecimenBadgesProps {
   sectorType: SectorType;
@@ -13,7 +13,8 @@ export const SpecimenBadges: React.FC<SpecimenBadgesProps> = ({
   hasHerbarium,
   getSectorTypeName
 }) => {
-  const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
+  const sectorTypeNumber = getSectorTypeNumber(sectorType);
+  const sectorColor = sectorTypeColors[sectorTypeNumber as keyof typeof sectorTypeColors] || sectorTypeColors[0];
   
   return (
     <div className="flex items-center justify-between mb-4">
@@ -21,9 +22,9 @@ export const SpecimenBadges: React.FC<SpecimenBadgesProps> = ({
       <span 
         className={`text-xs font-medium px-2.5 py-1.5 bg-white/70 
           rounded-full shadow-sm flex items-center space-x-1 ${sectorColor.text} font-semibold`}
-        aria-label={`Сектор: ${getSectorTypeName(sectorType)}`}
+        aria-label={`Сектор: ${getSectorTypeName(sectorTypeNumber as SectorType)}`}
       >
-        {getSectorTypeName(sectorType)}
+        {getSectorTypeName(sectorTypeNumber as SectorType)}
       </span>
       
       {/* Дополнительные бейджи */}

@@ -18,7 +18,7 @@ export const useFormValidation = (formData: SpecimenFormData) => {
     const requiredFieldsByStep = {
       1: ['inventoryNumber', 'russianName', 'latinName'],
       2: ['familyId'],
-      3: ['regionId', 'expositionId'],
+      3: ['regionId'],
       4: [],
       5: []
     };

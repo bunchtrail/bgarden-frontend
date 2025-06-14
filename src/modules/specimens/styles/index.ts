@@ -80,6 +80,22 @@ export const specimenPageStyles = {
   formCard: cardClasses.elevated,
 };
 
+// Утилитарная функция для преобразования sectorType в числовое значение
+export const getSectorTypeNumber = (sectorType: any): number => {
+  if (typeof sectorType === 'number') {
+    return sectorType;
+  }
+  if (typeof sectorType === 'string') {
+    switch (sectorType) {
+      case 'Dendrology': return 0;
+      case 'Flora': return 1;
+      case 'Flowering': return 2;
+      default: return 0;
+    }
+  }
+  return 0;
+};
+
 // Цвета для типов секторов
 export const sectorTypeColors = {
   // Дендрология (деревья и кустарники) - зеленые оттенки

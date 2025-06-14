@@ -9,6 +9,7 @@ import {
   PositionedControlPanel,
   UNIFIED_PANEL_PRESETS,
 } from '@/modules/map/components/control-panel';
+import { MAP_TYPES } from '@/modules/map/contexts/MapConfigContext';
 
 // Константы для типов слоев на карте
 export const MAP_LAYERS = {
@@ -25,6 +26,7 @@ export interface RegionMapSelectorProps {
   onCoordinatesChange: (lat: number, lng: number) => void;
   markerPosition: [number, number] | null;
   showTooltips?: boolean;
+  initialMapType?: (typeof MAP_TYPES)[keyof typeof MAP_TYPES];
 }
 
 export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
@@ -34,6 +36,7 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
   onCoordinatesChange,
   markerPosition,
   showTooltips = false,
+  initialMapType = MAP_TYPES.SCHEMATIC,
 }) => {
   const { mapData, loading } = useMapData();
 
@@ -83,8 +86,9 @@ export const RegionMapSelector: React.FC<RegionMapSelectorProps> = ({
       enableClustering: true,
       mapInteractionPriority: 'marker',
       showControls: false,
+      mapType: initialMapType,
     }),
-    [selectedAreaIds, showTooltips]
+    [selectedAreaIds, showTooltips, initialMapType]
   );
 
   return (

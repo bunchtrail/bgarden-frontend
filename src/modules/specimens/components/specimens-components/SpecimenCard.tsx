@@ -8,7 +8,7 @@ import {
   animationClasses,
   getUnifiedButtonClasses,
 } from '../../../../styles/global-styles';
-import { sectorTypeColors } from '../../styles';
+import { sectorTypeColors, getSectorTypeNumber } from '../../styles';
 import {
   SpecimenBadges,
   SpecimenDetails,
@@ -38,10 +38,11 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const navigate = useNavigate();
-  const sectorType = specimen.sectorType as SectorType;
+  const sectorTypeNumber = getSectorTypeNumber(specimen.sectorType);
+  const sectorType = sectorTypeNumber as SectorType;
 
   // Получаем пропсы для заголовка
-  const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
+  const sectorColor = sectorTypeColors[sectorTypeNumber as keyof typeof sectorTypeColors] || sectorTypeColors[0];
   const headerClassName = `${sectorColor.bg} py-3 border-b border-gray-200`;
 
   // Используем хук для загрузки изображения, только когда открыто модальное окно
