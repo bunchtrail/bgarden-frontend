@@ -5,7 +5,7 @@ import GeographicInfoCard from './GeographicInfoCard';
 import TimelineInfoCard from './TimelineInfoCard';
 import AdditionalInfoCard from './AdditionalInfoCard';
 import SpecimenGallery from '../specimen-gallery/SpecimenGallery';
-import { layoutClasses } from '../../../../styles/global-styles';
+import { specimenDisplayStyles } from '../../styles';
 
 interface SpecimenDisplayProps {
   specimen: Specimen | null;
@@ -21,12 +21,19 @@ const SpecimenDisplay: React.FC<SpecimenDisplayProps> = ({ specimen }) => {
   }
 
   return (
-    <div className={`${layoutClasses.grid2} gap-6`}>
-      <BasicInfoCard specimen={specimen} />
-      <SpecimenGallery specimen={specimen} />
-      <GeographicInfoCard specimen={specimen} />
-      <TimelineInfoCard specimen={specimen} />
-      <AdditionalInfoCard specimen={specimen} />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 max-w-7xl mx-auto">
+      {/* Левая колонка */}
+      <div className="space-y-6">
+        <BasicInfoCard specimen={specimen} />
+        <GeographicInfoCard specimen={specimen} />
+      </div>
+      
+      {/* Правая колонка */}
+      <div className="space-y-6">
+        <SpecimenGallery specimen={specimen} />
+        <TimelineInfoCard specimen={specimen} />
+        <AdditionalInfoCard specimen={specimen} />
+      </div>
     </div>
   );
 };

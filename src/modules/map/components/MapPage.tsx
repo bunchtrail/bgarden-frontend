@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapConfigProvider } from '../contexts/MapConfigContext';
 import { MapProvider } from '../contexts/MapContext';
@@ -30,9 +30,11 @@ const MapPage: React.FC<MapPageProps & { mode?: 'full' | 'light' }> = ({
   ...contentProps
 }) => {
   // Выбираем конфигурацию в зависимости от режима
-  const config = mode === 'light' 
-    ? { ...LIGHT_CONFIG, ...initialConfig }
-    : initialConfig;
+  const config = useMemo(() => (
+    mode === 'light'
+      ? { ...LIGHT_CONFIG, ...initialConfig }
+      : initialConfig
+  ), [mode, initialConfig]);
 
   return (
     <MapConfigProvider initialConfig={config}>

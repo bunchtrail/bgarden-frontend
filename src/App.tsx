@@ -2,6 +2,7 @@ import { useRoutes } from 'react-router-dom';
 import './App.css';
 import { routes } from './routes';
 import { NotificationContainer } from './modules/notifications';
+import LoggerControls from './components/LoggerControls';
 
 function App() {
   // Используем useRoutes для создания элементов маршрутизации из конфигурации
@@ -12,6 +13,7 @@ function App() {
     <>
       {routeElements}
       <NotificationContainer />
+      <LoggerControls position="bottom-right" />
     </>
   );
 }

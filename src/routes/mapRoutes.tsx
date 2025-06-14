@@ -1,36 +1,29 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
-import { MainLayout } from '../modules/layouts';
-import { 
-  MapPage, 
-  MapProvider, 
-  useMapConfig, 
-  MAP_LAYERS,
-  MAP_MODES,
-  DEFAULT_MAP_CONFIG,
-  UnifiedControlPanel
-} from '../modules/map';
-import { buttonClasses } from '../styles/global-styles';
-import { Switch } from '../modules/ui/components/Form';
-import { PanelSection } from '../modules/map/components/control-panel';
-
-// Заглушка для страницы сектора карты (будет реализована позже)
-const MapSectorPage = () => <div>Страница сектора карты (скоро будет реализована)</div>;
+import { FullscreenLayout } from '../modules/layouts';
+import { MapPage } from '../modules/map';
+import {
+  PositionedControlPanel,
+  UNIFIED_PANEL_PRESETS,
+} from '../modules/map/components/control-panel';
 
 export const mapRoutes: RouteObject[] = [
   {
     path: 'map',
     element: (
       <ProtectedRoute>
-        <MainLayout>
-          <MapProvider>
-            <MapPage 
-              showControls={true}
-              extraControls={<UnifiedControlPanel pageType="map" />}
-            />
-          </MapProvider>
-        </MainLayout>
+        <FullscreenLayout>
+          <MapPage
+            showControls={true}
+            extraControls={
+              <PositionedControlPanel
+                config={UNIFIED_PANEL_PRESETS.map}
+                panelId="main-map-panel"
+              />
+            }
+          />
+        </FullscreenLayout>
       </ProtectedRoute>
     ),
   },
@@ -38,15 +31,18 @@ export const mapRoutes: RouteObject[] = [
     path: 'map/sector/:id',
     element: (
       <ProtectedRoute>
-        <MainLayout>
-          <MapProvider>
-            <MapPage 
-              showControls={true}
-              extraControls={<UnifiedControlPanel pageType="sector" />}
-            />
-          </MapProvider>
-        </MainLayout>
+        <FullscreenLayout>
+          <MapPage
+            showControls={true}
+            extraControls={
+              <PositionedControlPanel
+                config={UNIFIED_PANEL_PRESETS.sector}
+                panelId="sector-map-panel"
+              />
+            }
+          />
+        </FullscreenLayout>
       </ProtectedRoute>
     ),
   },
-]; 
+];

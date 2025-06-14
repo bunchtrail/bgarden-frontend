@@ -5,8 +5,24 @@ import {
     RegisterDto,
     TokenDto,
     UserDto,
-    TwoFactorAuthDto
+    TwoFactorAuthDto,
+    UserRole
 } from '../types';
+
+// Функция для маппинга строковых ролей в enum
+const mapStringRoleToEnum = (role: string): UserRole => {
+    switch (role) {
+        case 'Administrator':
+            return UserRole.Administrator;
+        case 'Employee':
+            return UserRole.Employee;
+        case 'Client':
+            return UserRole.Client;
+        default:
+            console.warn(`Неизвестная роль: ${role}, используется роль Client по умолчанию`);
+            return UserRole.Client;
+    }
+};
 
 // Сервис авторизации
 export const authService = {
@@ -129,14 +145,22 @@ export const authService = {
             }
             
             // Получаем данные пользователя с таймаутом в 3 секунды
-            const userData = await httpClient.get<UserDto>('User/me', {
+            const userData = await httpClient.get<any>('User/me', {
                 timeout: 3000,
                 headers: {
                     'Cache-Control': 'max-age=60'
                 }
             });
             
-            return userData;
+            // Маппируем строковую роль в enum
+            const mappedUserData: UserDto = {
+                ...userData,
+                role: typeof userData.role === 'string' 
+                    ? mapStringRoleToEnum(userData.role) 
+                    : userData.role
+            };
+            
+            return mappedUserData;
         } catch (err) {
             console.error('Ошибка при проверке авторизации:', err);
             return null;

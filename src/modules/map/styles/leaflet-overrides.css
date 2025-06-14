@@ -1,364 +1,474 @@
-/* Переопределение стилей Leaflet для соответствия дизайну Apple */
+/* ===== CSS ПЕРЕМЕННЫЕ ===== */
+:root {
+  /* Цвета */
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --secondary-color: #8b5cf6;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --danger-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
 
-/* Стили для тултипов на карте */
-.leaflet-tooltip {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-  padding: 8px 12px !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
-  min-width: 160px;
-  max-width: 300px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transform: translateY(0);
-  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  /* Фоны */
+  --bg-primary: rgba(255, 255, 255, 0.95);
+  --bg-secondary: rgba(249, 250, 251, 0.9);
+  --bg-glass: rgba(255, 255, 255, 0.8);
+
+  /* Тени */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.08);
+
+  /* Радиусы */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Z-index слои */
+  --z-map: 100;
+  --z-regions: 200;
+  --z-markers: 300;
+  --z-clusters: 350;
+  --z-controls: 400;
+  --z-popups: 500;
+  --z-notifications: 600;
+
+  /* Анимации */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.4s ease;
+  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.leaflet-tooltip-top {
-  margin-bottom: 8px !important;
-}
-
-.leaflet-tooltip strong {
-  color: #1D1D1F;
-  font-weight: 600;
-  font-size: 1.05rem;
-  display: block;
-  margin-bottom: 0.35rem;
-}
-
-.leaflet-tooltip p {
-  color: #86868B;
-  font-size: 0.9rem;
-  margin: 0.25rem 0;
-  line-height: 1.4;
-}
-
-/* Стили для элементов управления картой */
-.leaflet-control-zoom {
-  border: none !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+/* ===== БАЗОВЫЕ СТИЛИ КОНТЕЙНЕРА ===== */
+.leaflet-container {
+  border-radius: var(--radius-xl);
   overflow: hidden;
+  box-shadow: var(--shadow-lg), var(--shadow-xl);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  position: relative;
+  z-index: var(--z-map);
+}
+
+.leaflet-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.02) 0%,
+    rgba(139, 92, 246, 0.02) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== ЭЛЕМЕНТЫ УПРАВЛЕНИЯ ===== */
+.leaflet-control-zoom {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .leaflet-control-zoom a {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #1D1D1F !important;
-  border: 1px solid rgba(229, 229, 234, 0.8) !important;
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  font-size: 18px !important;
-  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: none;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-normal);
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #F5F5F7 !important;
-  color: #0A84FF !important;
+  background: var(--bg-glass);
+  color: var(--primary-color);
   transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.leaflet-control-zoom a:hover::before {
+  opacity: 1;
 }
 
 .leaflet-control-zoom a:active {
   transform: scale(0.98);
 }
 
-/* Удаление теней и рамок для контейнера карты */
-.leaflet-container {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.07);
-  background-color: #F5F5F7 !important;
-  pointer-events: auto !important;
+.leaflet-control-layers {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-/* Предотвращение выделения полигонов и областей при клике */
-.leaflet-interactive {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Отключение выделения path элементов */
-.leaflet-pane path {
-  outline: none !important;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
-  pointer-events: auto !important;
-}
-
-/* Стилизация кастомных маркеров растений */
+/* ===== МАРКЕРЫ И КЛАСТЕРЫ ===== */
 .custom-plant-marker {
-  background-color: transparent !important;
-  border: none !important;
-  z-index: 650 !important;
-  cursor: grab;
+  background: transparent;
+  border: none;
+  z-index: var(--z-markers);
+  cursor: pointer;
 }
 
 .custom-plant-marker div {
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+  transition: all var(--transition-normal) var(--ease-bounce);
+  filter: drop-shadow(var(--shadow-sm));
+  position: relative;
 }
 
-.custom-plant-marker div:hover {
+.custom-plant-marker div::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(139, 92, 246, 0.3) 100%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  z-index: -1;
+}
+
+.custom-plant-marker:hover div {
   transform: scale(1.2) translateY(-3px);
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(var(--shadow-md));
 }
 
-.custom-plant-marker div:active {
+.custom-plant-marker:hover div::before {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+.custom-plant-marker:active div {
   transform: scale(1.1) translateY(-1px);
   cursor: grabbing;
 }
 
-/* Стили для кластеров маркеров */
+/* Кластеры */
 .plant-cluster-icon {
-  background-color: transparent !important;
-  border: none !important;
+  background: transparent;
+  border: none;
+  z-index: var(--z-clusters);
 }
 
 .plant-cluster-icon div {
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
-}
-
-.plant-cluster-icon div:hover {
-  transform: scale(1.15) translateY(-3px);
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
-}
-
-/* Анимация для появления кластеров */
-@keyframes clusterPulse {
-  0% { transform: scale(0.8); opacity: 0.7; filter: blur(2px); }
-  50% { transform: scale(1.08); opacity: 0.9; filter: blur(0px); }
-  100% { transform: scale(1); opacity: 1; filter: blur(0px); }
-}
-
-.plant-cluster-icon div {
-  animation: clusterPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Анимация для маркеров при добавлении на карту */
-@keyframes markerPulse {
-  0% { transform: scale(0.5) translateY(10px); opacity: 0; }
-  70% { transform: scale(1.1) translateY(-3px); opacity: 0.9; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-.custom-plant-marker div {
-  animation: markerPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Стили для светлого режима карты */
-.leaflet-light-mode {
-  filter: brightness(110%) saturate(65%) contrast(95%);
-  transition: filter 0.4s ease;
-}
-
-/* Анимация для масштабирования карты */
-@keyframes mapZoomAnimation {
-  0% { opacity: 0.4; }
-  100% { opacity: 1; }
-}
-
-.leaflet-zoom-animated {
-  animation: mapZoomAnimation 0.3s ease-out;
-}
-
-/* Улучшенные стили для попапов */
-.leaflet-popup-content-wrapper {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  background: var(--bg-primary);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  animation: clusterAppear 0.5s var(--ease-bounce);
+}
+
+.plant-cluster-icon div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.plant-cluster-icon:hover div {
+  transform: scale(1.15) translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: var(--shadow-md);
+}
+
+.plant-cluster-icon:hover div::before {
+  opacity: 1;
+}
+
+/* ===== ПАНЕЛИ И СОБЫТИЯ ===== */
+.leaflet-pane-no-pointer-events {
+  pointer-events: none !important;
+}
+
+/* ===== ПОПАПЫ И ТУЛТИПЫ ===== */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  padding: 0;
 }
 
 .leaflet-popup-tip {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .leaflet-popup-close-button {
-  color: #86868B !important;
-  font-size: 20px !important;
-  transition: all 0.2s ease;
+  color: var(--text-muted);
+  font-size: 20px;
+  font-weight: 300;
+  transition: all var(--transition-normal);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 22px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  top: 8px;
+  right: 8px;
 }
 
 .leaflet-popup-close-button:hover {
-  color: #0A84FF !important;
-  transform: scale(1.1);
-}
-
-/* Установка z-index для контейнера карты */
-.leaflet-map-pane {
-  z-index: 100 !important;
-}
-
-.leaflet-top, 
-.leaflet-bottom {
-  z-index: 1000 !important;
-}
-
-/* Стили для полигонов регионов */
-.region-polygon {
-  cursor: pointer;
-  pointer-events: auto !important; /* Обязательно разрешаем события мыши */
-  z-index: 400 !important; /* Повышаем z-index для лучшего обнаружения кликов */
-  transition: all 0.2s ease;
-}
-
-/* Специальный класс для кликабельных регионов */
-.clickable-region {
-  pointer-events: auto !important;
-  stroke-opacity: 0.8;
-  fill-opacity: 0.2 !important;
-}
-
-.region-hover {
-  filter: brightness(1.05);
-}
-
-/* Убедимся, что слой с маркерами всегда выше полигонов */
-.leaflet-marker-pane {
-  z-index: 600 !important;
-}
-
-/* Обеспечиваем корректное поведение кликов внутри полигонов */
-.leaflet-overlay-pane path {
-  pointer-events: auto !important;
-  cursor: pointer;
-}
-
-/* Специальные стили для корректной работы событий во всех браузерах */
-.leaflet-overlay-pane svg {
-  pointer-events: auto !important;
-}
-
-/* Правильный обработчик событий для всех браузеров */
-.leaflet-overlay-pane {
-  pointer-events: auto !important;
-}
-
-/* Нужна отдельная стилизация для полигонов регионов, чтобы они были прозрачными для кликов */
-.leaflet-overlay-pane .leaflet-interactive {
-  pointer-events: auto !important;
-  touch-action: auto !important;
-  -webkit-user-drag: auto !important;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Для улучшения восприятия при клике */
-.leaflet-overlay-pane svg path.region-polygon:active {
-  stroke-width: 3px !important;
-  filter: brightness(1.1) !important;
-}
-
-/* Стили для состояния интерактивности карты */
-.map-interacting {
-  cursor: grabbing;
-}
-
-.map-interacting .leaflet-overlay-pane {
-  pointer-events: none;
-}
-
-.map-interacting .custom-plant-marker {
-  transition: none;
-}
-
-/* Улучшаем стиль маркера во время перетаскивания */
-.custom-plant-marker:active {
-  cursor: grabbing !important;
-  z-index: 1000 !important;
-}
-
-/* Улучшаем взаимодействие с интерактивными областями */
-.leaflet-interactive {
-  cursor: pointer;
-}
-
-/* Увеличиваем область клика для маркеров */
-.leaflet-marker-icon {
-  margin-left: -10px !important;
-  margin-top: -10px !important;
-  width: 20px !important;
-  height: 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.leaflet-pane {
-  pointer-events: auto !important;
-}
-
-/* Стили для попапа растения */
-.plant-popup-container {
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-}
-
-.plant-popup-container .leaflet-popup-content {
-  margin: 0 !important;
-  width: auto !important;
-}
-
-.plant-popup-container .leaflet-popup-content-wrapper {
-  padding: 0 !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-}
-
-.plant-popup-container .leaflet-popup-tip {
-  background-color: white !important;
-}
-
-.plant-popup-loading {
-  padding: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: #64748B;
-}
-
-.plant-popup-error {
-  padding: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: #EF4444;
-}
-
-/* Анимация для появления попапа */
-@keyframes popupFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1) rotate(90deg);
 }
 
 .leaflet-popup {
-  animation: popupFadeIn 0.3s ease-out;
+  animation: popupFadeIn var(--transition-normal) ease-out;
 }
 
-/* Стили для маркеров с отключенными попапами */
+.leaflet-tooltip {
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
+  padding: 12px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto,
+    sans-serif;
+  min-width: 180px;
+  max-width: 320px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-md);
+  transition: opacity var(--transition-normal);
+}
+
+.leaflet-tooltip strong {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.leaflet-tooltip p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ===== ПОЛИГОНЫ И РЕГИОНЫ ===== */
+.leaflet-overlay-pane {
+  z-index: var(--z-regions);
+}
+
+.leaflet-marker-pane {
+  z-index: var(--z-markers);
+}
+
+.region-polygon {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  stroke-opacity: 0.8;
+  fill-opacity: 0.15;
+}
+
+.region-polygon:hover {
+  fill-opacity: 0.25;
+  filter: brightness(1.05);
+}
+
+.region-polygon:active {
+  stroke-width: 3px;
+  filter: brightness(1.1);
+}
+
+.region-selected {
+  stroke: var(--primary-color);
+  stroke-width: 3px;
+  stroke-opacity: 1;
+  fill-opacity: 0.3;
+  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3));
+  animation: regionPulse 2s infinite;
+}
+
+/* ===== СОСТОЯНИЯ ===== */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.map-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+.map-error {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fca5a5;
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  text-align: center;
+  color: #991b1b;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .popup-disabled {
-  opacity: 0.7 !important;
-  cursor: default !important;
+  opacity: 0.7;
+  cursor: default;
 }
 
 .popup-disabled:hover {
-  transform: none !important;
-  filter: none !important;
+  transform: none;
+  filter: none;
 }
 
-/* Стилизуем кастомные маркеры, чтобы было понятно, что на них нельзя кликнуть */
-.custom-plant-marker.popup-disabled div:hover {
-  transform: none !important;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15)) !important;
-  cursor: default !important;
-} 
+/* ===== АНИМАЦИИ ===== */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+@keyframes clusterAppear {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes regionPulse {
+  0%,
+  100% {
+    stroke-opacity: 1;
+    fill-opacity: 0.3;
+  }
+  50% {
+    stroke-opacity: 0.7;
+    fill-opacity: 0.15;
+  }
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+  .leaflet-control-zoom a {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 16px;
+  }
+
+  .leaflet-tooltip {
+    min-width: 140px;
+    max-width: 280px;
+    padding: 10px 12px;
+  }
+
+  .custom-plant-marker:hover div {
+    transform: scale(1.15) translateY(-2px);
+  }
+}
+
+/* ===== ОПТИМИЗАЦИЯ ПРОИЗВОДИТЕЛЬНОСТИ ===== */
+.leaflet-container,
+.leaflet-control-zoom,
+.custom-plant-marker,
+.plant-cluster-icon {
+  will-change: transform, opacity;
+}
+
+/* Отключаем тяжелые эффекты на мобильных */
+@media (hover: none) and (pointer: coarse) {
+  .leaflet-control-zoom a,
+  .leaflet-popup-content-wrapper,
+  .leaflet-tooltip {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

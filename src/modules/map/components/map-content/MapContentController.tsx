@@ -1,13 +1,12 @@
-import React, { useState, useCallback, ReactElement, isValidElement } from 'react';
+import React, { useState, useCallback } from 'react';
 import MapContentStateRenderer from './MapContentStateRenderer';
-import { UnifiedControlPanel, PanelSection } from '../../components/control-panel';
 import MapViewContainer from '../map-view/MapViewContainer';
 import ImageBoundsCalculator from '../map-view/ImageBoundsCalculator';
 import { MapContentControllerProps } from '../../types/mapTypes';
 
 /**
  * Компонент контроллера содержимого карты
- * Отвечает за координацию отображения состояния содержимого, 
+ * Отвечает за координацию отображения состояния содержимого,
  * элементов управления и вида карты
  */
 const MapContentController: React.FC<MapContentControllerProps> = ({
@@ -21,42 +20,27 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
   setImageBoundsCalculated,
   refreshMapData,
   showControls,
-  controlPanelStyles,
-  toggleControlPanel,
-  showControlPanel,
   extraControls,
   customLayers,
   onRegionClick,
   onMapReady,
   plugins,
-  isEmpty = false
+  isEmpty = false,
+  mapTitle,
 }) => {
   // Локальное состояние пустоты данных, которое может обновляться из детей
   const [localIsEmpty, setLocalIsEmpty] = useState<boolean>(isEmpty);
-  
-  // Обновляем состояние пустоты данных
-  const handleDataStateChange = useCallback((state: { 
-    hasPlants: boolean; 
-    hasRegions: boolean; 
-    isEmpty: boolean; 
-  }) => {
-    setLocalIsEmpty(state.isEmpty);
-  }, []);
 
+  // Обновляем состояние пустоты данных
+  const handleDataStateChange = useCallback(
+    (state: { hasPlants: boolean; hasRegions: boolean; isEmpty: boolean }) => {
+      setLocalIsEmpty(state.isEmpty);
+    },
+    []
+  );
   // Используем значение пустоты данных, либо переданное извне, либо локальное
   const effectiveIsEmpty = isEmpty || localIsEmpty;
-  
-  /**
-   * Более простой и надежный способ проверки, является ли элемент панелью управления -
-   * просто проверяем наличие свойства pageType у props
-   */
-  const isControlPanel = 
-    extraControls && 
-    isValidElement(extraControls) && 
-    typeof extraControls.props === 'object' && 
-    extraControls.props !== null &&
-    'pageType' in extraControls.props;
-  
+
   return (
     <MapContentStateRenderer
       loading={loading}
@@ -65,23 +49,9 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
       handleRefresh={refreshMapData}
       isEmpty={effectiveIsEmpty}
     >
-      {/* Рендерим элементы управления картой */}
-      {showControls && (
-        <>
-          {/* Если передана панель управления через extraControls, используем её */}
-          {isControlPanel ? extraControls : (
-            /* Иначе создаем стандартную и используем extraControls как customSections */
-            <UnifiedControlPanel
-              pageType="map"
-              className={controlPanelStyles?.container}
-              onClose={toggleControlPanel}
-              customSections={extraControls}
-              panelId="main-map-control-panel"
-            />
-          )}
-        </>
-      )}
-      
+      {/* Рендерим элементы управления картой, если переданы */}
+      {showControls && extraControls}
+
       {/* Компонент для расчета границ */}
       <ImageBoundsCalculator
         mapImageUrl={mapImageUrl}
@@ -91,7 +61,7 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
         }}
         isCalculated={imageBoundsCalculated}
       />
-      
+
       {/* Контейнер вида карты */}
       <MapViewContainer
         mapImageUrl={mapImageUrl}
@@ -107,4 +77,4 @@ const MapContentController: React.FC<MapContentControllerProps> = ({
   );
 };
 
-export default MapContentController; 
+export default MapContentController;

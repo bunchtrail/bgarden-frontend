@@ -15,6 +15,87 @@ import galleryStyles, {
   errorStateStyles
 } from './specimen-gallery-styles';
 
+// Импортируем глобальные стили
+import { 
+  cardClasses, 
+  textClasses, 
+  animationClasses,
+  pageClasses,
+  buttonClasses
+} from '../../../styles/global-styles';
+
+// Специальные стили для отображения образца
+export const specimenDisplayStyles = {
+  // Стили для карточек информации
+  card: {
+    container: `${cardClasses.elevated} ${animationClasses.transition} ${animationClasses.springHover}`,
+    header: cardClasses.header,
+    title: cardClasses.title,
+    content: cardClasses.content,
+  },
+  
+  // Стили для полей информации
+  infoField: {
+    container: 'border-b border-gray-100 pb-3',
+    label: `${textClasses.small} ${textClasses.secondary}`,
+    value: `${textClasses.body} ${textClasses.primary} font-medium`,
+    section: 'space-y-4',
+  },
+  
+  // Стили для различных типов контента
+  content: {
+    primary: `${textClasses.body} ${textClasses.primary} font-medium`,
+    secondary: `${textClasses.small} ${textClasses.secondary}`,
+    highlight: `${textClasses.body} ${textClasses.primary} font-semibold`,
+  },
+  
+  // Стили для координат и специальных значений
+  coordinates: {
+    geographic: `${textClasses.body} ${textClasses.primary} font-mono text-sm`,
+    schematic: `${textClasses.body} ${textClasses.primary} font-mono text-sm`,
+  },
+  
+  // Стили для булевых значений
+  boolean: {
+    yes: `${textClasses.body} text-green-700 font-medium`,
+    no: `${textClasses.body} text-gray-500 font-medium`,
+  },
+};
+
+// Стили для страницы образца
+export const specimenPageStyles = {
+  container: `${pageClasses.base}`,
+  content: `${pageClasses.container} ${pageClasses.section}`,
+  centerContent: `${pageClasses.container} ${pageClasses.centerContent}`,
+  
+  // Стили для состояний загрузки и ошибок
+  loadingContainer: `${pageClasses.base}`,
+  errorContainer: `${pageClasses.base}`,
+  errorCard: 'bg-red-100 text-red-700 p-6 rounded-xl shadow-sm',
+  errorTitle: `${textClasses.heading} text-lg mb-2`,
+  errorText: textClasses.body,
+  errorButton: `${buttonClasses.danger} mt-4`,
+  
+  // Стили для формы редактирования
+  formCard: cardClasses.elevated,
+};
+
+// Утилитарная функция для преобразования sectorType в числовое значение
+export const getSectorTypeNumber = (sectorType: any): number => {
+  if (typeof sectorType === 'number') {
+    return sectorType;
+  }
+  if (typeof sectorType === 'string') {
+    switch (sectorType) {
+      case 'Dendrology': return 0;
+      case 'Flora': return 1;
+      case 'Flowering': return 2;
+      default: return 0;
+    }
+  }
+  return 0;
+};
+
 // Цвета для типов секторов
 export const sectorTypeColors = {
   // Дендрология (деревья и кустарники) - зеленые оттенки
@@ -99,6 +180,8 @@ export {
 };
 
 export default {
+  specimenDisplayStyles,
+  specimenPageStyles,
   sectorTypeColors,
   statusColors,
   formStyles,

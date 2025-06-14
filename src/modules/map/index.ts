@@ -5,42 +5,44 @@ export * from './types/mapTypes';
 
 // Экспорт основных компонентов
 export { default as MapPage } from './components/MapPage';
+export { default as MapTypeSelector } from './components/MapTypeSelector';
 
 // Экспорт контекстов
-export { 
-  MapProvider, 
-  useMapContext,
-} from './contexts/MapContext';
+export { MapProvider, useMapContext } from './contexts/MapContext';
 
-export { 
+export {
   MapConfigProvider,
   MAP_LAYERS,
   MAP_MODES,
+  MAP_TYPES,
   DEFAULT_MAP_CONFIG,
-  useMapConfig
+  DEFAULT_DGIS_CONFIG,
+  useMapConfig,
 } from './contexts/MapConfigContext';
 
 // Экспорт унифицированной панели управления
 export { default as UnifiedControlPanel } from './components/control-panel/UnifiedControlPanel';
+export { default as PositionedControlPanel } from './components/control-panel/PositionedControlPanel';
 export { PanelSection } from './components/control-panel/types';
-export type { ControlPanelSection, UnifiedPanelConfig, UNIFIED_PANEL_PRESETS } from './components/control-panel';
+export type {
+  ControlPanelSection,
+  UnifiedPanelConfig,
+  UNIFIED_PANEL_PRESETS,
+} from './components/control-panel';
 
 // Дополнительные типы
 export type { MapData } from './services/mapService';
 
 // Хуки
-export { 
-  useMap, 
-  useMapData, 
-  useMapLayers,
-  useMapControlPanel
-} from './hooks';
+export { useMap, useMapData, useMapLayers, useDgisMap } from './hooks';
 
 // Сервисы
+export { getMapImageUrl, getActiveMap } from './services/mapService';
 export { 
-  getMapImageUrl, 
-  getActiveMap 
-} from './services/mapService';
+  dgisMapProvider, 
+  createDgisMapProvider,
+  DEFAULT_DGIS_SETTINGS 
+} from './services/dgisMapProvider';
 
 export {
   getAllRegions,
@@ -54,7 +56,7 @@ export {
   parseCoordinates,
   getDefaultCoordinates,
   getDefaultRegions,
-  getSectorRegionMapping
+  getSectorRegionMapping,
 } from '@/services/regions';
 
 // Стили
@@ -69,7 +71,8 @@ export {
   EmptyMapView,
   LoadingView,
   MapReadyHandler,
-  BaseMapContainer
+  BaseMapContainer,
+  DgisTileLayer,
 } from './components/map-components';
 
 // Компоненты панели управления (кроме UnifiedControlPanel, который уже экспортирован выше)
@@ -86,4 +89,4 @@ export { default as MapLayersManager } from './components/map-layers/MapLayersMa
 export { default as MapContentStateRenderer } from './components/map-content/MapContentStateRenderer';
 
 // Компоненты информации о растениях
-export { EnhancedPlantMarkersLayer } from './components/plant-info'; 
+export { EnhancedPlantMarkersLayer } from './components/plant-info';

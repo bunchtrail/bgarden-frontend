@@ -1,9 +1,15 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 import { BaseMapContainer, MapBoundsHandler, MapReadyHandler } from '../map-components';
+import LockBoundsAtInit from '../map-components/LockBoundsAtInit';
 import MapLayersManager from '../map-layers/MapLayersManager';
 import { MapViewContainerProps } from '../../types/mapTypes';
 import { Plant } from '@/services/regions/types';
+import { MAP_TYPES } from '../../contexts/MapConfigContext';
+import { useMapEvents } from 'react-leaflet';
+import { mapLogger } from '../../utils/logger';
+
+
 
 /**
  * Компонент контейнера вида карты
@@ -35,17 +41,21 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
     
     // Уведомляем родительский компонент об изменении состояния данных
     if (onDataStateChange) {
-      onDataStateChange({
+      const state = {
         hasPlants: plants && plants.length > 0,
         hasRegions: regions && regions.length > 0,
         isEmpty: isEmpty
-      });
+      };
+      onDataStateChange(state);
     }
   }, [regions, onDataStateChange]);
   
   // Мемоизация контента для предотвращения лишних перерисовок
   return useMemo(() => {
-    if (!mapImageUrl) return null;
+    // Для гео-карт и 2ГИС не нужен mapImageUrl, для схематических карт нужен
+    if (!mapImageUrl && mapConfig.mapType !== MAP_TYPES.GEO && mapConfig.mapType !== MAP_TYPES.DGIS) {
+      return null;
+    }
     
     return (
       <BaseMapContainer
@@ -55,6 +65,13 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
         {/* Обработчик события ready */}
         {onMapReady && <MapReadyHandler onMapReady={onMapReady} />}
         
+
+
+        {/* Фиксация границ для гео-карты и 2ГИС */}
+        {(mapConfig.mapType === MAP_TYPES.GEO || mapConfig.mapType === MAP_TYPES.DGIS) && (
+          <LockBoundsAtInit />
+        )}
+
         {/* Слои карты */}
         <MapLayersManager 
           visibleLayers={mapConfig.visibleLayers}
@@ -68,8 +85,10 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
           onPlantsLoaded={handlePlantsLoaded}
         />
         
-        {/* Обработчик границ карты */}
-        <MapBoundsHandler imageBounds={imageBounds} />
+        {/* Обработчик границ карты - только для схематической карты */}
+        {mapConfig.mapType === MAP_TYPES.SCHEMATIC && (
+          <MapBoundsHandler imageBounds={imageBounds} />
+        )}
 
         {/* Плагины */}
         {plugins}
@@ -88,4 +107,4 @@ const MapViewContainer: React.FC<MapViewContainerProps> = ({
   ]);
 };
 
-export default MapViewContainer; 
+export default MapViewContainer;

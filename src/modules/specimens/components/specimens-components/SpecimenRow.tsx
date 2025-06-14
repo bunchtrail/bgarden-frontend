@@ -1,6 +1,6 @@
 import React from 'react';
 import { Specimen, SectorType } from '../../types';
-import { sectorTypeColors } from '../../styles';
+import { sectorTypeColors, getSectorTypeNumber } from '../../styles';
 import { animationClasses } from '../../../../styles/global-styles';
 import ActionButtons from '../specimens-controls/ActionButtons';
 
@@ -8,6 +8,8 @@ interface SpecimenRowProps {
   specimen: Specimen;
   getSectorTypeName: (sectorType: SectorType) => string;
   onDelete: (id: number) => void;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -16,13 +18,18 @@ interface SpecimenRowProps {
 const SpecimenRow: React.FC<SpecimenRowProps> = ({
   specimen,
   getSectorTypeName,
-  onDelete
+  onDelete,
+  className = '',
+  style = {},
 }) => {
-  const sectorType = specimen.sectorType as SectorType;
-  const sectorColor = sectorTypeColors[sectorType] || sectorTypeColors[0];
-  
+  const sectorTypeNumber = getSectorTypeNumber(specimen.sectorType);
+  const sectorType = sectorTypeNumber as SectorType;
+  const sectorColor = sectorTypeColors[sectorTypeNumber as keyof typeof sectorTypeColors] || sectorTypeColors[0];
   return (
-    <tr className={`${animationClasses.transition} hover:bg-[#F5F5F7]/90 group cursor-default`}>
+    <tr
+      className={`${animationClasses.transition} hover:bg-[#F5F5F7]/90 group cursor-default ${className}`}
+      style={style}
+    >
       <td className="px-6 py-4 whitespace-nowrap w-1/4">
         <div className="flex items-center">
           <div>
@@ -44,19 +51,25 @@ const SpecimenRow: React.FC<SpecimenRowProps> = ({
       </td>
       <td className="px-6 py-4 whitespace-nowrap w-1/6">
         <div className="text-sm text-[#1D1D1F]">
-          {specimen.familyName || 
+          {specimen.familyName || (
             <span className="text-[#86868B] italic">Не указано</span>
-          }
+          )}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap w-1/6">
-        <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${sectorColor.bg} ${sectorColor.text} shadow-sm ${animationClasses.transition} ${sectorColor.hoverBg}`}>
+        <span
+          className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${sectorColor.bg} ${sectorColor.text} shadow-sm ${animationClasses.transition} ${sectorColor.hoverBg}`}
+        >
           {getSectorTypeName(sectorType)}
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-1/6">
         <div className="opacity-80 group-hover:opacity-100 transition-opacity">
-          <ActionButtons specimenId={specimen.id} onDelete={onDelete} variant="row" />
+          <ActionButtons
+            specimenId={specimen.id}
+            onDelete={onDelete}
+            variant="row"
+          />
         </div>
       </td>
     </tr>

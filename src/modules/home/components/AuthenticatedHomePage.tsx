@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from '../../../modules/auth/types';
-import { layoutClasses } from '../../../styles/global-styles';
+import { pageClasses } from '../../../styles/global-styles';
 import { TimeBasedGreeting, TimeInfo } from './time-based-greeting';
 import SectorGrid from './SectorGrid';
 import UserTools from './UserTools';
@@ -10,26 +10,28 @@ interface AuthenticatedHomePageProps {
   user: User;
 }
 
-const AuthenticatedHomePage: React.FC<AuthenticatedHomePageProps> = ({ timeInfo, user }) => {
+const AuthenticatedHomePage: React.FC<AuthenticatedHomePageProps> = ({
+  timeInfo,
+  user,
+}) => {
   // Получаем имя пользователя из объекта user
   const userName = user.name || user.email;
-
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)]">
+    <div className={pageClasses.base}>
       {/* Основное содержимое с приветствием и секторами */}
       <div className="flex-1 pb-16">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${layoutClasses.section}`}>
-          {/* Приветствие */}
-          <div className="mb-8 text-center">
-            <TimeBasedGreeting 
-              timeInfo={timeInfo} 
-              userName={userName} 
-            />
-          </div>
+        <div className={`${pageClasses.container} ${pageClasses.section}`}>
+          {/* Центрированный контент */}
+          <div className={pageClasses.centerContent}>
+            {/* Приветствие */}
+            <div className="mb-8 text-center">
+              <TimeBasedGreeting timeInfo={timeInfo} userName={userName} />
+            </div>
 
-          {/* Секторы - центрированные */}
-          <div className="flex justify-center">
-            <SectorGrid className="lg:gap-10 max-w-5xl" />
+            {/* Секторы - центрированные */}
+            <div className="flex justify-center">
+              <SectorGrid className="lg:gap-10 max-w-5xl" />
+            </div>
           </div>
         </div>
       </div>
@@ -42,4 +44,4 @@ const AuthenticatedHomePage: React.FC<AuthenticatedHomePageProps> = ({ timeInfo,
   );
 };
 
-export default AuthenticatedHomePage; 
+export default AuthenticatedHomePage;

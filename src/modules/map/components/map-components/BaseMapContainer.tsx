@@ -1,9 +1,11 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Suspense } from 'react';
 import { MapContainer, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapConfig } from '../../contexts/MapConfigContext';
 import { MAP_STYLES } from '../../styles';
+import { useMapConfig } from '../../contexts/MapConfigContext';
+import LoadingView from './LoadingView';
 
 export interface BaseMapContainerProps {
   mapConfig: MapConfig;
@@ -14,36 +16,48 @@ export interface BaseMapContainerProps {
 }
 
 /**
- * Базовый компонент контейнера карты, абстрагирующий общие настройки MapContainer
- * для устранения дублирования между MapPage и LightMapView
+ * Базовый компонент контейнера карты, который теперь динамически
+ * настраивает систему координат (CRS) в зависимости от типа карты.
  */
 const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
   mapConfig,
   children,
   showControls = true,
   style = { height: '100%', width: '100%' },
-  className = ''
+  className = '',
 }) => {
+  const { mapConfig: contextMapConfig } = useMapConfig();
+  
   return (
-    <MapContainer
-      center={mapConfig.center}
-      zoom={mapConfig.zoom}
-      maxZoom={mapConfig.maxZoom}
-      minZoom={mapConfig.minZoom}
-      style={style}
-      zoomControl={false}
-      crs={L.CRS.Simple}
-      maxBounds={mapConfig.maxBounds}
-      maxBoundsViscosity={mapConfig.maxBoundsViscosity}
-      attributionControl={false}
-      className={`${mapConfig.lightMode ? MAP_STYLES.lightMode : ''} ${className}`}
-      scrollWheelZoom={showControls}
-      dragging={showControls}
-    >
-      {showControls && <ZoomControl position={mapConfig.zoomControlPosition} />}
-      {children}
-    </MapContainer>
+    <Suspense fallback={<LoadingView />}>
+      <MapContainer
+        key={contextMapConfig.mapType}
+        center={contextMapConfig.center}
+        zoom={contextMapConfig.zoom}
+        maxZoom={contextMapConfig.maxZoom}
+        minZoom={contextMapConfig.minZoom}
+        style={style}
+        zoomControl={false}
+        crs={
+          contextMapConfig.mapType === 'geo' || contextMapConfig.mapType === 'dgis'
+            ? L.CRS.EPSG3857
+            : L.CRS.Simple
+        }
+        maxBounds={contextMapConfig.maxBounds}
+        maxBoundsViscosity={contextMapConfig.maxBoundsViscosity}
+        attributionControl={false}
+        className={`${
+          contextMapConfig.lightMode ? MAP_STYLES.lightMode : ''
+        } ${className}`}
+        scrollWheelZoom={showControls}
+        dragging={showControls}
+        keyboard={false}
+      >
+        {showControls && <ZoomControl position={contextMapConfig.zoomControlPosition} />}
+        {children}
+      </MapContainer>
+    </Suspense>
   );
 };
 
-export default BaseMapContainer; 
+export default BaseMapContainer;

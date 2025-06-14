@@ -11,4 +11,4 @@ export * from './map-layers/MapLayersManager';
 
 // Экспорт подкомпонентов карты
 export * from './map-components';
-export * from './map-submodules'; 
+export * from './map-submodules';

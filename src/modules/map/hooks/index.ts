@@ -3,6 +3,7 @@
 export { useMap } from './useMap';
 export { useMapData } from './useMapData';
 export { useMapLayers } from './useMapLayers';
+export { useDgisMap } from './useDgisMap';
 
-// Предпочтительный хук для панели управления
-export { default as useMapControlPanel } from './useMapControlPanel'; 
+// Примечание: useMapControlPanel был удален после рефакторинга унифицированной панели управления
+// Логика панели управления теперь находится в самом компоненте UnifiedControlPanel

@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Specimen, SpecimenFormData } from '../../types';
-import { cardClasses } from '@/styles/global-styles';
 import { useNotification } from '@/modules/notifications';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/modules/auth/hooks';
 import { useFormValidation } from './hooks/useFormValidation';
 import { useFormChanges } from './hooks/useFormChanges';
 import { useFormNavigation } from './hooks/useFormNavigation';
@@ -20,6 +18,7 @@ import { ExpositionDto } from '../../services/expositionService';
 import { RegionData } from '@/modules/map/types/mapTypes';
 import { useSpecimenImage } from '../../hooks';
 import { specimenService } from '../../services/specimenService';
+import { useLogger } from '@/hooks/useLogger';
 
 interface SpecimenFormProps {
   specimen?: Specimen;
@@ -42,23 +41,36 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Инициализация логгера
+  const log = useLogger('SpecimenForm');
+  
   // Получаем тип сектора из URL, если он там есть
   const getSectorTypeFromUrl = (): number | null => {
     const params = new URLSearchParams(location.search);
     const sectorTypeParam = params.get('sectorType');
-    return sectorTypeParam ? Number(sectorTypeParam) : null;
+    const sectorType = sectorTypeParam ? Number(sectorTypeParam) : null;
+    
+    log.debug('Анализ параметров URL', { 
+      sectorTypeParam, 
+      sectorType, 
+      search: location.search 
+    });
+    
+    return sectorType;
   };
   
   // Получаем тип сектора из URL
   const sectorTypeFromUrl = getSectorTypeFromUrl();
   
-  // Начальное состояние формы
+  // Формируем начальное состояние формы, учитывая тип сектора из URL (если он указан)
   const initialFormState: SpecimenFormData = {
     inventoryNumber: '',
-    sectorType: SectorType.Dendrology,
+    // Если в URL присутствует параметр sectorType, используем его, иначе по умолчанию — дендрология
+    sectorType: (sectorTypeFromUrl !== null ? sectorTypeFromUrl : SectorType.Dendrology) as SectorType,
     locationType: LocationType.SchematicMap,
     latitude: 0,
     longitude: 0,
+    locationWkt: '',
     mapX: 0,
     mapY: 0,
     regionId: null,
@@ -141,20 +153,51 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Обновление формы при получении данных образца
   useEffect(() => {
     if (specimen) {
+      log.info('Инициализация формы для редактирования образца', { 
+        specimenId: specimen.id,
+        inventoryNumber: specimen.inventoryNumber,
+        russianName: specimen.russianName,
+        latinName: specimen.latinName
+      });
+      
       setFormData({
         ...specimen,
         sectorType: typeof specimen.sectorType === 'string' ? Number(specimen.sectorType) : specimen.sectorType
       });
+      
+      log.debug('Данные образца загружены в форму', { formData: specimen });
+    } else {
+      log.info('Инициализация формы для создания нового образца', { 
+        sectorTypeFromUrl,
+        initialSectorType: initialFormState.sectorType 
+      });
     }
-  }, [specimen, setFormData]);
+  }, [specimen, setFormData, log, sectorTypeFromUrl]);
 
   // Обработчик выбора изображений
   const handleImagesChange = (files: File[]) => {
+    log.info('Изображения выбраны пользователем', { 
+      filesCount: files.length,
+      filesInfo: files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        lastModified: f.lastModified
+      }))
+    });
+    
     setSelectedImages(files);
+    
+    log.debug('Детали выбранных изображений', {
+      totalSize: files.reduce((sum, f) => sum + f.size, 0),
+      fileTypes: Array.from(new Set(files.map(f => f.type))),
+      averageSize: files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) / files.length : 0
+    });
   };
 
   // Обработчик ошибок загрузки изображений
   const handleImageError = (message: string) => {
+    log.error('Ошибка при работе с изображениями', { errorMessage: message });
     notification.error(message);
   };
 
@@ -162,22 +205,43 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    log.info('Начало обработки отправки формы образца');
+    
     // Проверка, вызван ли submit действительно через кнопку "Сохранить"
     const submitEvent = e.nativeEvent as SubmitEvent;
     const isRealSubmit = submitEvent.submitter?.getAttribute('type') === 'submit';
     
+    log.debug('Анализ события отправки формы', { 
+      isRealSubmit,
+      submitterType: submitEvent.submitter?.getAttribute('type'),
+      submitterText: submitEvent.submitter?.textContent
+    });
+    
     // Если это не настоящий submit, то выходим (например, при клике на кнопку "Далее")
     if (!isRealSubmit) {
+      log.debug('Прервана обработка - не является настоящей отправкой формы');
       return;
     }
     
-    console.log('Отправка формы образца...');
     
-    // Проверяем все поля перед отправкой
+    // Проверяем все обязательные поля перед отправкой (согласованно с другими функциями валидации)
     const allFields = [
-      'inventoryNumber', 'russianName', 'latinName', 'genus', 'species',
-      'familyId', 'familyName', 'regionId'
+      'inventoryNumber', 'russianName', 'latinName', // Шаг 1
+      'familyId', // Шаг 2  
+      'regionId' // Шаг 3
+      // Шаги 4 и 5 не имеют обязательных полей
     ];
+    
+    log.debug('Валидация формы перед отправкой', { 
+      allFields,
+      currentFormData: {
+        inventoryNumber: formData.inventoryNumber,
+        russianName: formData.russianName,
+        latinName: formData.latinName,
+        familyId: formData.familyId,
+        regionId: formData.regionId
+      }
+    });
     
     // Помечаем все обязательные поля как затронутые
     const newTouchedFields = { ...touchedFields };
@@ -188,100 +252,177 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
     
     // Валидируем все поля
     let isValid = true;
+    const validationErrors: string[] = [];
     allFields.forEach(field => {
       const fieldIsValid = validateField(field, formData[field as keyof SpecimenFormData]);
-      if (!fieldIsValid) isValid = false;
+      if (!fieldIsValid) {
+        isValid = false;
+        validationErrors.push(field);
+      }
+    });
+    
+    log.debug('Результат валидации формы', { 
+      isValid, 
+      validationErrors,
+      touchedFieldsCount: Object.keys(newTouchedFields).length
     });
     
     if (isValid) {
+      log.info('Форма прошла валидацию, начинаем отправку данных образца', {
+        hasImages: selectedImages.length > 0,
+        imagesCount: selectedImages.length,
+        isEditMode: !!specimen?.id
+      });
+      
       notification.info('Отправка данных образца...', { duration: 3000 });
       
       // Проверяем и преобразуем sectorType в число, если это строка
-      const finalFormData = { 
+      const finalFormData = {
         ...formData,
-        // Преобразуем строковое значение sectorType в число
-        sectorType: typeof formData.sectorType === 'string' ? Number(formData.sectorType) : formData.sectorType 
-      };
+        // Преобразуем строковые значения в числа там, где это требуется API
+        sectorType:
+          typeof formData.sectorType === 'string'
+            ? Number(formData.sectorType)
+            : formData.sectorType,
+        locationType:
+          typeof formData.locationType === 'string'
+            ? Number(formData.locationType)
+            : formData.locationType,
+        latitude:
+          typeof formData.latitude === 'string'
+            ? parseFloat(formData.latitude)
+            : formData.latitude,
+        longitude:
+          typeof formData.longitude === 'string'
+            ? parseFloat(formData.longitude)
+            : formData.longitude,
+        mapX:
+          typeof formData.mapX === 'string'
+            ? parseFloat(formData.mapX)
+            : formData.mapX,
+        mapY:
+          typeof formData.mapY === 'string'
+            ? parseFloat(formData.mapY)
+            : formData.mapY,
+      } as SpecimenFormData;
+      
+      log.debug('Подготовлены финальные данные для отправки', {
+        finalFormData: {
+          inventoryNumber: finalFormData.inventoryNumber,
+          russianName: finalFormData.russianName,
+          latinName: finalFormData.latinName,
+          sectorType: finalFormData.sectorType,
+          locationType: finalFormData.locationType,
+          regionId: finalFormData.regionId,
+          familyId: finalFormData.familyId,
+          coordinates: {
+            latitude: finalFormData.latitude,
+            longitude: finalFormData.longitude,
+            mapX: finalFormData.mapX,
+            mapY: finalFormData.mapY
+          }
+        }
+      });
       
       // Корректируем данные в зависимости от типа локации
       if (finalFormData.locationType === LocationType.SchematicMap) {
+        log.debug('Применены настройки для схематических координат - убираем географические');
         // Для схематических координат убираем географические
         finalFormData.latitude = null as unknown as number;
         finalFormData.longitude = null as unknown as number;
       } else if (finalFormData.locationType === LocationType.Geographic) {
+        log.debug('Применены настройки для географических координат - убираем схематические');
         // Для географических координат убираем схематические
         finalFormData.mapId = null as unknown as number;
         finalFormData.mapX = null as unknown as number;
         finalFormData.mapY = null as unknown as number;
       }
       
-      console.log('Детальные данные формы перед отправкой в SpecimenForm:', {
-        locationType: finalFormData.locationType,
-        coordinates: {
-          latitude: finalFormData.latitude,
-          longitude: finalFormData.longitude,
-          mapX: finalFormData.mapX,
-          mapY: finalFormData.mapY,
-          mapId: finalFormData.mapId
-        },
-        taxonomy: {
-          russianName: finalFormData.russianName,
-          latinName: finalFormData.latinName,
-          genus: finalFormData.genus,
-          species: finalFormData.species,
-          familyId: finalFormData.familyId
-        },
-        inventoryData: {
-          inventoryNumber: finalFormData.inventoryNumber,
-          sectorType: finalFormData.sectorType,
-          plantingYear: finalFormData.plantingYear,
-          expositionId: finalFormData.expositionId
-        }
-      });
+    
       
       // Если есть изображения, используем обновленный метод работы с изображениями
       if (selectedImages.length > 0) {
+        log.info('Начинаем создание образца с изображениями', {
+          imagesCount: selectedImages.length,
+          imagesTotalSize: selectedImages.reduce((sum, f) => sum + f.size, 0),
+          imageNames: selectedImages.map(f => f.name)
+        });
+        
         try {
-          console.log('Отправляемые данные образца:', finalFormData);
-          console.log('Отправляемые изображения:', selectedImages.map(img => ({
-            name: img.name,
-            type: img.type,
-            size: img.size
-          })));
-
           setIsUploading(true);
+          log.debug('Установлен статус загрузки изображений');
 
           const result = await specimenService.createSpecimenWithImages(finalFormData, selectedImages);
+
+          log.info('Образец успешно создан с изображениями', {
+            specimenId: result.specimen.id,
+            uploadedImageIds: result.imageIds,
+            imagesUploaded: result.imageIds?.length || 0
+          });
 
           setIsUploading(false);
           notification.success('Образец успешно создан с изображениями', { duration: 5000 });
           navigate(`/specimens/${result.specimen.id}`);
         } catch (error: any) {
           setIsUploading(false);
-          console.error('Подробная ошибка:', error);
+          
+          log.error('Ошибка при создании образца с изображениями', {
+            error: error.message || 'Неизвестная ошибка',
+            errorDetails: error,
+            finalFormData: {
+              inventoryNumber: finalFormData.inventoryNumber,
+              russianName: finalFormData.russianName,
+              latinName: finalFormData.latinName
+            },
+            imagesInfo: {
+              count: selectedImages.length,
+              totalSize: selectedImages.reduce((sum, f) => sum + f.size, 0)
+            }
+          }, error);
+          
           notification.error(`Ошибка при создании образца: ${error.message || 'Неизвестная ошибка'}`);
         }
       } else {
+        log.info('Создание образца без изображений', {
+          inventoryNumber: finalFormData.inventoryNumber,
+          russianName: finalFormData.russianName,
+          latinName: finalFormData.latinName
+        });
+        
         // Если изображения не выбраны, используем стандартный метод создания образца
         onSubmit(finalFormData);
       }
     } else {
+      log.warn('Форма не прошла валидацию', {
+        validationErrors,
+        currentStep: activeStep,
+        errors: errors
+      });
+      
       notification.error('Форма содержит ошибки. Пожалуйста, проверьте введенные данные.');
       
       // Переходим к первому шагу с ошибкой
       const fieldsToValidate: Record<number, string[]> = {
-        1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
-        2: ['familyId', 'familyName'],
+        1: ['inventoryNumber', 'russianName', 'latinName'],
+        2: ['familyId'],
         3: ['regionId'],
-        4: []
+        4: [],
+        5: []
       };
       
-      const stepsWithErrors = [1, 2, 3, 4].filter(step => {
+      const stepsWithErrors = [1, 2, 3, 4, 5].filter(step => {
         const stepFields = (fieldsToValidate[step] || []);
         return stepFields.some(field => !!errors[field]);
       });
       
+      log.debug('Определены шаги с ошибками', {
+        stepsWithErrors,
+        fieldsToValidate,
+        currentErrors: errors
+      });
+      
       if (stepsWithErrors.length > 0) {
+        log.info('Переход к первому шагу с ошибкой', { targetStep: stepsWithErrors[0] });
         goToStep(stepsWithErrors[0]);
       }
     }
@@ -299,10 +440,11 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   // Функция для проверки валидности шага без побочных эффектов
   const checkStepValidity = (step: number) => {
     const fieldsToValidate: Record<number, string[]> = {
-      1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
-      2: ['familyId', 'familyName'],
+      1: ['inventoryNumber', 'russianName', 'latinName'],
+      2: ['familyId'],
       3: ['regionId'],
-      4: []
+      4: [],
+      5: []
     };
     
     const stepFields = fieldsToValidate[step] || [];
@@ -313,6 +455,9 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       const value = formData[field as keyof SpecimenFormData];
       if (field === 'inventoryNumber' || field === 'russianName' || field === 'latinName') {
         return value !== undefined && value !== '';
+      }
+      if (field === 'familyId' || field === 'regionId') {
+        return value !== undefined && value !== 0 && value !== '0';
       }
       return true;
     });
@@ -325,7 +470,8 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
       1: checkStepValidity(1),
       2: checkStepValidity(2),
       3: checkStepValidity(3),
-      4: checkStepValidity(4)
+      4: checkStepValidity(4),
+      5: checkStepValidity(5)
     };
   }, [formData]);
 
@@ -336,7 +482,7 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
 
   // Проверка валидности всей формы для кнопки "Сохранить"
   const isFormValid = useMemo(() => {
-    return [1, 2, 3, 4].every(step => checkStepValidity(step));
+    return [1, 2, 3, 4, 5].every(step => checkStepValidity(step));
   }, [formData]);
 
   // Рендер шага с загрузкой изображений
@@ -384,64 +530,70 @@ const SpecimenForm: React.FC<SpecimenFormProps> = ({ specimen, onSubmit, onCance
   );
 
   return (
-    <div>
+    <div className="space-y-6">
       <FormStepper 
         activeStep={activeStep} 
         goToStep={goToStep} 
       />
       
-      <form onSubmit={handleSubmit} className={`${cardClasses.outlined} ${cardClasses.content} rounded-xl`}>
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Контейнер шагов с анимацией */}
-        <StepContainer slideDirection={slideDirection}>
-          {/* Рендерер активного шага */}
-          <StepRenderer 
-            activeStep={activeStep} 
-            formData={formData} 
-            onChange={handleChange}
-            errors={errors}
-            touchedFields={touchedFields}
-            families={families}
-            regions={regions}
-            expositions={expositions}
-            imagesStep={renderImagesStep()}
-          />
-        </StepContainer>
+        <div className="p-8">
+          <StepContainer slideDirection={slideDirection}>
+            {/* Рендерер активного шага */}
+            <StepRenderer 
+              activeStep={activeStep} 
+              formData={formData} 
+              onChange={handleChange}
+              errors={errors}
+              touchedFields={touchedFields}
+              families={families}
+              regions={regions}
+              expositions={expositions}
+              imagesStep={renderImagesStep()}
+            />
+          </StepContainer>
+        </div>
         
         {/* Индикатор заполненности формы */}
-        <FormProgress 
-          progress={calculateFormProgress(formData)} 
-        />
+        <div className="px-8 py-4 bg-gray-50 border-t border-gray-100">
+          <FormProgress 
+            progress={calculateFormProgress(formData)} 
+          />
+        </div>
         
         {/* Навигационные кнопки */}
-        <NavigationButtons 
-          activeStep={activeStep}
-          totalSteps={formSteps.length}
-          onNext={() => {
-            // Проверяем текущий шаг и переходим к следующему
-            if (isCurrentStepValid) {
-              // Убираем уведомление о переходе на следующий шаг
-              goToNextStep();
-            } else {
-              notification.warning('Пожалуйста, заполните все обязательные поля', {
-                title: 'Невозможно перейти дальше'
+        <div className="px-8 py-6 bg-white border-t border-gray-100">
+          <NavigationButtons 
+            activeStep={activeStep}
+            totalSteps={formSteps.length}
+            onNext={() => {
+              // Проверяем текущий шаг и переходим к следующему
+              if (isCurrentStepValid) {
+                // Убираем уведомление о переходе на следующий шаг
+                goToNextStep();
+              } else {
+                notification.warning('Пожалуйста, заполните все обязательные поля', {
+                  title: 'Невозможно перейти дальше'
+                });
+              }
+            }}
+            onPrevious={() => {
+              const prevStepInfo = formSteps[activeStep - 2];
+              notification.info(`Возврат к шагу "${prevStepInfo.title}"`, { 
+                duration: 2000 
               });
-            }
-          }}
-          onPrevious={() => {
-            const prevStepInfo = formSteps[activeStep - 2];
-            notification.info(`Возврат к шагу "${prevStepInfo.title}"`, { 
-              duration: 2000 
-            });
-            goToPreviousStep();
-          }}
-          onCancel={() => {
-            notification.info('Ввод данных отменен', { duration: 3000 });
-            onCancel();
-          }}
-          onSubmit={handleSubmit}
-          isNextDisabled={!isCurrentStepValid}
-          isSubmitDisabled={!isFormValid}
-        />
+              goToPreviousStep();
+            }}
+            onCancel={() => {
+              notification.info('Ввод данных отменен', { duration: 3000 });
+              onCancel();
+            }}
+            onSubmit={handleSubmit}
+            isNextDisabled={!isCurrentStepValid}
+            isSubmitDisabled={!isFormValid}
+          />
+        </div>
       </form>
     </div>
   );

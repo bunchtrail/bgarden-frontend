@@ -20,39 +20,43 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   title = 'Управление картой'
 }) => {
   return (
-    <div className={`flex items-center justify-between px-4 py-3 border-b border-gray-200/50`}>
+    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/30 bg-gradient-to-r from-gray-50/30 to-white/30 backdrop-blur-sm">
       {onToggleExpand && (
         <button 
           onClick={onToggleExpand}
-          className={`${textClasses.secondary} hover:${textClasses.primary} ${animationClasses.transition} p-1.5 rounded-full hover:bg-gray-100/50`}
+          className={`${textClasses.secondary} hover:text-blue-600 ${animationClasses.transition} p-2 rounded-xl hover:bg-blue-50/50 group transform hover:scale-105 active:scale-95`}
           aria-label={isExpanded ? "Свернуть панель" : "Развернуть панель"}
         >
           {isExpanded ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            <svg className="h-4 w-4 transform group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+            <svg className="h-4 w-4 transform group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           )}
         </button>
       )}
       
       {customHeader ? (
-        <div className="flex-1">{customHeader}</div>
+        <div className="flex-1 px-2">{customHeader}</div>
       ) : (
-        <h3 className={`${textClasses.heading} flex-1 text-center`}>{title}</h3>
+        <div className="flex-1 text-center">
+          <h3 className={`${textClasses.heading} text-gray-800 font-semibold text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+            {title}
+          </h3>
+        </div>
       )}
       
       {onClose && (
         <button 
           onClick={onClose}
-          className={`${textClasses.secondary} hover:${textClasses.primary} ${animationClasses.transition} p-1.5 rounded-full hover:bg-gray-100/50`}
+          className={`${textClasses.secondary} hover:text-red-600 ${animationClasses.transition} p-2 rounded-xl hover:bg-red-50/50 group transform hover:scale-105 active:scale-95`}
           aria-label="Закрыть панель"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          <svg className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       )}

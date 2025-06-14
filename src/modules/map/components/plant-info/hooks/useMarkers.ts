@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import L from 'leaflet';
 import { Plant } from '@/services/regions/types';
 import { MarkerClusterManager } from '../managers/MarkerClusterManager';
@@ -10,6 +10,7 @@ import { MarkerClusterManager } from '../managers/MarkerClusterManager';
  * @param isVisible Флаг видимости слоя
  * @param enableClustering Флаг включения кластеризации
  * @param showPopupOnClick Флаг, указывающий, нужно ли показывать попап при клике на маркер
+ * @param interactionMode Режим взаимодействия с маркерами
  * @returns Объект с функцией для очистки маркеров
  */
 export const useMarkers = (
@@ -17,60 +18,88 @@ export const useMarkers = (
   plants: Plant[],
   isVisible: boolean,
   enableClustering: boolean,
-  showPopupOnClick: boolean = true
+  showPopupOnClick: boolean = true,
+  interactionMode: string = 'view'
 ) => {
   const [manager, setManager] = useState<MarkerClusterManager | null>(null);
+  const isInitialMarkersLoad = useRef(true);
 
-  // Инициализация менеджера при монтировании или изменении карты
+  // Сбрасываем флаг, если видимость слоя выключается
+  useEffect(() => {
+    if (!isVisible) {
+      isInitialMarkersLoad.current = true;
+    }
+  }, [isVisible]);
+
   useEffect(() => {
     if (map) {
-      setManager(new MarkerClusterManager(map, showPopupOnClick));
-    }
-    
-    return () => {
-      if (manager) {
-        manager.clearAllMarkers();
-      }
-    };
-  }, [map, showPopupOnClick]);
+      const newManager = new MarkerClusterManager(
+        map,
+        showPopupOnClick,
+        interactionMode
+      );
+      setManager(newManager);
 
-  // Обновляем настройку при её изменении
+      return () => {
+        newManager.clearAllMarkers(true); // Полная очистка при размонтировании компонента
+      };
+    }
+  }, [map, showPopupOnClick, interactionMode]);
+
   useEffect(() => {
     if (manager) {
       manager.setShowPopupOnClick(showPopupOnClick);
     }
   }, [manager, showPopupOnClick]);
 
-  // Обновление маркеров при изменении данных или настроек
+  // Обновляем режим взаимодействия при его изменении
   useEffect(() => {
-    if (!isVisible || !manager || plants.length === 0) {
-      if (manager) {
-        manager.clearAllMarkers();
-      }
+    if (manager) {
+      manager.setInteractionMode(interactionMode);
+    }
+  }, [manager, interactionMode]);
+
+  useEffect(() => {
+    if (!isVisible || !manager) {
+      if (manager) manager.clearAllMarkers(false); // Сохраняем кэш при скрытии
+      return;
+    }
+
+    if (plants.length === 0) {
+      manager.clearAllMarkers(false); // Сохраняем кэш при отсутствии растений
       return;
     }
 
     const markers = manager.createPlantMarkers(plants);
 
     if (enableClustering) {
-      manager.addMarkersWithClustering(markers);
+      manager.addMarkersWithClustering(markers, {
+        fitBounds: !isInitialMarkersLoad.current,
+      });
     } else {
       manager.addMarkersWithoutClustering(markers);
     }
 
-    return () => {
-      if (manager) {
-        manager.clearAllMarkers();
-      }
-    };
+    if (isInitialMarkersLoad.current) {
+      isInitialMarkersLoad.current = false;
+    }
+
+    // ВНИМАНИЕ: Очистка маркеров при размонтировании эффекта здесь может быть избыточной
+    // и приводить к мерцанию. `clearAllMarkers` уже вызывается при изменении isVisible.
+    // Если будут проблемы, эту часть можно удалить.
+    // return () => {
+    //   if (manager) {
+    //     manager.clearAllMarkers();
+    //   }
+    // };
   }, [isVisible, plants, enableClustering, manager]);
 
-  // Функция для ручной очистки маркеров
   const clearMarkers = useCallback(() => {
     if (manager) {
-      manager.clearAllMarkers();
+      manager.clearAllMarkers(true); // Полная очистка включая кэш только при явном вызове
+      isInitialMarkersLoad.current = true;
     }
   }, [manager]);
 
   return { clearMarkers };
-}; 
+};

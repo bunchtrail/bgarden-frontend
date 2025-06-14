@@ -1,58 +1,63 @@
-import { Plant } from '@/services/regions/types';
-import { getAllSpecimens, convertSpecimensToPlants } from '../../../services/plantService';
+// src/modules/map/components/plant-info/services/PlantDataService.ts
 
-// Кэширование данных
+import { Plant } from '@/services/regions/types';
+import {
+  getAllSpecimens,
+  convertSpecimensToPlants,
+} from '../../../services/plantService';
+import { MAP_TYPES } from '../../../contexts/MapConfigContext';
+
+// Simple in-memory cache so that we don't flood the backend each time карта перерисовывается.
 let cachedPlants: Plant[] | null = null;
-let lastFetchTime = 0;
-let hasError = false;
-const CACHE_TIME = 60000; // 1 минута кэширования
-const ERROR_CACHE_TIME = 300000; // 5 минут кэширования при ошибке
+let lastFetchTimestamp = 0;
+let lastMapType: string | null = null;
+
+// Время жизни кэша (60 секунд достаточно, чтобы предотвратить «всплеск» запросов при зуме/панорамировании,
+// но данные остаются относительно свежими).
+const CACHE_DURATION_MS = 60_000; // 1 минута
 
 /**
- * Сервис для загрузки данных о растениях с сервера
+ * Сервис для загрузки и кэширования данных о растениях.
  */
-export const PlantDataService = {
+export class PlantDataService {
   /**
-   * Загружает данные о растениях с сервера
-   * @returns Промис с массивом растений
+   * Загружает данные о растениях, принимая тип карты для корректной фильтрации.
+   * @param mapType - Тип текущей карты ('schematic' или 'geo').
    */
-  async loadPlants(): Promise<Plant[]> {
-    // Проверка кэша
+  public static async loadPlants(
+    mapType: (typeof MAP_TYPES)[keyof typeof MAP_TYPES]
+  ): Promise<Plant[]> {
     const now = Date.now();
-    const cacheExpired = now - lastFetchTime > (hasError ? ERROR_CACHE_TIME : CACHE_TIME);
-    
-    // Возвращаем кэшированные данные, если они актуальны
-    if (cachedPlants !== null && !cacheExpired) {
+
+    // Если в кэше есть данные для того же типа карты и кэш ещё не устарел, возвращаем его
+    if (
+      cachedPlants &&
+      lastMapType === mapType &&
+      now - lastFetchTimestamp < CACHE_DURATION_MS
+    ) {
       return cachedPlants;
     }
-    
+
     try {
-      // Запрашиваем данные с сервера
+      // Запрашиваем данные с сервера только если кэш отсутствует или устарел
       const specimens = await getAllSpecimens();
-      const plants = convertSpecimensToPlants(specimens);
-      
+
+      // **ИСПРАВЛЕНИЕ:** Передаем `mapType` в функцию конвертации.
+      const plants = convertSpecimensToPlants(specimens, mapType);
+
       // Обновляем кэш
       cachedPlants = plants;
-      lastFetchTime = now;
-      hasError = false;
-      
+      lastFetchTimestamp = now;
+      lastMapType = mapType;
+
       return plants;
     } catch (error) {
-      // Устанавливаем флаг ошибки для более долгого кэширования
-      hasError = true;
-      lastFetchTime = now;
-      
-      // Возвращаем кэшированные данные или пустой массив
-      return cachedPlants || [];
+      console.error('Ошибка в PlantDataService при загрузке растений:', error);
+      // В случае ошибки сбрасываем кэш и возвращаем пустой массив
+      cachedPlants = null;
+      lastFetchTimestamp = 0;
+      lastMapType = null;
+      return [];
     }
-  },
-  
-  /**
-   * Очищает кэш данных растений
-   */
-  clearCache(): void {
-    cachedPlants = null;
-    lastFetchTime = 0;
-    hasError = false;
   }
-};
+}

@@ -14,11 +14,30 @@ export const useFormValidation = (formData: SpecimenFormData) => {
   const validateField = (name: string, value: any) => {
     let error = '';
     
-    // Проверяем обязательные поля
-    const requiredFields = ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'];
+    // Проверяем обязательные поля по шагам
+    const requiredFieldsByStep = {
+      1: ['inventoryNumber', 'russianName', 'latinName'],
+      2: ['familyId'],
+      3: ['regionId'],
+      4: [],
+      5: []
+    };
     
-    if (requiredFields.includes(name) && (!value || value === '')) {
-      error = 'Это поле обязательно для заполнения';
+    // Получаем все обязательные поля
+    const allRequiredFields = Object.values(requiredFieldsByStep).flat();
+    
+    if (allRequiredFields.includes(name)) {
+      if (name === 'familyId' || name === 'regionId') {
+        // Для ID полей проверяем, что значение больше 0
+        if (!value || value === 0 || value === '0') {
+          error = 'Это поле обязательно для заполнения';
+        }
+      } else {
+        // Для текстовых полей проверяем, что значение не пустое
+        if (!value || value === '') {
+          error = 'Это поле обязательно для заполнения';
+        }
+      }
     }
     
     // Устанавливаем или удаляем ошибку
@@ -33,10 +52,11 @@ export const useFormValidation = (formData: SpecimenFormData) => {
   // Валидация текущего шага формы
   const validateCurrentStep = (activeStep: number) => {
     const fieldsToValidate: Record<number, string[]> = {
-      1: ['inventoryNumber', 'russianName', 'latinName', 'genus', 'species'],
-      2: ['familyId', 'familyName'],
-      3: ['latitude', 'longitude', 'regionId'],
-      4: []
+      1: ['inventoryNumber', 'russianName', 'latinName'],
+      2: ['familyId'],
+      3: ['regionId'],
+      4: [],
+      5: []
     };
     
     const currentFields = fieldsToValidate[activeStep] || [];

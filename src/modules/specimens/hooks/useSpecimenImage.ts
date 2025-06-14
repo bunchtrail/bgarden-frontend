@@ -3,6 +3,7 @@ import { specimenService } from '../services/specimenService';
 import { UploadImageOptions } from '../services/specimenService';
 import { SpecimenImage, BatchImageUploadResult } from '../types';
 import httpClient from '../../../services/httpClient';
+import { logInfo, logDebug, logError } from '../../../utils/logger';
 
 /**
  * Хук для работы с изображениями образца
@@ -41,16 +42,27 @@ export const useSpecimenImage = (
   const fetchSpecimenImage = useCallback(async () => {
     try {
       setIsLoading(true);
+      logDebug('Начинаем загрузку основного изображения образца', 'useSpecimenImage', { specimenId });
+      
       const imageData = await specimenService.getSpecimenMainImage(specimenId);
       
       if (imageData && imageData.imageUrl) {
+        logInfo('Основное изображение образца загружено', 'useSpecimenImage', {
+          specimenId,
+          imageId: imageData.id,
+          imageUrl: imageData.imageUrl,
+          isMain: imageData.isMain
+        });
         setImageSrc(imageData.imageUrl);
       } else {
-        console.log(`Для образца ID=${specimenId} используется изображение по умолчанию`);
+        logDebug('Основное изображение не найдено, используем fallback', 'useSpecimenImage', {
+          specimenId,
+          fallbackUrl: imageUrl || placeholderImage
+        });
         setImageSrc(imageUrl || placeholderImage);
       }
     } catch (error) {
-      console.error(`Ошибка при загрузке изображения образца ID=${specimenId}:`, error);
+      logError('Ошибка при загрузке изображения образца', 'useSpecimenImage', { specimenId }, error);
       setImageSrc(imageUrl || placeholderImage);
     } finally {
       setIsLoading(false);
@@ -61,9 +73,20 @@ export const useSpecimenImage = (
   const fetchAllSpecimenImages = useCallback(async () => {
     try {
       setIsLoading(true);
-      return await specimenService.getSpecimenImages(specimenId);
+      logDebug('Начинаем загрузку всех изображений образца', 'useSpecimenImage', { specimenId });
+      
+      const images = await specimenService.getSpecimenImages(specimenId);
+      
+      logInfo('Загружены все изображения образца', 'useSpecimenImage', {
+        specimenId,
+        imagesCount: images.length,
+        imageIds: images.map(img => img.id),
+        mainImageId: images.find(img => img.isMain)?.id
+      });
+      
+      return images;
     } catch (error) {
-      console.error(`Ошибка при загрузке всех изображений образца ID=${specimenId}:`, error);
+      logError('Ошибка при загрузке всех изображений образца', 'useSpecimenImage', { specimenId }, error);
       return [];
     } finally {
       setIsLoading(false);
@@ -81,14 +104,32 @@ export const useSpecimenImage = (
       // Опции по умолчанию
       const { isMain = false, description = '' } = options;
       
+      logInfo('Начинаем загрузку изображений для образца', 'useSpecimenImage', {
+        specimenId,
+        isArray: Array.isArray(file),
+        filesCount: Array.isArray(file) ? file.length : 1,
+        options: { isMain, description },
+        filesInfo: Array.isArray(file) 
+          ? file.map(f => ({ name: f.name, size: f.size, type: f.type }))
+          : [{ name: file.name, size: file.size, type: file.type }]
+      });
+      
       // Обработка прогресса загрузки
       const onProgress = (progress: number) => {
         setUploadProgress(progress);
+        logDebug('Прогресс загрузки изображений', 'useSpecimenImage', { 
+          specimenId, 
+          progress: `${progress}%` 
+        });
       };
       
       // Реализация загрузки изображений
       if (Array.isArray(file)) {
-        console.log(`Начинаем множественную загрузку ${file.length} изображений для образца ID=${specimenId}`);
+        logDebug('Загрузка множественных изображений', 'useSpecimenImage', {
+          specimenId,
+          filesCount: file.length,
+          totalSize: file.reduce((sum, f) => sum + f.size, 0)
+        });
         
         const formData = new FormData();
         formData.append('SpecimenId', specimenId.toString());
@@ -99,9 +140,18 @@ export const useSpecimenImage = (
         }
         
         // Добавляем файлы в FormData
-        file.forEach(f => {
+        file.forEach((f, index) => {
           formData.append('Files', f, f.name);
-          console.log(`Добавлено изображение для загрузки: ${f.name}, ${f.type}, ${f.size} байт`);
+          logDebug(`Добавлен файл ${index + 1} в FormData`, 'useSpecimenImage', {
+            fileName: f.name,
+            fileSize: f.size,
+            fileType: f.type
+          });
+        });
+        
+        logDebug('Отправляем запрос на загрузку множественных изображений', 'useSpecimenImage', {
+          specimenId,
+          endpoint: 'specimen-images/batch-upload'
         });
         
         // Отправляем запрос
@@ -118,6 +168,16 @@ export const useSpecimenImage = (
           }
         );
         
+        logInfo('Множественные изображения успешно загружены', 'useSpecimenImage', {
+          specimenId,
+          result: {
+            successCount: result.successCount,
+            errorCount: result.errorCount,
+            uploadedImageIds: result.uploadedImageIds,
+            errorMessages: result.errorMessages
+          }
+        });
+        
         // Обновляем текущее изображение, если загруженное изображение основное
         if (isMain) {
           fetchSpecimenImage();
@@ -126,7 +186,12 @@ export const useSpecimenImage = (
         return result;
       } else if (file instanceof File) {
         // Загрузка одного файла
-        console.log(`Загрузка одиночного файла для образца ID=${specimenId}: ${file.name}`);
+        logDebug('Загрузка одного изображения', 'useSpecimenImage', {
+          specimenId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        });
         
         const formData = new FormData();
         formData.append('SpecimenId', specimenId.toString());
@@ -136,6 +201,12 @@ export const useSpecimenImage = (
         if (description) {
           formData.append('Description', description);
         }
+        
+        logDebug('Отправляем запрос на загрузку одного изображения', 'useSpecimenImage', {
+          specimenId,
+          endpoint: 'specimen-images/batch-upload',
+          fileName: file.name
+        });
         
         // Отправляем запрос
         const result = await httpClient.post<BatchImageUploadResult>(
@@ -150,6 +221,17 @@ export const useSpecimenImage = (
             }
           }
         );
+        
+        logInfo('Одно изображение успешно загружено', 'useSpecimenImage', {
+          specimenId,
+          fileName: file.name,
+          result: {
+            successCount: result.successCount,
+            errorCount: result.errorCount,
+            uploadedImageIds: result.uploadedImageIds,
+            errorMessages: result.errorMessages
+          }
+        });
         
         // Обновляем текущее изображение, если загруженное изображение основное
         if (isMain) {
@@ -168,7 +250,11 @@ export const useSpecimenImage = (
       
       throw new Error('Неподдерживаемый тип данных для загрузки изображения');
     } catch (error) {
-      console.error(`Ошибка при загрузке изображения для образца ID=${specimenId}:`, error);
+      logError('Ошибка при загрузке изображения для образца', 'useSpecimenImage', { 
+        specimenId,
+        fileType: Array.isArray(file) ? 'array' : file instanceof File ? 'file' : 'unknown',
+        filesCount: Array.isArray(file) ? file.length : 1
+      }, error);
       throw error;
     } finally {
       setIsUploading(false);
@@ -179,7 +265,7 @@ export const useSpecimenImage = (
   const setImageAsMain = useCallback(async (imageId: number) => {
     try {
       setIsLoading(true);
-      console.log(`Установка изображения ID=${imageId} как основного`);
+     
       
       // Используем PATCH запрос к эндпоинту /api/specimen-images/{id}/set-as-main
       const result = await httpClient.patch<SpecimenImage>(

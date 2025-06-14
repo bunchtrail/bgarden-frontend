@@ -1,0 +1,43 @@
+/**
+ * Утилитарные классы для работы с динамической высотой навбара
+ */
+
+:root {
+  --navbar-height: 0px;
+}
+
+/* Отступ сверху равный высоте навбара */
+.pt-navbar {
+  padding-top: var(--navbar-height);
+}
+
+.mt-navbar {
+  margin-top: var(--navbar-height);
+}
+
+/* Высота минус навбар */
+.h-screen-minus-navbar {
+  height: calc(100vh - var(--navbar-height));
+}
+
+.min-h-screen-minus-navbar {
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+/* Позиционирование относительно навбара */
+.top-navbar {
+  top: var(--navbar-height);
+}
+
+/* Плавные переходы для изменения отступов */
+.navbar-transition {
+  transition: padding-top 0.2s ease-in-out, margin-top 0.2s ease-in-out,
+    top 0.2s ease-in-out;
+}
+
+/* Sticky позиционирование с учетом навбара */
+.sticky-below-navbar {
+  position: sticky;
+  top: var(--navbar-height);
+  z-index: 30;
+}

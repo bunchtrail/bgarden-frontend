@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useMapConfig } from '../contexts/MapConfigContext';
-import { useMapData, useMapControlPanel } from '../hooks';
+import { useMapData } from '../hooks';
 import MapCard from './map-card/MapCard';
 import MapContentController from './map-content/MapContentController';
 import { MapPageContentProps } from '../types/mapTypes';
@@ -16,61 +16,79 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   plugins,
   onRegionClick,
   onMapReady,
-  controlPanelPosition = 'topRight',
   showControls,
   onDataLoaded,
-  onError
+  onError,
 }) => {
   // Состояние для bounds
-  const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([[0, 0], [1000, 1000]]);
+  const [imageBounds, setImageBounds] = useState<L.LatLngBoundsExpression>([
+    [0, 0],
+    [1000, 1000],
+  ]);
   const [imageBoundsCalculated, setImageBoundsCalculated] = useState(false);
-  
+
   // Хуки для данных и управления
-  const { mapData, regions, loading, error, mapImageUrl, refreshMapData, isEmpty } = useMapData({
-    autoLoad: true, 
-    onDataLoaded, 
-    onError
+  const {
+    mapData,
+    regions,
+    loading,
+    error,
+    mapImageUrl,
+    refreshMapData,
+    isEmpty,
+  } = useMapData({
+    autoLoad: true,
+    onDataLoaded,
+    onError,
   });
-  
-  const { showControlPanel, toggleControlPanel, controlPanelStyles } = useMapControlPanel({
-    controlPanelPosition
-  });
-  
+
   const { mapConfig } = useMapConfig();
-  
+
   // Используем showControls из параметров, если передан, иначе из mapConfig
-  const effectiveShowControls = showControls !== undefined ? showControls : mapConfig.showControls;
-  
+  const effectiveShowControls =
+    showControls !== undefined ? showControls : mapConfig.showControls;
+
   // Заголовок карты
   const mapTitle = useMemo(() => {
-    return mapConfig.lightMode 
-      ? "Облегченная карта" 
-      : (mapData?.name || "Интерактивная карта ботанического сада");
+    return mapConfig.lightMode
+      ? 'Облегченная карта'
+      : mapData?.name || 'Интерактивная карта ботанического сада';
   }, [mapConfig.lightMode, mapData?.name]);
-    
+
+  // Настройки заголовка для полноэкранного режима
+  const headerConfig = {
+    hideHeader: true, // полностью скрыть заголовок - название будет в панели управления
+    compactHeader: false, // true - компактный заголовок
+    floatingHeader: false, // true - плавающий заголовок поверх карты (облачко)
+  };
+
   // Обработчик обновления данных
   const handleRefresh = useCallback(() => {
     refreshMapData();
   }, [refreshMapData]);
-  
+
   // Преобразование строковой ошибки в объект Error
   const errorObj = useMemo(() => {
     if (!error) return null;
     return new Error(error);
   }, [error]);
-  
+
   // Не добавляем слой для рисования здесь, так как он уже добавляется в MapLayersManager
   const enhancedLayers = useMemo(() => {
     // Просто возвращаем пользовательские слои без добавления слоя рисования
     return [...customLayers];
   }, [customLayers]);
-    
+
   return (
-    <div className="w-full h-full flex justify-center items-center pt-8 mt-4">
-      <div className="w-full max-w-10xl">
-        <MapCard 
+    <div className="h-screen-minus-navbar flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 w-full">
+        <MapCard
           title={mapTitle}
           loading={loading}
+          fullscreen
+          hideHeader={headerConfig.hideHeader}
+          compactHeader={headerConfig.compactHeader}
+          floatingHeader={headerConfig.floatingHeader}
         >
           <MapContentController
             loading={loading}
@@ -83,15 +101,13 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
             setImageBoundsCalculated={setImageBoundsCalculated}
             refreshMapData={handleRefresh}
             showControls={effectiveShowControls}
-            controlPanelStyles={controlPanelStyles}
-            toggleControlPanel={toggleControlPanel}
-            showControlPanel={showControlPanel}
             extraControls={extraControls}
             customLayers={enhancedLayers}
             onRegionClick={onRegionClick}
             onMapReady={onMapReady}
             plugins={plugins}
             isEmpty={isEmpty}
+            mapTitle={mapTitle}
           />
         </MapCard>
       </div>
@@ -99,4 +115,5 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   );
 };
 
-export default MapPageContent; 
+export default MapPageContent;
+

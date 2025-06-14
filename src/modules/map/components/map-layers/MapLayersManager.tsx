@@ -1,23 +1,21 @@
-import React, { memo, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { memo, ReactNode, useCallback } from 'react';
 import L from 'leaflet';
-import 'leaflet.markercluster'; // Убедитесь, что этот пакет установлен
+import 'leaflet.markercluster';
+import { TileLayer } from 'react-leaflet'; // Импортируем TileLayer
 import { RegionData } from '@/services/regions/types';
-// Убираем импорт и используем локальное объявление
-// import { MapLayerProps } from '../MapPage';
-import { MapImageLayer, MapRegionsLayer } from '../map-components';
+import { MapImageLayer, MapRegionsLayer, DgisTileLayer } from '../map-components';
 import { useMapLayers } from '../../hooks/useMapLayers';
-import { MapConfig, MAP_LAYERS } from '../../contexts/MapConfigContext';
-import { getAllSpecimens, convertSpecimensToPlants } from '../../services/plantService';
+import {
+  MapConfig,
+  MAP_LAYERS,
+  MAP_TYPES,
+  MAP_MODES,
+} from '../../contexts/MapConfigContext';
 import { Plant } from '@/services/regions/types';
-import { useMap } from 'react-leaflet';
-import { MAP_COLORS } from '../../styles';
-// Импортируем компонент напрямую, а не через индексный файл
 import MapDrawingLayer from './MapDrawingLayer';
 import { EnhancedPlantMarkersLayer } from '../plant-info';
 import { useMapConfig } from '../../contexts/MapConfigContext';
 
-
-// Интерфейс для пользовательских слоёв
 export interface CustomMapLayerProps {
   isVisible: boolean;
   config?: Record<string, any>;
@@ -46,8 +44,8 @@ interface MapLayersManagerProps {
 }
 
 /**
- * Улучшенный компонент для управления слоями карты
- * Использует хук useMapLayers для эффективного управления видимостью и сортировкой слоев
+ * Управляет слоями, переключая базовый слой (схема или гео) и
+ * условно отображая другие слои в зависимости от типа карты.
  */
 const MapLayersManager: React.FC<MapLayersManagerProps> = ({
   visibleLayers,
@@ -57,49 +55,75 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
   customLayers = [],
   mapConfig,
   onRegionClick,
-  selectedRegionIds = [],
   highlightSelected = true,
-  onPlantsLoaded
+  onPlantsLoaded,
 }) => {
-  const map = useMap();
   const { mapConfig: mapConfigContext } = useMapConfig();
-  
-  // Используем расширенный хук для управления слоями
+
   const {
     isLayerVisible,
     sortedLayers,
     hasMapImage,
     filteredRegions,
-    shouldShowRegions
+    shouldShowRegions,
   } = useMapLayers({
     visibleLayers,
     regions,
     customLayers,
     mapImageUrl,
-    config: mapConfigContext
+    config: mapConfigContext,
   });
 
-  // Обработчик загрузки данных о растениях
-  const handlePlantsLoaded = useCallback((plantsData: Plant[]) => {
-    // Передаем данные в родительский компонент
-    if (onPlantsLoaded) {
-      onPlantsLoaded(plantsData);
-    }
-  }, [onPlantsLoaded]);
+  const handlePlantsLoaded = useCallback(
+    (plantsData: Plant[]) => {
+      if (onPlantsLoaded) {
+        onPlantsLoaded(plantsData);
+      }
+    },
+    [onPlantsLoaded]
+  );
 
-  // Проверяем, что мы находимся внутри контекста Leaflet
   const renderLayers = () => {
-    const layers = [
-      // Слой изображения карты (всегда первый)
-      mapImageUrl && hasMapImage && (
-        <MapImageLayer 
+    const isGeoMap = mapConfigContext.mapType === MAP_TYPES.GEO;
+    const isDgisMap = mapConfigContext.mapType === MAP_TYPES.DGIS;
+
+    // Динамический выбор базового слоя
+    let baseLayer = null;
+    
+    if (isDgisMap && isLayerVisible(MAP_LAYERS.GEO_TILES)) {
+      // Слой 2ГИС
+      baseLayer = (
+        <DgisTileLayer
+          key="dgis-tile-layer"
+          maxZoom={mapConfigContext.maxZoom}
+          minZoom={mapConfigContext.minZoom}
+        />
+      );
+    } else if (isGeoMap && isLayerVisible(MAP_LAYERS.GEO_TILES)) {
+      // Стандартный OSM слой
+      baseLayer = (
+        <TileLayer
+          key="geo-tile-layer"
+          attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxNativeZoom={18}
+          maxZoom={mapConfigContext.maxZoom}
+          minZoom={mapConfigContext.minZoom}
+        />
+      );
+    } else if (!isGeoMap && !isDgisMap && mapImageUrl && hasMapImage) {
+      // Схематическая карта
+      baseLayer = (
+        <MapImageLayer
           key="map-base-image"
-          imageUrl={mapImageUrl} 
+          imageUrl={mapImageUrl}
           bounds={imageBounds}
         />
-      ),
-      
-      // Слой регионов (всегда второй)
+      );
+    }
+
+    const layers = [
+      baseLayer, // Слой регионов - доступен на всех типах карт
       shouldShowRegions && filteredRegions.length > 0 && (
         <MapRegionsLayer
           key="map-regions"
@@ -109,19 +133,19 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
           showTooltips={mapConfigContext.showTooltips}
         />
       ),
-      
-      // Слой растений (всегда третий)
+
+      // Слой растений (теперь работает на обеих картах)
       isLayerVisible(MAP_LAYERS.PLANTS) && (
-        <EnhancedPlantMarkersLayer 
+        <EnhancedPlantMarkersLayer
           key="map-plants"
           isVisible={true}
           mapConfig={mapConfigContext}
           onPlantsLoaded={handlePlantsLoaded}
         />
-      ),
-      
-      // Слой рисования (всегда последний)
-      mapConfigContext.drawingEnabled && (
+      ), // Слой рисования и редактирования - доступен в режимах DRAW, EDIT и DELETE
+      (mapConfigContext.interactionMode === MAP_MODES.DRAW ||
+        mapConfigContext.interactionMode === MAP_MODES.EDIT ||
+        mapConfigContext.interactionMode === MAP_MODES.DELETE) && (
         <MapDrawingLayer
           key="map-drawing"
           isVisible={true}
@@ -129,33 +153,27 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
             color: '#3B82F6',
             fillColor: '#60A5FA',
             fillOpacity: 0.3,
-            weight: 2
+            weight: 2,
           }}
         />
       ),
-      
-      // Пользовательские слои
-      ...sortedLayers.map(layer => {
+
+      ...sortedLayers.map((layer) => {
         const CustomLayer = layer.component;
         return (
           <CustomLayer
             key={`custom-layer-${layer.layerId}`}
-            isVisible={layer.isVisible} 
+            isVisible={layer.isVisible}
             config={layer.config}
           />
         );
-      })
+      }),
     ].filter(Boolean);
-    
+
     return layers;
   };
 
-  // Возвращаем обернутый в фрагмент список слоев вместо массива
-  return (
-    <>
-      {renderLayers()}
-    </>
-  );
+  return <>{renderLayers()}</>;
 };
 
-export default memo(MapLayersManager); 
+export default memo(MapLayersManager);

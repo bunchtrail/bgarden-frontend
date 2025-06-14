@@ -30,7 +30,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({ activeStep, goToStep }
             <button
               type="button"
               onClick={() => goToStep(step.id)}
-              className={`flex flex-col items-center ${
+              className={`flex flex-col items-center transition-all duration-300 ${
                 step.id === activeStep 
                   ? 'text-blue-600' 
                   : step.id < activeStep 
@@ -40,11 +40,11 @@ export const FormStepper: React.FC<FormStepperProps> = ({ activeStep, goToStep }
             >
               {/* Номер шага */}
               <div 
-                className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-medium mb-2 ${
+                className={`flex items-center justify-center w-12 h-12 rounded-full text-white font-semibold mb-3 transition-all duration-300 ${
                   step.id === activeStep 
-                    ? 'bg-blue-600' 
+                    ? 'bg-blue-600 shadow-lg scale-110' 
                     : step.id < activeStep 
-                      ? 'bg-green-500'
+                      ? 'bg-green-500 shadow-md'
                       : 'bg-gray-300'
                 }`}
               >
@@ -58,14 +58,16 @@ export const FormStepper: React.FC<FormStepperProps> = ({ activeStep, goToStep }
               </div>
               
               {/* Название шага */}
-              <span className="text-sm font-medium hidden sm:block">{step.title}</span>
+              <span className={`text-sm font-medium hidden sm:block transition-all duration-300 ${
+                step.id === activeStep ? 'font-semibold' : ''
+              }`}>{step.title}</span>
             </button>
             
-            {/* Линия-разделитель между шагами */}
+            {/* Линия-разделитель между шагами - более деликатная */}
             {step.id < steps.length && (
-              <div className="flex-1 h-0.5 mx-2 sm:mx-4 bg-gray-200">
+              <div className="flex-1 h-px mx-4 sm:mx-6 bg-gray-100 relative">
                 <div 
-                  className="h-0.5 bg-green-500 transition-all"
+                  className="absolute top-0 left-0 h-px bg-gradient-to-r from-green-400 to-blue-400 transition-all duration-500"
                   style={{ 
                     width: step.id < activeStep ? '100%' : '0%'
                   }}

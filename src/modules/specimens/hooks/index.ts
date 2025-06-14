@@ -2,4 +2,5 @@
 export { useSpecimens } from './useSpecimens';
 export { useReferenceData } from './useReferenceData';
 export { useSpecimenData } from './useSpecimenData';
-export { useSpecimenImage } from './useSpecimenImage'; 
+export { useSpecimenImage } from './useSpecimenImage';
+export { useViewTransition } from './useViewTransition';

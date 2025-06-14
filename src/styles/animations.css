@@ -102,4 +102,170 @@
 
 .animate-slideInUp {
   animation: slideInUp 0.3s ease-out forwards;
-} 
+}
+
+/* Анимации для переключения между видами (список/сетка) */
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeOutScale {
+  animation: fadeOutScale 0.2s ease-in forwards;
+}
+
+.animate-fadeInScale {
+  animation: fadeInScale 0.3s ease-out forwards;
+}
+
+.animate-slideOutLeft {
+  animation: slideOutLeft 0.2s ease-in forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+/* Анимация для контейнера переключения */
+@keyframes containerTransition {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-containerTransition {
+  animation: containerTransition 0.4s ease-in-out;
+}
+
+/* Анимация плавного появления элементов с задержкой */
+@keyframes staggeredFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-staggeredFadeIn {
+  animation: staggeredFadeIn 0.4s ease-out forwards;
+}
+
+/* Анимация для карточек при смене вида */
+@keyframes cardMorph {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) rotate(1deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.02) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-cardMorph {
+  animation: cardMorph 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Дополнительные анимации для улучшения UX */
+@keyframes gentleBounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-gentleBounce {
+  animation: gentleBounce 0.6s ease-in-out;
+}
+
+/* Плавная анимация для смены opacity */
+@keyframes smoothFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-smoothFade {
+  animation: smoothFade 0.4s ease-out forwards;
+}
+
+/* Адаптивные стили для анимаций */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeOutScale,
+  .animate-fadeInScale,
+  .animate-slideOutLeft,
+  .animate-slideInRight,
+  .animate-containerTransition,
+  .animate-staggeredFadeIn,
+  .animate-cardMorph,
+  .animate-gentleBounce,
+  .animate-smoothFade {
+    animation: none;
+    transition: none;
+  }
+}
+
