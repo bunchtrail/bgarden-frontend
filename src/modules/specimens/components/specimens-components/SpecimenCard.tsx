@@ -161,32 +161,44 @@ const SpecimenCard: React.FC<SpecimenCardProps> = ({
         isOpen={isImageModalOpen}
         onClose={handleCloseImageModal}
         title={`Изображение: ${specimen.russianName}`}
-        size="medium"
+        size="large"
         variant="elevated"
         animation="spring"
-        blockScroll={false}
-        usePortal={false}
+        blockScroll={true}
+        usePortal={true}
       >
-        <div className="flex flex-col items-center p-2">
-          <div className="w-64 h-64 overflow-hidden rounded-lg">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-full max-w-md mx-auto overflow-hidden rounded-lg bg-gray-50 border border-gray-200">
             {isLoading ? (
-              <div className="w-64 h-64 flex items-center justify-center bg-gray-100">
-                <span className="text-gray-500">Загрузка изображения...</span>
+              <div className="aspect-square flex items-center justify-center bg-gray-100 min-h-[300px]">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="text-gray-500 text-sm">Загрузка изображения...</span>
+                </div>
               </div>
             ) : (
               <img
                 src={imageSrc || placeholderImage}
                 alt={`${specimen.russianName} (${specimen.latinName})`}
-                className="w-64 h-64 object-contain"
+                className="w-full h-auto max-h-[400px] object-contain"
                 onError={() => handleImageError()}
               />
             )}
           </div>
-          <div className="text-center mt-4 w-full">
-            <p className="text-sm text-gray-700 italic">{specimen.latinName}</p>
+          <div className="text-center w-full space-y-2 px-2">
+            {specimen.latinName && (
+              <p className="text-base text-gray-700 italic font-medium break-words">
+                {specimen.latinName}
+              </p>
+            )}
             {specimen.expositionName && (
-              <p className="text-xs text-gray-500 mt-1">
-                Экспозиция: {specimen.expositionName}
+              <p className="text-sm text-gray-600 break-words">
+                <span className="font-medium">Экспозиция:</span> {specimen.expositionName}
+              </p>
+            )}
+            {specimen.inventoryNumber && (
+              <p className="text-sm text-gray-600 break-words">
+                <span className="font-medium">Инв. номер:</span> {specimen.inventoryNumber}
               </p>
             )}
           </div>

@@ -52,13 +52,15 @@ export class ApiError extends Error {
   status: number;
   data: any;
   isAuthError: boolean;
+  url?: string;
 
-  constructor(status: number, message: string, data?: any) {
+  constructor(status: number, message: string, data?: any, url?: string) {
     super(message);
     this.status = status;
     this.data = data;
     this.name = 'ApiError';
     this.isAuthError = status === 401;
+    this.url = url;
   }
 }
 
@@ -170,7 +172,7 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
     // Обработка 401 (Unauthorized)
     if (response.status === 401) {
       handleAuthError();
-      throw new ApiError(401, 'Необходима авторизация', { isAuthError: true });
+      throw new ApiError(401, 'Необходима авторизация', { isAuthError: true }, url);
     }
 
     // Разбираем ответ
@@ -180,7 +182,7 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
       
       // Если статус не ok — выбрасываем ошибку, если не решили её подавлять
       if (!suppressErrorsForStatus.includes(response.status)) {
-        throw new ApiError(response.status, data?.message || 'Ошибка при запросе', data);
+        throw new ApiError(response.status, data?.message || 'Ошибка при запросе', data, url);
       }
       // Для подавляемых статусов (GET-запросы) отдаём пустой массив
       if (method === 'GET') {
@@ -190,7 +192,7 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
 
     return data as T;
   } catch (error) {
-    handleError(error, suppressErrorsForStatus, method);
+    handleError(error, suppressErrorsForStatus, method, url);
     // Этот код никогда не выполнится, так как handleError всегда выбрасывает исключение
     // Но TypeScript не может это определить, поэтому добавим явный возврат
     throw new Error("Недостижимый код");
@@ -212,13 +214,12 @@ function handleAuthError() {
 }
 
 // Универсальная обработка ошибок
-function handleError(error: unknown, suppressErrors: number[], method: HttpMethod): never {
-  // Если это ApiError с кодом 404 и запрос был к Specimen/all, не логируем ошибку в консоль
+function handleError(error: unknown, suppressErrors: number[], method: HttpMethod, url?: string): never {
+  // Если это ApiError с кодом 404 и запрос был к Specimen, не логируем ошибку в консоль
   const isSpecimenNotFoundError = 
     error instanceof ApiError && 
     error.status === 404 && 
-    (error.message.includes('Specimen') || 
-     (error as any)?.url?.includes('/Specimen/all'));
+    (url?.includes('/Specimen/') || error.url?.includes('/Specimen/'));
   
   // Логирование ошибок в консоль удалено
 
@@ -242,13 +243,13 @@ function handleError(error: unknown, suppressErrors: number[], method: HttpMetho
 
   // Если запрос был прерван (AbortError)
   if (error instanceof DOMException && error.name === 'AbortError') {
-    const apiError = new ApiError(408, 'Запрос отменён или истек таймаут', error);
+    const apiError = new ApiError(408, 'Запрос отменён или истек таймаут', error, url);
     showErrorNotification(`Ошибка таймаута: ${apiError.message}`);
     throw apiError;
   }
 
   // Иначе любая другая непредвиденная ошибка (сеть и т.д.)
-  const apiError = new ApiError(500, (error as Error)?.message || 'Неизвестная ошибка сети');
+  const apiError = new ApiError(500, (error as Error)?.message || 'Неизвестная ошибка сети', undefined, url);
   showErrorNotification(`Ошибка сети: ${apiError.message}`);
   throw apiError;
 }

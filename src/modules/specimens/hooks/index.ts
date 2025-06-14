@@ -1,6 +1,7 @@
 // Экспорт хуков для работы с образцами
 export { useSpecimens } from './useSpecimens';
-export { useReferenceData } from './useReferenceData';
 export { useSpecimenData } from './useSpecimenData';
+export { useReferenceData } from './useReferenceData';
+export { useFamilyNames } from './useFamilyNames';
 export { useSpecimenImage } from './useSpecimenImage';
 export { useViewTransition } from './useViewTransition';

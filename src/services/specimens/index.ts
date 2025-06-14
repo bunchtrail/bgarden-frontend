@@ -213,8 +213,11 @@ class UnifiedSpecimenService {
     async getSpecimenById(id: number): Promise<SpecimenData> {
         try {
             return await httpClient.get<SpecimenData>(`Specimen/${id}`);
-        } catch (error) {
-            logError('Ошибка при получении данных растения:', 'specimens', undefined, error);
+        } catch (error: any) {
+            // Не логируем 404 ошибки, так как они ожидаемы для несуществующих образцов
+            if (error?.status !== 404) {
+                logError('Ошибка при получении данных растения:', 'specimens', undefined, error);
+            }
             throw error;
         }
     }

@@ -111,30 +111,68 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={handleCancelDelete}
         title="Подтверждение удаления"
-        size="small"
-        blockScroll={false}
+        size="medium"
+        blockScroll={true}
         variant="elevated"
         animation="spring"
-        usePortal={false}
+        usePortal={true}
         footer={
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col sm:flex-row justify-end gap-3">
             <Button 
-              variant="neutral" 
+              variant="neutral"
+              size="medium"
               onClick={handleCancelDelete}
+              className="w-full sm:w-auto"
             >
               Отмена
             </Button>
             <Button 
-              variant="danger" 
+              variant="danger"
+              size="medium"
               onClick={handleConfirmDelete}
+              className="w-full sm:w-auto"
             >
               Удалить
             </Button>
           </div>
         }
       >
-        <p className="mb-4">Вы действительно хотите удалить образец с ID: {specimenId}?</p>
-        <p className="text-red-600 text-sm">Это действие нельзя будет отменить.</p>
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex-shrink-0">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-red-800 mb-1">
+                Внимание! Необратимое действие
+              </h4>
+              <p className="text-sm text-red-700">
+                Вы действительно хотите удалить образец с ID: <span className="font-mono font-semibold">{specimenId}</span>?
+              </p>
+            </div>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              После удаления все данные об образце будут безвозвратно потеряны, включая:
+            </p>
+            <ul className="mt-2 text-sm text-gray-600 space-y-1">
+              <li className="flex items-center space-x-2">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                <span>Основную информацию и характеристики</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                <span>Изображения и фотографии</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                <span>Историю изменений</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </Modal>
     </>
   );

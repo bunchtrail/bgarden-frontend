@@ -14,6 +14,7 @@ import { useSpecimenData } from '../../modules/specimens/hooks/useSpecimenData';
 import { useReferenceData } from '../../modules/specimens/hooks/useReferenceData';
 import { specimenPageStyles } from '../../modules/specimens/styles';
 import { getActiveMap } from '../../modules/map/services/mapService';
+import { NotFound } from '../NotFound';
 
 /**
  * Страница детального просмотра и редактирования образца растения
@@ -35,6 +36,7 @@ const SpecimenPage: React.FC = () => {
     specimen,
     loading: specimenLoading,
     error: specimenError,
+    notFound: specimenNotFound,
     setSpecimen,
   } = useSpecimenData(specimenId);
   const {
@@ -51,6 +53,11 @@ const SpecimenPage: React.FC = () => {
       setIsEditing(true);
     }
   }, [location.pathname, isNewSpecimen]);
+
+  // Если образец не найден (404), показываем страницу NotFound
+  if (!isNewSpecimen && specimenNotFound) {
+    return <NotFound />;
+  }
 
   // Обработчик сохранения образца
   const handleSave = async (updatedSpecimen: SpecimenFormData) => {
@@ -200,6 +207,7 @@ const SpecimenPage: React.FC = () => {
     ? referencesLoading
     : specimenLoading || referencesLoading;
   const error = specimenError || referenceError;
+  
   if (loading) {
     return (
       <div className={specimenPageStyles.loadingContainer}>
@@ -217,18 +225,26 @@ const SpecimenPage: React.FC = () => {
           <div className={specimenPageStyles.errorCard}>
             <h2 className={specimenPageStyles.errorTitle}>Ошибка</h2>
             <p className={specimenPageStyles.errorText}>{error}</p>
-            <Button
-              variant="danger"
-              className="mt-4"
-              onClick={() => navigate('/specimens')}
-            >
-              Вернуться к списку
-            </Button>
+            <div className="flex gap-4 mt-4">
+              <Button
+                variant="primary"
+                onClick={() => navigate('/specimens')}
+              >
+                Вернуться к списку
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => window.location.reload()}
+              >
+                Обновить страницу
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
+  
   return (
     <div className={specimenPageStyles.container}>
       <div className={specimenPageStyles.content}>

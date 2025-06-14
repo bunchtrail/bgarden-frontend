@@ -117,10 +117,10 @@ const Modal: React.FC<ModalProps> = ({
   
   // Определяем класс размера
   const sizeClass = {
-    small: 'w-full max-w-sm',
-    medium: 'w-full max-w-lg',
-    large: 'w-full max-w-3xl',
-    fullscreen: 'w-[95vw] h-[90vh] max-w-none'
+    small: 'w-full max-w-sm mx-4',
+    medium: 'w-full max-w-lg mx-4',
+    large: 'w-full max-w-2xl mx-4',
+    fullscreen: 'w-[95vw] h-[90vh] max-w-none mx-4'
   }[size];
   
   // Определяем класс вертикального положения
@@ -140,7 +140,7 @@ const Modal: React.FC<ModalProps> = ({
   }[animation];
   
   // Базовые классы для модального окна
-  const modalClasses = `${baseClass} ${variantClass} ${sizeClass} ${positionClass} ${animationClass} ${className} z-50 overflow-auto max-h-[90vh] ring-1 ring-white/50`;
+  const modalClasses = `${baseClass} ${variantClass} ${sizeClass} ${positionClass} ${animationClass} ${className} z-50 overflow-hidden max-h-[90vh] ring-1 ring-white/50 flex flex-col`;
   
   // Функция обработки клика на оверлей
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -234,10 +234,10 @@ const Modal: React.FC<ModalProps> = ({
       >
         {/* Шапка модального окна */}
         {(title || showCloseButton) && (
-          <div className={`flex items-center justify-between px-5 pt-4 pb-2 border-b border-[#E5E5EA]/40`}>
-            <div className="flex-grow">
+          <div className={`flex items-center justify-between px-5 pt-4 pb-2 border-b border-[#E5E5EA]/40 flex-shrink-0`}>
+            <div className="flex-grow min-w-0">
               {typeof title === 'string' ? (
-                <h3 className="text-lg font-semibold text-[#000000] tracking-tight antialiased">{title}</h3>
+                <h3 className="text-lg font-semibold text-[#000000] tracking-tight antialiased truncate pr-2">{title}</h3>
               ) : (
                 title
               )}
@@ -262,13 +262,13 @@ const Modal: React.FC<ModalProps> = ({
         )}
         
         {/* Содержимое модального окна */}
-        <div className={`px-5 py-4 text-[#000000] antialiased font-normal tracking-normal leading-relaxed ${contentClassName}`}>
+        <div className={`px-5 py-4 text-[#000000] antialiased font-normal tracking-normal leading-relaxed overflow-y-auto flex-1 ${contentClassName}`}>
           {children}
         </div>
         
         {/* Футер модального окна */}
         {footer && (
-          <div className="px-5 py-3 border-t border-[#E5E5EA]/40 bg-[#F5F5F7]/30 text-[#1D1D1F] antialiased">
+          <div className="px-5 py-3 border-t border-[#E5E5EA]/40 bg-[#F5F5F7]/30 text-[#1D1D1F] antialiased flex-shrink-0">
             {footer}
           </div>
         )}

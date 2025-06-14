@@ -1,6 +1,7 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
+import { RouteParamsValidator } from '../modules/ui/components';
 import { FullscreenLayout } from '../modules/layouts';
 import { MapPage } from '../modules/map';
 import {
@@ -31,17 +32,19 @@ export const mapRoutes: RouteObject[] = [
     path: 'map/sector/:id',
     element: (
       <ProtectedRoute>
-        <FullscreenLayout>
-          <MapPage
-            showControls={true}
-            extraControls={
-              <PositionedControlPanel
-                config={UNIFIED_PANEL_PRESETS.sector}
-                panelId="sector-map-panel"
-              />
-            }
-          />
-        </FullscreenLayout>
+        <RouteParamsValidator paramName="id" validation="numeric">
+          <FullscreenLayout>
+            <MapPage
+              showControls={true}
+              extraControls={
+                <PositionedControlPanel
+                  config={UNIFIED_PANEL_PRESETS.sector}
+                  panelId="sector-map-panel"
+                />
+              }
+            />
+          </FullscreenLayout>
+        </RouteParamsValidator>
       </ProtectedRoute>
     ),
   },

@@ -2,7 +2,7 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import { MainLayout } from '../modules/layouts';
 import Home from '../pages/Home';
-import { NotFound } from '../pages/NotFound';
+import NotFound from '../pages/NotFound';
 import { authRoutes } from './authRoutes';
 import { expositionRoutes } from './expositionRoutes';
 import { mapRoutes } from './mapRoutes';

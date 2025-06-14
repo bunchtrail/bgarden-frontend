@@ -44,7 +44,7 @@ const SpecimensGrid: React.FC<SpecimensGridProps> = ({
       {specimens.map((specimen, index) => (
         <div
           key={specimen.id}
-          className={`${animationClasses.transition} h-96 animate-staggeredFadeIn`}
+          className={`${animationClasses.transition} min-h-[28rem] animate-staggeredFadeIn`}
           style={{
             animationDelay: `${index * 0.05}s`,
           }}
