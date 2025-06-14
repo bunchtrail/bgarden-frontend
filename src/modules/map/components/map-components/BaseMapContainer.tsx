@@ -38,7 +38,11 @@ const BaseMapContainer: React.FC<BaseMapContainerProps> = ({
         minZoom={contextMapConfig.minZoom}
         style={style}
         zoomControl={false}
-        crs={contextMapConfig.mapType === 'geo' ? L.CRS.EPSG3857 : L.CRS.Simple}
+        crs={
+          contextMapConfig.mapType === 'geo' || contextMapConfig.mapType === 'dgis'
+            ? L.CRS.EPSG3857
+            : L.CRS.Simple
+        }
         maxBounds={contextMapConfig.maxBounds}
         maxBoundsViscosity={contextMapConfig.maxBoundsViscosity}
         attributionControl={false}

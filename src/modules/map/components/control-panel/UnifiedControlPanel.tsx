@@ -169,23 +169,24 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   // Рендеринг секции переключения вида карты
   const renderMapTypeSection = () => {
     const buttonBaseClasses =
-      'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
+      'flex-1 px-2 py-2 text-xs font-medium rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
     const activeClasses = 'bg-white shadow-sm text-blue-700';
     const inactiveClasses = 'bg-transparent text-gray-600 hover:bg-white/60';
 
     return (
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Вид карты</h4>
-        <div className="flex p-1 space-x-1 bg-gray-200/80 rounded-xl">
+        <div className="grid grid-cols-3 gap-1 p-1 bg-gray-200/80 rounded-xl">
           <button
-            onClick={() => handleMapTypeChange(MAP_TYPES.SCHEMATIC)}
+            onClick={() => handleMapTypeChange(MAP_TYPES.DGIS)}
             className={`${buttonBaseClasses} ${
-              mapConfig.mapType === MAP_TYPES.SCHEMATIC
+              mapConfig.mapType === MAP_TYPES.DGIS
                 ? activeClasses
                 : inactiveClasses
             }`}
+            title="Карты 2ГИС с детальной информацией"
           >
-            Схема
+            2ГИС
           </button>
           <button
             onClick={() => handleMapTypeChange(MAP_TYPES.GEO)}
@@ -194,8 +195,20 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
                 ? activeClasses
                 : inactiveClasses
             }`}
+            title="OpenStreetMap - общая географическая карта"
           >
-            Карта
+            OSM
+          </button>
+          <button
+            onClick={() => handleMapTypeChange(MAP_TYPES.SCHEMATIC)}
+            className={`${buttonBaseClasses} ${
+              mapConfig.mapType === MAP_TYPES.SCHEMATIC
+                ? activeClasses
+                : inactiveClasses
+            }`}
+            title="Схематический план ботанического сада"
+          >
+            Схема
           </button>
         </div>
       </div>
@@ -271,18 +284,21 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   const renderLayersSection = () => {
     if (!isSectionVisible(PanelSection.LAYERS)) return null;
     const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
+    const isDgisMap = mapConfig.mapType === MAP_TYPES.DGIS;
+    const isSchematicMap = mapConfig.mapType === MAP_TYPES.SCHEMATIC;
 
     return (
       <div className="mb-4">
         <h4 className={`${textClasses.subheading} mb-2.5`}>Слои</h4>
         <div className={`${cardClasses.filled} p-2.5 rounded-xl space-y-2.5`}>
-          {isGeoMap ? (
+          {/* Базовые слои в зависимости от типа карты */}
+          {(isGeoMap || isDgisMap) ? (
             <Switch
-              label="Гео-подложка"
+              label={isDgisMap ? "Карта 2ГИС" : "Гео-подложка"}
               checked={mapConfig.visibleLayers.includes(MAP_LAYERS.GEO_TILES)}
               onChange={() => handleToggleLayer(MAP_LAYERS.GEO_TILES)}
             />
-          ) : (
+          ) : isSchematicMap ? (
             <>
               <Switch
                 label="Области"
@@ -295,7 +311,17 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
                 onChange={() => handleToggleLayer(MAP_LAYERS.IMAGERY)}
               />
             </>
+          ) : null}
+          
+          {/* Общие слои для всех типов карт */}
+          {(isGeoMap || isDgisMap) && (
+            <Switch
+              label="Области"
+              checked={mapConfig.visibleLayers.includes(MAP_LAYERS.REGIONS)}
+              onChange={() => handleToggleLayer(MAP_LAYERS.REGIONS)}
+            />
           )}
+          
           <Switch
             label="Растения"
             checked={mapConfig.visibleLayers.includes(MAP_LAYERS.PLANTS)}
@@ -310,6 +336,8 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     const settingsConfig =
       panelConfig.sectionConfig?.[PanelSection.SETTINGS] || {};
     const isGeoMap = mapConfig.mapType === MAP_TYPES.GEO;
+    const isDgisMap = mapConfig.mapType === MAP_TYPES.DGIS;
+    const isSchematicMap = mapConfig.mapType === MAP_TYPES.SCHEMATIC;
 
     return (
       <div className="mb-4">
@@ -336,12 +364,12 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
             />
           )}
 
-          {settingsConfig.showDrawingToggle !== false && !isGeoMap && (
+          {settingsConfig.showDrawingToggle !== false && isSchematicMap && (
             <Switch
               label="Редактирование областей"
               checked={mapConfig.drawingEnabled}
               onChange={handleToggleDrawing}
-              disabled={isGeoMap}
+              disabled={!isSchematicMap}
             />
           )}
         </div>

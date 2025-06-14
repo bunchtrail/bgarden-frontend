@@ -26,6 +26,7 @@ export const MAP_LAYERS = {
 export const MAP_TYPES = {
   SCHEMATIC: 'schematic',
   GEO: 'geo',
+  DGIS: 'dgis', // Карта 2ГИС
 } as const;
 
 // Режимы взаимодействия с картой
@@ -112,8 +113,28 @@ export const DEFAULT_GEO_CONFIG: MapConfig = {
   interactionMode: MAP_MODES.VIEW,
 };
 
-// Глобальная конфигурация по умолчанию
-export const DEFAULT_MAP_CONFIG: MapConfig = DEFAULT_SCHEMATIC_CONFIG;
+// Настройки по умолчанию для карты 2ГИС
+export const DEFAULT_DGIS_CONFIG: MapConfig = {
+  ...DEFAULT_SCHEMATIC_CONFIG, // Наследуем общие настройки
+  mapType: MAP_TYPES.DGIS,
+  center: [58.596323, 49.666755] as LatLngExpression, // Координаты ботсада
+  zoom: 13,
+  maxZoom: 18,
+  minZoom: 8,
+  maxBounds: undefined,
+  maxBoundsViscosity: 1.0,
+  visibleLayers: [MAP_LAYERS.GEO_TILES, MAP_LAYERS.REGIONS, MAP_LAYERS.PLANTS],
+  availableLayers: [
+    MAP_LAYERS.GEO_TILES,
+    MAP_LAYERS.REGIONS, 
+    MAP_LAYERS.PLANTS,
+  ],
+  drawingEnabled: false,
+  interactionMode: MAP_MODES.VIEW,
+};
+
+// Глобальная конфигурация по умолчанию - теперь используем 2ГИС
+export const DEFAULT_MAP_CONFIG: MapConfig = DEFAULT_DGIS_CONFIG;
 
 interface MapConfigContextProps {
   mapConfig: MapConfig;
@@ -140,7 +161,7 @@ export const useMapConfig = (): MapConfigContextProps => {
 
 export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: Partial<MapConfig>; }> = ({ children, initialConfig = {} }) => {
   const [mapConfig, setMapConfig] = useState<MapConfig>({
-    ...DEFAULT_SCHEMATIC_CONFIG,
+    ...DEFAULT_DGIS_CONFIG,
     ...initialConfig,
   });
 
@@ -159,7 +180,7 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
 
   const resetMapConfig = useCallback(() => {
     
-    setMapConfig(DEFAULT_SCHEMATIC_CONFIG);
+    setMapConfig(DEFAULT_DGIS_CONFIG);
   }, []);
 
   const toggleLayer = useCallback((layerName: string) => {
@@ -178,6 +199,17 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
         
         // Если пытаемся выключить последний базовый слой, отменяем операцию
         if (!hasImagery && !hasRegions) {
+          
+          return prevConfig;
+        }
+      }
+
+      // Проверка для карт 2ГИС и геокарт - должен быть активен базовый тайловый слой
+      if (prevConfig.mapType === MAP_TYPES.DGIS || prevConfig.mapType === MAP_TYPES.GEO) {
+        const hasGeoTiles = newVisibleLayers.includes(MAP_LAYERS.GEO_TILES);
+        
+        // Если пытаемся выключить тайловый слой на геокарте, отменяем операцию
+        if (!hasGeoTiles) {
           
           return prevConfig;
         }
@@ -212,13 +244,32 @@ export const MapConfigProvider: React.FC<{ children: ReactNode; initialConfig?: 
 
     // Устанавливаем новый тип карты с соответствующими настройками
     setMapConfig((prevConfig) => {
-      const newConfig = {
-        ...(newMapType === MAP_TYPES.GEO ? DEFAULT_GEO_CONFIG : DEFAULT_SCHEMATIC_CONFIG),
-        mapType: newMapType,
-        debug: prevConfig.debug,
-        showTooltips: prevConfig.showTooltips,
-      };
+      let newConfig: MapConfig;
       
+      switch(newMapType) {
+        case MAP_TYPES.GEO:
+          newConfig = {
+            ...DEFAULT_GEO_CONFIG,
+            debug: prevConfig.debug,
+            showTooltips: prevConfig.showTooltips,
+          };
+          break;
+        case MAP_TYPES.DGIS:
+          newConfig = {
+            ...DEFAULT_DGIS_CONFIG,
+            debug: prevConfig.debug,
+            showTooltips: prevConfig.showTooltips,
+          };
+          break;
+        default:
+          newConfig = {
+            ...DEFAULT_SCHEMATIC_CONFIG,
+            debug: prevConfig.debug,
+            showTooltips: prevConfig.showTooltips,
+          };
+      }
+      
+      newConfig.mapType = newMapType;
 
       // Генерируем кастомное событие для уведомления других компонентов
       if (typeof window !== 'undefined' && window.dispatchEvent) {

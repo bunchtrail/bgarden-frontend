@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { TileLayer } from 'react-leaflet'; // Импортируем TileLayer
 import { RegionData } from '@/services/regions/types';
-import { MapImageLayer, MapRegionsLayer } from '../map-components';
+import { MapImageLayer, MapRegionsLayer, DgisTileLayer } from '../map-components';
 import { useMapLayers } from '../../hooks/useMapLayers';
 import {
   MapConfig,
@@ -85,27 +85,42 @@ const MapLayersManager: React.FC<MapLayersManagerProps> = ({
 
   const renderLayers = () => {
     const isGeoMap = mapConfigContext.mapType === MAP_TYPES.GEO;
+    const isDgisMap = mapConfigContext.mapType === MAP_TYPES.DGIS;
 
     // Динамический выбор базового слоя
-    const baseLayer = isGeoMap
-      ? isLayerVisible(MAP_LAYERS.GEO_TILES) && (
-          <TileLayer
-            key="geo-tile-layer"
-            attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maxNativeZoom={18}
-            maxZoom={mapConfigContext.maxZoom}
-            minZoom={mapConfigContext.minZoom}
-          />
-        )
-      : mapImageUrl &&
-        hasMapImage && (
-          <MapImageLayer
-            key="map-base-image"
-            imageUrl={mapImageUrl}
-            bounds={imageBounds}
-          />
-        );
+    let baseLayer = null;
+    
+    if (isDgisMap && isLayerVisible(MAP_LAYERS.GEO_TILES)) {
+      // Слой 2ГИС
+      baseLayer = (
+        <DgisTileLayer
+          key="dgis-tile-layer"
+          maxZoom={mapConfigContext.maxZoom}
+          minZoom={mapConfigContext.minZoom}
+        />
+      );
+    } else if (isGeoMap && isLayerVisible(MAP_LAYERS.GEO_TILES)) {
+      // Стандартный OSM слой
+      baseLayer = (
+        <TileLayer
+          key="geo-tile-layer"
+          attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxNativeZoom={18}
+          maxZoom={mapConfigContext.maxZoom}
+          minZoom={mapConfigContext.minZoom}
+        />
+      );
+    } else if (!isGeoMap && !isDgisMap && mapImageUrl && hasMapImage) {
+      // Схематическая карта
+      baseLayer = (
+        <MapImageLayer
+          key="map-base-image"
+          imageUrl={mapImageUrl}
+          bounds={imageBounds}
+        />
+      );
+    }
 
     const layers = [
       baseLayer, // Слой регионов - доступен на всех типах карт

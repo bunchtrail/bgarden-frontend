@@ -6,6 +6,7 @@ export { default as MapImageLayer } from './MapImageLayer';
 export { default as MapReadyHandler } from './MapReadyHandler';
 export { default as MapRegionsLayer } from './MapRegionsLayer';
 export { default as EmptyMapView } from './EmptyMapView';
+export { default as DgisTileLayer } from './DgisTileLayer';
 
 // Импорт типа из структуры панели управления
 export type { ControlPanelSection } from '../control-panel'; 
