@@ -55,16 +55,6 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
       : mapData?.name || 'Интерактивная карта ботанического сада';
   }, [mapConfig.lightMode, mapData?.name]);
 
-  // Классы контейнера: в полноэкранном режиме добавляем отступ и корректируем высоту,
-  // в облегченном режиме карта наследует размеры родителя без дополнительных расчётов
-  const containerClasses = useMemo(
-    () =>
-      mapConfig.lightMode
-        ? 'flex flex-col overflow-hidden'
-        : 'h-screen-minus-navbar flex flex-col overflow-hidden',
-    [mapConfig.lightMode]
-  );
-
   // Настройки заголовка для полноэкранного режима
   const headerConfig = {
     hideHeader: true, // полностью скрыть заголовок - название будет в панели управления
@@ -90,9 +80,7 @@ const MapPageContent: React.FC<MapPageContentProps> = ({
   }, [customLayers]);
 
   return (
-    // Контейнер карты. В полноэкранном режиме учитываем высоту навбара, в облегчённом —
-    // используем гибкую вёрстку без фиксированной высоты.
-    <div className={containerClasses}>
+    <div className="h-screen-minus-navbar flex flex-col overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0 w-full">
         <MapCard
           title={mapTitle}

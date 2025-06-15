@@ -20,7 +20,7 @@ const FullscreenLayoutContent: React.FC<FullscreenLayoutProps> = ({
     <div className="App flex flex-col h-screen overflow-hidden">
       <Navbar navbarRef={navbarRef} />
       <NotificationContainer />
-      <main className="flex flex-col navbar-transition overflow-hidden">
+      <main className="flex-1 flex flex-col navbar-transition overflow-hidden">
         {children}
       </main>
     </div>
