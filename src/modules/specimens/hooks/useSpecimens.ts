@@ -12,23 +12,53 @@ export const useSpecimens = () => {
   const [specimens, setSpecimens] = useState<Specimen[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<SpecimenFilterParams>({});
+
+  // Вспомогательная функция для получения sectorType из строки запроса
+  const getSectorTypeFromSearch = (search: string): SectorType | null => {
+    const params = new URLSearchParams(search);
+    const sectorTypeParam = params.get('sectorType');
+    return sectorTypeParam !== null ? (Number(sectorTypeParam) as SectorType) : null;
+  };
+
+  // Инициализируем фильтры и активный сектор из URL (ленивый инициализатор)
+  const [filters, setFilters] = useState<SpecimenFilterParams>(() => {
+    const sectorType = getSectorTypeFromSearch(location.search);
+    return sectorType !== null ? { sectorType } : {};
+  });
+
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeSectorType, setActiveSectorType] = useState<SectorType | null>(null);
+
+  const [activeSectorType, setActiveSectorType] = useState<SectorType | null>(() => {
+    return getSectorTypeFromSearch(location.search);
+  });
+
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<keyof Specimen>('russianName');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Получение параметров фильтрации из URL
+  // Обновляем фильтры при изменении строки запроса (например, при ручном редактировании URL)
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const sectorTypeParam = params.get('sectorType');
-    
-    if (sectorTypeParam) {
-      const sectorType = Number(sectorTypeParam) as SectorType;
-      setActiveSectorType(sectorType);
-      setFilters(prev => ({ ...prev, sectorType }));
-    }
+    const sectorType = getSectorTypeFromSearch(location.search);
+
+    setActiveSectorType(prev => {
+      // Обновляем только при фактическом изменении, чтобы избежать лишних перерисовок
+      return prev !== sectorType ? sectorType : prev;
+    });
+
+    setFilters(prev => {
+      if (sectorType !== null) {
+        if (prev.sectorType !== sectorType) {
+          return { ...prev, sectorType };
+        }
+        return prev;
+      }
+      // Если sectorType отсутствует в URL, удаляем его из фильтров
+      if (prev.sectorType !== undefined) {
+        const { sectorType: _removed, ...rest } = prev;
+        return rest;
+      }
+      return prev;
+    });
   }, [location.search]);
 
   // Функция для отображения типа сектора в виде текста
@@ -45,45 +75,53 @@ export const useSpecimens = () => {
     }
   };
 
-  // Загрузка списка образцов
+  // Загрузка списка образцов при изменении фильтра sectorType
   useEffect(() => {
+    let isActive = true;
+
     const fetchSpecimens = async () => {
       try {
         setLoading(true);
         let data: Specimen[] = [];
 
-        // Если указан тип сектора, то загружаем только образцы этого сектора
         if (filters.sectorType !== undefined) {
           data = await specimenService.getSpecimensBySectorType(filters.sectorType);
         } else {
-          // Загружаем все образцы
           data = await specimenService.getAllSpecimens();
         }
-        
-        // Обеспечиваем, что data всегда массив
+
         if (!Array.isArray(data)) {
           data = [data];
         }
-        
-        setSpecimens(data);
-        setError(null); // Сбрасываем ошибку, если она была
-      } catch (err) {
-        console.error('Ошибка при загрузке списка образцов:', err);
-        // Проверяем, не 404 ли это ошибка (отсутствие данных)
-        if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
-          // Для 404 ошибки мы просто устанавливаем пустой массив без ошибки
-          setSpecimens([]);
+
+        if (isActive) {
+          setSpecimens(data);
           setError(null);
-        } else {
-          setError('Не удалось загрузить список образцов');
-          setSpecimens([]);
+        }
+      } catch (err) {
+        if (isActive) {
+          console.error('Ошибка при загрузке списка образцов:', err);
+          if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
+            setSpecimens([]);
+            setError(null);
+          } else {
+            setError('Не удалось загрузить список образцов');
+            setSpecimens([]);
+          }
         }
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
     fetchSpecimens();
+
+    return () => {
+      // Отменяем обновление состояния, если эффект очистился (изменились фильтры или демонтирован компонент)
+      isActive = false;
+    };
   }, [filters.sectorType]);
 
   // Обработчик удаления образца

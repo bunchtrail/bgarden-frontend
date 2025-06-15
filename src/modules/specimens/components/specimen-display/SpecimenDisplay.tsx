@@ -6,6 +6,7 @@ import TimelineInfoCard from './TimelineInfoCard';
 import AdditionalInfoCard from './AdditionalInfoCard';
 import SpecimenGallery from '../specimen-gallery/SpecimenGallery';
 import { specimenDisplayStyles } from '../../styles';
+import { useAuth } from '../../../auth/hooks';
 
 interface SpecimenDisplayProps {
   specimen: Specimen | null;
@@ -16,6 +17,8 @@ interface SpecimenDisplayProps {
  * в виде набора карточек с информацией
  */
 const SpecimenDisplay: React.FC<SpecimenDisplayProps> = ({ specimen }) => {
+  const { isAuthenticated } = useAuth();
+
   if (!specimen) {
     return null;
   }
@@ -25,14 +28,18 @@ const SpecimenDisplay: React.FC<SpecimenDisplayProps> = ({ specimen }) => {
       {/* Левая колонка */}
       <div className="space-y-6">
         <BasicInfoCard specimen={specimen} />
-        <GeographicInfoCard specimen={specimen} />
+        {isAuthenticated && <GeographicInfoCard specimen={specimen} />}
       </div>
       
       {/* Правая колонка */}
       <div className="space-y-6">
         <SpecimenGallery specimen={specimen} />
-        <TimelineInfoCard specimen={specimen} />
-        <AdditionalInfoCard specimen={specimen} />
+        {isAuthenticated && (
+          <>
+            <TimelineInfoCard specimen={specimen} />
+            <AdditionalInfoCard specimen={specimen} />
+          </>
+        )}
       </div>
     </div>
   );

@@ -34,7 +34,8 @@ export interface RegionDto {
 export const getAllRegions = async (): Promise<RegionData[]> => {
   try {
     const regions = await httpClient.get<RegionData[]>('Region', {
-      suppressErrorsForStatus: [404], // Подавляем ошибки 404 и получаем пустой массив
+      suppressErrorsForStatus: [404, 401],
+      requiresAuth: false,
     });
 
     // Если API вернул пустой список, используем временные данные
@@ -58,7 +59,7 @@ export const getAllRegions = async (): Promise<RegionData[]> => {
  */
 export const getRegionById = async (id: number): Promise<RegionData> => {
   try {
-    return await httpClient.get<RegionData>(`Region/${id}`);
+    return await httpClient.get<RegionData>(`Region/${id}`, { requiresAuth: false, suppressErrorsForStatus: [404, 401] });
   } catch (error) {
     logError(`Ошибка при получении региона с ID ${id}:`, 'regions', undefined, error);
     throw error;
@@ -150,7 +151,7 @@ export const getSpecimensInRegion = async (
   regionId: number
 ): Promise<Specimen[]> => {
   try {
-    return await httpClient.get<Specimen[]>(`Region/${regionId}/specimens`);
+    return await httpClient.get<Specimen[]>(`Region/${regionId}/specimens`, { requiresAuth: false, suppressErrorsForStatus: [404, 401] });
   } catch (error) {
     logError(`Ошибка при получении образцов из региона ${regionId}:`, 'regions', undefined, error);
     return [];

@@ -12,11 +12,7 @@ import { UserRole } from '../modules/specimens/types';
 export const specimenRoutes: RouteObject[] = [
   {
     path: '/specimens',
-    element: (
-      <ProtectedRoute>
-        <SpecimensListPage />
-      </ProtectedRoute>
-    ),
+    element: <SpecimensListPage />,
   },
   {
     path: '/specimens/new',
@@ -29,11 +25,9 @@ export const specimenRoutes: RouteObject[] = [
   {
     path: '/specimens/:id',
     element: (
-      <ProtectedRoute>
-        <RouteParamsValidator paramName="id" validation="numeric">
-          <SpecimenPage />
-        </RouteParamsValidator>
-      </ProtectedRoute>
+      <RouteParamsValidator paramName="id" validation="numeric">
+        <SpecimenPage />
+      </RouteParamsValidator>
     ),
   },
   {

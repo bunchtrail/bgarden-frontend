@@ -10,19 +10,19 @@ export interface FamilyDto {
 
 // Класс для работы с API семейств растений
 class FamilyService {
-    // Получить все семейства
+    // Получить все семейства (доступно без авторизации для чтения)
     async getAllFamilies(): Promise<FamilyDto[]> {
-        return httpClient.get<FamilyDto[]>('Family');
+        return httpClient.get<FamilyDto[]>('Family', { requiresAuth: false });
     }
 
-    // Получить семейство по ID
+    // Получить семейство по ID (доступно без авторизации для чтения)
     async getFamilyById(id: number): Promise<FamilyDto> {
-        return httpClient.get<FamilyDto>(`Family/${id}`);
+        return httpClient.get<FamilyDto>(`Family/${id}`, { requiresAuth: false });
     }
 
-    // Получить семейство по названию
+    // Получить семейство по названию (доступно без авторизации для чтения)
     async getFamilyByName(name: string): Promise<FamilyDto> {
-        return httpClient.get<FamilyDto>(`Family/name/${encodeURIComponent(name)}`);
+        return httpClient.get<FamilyDto>(`Family/name/${encodeURIComponent(name)}`, { requiresAuth: false });
     }
 
     // Создать новое семейство

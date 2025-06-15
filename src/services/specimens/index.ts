@@ -139,7 +139,8 @@ class UnifiedSpecimenService {
                     offset: offset.toString(), 
                     ...filters 
                 },
-                suppressErrorsForStatus: [404]
+                suppressErrorsForStatus: [404],
+                requiresAuth: false,
             });
         } catch (error: any) {
             // Если получили 404, возвращаем пустой результат
@@ -165,6 +166,7 @@ class UnifiedSpecimenService {
         try {
             const data = await httpClient.get<SpecimenData[]>('Specimen/all', {
                 suppressErrorsForStatus: [404],
+                requiresAuth: false,
             });
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
@@ -189,7 +191,8 @@ class UnifiedSpecimenService {
         try {
             const data = await httpClient.get<SpecimenData[]>(`Specimen/sector/${sectorType}`, {
                 timeout: 5000,
-                suppressErrorsForStatus: [404]
+                suppressErrorsForStatus: [404],
+                requiresAuth: false,
             });
             
             // Преобразуем единичный объект в массив, если API вернуло один объект
@@ -212,7 +215,10 @@ class UnifiedSpecimenService {
     // Получить образец по ID
     async getSpecimenById(id: number): Promise<SpecimenData> {
         try {
-            return await httpClient.get<SpecimenData>(`Specimen/${id}`);
+            return await httpClient.get<SpecimenData>(`Specimen/${id}`, {
+                suppressErrorsForStatus: [404],
+                requiresAuth: false,
+            });
         } catch (error: any) {
             // Не логируем 404 ошибки, так как они ожидаемы для несуществующих образцов
             if (error?.status !== 404) {
@@ -442,7 +448,7 @@ class UnifiedSpecimenService {
         try {
             return await httpClient.get<SpecimenImage>(
                 `specimen-images/by-specimen/${specimenId}/main`,
-                { suppressErrorsForStatus: [404] }
+                { suppressErrorsForStatus: [404], requiresAuth: false }
             );
         } catch (error) {
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
@@ -458,7 +464,7 @@ class UnifiedSpecimenService {
         try {
             return await httpClient.get<SpecimenImage[]>(
                 `specimen-images/by-specimen/${specimenId}?includeImageData=${includeImageData}`,
-                { suppressErrorsForStatus: [404] }
+                { suppressErrorsForStatus: [404], requiresAuth: false }
             );
         } catch (error) {
             if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
@@ -472,7 +478,7 @@ class UnifiedSpecimenService {
     // Получить изображение по ID
     async getSpecimenImageById(imageId: number): Promise<SpecimenImage | null> {
         try {
-            return await httpClient.get<SpecimenImage>(`specimen-images/${imageId}`);
+            return await httpClient.get<SpecimenImage>(`specimen-images/${imageId}`, { requiresAuth: false });
         } catch (error) {
             logError(`Ошибка при получении изображения с ID ${imageId}:`, 'specimens', undefined, error);
             return null;

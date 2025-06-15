@@ -2,6 +2,7 @@ import React from 'react';
 import Button from '../../../../modules/ui/components/Button';
 import { Specimen, SectorType } from '../../types';
 import { textClasses, layoutClasses, chipClasses, animationClasses } from '../../../../styles/global-styles';
+import { useAuth } from '../../../auth/hooks';
 
 interface SpecimenHeaderProps {
   specimen: Specimen | null;
@@ -21,6 +22,8 @@ const SpecimenHeader: React.FC<SpecimenHeaderProps> = ({
   onEdit, 
   onBack 
 }) => {
+  const { isAuthenticated } = useAuth();
+
   const getSectorTypeName = (sectorType: SectorType): string => {
     switch (sectorType) {
       case SectorType.Dendrology: return 'Дендрология';
@@ -59,7 +62,7 @@ const SpecimenHeader: React.FC<SpecimenHeaderProps> = ({
       </div>
       
       <div className="flex gap-2">
-        {!isEditing && !isNew && (
+        {!isEditing && !isNew && isAuthenticated && (
           <Button 
             variant="primary"
             onClick={onEdit}

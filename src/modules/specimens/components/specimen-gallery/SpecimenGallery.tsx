@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Specimen } from '../../types';
 import { 
   galleryContainerStyles,
@@ -21,6 +21,7 @@ import {
 
 // Импорт хука для работы с изображениями
 import { useGalleryImages } from './hooks';
+import { useAuth } from '../../../auth/hooks';
 
 interface SpecimenGalleryProps {
   specimen: Specimen;
@@ -30,6 +31,7 @@ interface SpecimenGalleryProps {
  * Компонент галереи для отображения нескольких фотографий образца
  */
 const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
+  const { isAuthenticated } = useAuth();
   // Используем кастомный хук для логики работы с изображениями
   const {
     allImages,
@@ -64,6 +66,13 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
   // Текущее изображение для модального окна
   const currentImage = allImages.length > 0 ? allImages[currentImageIndex] : null;
   
+  // Эффект для сброса выбранного изображения при изменении образца
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [specimen.id, setCurrentImageIndex]);
+  
+  const hasImages = allImages.length > 0;
+  
   if (error) {
     return (
       <Card className={errorStateStyles.container}>
@@ -74,34 +83,40 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
   
   return (
     <Card className={`${galleryContainerStyles.wrapper} p-3`}>
-      <GalleryHeader onAddClick={handleOpenUploadModal} />
+      <GalleryHeader
+        onAddClick={handleOpenUploadModal}
+        showAddButton={isAuthenticated}
+      />
       
       <div className="flex flex-col items-center space-y-1">
         <div className={mainImageStyles.container}>
           <MainImageDisplay
-            isLoading={isLoading}
             images={allImages}
             currentImageIndex={currentImageIndex}
-            specimenName={specimen.russianName}
-            latinName={specimen.latinName}
+            isLoading={isLoading}
+            specimenName={specimen.russianName || 'Образец'}
+            latinName={specimen.latinName || ''}
             onImageClick={handleOpenImageModal}
-            onPrevClick={handlePrevImage}
-            onNextClick={handleNextImage}
-            onImageError={handleImageError}
+            onPrevClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+            onNextClick={() => setCurrentImageIndex(Math.min(allImages.length - 1, currentImageIndex + 1))}
+            onImageError={() => {}}
           />
         </div>
         
-        <ImageCounter 
-          currentIndex={currentImageIndex} 
-          totalImages={allImages.length} 
-        />
-        
-        <ThumbnailsList 
-          images={allImages}
-          currentIndex={currentImageIndex}
-          onThumbnailClick={setCurrentImageIndex}
-          onSetMainImage={handleSetMainImage}
-        />
+        {hasImages && (
+          <>
+            <ImageCounter 
+              currentIndex={currentImageIndex} 
+              totalImages={allImages.length} 
+            />
+            <ThumbnailsList 
+              images={allImages}
+              currentIndex={currentImageIndex}
+              onThumbnailClick={setCurrentImageIndex}
+              onSetMainImage={handleSetMainImage}
+            />
+          </>
+        )}
         
         <SpecimenInfoFooter 
           russianName={specimen.russianName}
@@ -129,6 +144,14 @@ const SpecimenGallery: React.FC<SpecimenGalleryProps> = ({ specimen }) => {
         isUploading={isUploading}
         uploadProgress={uploadProgress}
       />
+      
+      {!isAuthenticated && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-700">
+            <span className="font-medium">📷 Изображения:</span> Авторизуйтесь для управления галереей изображений и загрузки новых фотографий.
+          </p>
+        </div>
+      )}
     </Card>
   );
 };

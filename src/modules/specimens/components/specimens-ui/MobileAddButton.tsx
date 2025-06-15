@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../../../ui/components/Button';
 import { SectorType } from '../../types';
+import { useAuth } from '../../../auth/hooks';
 
 /**
  * Плавающая кнопка добавления образца для мобильных устройств
@@ -9,6 +10,7 @@ import { SectorType } from '../../types';
 const MobileAddButton: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   
   // Получаем текущий выбранный тип сектора из URL
   const getActiveSectorType = (): SectorType | null => {
@@ -18,6 +20,11 @@ const MobileAddButton: React.FC = () => {
   };
   
   const activeSectorType = getActiveSectorType();
+  
+  // Скрываем кнопку для неавторизованных пользователей
+  if (!isAuthenticated) {
+    return null;
+  }
   
   return (
     <div className="md:hidden fixed bottom-6 right-6">

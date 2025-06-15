@@ -1,6 +1,5 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import { ProtectedRoute } from '../modules/auth/components/ProtectedRoute';
 import { RouteParamsValidator } from '../modules/ui/components';
 import { FullscreenLayout } from '../modules/layouts';
 import { MapPage } from '../modules/map';
@@ -13,39 +12,35 @@ export const mapRoutes: RouteObject[] = [
   {
     path: 'map',
     element: (
-      <ProtectedRoute>
-        <FullscreenLayout>
-          <MapPage
-            showControls={true}
-            extraControls={
-              <PositionedControlPanel
-                config={UNIFIED_PANEL_PRESETS.map}
-                panelId="main-map-panel"
-              />
-            }
-          />
-        </FullscreenLayout>
-      </ProtectedRoute>
+      <FullscreenLayout>
+        <MapPage
+          showControls={true}
+          extraControls={
+            <PositionedControlPanel
+              config={UNIFIED_PANEL_PRESETS.map}
+              panelId="main-map-panel"
+            />
+          }
+        />
+      </FullscreenLayout>
     ),
   },
   {
     path: 'map/sector/:id',
     element: (
-      <ProtectedRoute>
-        <RouteParamsValidator paramName="id" validation="numeric">
-          <FullscreenLayout>
-            <MapPage
-              showControls={true}
-              extraControls={
-                <PositionedControlPanel
-                  config={UNIFIED_PANEL_PRESETS.sector}
-                  panelId="sector-map-panel"
-                />
-              }
-            />
-          </FullscreenLayout>
-        </RouteParamsValidator>
-      </ProtectedRoute>
+      <RouteParamsValidator paramName="id" validation="numeric">
+        <FullscreenLayout>
+          <MapPage
+            showControls={true}
+            extraControls={
+              <PositionedControlPanel
+                config={UNIFIED_PANEL_PRESETS.sector}
+                panelId="sector-map-panel"
+              />
+            }
+          />
+        </FullscreenLayout>
+      </RouteParamsValidator>
     ),
   },
 ];

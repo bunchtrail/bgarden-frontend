@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SectorType } from '../../types';
 import Button from '../../../ui/components/Button';
+import { useAuth } from '../../../auth/hooks';
 import {
   cardClasses,
   buttonClasses,
@@ -29,6 +30,7 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
   toggleView,
 }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Обработчик смены сектора
   const handleSectorChange = (sectorType: SectorType) => {
@@ -153,27 +155,30 @@ const SpecimensHeader: React.FC<SpecimensHeaderProps> = ({
               </span>
             )}
           </Button>
-          <Button
-            variant="success"
-            onClick={handleAddSpecimen}
-            className={`flex items-center ${animationClasses.springHover}`}
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          {/* Кнопка добавления доступна только авторизованным пользователям */}
+          {isAuthenticated && (
+            <Button
+              variant="success"
+              onClick={handleAddSpecimen}
+              className={`flex items-center ${animationClasses.springHover}`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            Добавить образец
-          </Button>
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Добавить образец
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -19,6 +19,7 @@ import {
 } from '../../../../styles/global-styles';
 import PanelHeader from './PanelHeader';
 import ControlButtons from './ControlButtons';
+import { useAuth } from '../../../auth/hooks';
 
 const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   pageType = 'map',
@@ -52,6 +53,9 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const [isPanelVisible, setIsPanelVisible] = useState(mapConfig.showControls);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Получаем статус аутентификации
+  const { isAuthenticated } = useAuth();
 
   const handleToggleExpand = () => setIsExpanded((prev) => !prev);
 
@@ -169,6 +173,8 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
 
   // Рендеринг секции переключения вида карты с улучшенным дизайном
   const renderMapTypeSection = () => {
+    // Для неавторизованных пользователей скрываем выбор типа карты
+    if (!isAuthenticated) return null;
     const buttonBaseClasses =
       'flex-1 px-3 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 transform hover:scale-[1.02] active:scale-[0.98]';
     const activeClasses = 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25';
@@ -221,6 +227,8 @@ const UnifiedControlPanel: React.FC<UnifiedControlPanelProps> = ({
     );
   };
   const renderModeSection = () => {
+    // Для неавторизованных пользователей скрываем выбор режима карты
+    if (!isAuthenticated) return null;
     if (!isSectionVisible(PanelSection.MODE)) return null;
     const modeConfig = panelConfig.sectionConfig?.[PanelSection.MODE] || {};
 

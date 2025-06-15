@@ -20,7 +20,10 @@ export interface MapData {
 // Функция для получения активной карты
 export const getActiveMap = async (): Promise<MapData[]> => {
   try {
-    return await httpClient.get<MapData[]>('Map/active');
+    return await httpClient.get<MapData[]>('Map/active', {
+      requiresAuth: false,
+      suppressErrorsForStatus: [401],
+    });
   } catch (error) {
     logError('Ошибка при получении активной карты:', 'map', undefined, error);
     throw error;

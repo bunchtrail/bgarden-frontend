@@ -19,19 +19,40 @@ export const useReferenceData = () => {
       try {
         setLoading(true);
         
-        // Параллельная загрузка всех справочников
-        const [familiesData, expositionsData, regionsData] = await Promise.all([
-          familyService.getAllFamilies(),
-          expositionService.getAllExpositions(),
-          getAllRegions()
-        ]);
+        // Загружаем справочники с разными требованиями к авторизации
+        const promises = [];
         
-        setFamilies(familiesData);
-        setExpositions(expositionsData);
-        setRegions(regionsData);
+        // Семейства и экспозиции - загружаем без требования авторизации для чтения
+        promises.push(
+          familyService.getAllFamilies().catch(err => {
+            console.warn('Не удалось загрузить семейства:', err);
+            return []; // Возвращаем пустой массив при ошибке
+          })
+        );
+        
+        promises.push(
+          expositionService.getAllExpositions().catch(err => {
+            console.warn('Не удалось загрузить экспозиции:', err);
+            return []; // Возвращаем пустой массив при ошибке
+          })
+        );
+        
+        // Регионы обычно доступны без авторизации
+        promises.push(
+          getAllRegions().catch(err => {
+            console.warn('Не удалось загрузить регионы:', err);
+            return []; // Возвращаем пустой массив при ошибке
+          })
+        );
+        
+        const [familiesData, expositionsData, regionsData] = await Promise.all(promises);
+        
+        setFamilies(familiesData as FamilyDto[]);
+        setExpositions(expositionsData as ExpositionDto[]);
+        setRegions(regionsData as RegionData[]);
       } catch (err) {
         console.error('Ошибка при загрузке справочных данных:', err);
-        setError('Не удалось загрузить справочные данные');
+        setError('Некоторые справочные данные недоступны');
       } finally {
         setLoading(false);
       }

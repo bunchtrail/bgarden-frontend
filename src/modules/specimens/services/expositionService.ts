@@ -10,19 +10,19 @@ export interface ExpositionDto {
 
 // Класс для работы с API экспозиций
 class ExpositionService {
-    // Получить все экспозиции
+    // Получить все экспозиции (доступно без авторизации для чтения)
     async getAllExpositions(): Promise<ExpositionDto[]> {
-        return httpClient.get<ExpositionDto[]>('Exposition');
+        return httpClient.get<ExpositionDto[]>('Exposition', { requiresAuth: false });
     }
 
-    // Получить экспозицию по ID
+    // Получить экспозицию по ID (доступно без авторизации для чтения)
     async getExpositionById(id: number): Promise<ExpositionDto> {
-        return httpClient.get<ExpositionDto>(`Exposition/${id}`);
+        return httpClient.get<ExpositionDto>(`Exposition/${id}`, { requiresAuth: false });
     }
 
-    // Получить экспозицию по имени
+    // Получить экспозицию по имени (доступно без авторизации для чтения)
     async getExpositionByName(name: string): Promise<ExpositionDto> {
-        return httpClient.get<ExpositionDto>(`Exposition/name/${name}`);
+        return httpClient.get<ExpositionDto>(`Exposition/name/${name}`, { requiresAuth: false });
     }
 
     // Создать новую экспозицию
