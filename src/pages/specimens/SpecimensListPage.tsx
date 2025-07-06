@@ -31,6 +31,8 @@ const SpecimensListPage: React.FC = () => {
     error,
     searchQuery,
     setSearchQuery,
+    searchCategory,
+    setSearchCategory,
     activeSectorType,
     view,
     sortBy,
@@ -100,6 +102,8 @@ const SpecimensListPage: React.FC = () => {
               <SpecimensSearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                searchCategory={searchCategory}
+                setSearchCategory={setSearchCategory}
               />
 
               <SpecimensSortControls

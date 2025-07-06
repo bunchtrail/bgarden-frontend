@@ -38,3 +38,15 @@ root.render(
 // to log results (for example: reportWebVitals(results => {...}))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// Полностью отключаем ранее зарегистрированные Service Worker,
+// чтобы избежать устаревших ответов из кэша (особенно при разработке)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      registration.unregister().catch(() => {
+        // игнорируем ошибки
+      });
+    });
+  });
+}

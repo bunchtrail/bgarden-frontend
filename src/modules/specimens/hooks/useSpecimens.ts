@@ -36,6 +36,10 @@ export const useSpecimens = () => {
   const [sortBy, setSortBy] = useState<keyof Specimen>('russianName');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  // Категория поиска: где именно искать совпадения
+  type SearchCategory = 'all' | 'name' | 'id' | 'family';
+  const [searchCategory, setSearchCategory] = useState<SearchCategory>('all');
+
   // Обновляем фильтры при изменении строки запроса (например, при ручном редактировании URL)
   useEffect(() => {
     const sectorType = getSectorTypeFromSearch(location.search);
@@ -175,36 +179,53 @@ export const useSpecimens = () => {
     // Фильтрация образцов на основе searchQuery
     const filtered = specimens.filter(specimen => {
       if (!searchQuery) return true;
-      
+
       const query = searchQuery.toLowerCase();
-      return (
-        (specimen.russianName?.toLowerCase().includes(query) || false) ||
-        (specimen.latinName?.toLowerCase().includes(query) || false) ||
-        (specimen.inventoryNumber?.toLowerCase().includes(query) || false) ||
-        (specimen.familyName?.toLowerCase().includes(query) || false)
-      );
+
+      // В зависимости от выбранной категории ищем только в нужных полях
+      switch (searchCategory) {
+        case 'name':
+          return (
+            (specimen.russianName?.toLowerCase().includes(query) || false) ||
+            (specimen.latinName?.toLowerCase().includes(query) || false)
+          );
+        case 'id':
+          return specimen.inventoryNumber?.toLowerCase().includes(query) || false;
+        case 'family':
+          return specimen.familyName?.toLowerCase().includes(query) || false;
+        default: // 'all'
+          return (
+            (specimen.russianName?.toLowerCase().includes(query) || false) ||
+            (specimen.latinName?.toLowerCase().includes(query) || false) ||
+            (specimen.inventoryNumber?.toLowerCase().includes(query) || false) ||
+            (specimen.familyName?.toLowerCase().includes(query) || false)
+          );
+      }
     });
 
     // Сортировка образцов
     return [...filtered].sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
-      
+
       if (aValue === bValue) return 0;
-      
-      // Сортировка строк
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' 
-          ? aValue.localeCompare(bValue) 
-          : bValue.localeCompare(aValue);
+
+      // Унифицированное направление
+      const direction = sortOrder === 'asc' ? 1 : -1;
+
+      // Строковые значения (или потенциально null/undefined)
+      if (typeof aValue === 'string' || typeof bValue === 'string') {
+        const aStr = (aValue ?? '').toString().toLowerCase();
+        const bStr = (bValue ?? '').toString().toLowerCase();
+        return aStr.localeCompare(bStr) * direction;
       }
-      
-      // Сортировка чисел
-      return sortOrder === 'asc'
-        ? (aValue as number) - (bValue as number)
-        : (bValue as number) - (aValue as number);
+
+      // Числовые значения (также обрабатываем null/undefined как Infinity)
+      const aNum = aValue != null ? (aValue as number) : Number.POSITIVE_INFINITY;
+      const bNum = bValue != null ? (bValue as number) : Number.POSITIVE_INFINITY;
+      return (aNum - bNum) * direction;
     });
-  }, [specimens, searchQuery, sortBy, sortOrder]);
+  }, [specimens, searchQuery, searchCategory, sortBy, sortOrder]);
 
   // Получение символа для сортировки
   const getSortIcon = (key: keyof Specimen): string => {
@@ -230,6 +251,8 @@ export const useSpecimens = () => {
     handleResetSectorFilter,
     toggleView,
     handleSort,
-    getSortIcon
+    getSortIcon,
+    searchCategory,
+    setSearchCategory
   };
 }; 

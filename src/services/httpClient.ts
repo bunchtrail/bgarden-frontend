@@ -129,6 +129,8 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json, text/plain',
+    // Гарантируем, что браузер всегда провалидирует данные, а не отдаст закешированный ответ
+    'Cache-Control': 'no-cache',
     ...headers,
   };
 
@@ -150,6 +152,8 @@ async function request<T>(endpoint: string, method: HttpMethod = 'GET', options:
     headers: requestHeaders,
     credentials: 'include',
     signal: abortSignal,
+    // Отключаем кеширование со стороны браузера на уровне fetch API
+    cache: 'no-store',
   };
 
   // Добавляем тело запроса, если это не GET

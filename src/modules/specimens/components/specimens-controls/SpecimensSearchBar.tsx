@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { cardClasses, buttonClasses, COLORS } from '@/styles/global-styles';
+import { cardClasses, buttonClasses } from '@/styles/global-styles';
+
+type SearchCategory = 'all' | 'name' | 'id' | 'family';
 
 interface SpecimensSearchBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  searchCategory: SearchCategory;
+  setSearchCategory: (category: SearchCategory) => void;
 }
 
 /**
@@ -11,10 +15,11 @@ interface SpecimensSearchBarProps {
  */
 const SpecimensSearchBar: React.FC<SpecimensSearchBarProps> = ({
   searchQuery,
-  setSearchQuery
+  setSearchQuery,
+  searchCategory,
+  setSearchCategory
 }) => {
   const [focused, setFocused] = useState(false);
-  const [searchCategory, setSearchCategory] = useState<'all' | 'name' | 'id' | 'family'>('all');
   
   const categoryLabels = {
     all: 'Везде',
